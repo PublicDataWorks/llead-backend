@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from .models import Document
-from .serializers import DocumentSerializer
+from documents.models import Document
+from documents.serializers import DocumentSerializer
 
 
 class DocumentViewSet(viewsets.ViewSet):
