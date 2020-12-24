@@ -1,4 +1,4 @@
-from .document import Document
+from documents.models.document import Document
 
 __all__ = [
     'Document',
