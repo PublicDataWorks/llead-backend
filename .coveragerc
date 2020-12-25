@@ -1,0 +1,12 @@
+[run]
+branch = True
+source = ./
+omit =
+    */migrations/*
+    */wsgi.py
+    */asgi.py
+    ipno/manage.py
+    */settings.py
+
+[report]
+show_missing = True

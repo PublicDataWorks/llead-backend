@@ -26,7 +26,10 @@ jobs:
           command: flake8
       - run:
           name: Tests
-          command: python -m pytest ipno
+          command: python -m pytest --cov-report term --cov=ipno ipno
+      - run:
+          name: Coveralls
+          command: coveralls
 
 workflows:
   testing:
