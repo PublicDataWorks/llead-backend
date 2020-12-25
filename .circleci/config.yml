@@ -1,0 +1,34 @@
+version: 2.1
+
+jobs:
+  test:
+    working_directory: ~/ipno
+    docker:
+      - image: circleci/python:3.8.5
+        environment:
+          POSTGRES_USER: ipno
+          POSTGRES_DB: ipno
+          POSTGRES_PASSWORD: password
+          POSTGRES_HOST: localhost
+      - image: circleci/postgres:13.1
+        environment:
+          POSTGRES_USER: ipno
+          POSTGRES_DB: ipno
+          POSTGRES_PASSWORD: password
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r requirements/dev.txt
+      - run:
+          name: flake8
+          command: flake8
+      - run:
+          name: Tests
+          command: python -m pytest ipno
+
+workflows:
+  testing:
+    jobs:
+      - test
