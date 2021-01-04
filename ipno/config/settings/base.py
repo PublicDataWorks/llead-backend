@@ -14,7 +14,7 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 env = environ.Env()
 environ.Env.read_env(f'{BASE_DIR}/.env')
@@ -23,17 +23,13 @@ environ.Env.read_env(f'{BASE_DIR}/.env')
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = env.str('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:8080',
-    'http://localhost:9090',
-]
 
 # Application definition
 
@@ -141,9 +137,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
