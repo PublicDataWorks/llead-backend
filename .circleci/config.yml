@@ -15,6 +15,10 @@ jobs:
           POSTGRES_USER: ipno
           POSTGRES_DB: ipno
           POSTGRES_PASSWORD: password
+      - image: elasticsearch:7.10.1
+        name: elasticsearch
+        environment:
+          - discovery.type=single-node
     steps:
       - checkout
       - run:
