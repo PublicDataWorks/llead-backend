@@ -1,4 +1,4 @@
-from .base import *
+from .base import *  # NOQA
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
