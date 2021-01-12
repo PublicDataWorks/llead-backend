@@ -1,5 +1,9 @@
 .idea
-.env
+*.env
 *__pycache__*
 /.coverage
 .DS_Store
+ipno/static
+.gitsecret/keys/random_seed
+!*.secret
+secrets-*.yml

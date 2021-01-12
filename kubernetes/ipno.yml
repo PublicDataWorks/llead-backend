@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipno-backend
+  labels:
+    app: ipno-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipno-backend
+  template:
+    metadata:
+      labels:
+        app: ipno-backend
+    spec:
+      containers:
+      - name: ipno-backend-app
+        image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
+        imagePullPolicy: Always
+        env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql
+                  key: password
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql
+                  key: host
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django
+                  key: secret-key
+            - name: DJANGO_SETTINGS_MODULE
+              valueFrom:
+                secretKeyRef:
+                  name: django
+                  key: setting-module
+        ports:
+        - containerPort: 8000
+
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+        name: cloudsql-proxy
+        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                  "-instances=excellent-zoo-300106:us-east4:ipno-db-staging=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-oauth-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+          - name: ssl-certs
+            mountPath: /etc/ssl/certs
+          - name: cloudsql
+            mountPath: /cloudsql
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: cloudsql-oauth-credentials
+          secret:
+            secretName: cloudsql-oauth-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipno-backend
+  labels:
+    app: ipno-backend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: ipno-backend
