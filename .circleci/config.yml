@@ -1,5 +1,15 @@
-version: 2.1
+---
+orbs:
+  gcp-gke: circleci/gcp-gke@1.1.0
 
+defaults:
+  - &gcloud-env
+    PROJECT_NAME: "IPNO"
+    GOOGLE_PROJECT_ID: "excellent-zoo-300106"
+    GOOGLE_COMPUTE_ZONE: "us-east4-a"
+    GOOGLE_CLUSTER_NAME: "ipno-staging"
+
+version: 2.1
 jobs:
   test:
     working_directory: ~/ipno
@@ -35,7 +45,120 @@ jobs:
           name: Coveralls
           command: coveralls
 
+  push_image:
+    description: Build docker image
+    machine: true
+    environment: *gcloud-env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/base.txt" }}-{{ .Branch }}
+          paths:
+            - /home/circleci/caches/app.tar
+      - run: echo "backend-$CIRCLE_BUILD_NUM" > buildnum
+      - run: echo -e "$GCLOUD_CREDENTIALS_JSON" | base64 --decode > gcloud-credentials.json
+      - persist_to_workspace:
+          root: .
+          paths:
+            - buildnum
+      - run:
+          name: Build image
+          command: |
+            docker build -t gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildnum) .
+      - gcp-gke/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: $GOOGLE_CLUSTER_NAME
+          perform-login: true
+      - run:
+          name: Push image
+          command: |
+            gcloud auth configure-docker
+            docker push gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildnum)
+      - save_cache:
+          key: backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/base.txt" }}-{{ .Branch }}
+          paths:
+            - /home/circleci/caches/app.tar
+
+  django_migrate:
+    description: Migrate database
+    machine: true
+    environment: *gcloud-env
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - gcp-gke/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: $GOOGLE_CLUSTER_NAME
+          perform-login: true
+      - checkout
+      - run:
+          name: Start job
+          command: |
+            bin/run_job.sh --staging $(cat /tmp/workspace/buildnum) migrate
+
+  django_collect_static:
+    description: Collect static
+    machine: true
+    environment: *gcloud-env
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - gcp-gke/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: $GOOGLE_CLUSTER_NAME
+          perform-login: true
+      - checkout
+      - run:
+          name: Collect static
+          command: |
+            bin/run_job.sh --staging $(cat /tmp/workspace/buildnum) collectstatic --no-input
+
+  deploy:
+    description: Deploy application to Google Kubernetes Engine
+    machine: true
+    environment: *gcloud-env
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - gcp-gke/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: $GOOGLE_CLUSTER_NAME
+          perform-login: true
+      - run:
+          name: Deploy
+          command: |
+            export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
+            cat kubernetes/ipno.yml | envsubst | kubectl apply -f -
+
 workflows:
-  testing:
+  version: 2
+  test:
     jobs:
-      - test
+      - test:
+          filters:
+            branches:
+              ignore:
+                - staging
+                - main
+
+  deploy_backend_staging:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: staging
+      - push_image:
+          requires:
+            - test
+      - django_migrate:
+          requires:
+            - push_image
+      - django_collect_static:
+          requires:
+            - push_image
+      - deploy:
+          requires:
+            - django_migrate
+            - django_collect_static
