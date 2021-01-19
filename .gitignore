@@ -7,3 +7,4 @@ ipno/static
 .gitsecret/keys/random_seed
 !*.secret
 secrets-*.yml
+venv/
