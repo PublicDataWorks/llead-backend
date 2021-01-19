@@ -17,6 +17,10 @@ from django.contrib import admin
 from django.urls import re_path, include, path
 
 from rest_framework import routers
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from documents.views import DocumentViewSet
 
@@ -27,4 +31,6 @@ api_router.register(r'documents', DocumentViewSet, basename='documents')
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^api/', include((api_router.urls, 'api'), namespace='api')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
 ]
