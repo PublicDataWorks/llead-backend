@@ -23,10 +23,12 @@ from rest_framework_simplejwt.views import (
 )
 
 from documents.views import DocumentViewSet
+from app_config.views import AppConfigViewSet
 
 api_router = routers.SimpleRouter()
 
 api_router.register(r'documents', DocumentViewSet, basename='documents')
+api_router.register(r'app-config', AppConfigViewSet, basename='app-config')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
