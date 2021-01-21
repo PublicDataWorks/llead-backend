@@ -55,6 +55,9 @@ LOCAL_APPS = (
     'authentication',
     'app_config',
     'documents',
+    'departments',
+    'officers',
+    'analytics'
 )
 
 AUTH_USER_MODEL = 'authentication.User'
