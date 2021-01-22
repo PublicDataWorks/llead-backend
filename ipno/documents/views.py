@@ -8,7 +8,7 @@ from documents.models import Document
 from documents.serializers import DocumentSerializer
 
 
-class DocumentViewSet(viewsets.ViewSet):
+class DocumentsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def retrieve(self, request, pk):
