@@ -8,3 +8,5 @@ class Department(TimeStampsModel):
     city = models.CharField(max_length=255, null=True, blank=True)
     parish = models.CharField(max_length=255, null=True, blank=True)
     location_map_url = models.CharField(max_length=255, null=True, blank=True)
+
+    officers = models.ManyToManyField('officers.Officer', through='officers.OfficerHistory')

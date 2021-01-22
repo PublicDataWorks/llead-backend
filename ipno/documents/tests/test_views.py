@@ -6,7 +6,7 @@ from documents.factories import DocumentFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 
 
-class DocumentViewSetTestCase(AuthAPITestCase):
+class DocumentsViewSetTestCase(AuthAPITestCase):
     def test_retrieve_success(self):
         document = DocumentFactory()
 
