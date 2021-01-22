@@ -5,7 +5,7 @@ from officers.models import Officer
 
 
 class OfficerAdmin(ModelAdmin):
-    list_display = ('uid', 'last_name', 'first_name', 'created_at', 'updated_at')
+    list_display = ('id', 'uid', 'last_name', 'first_name', 'created_at', 'updated_at')
 
 
 admin.site.register(Officer, OfficerAdmin)

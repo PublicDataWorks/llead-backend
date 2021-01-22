@@ -5,7 +5,7 @@ from departments.models import Department
 
 
 class DepartmentAdmin(ModelAdmin):
-    list_display = ('name', 'created_at', 'updated_at')
+    list_display = ('id', 'name', 'created_at', 'updated_at')
 
 
 admin.site.register(Department, DepartmentAdmin)
