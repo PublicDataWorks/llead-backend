@@ -15,3 +15,7 @@ class Officer(TimeStampsModel):
     birth_day = models.IntegerField()
 
     departments = models.ManyToManyField('departments.Department', through='officers.OfficerHistory')
+
+    @property
+    def name(self):
+        return f'{self.first_name} {self.last_name}'
