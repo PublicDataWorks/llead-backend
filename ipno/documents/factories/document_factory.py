@@ -1,3 +1,5 @@
+import random
+
 import factory
 from faker import Faker
 
@@ -14,3 +16,5 @@ class DocumentFactory(factory.django.DjangoModelFactory):
     document_type = factory.LazyFunction(lambda: fake.file_extension())
     url = factory.LazyFunction(lambda: fake.file_path(extension='pdf'))
     preview_image_url = factory.LazyFunction(lambda: fake.file_path(extension='jpg'))
+    incident_date = factory.LazyFunction(lambda: fake.date())
+    pages_count = factory.LazyFunction(lambda: random.randint(1, 20))
