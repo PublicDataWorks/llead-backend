@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
-
-class DepartmentSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
+from shared.serializers import SimpleDepartmentSerializer
 
 
 class OfficerSerializer(serializers.Serializer):
@@ -21,4 +18,4 @@ class OfficerSerializer(serializers.Serializer):
     def get_department(self, obj):
         officer_history = obj.officerhistory_set.first()
         if officer_history:
-            return DepartmentSerializer(officer_history.department).data
+            return SimpleDepartmentSerializer(officer_history.department).data
