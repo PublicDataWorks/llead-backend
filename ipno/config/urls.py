@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf import settings
 from django.urls import re_path, include, path
 
 from rest_framework import routers
@@ -26,6 +27,7 @@ from departments.views import DepartmentsViewSet
 from documents.views import DocumentsViewSet
 from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
+from officers.views import OfficersViewSet
 
 api_router = routers.SimpleRouter()
 
@@ -33,6 +35,7 @@ api_router.register(r'documents', DocumentsViewSet, basename='documents')
 api_router.register(r'departments', DepartmentsViewSet, basename='departments')
 api_router.register(r'app-config', AppConfigViewSet, basename='app-config')
 api_router.register(r'analytics', AnalyticsViewSet, basename='analytics')
+api_router.register(r'officers', OfficersViewSet, basename='officers')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,3 +43,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
 ]
+
+if settings.DEBUG:  # pragma: no cover
+    import debug_toolbar
+
+    urlpatterns = [path('__debug__/', include(debug_toolbar.urls))] + urlpatterns
