@@ -9,4 +9,4 @@ class Document(TimeStampsModel):
     url = models.CharField(max_length=255, null=True, blank=True)
     preview_image_url = models.CharField(max_length=255, null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer')
+    officers = models.ManyToManyField('officers.Officer', blank=True)
