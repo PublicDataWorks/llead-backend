@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from departments.serializers import DepartmentSerializer
+from shared.serializers import DepartmentSerializer
 from departments.factories import DepartmentFactory
 
 
