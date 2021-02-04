@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from officers.serializers import OfficerSerializer
+from shared.serializers import OfficerSerializer
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 
