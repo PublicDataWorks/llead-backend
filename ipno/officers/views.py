@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from officers.models import Officer, OfficerHistory
-from officers.serializers import OfficerSerializer
+from shared.serializers import OfficerSerializer
 from officers.constants import OFFICERS_LIMIT
 
 

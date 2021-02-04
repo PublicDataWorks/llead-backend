@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from departments.models import Department
-from departments.serializers import DepartmentSerializer
+from shared.serializers import DepartmentSerializer
 from departments.constants import DEPARTMENTS_LIMIT
 
 
