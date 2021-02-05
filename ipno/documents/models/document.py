@@ -10,5 +10,6 @@ class Document(TimeStampsModel):
     preview_image_url = models.CharField(max_length=255, null=True, blank=True)
     incident_date = models.DateField(null=True)
     pages_count = models.IntegerField(null=True)
+    text_content = models.TextField(blank=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True)

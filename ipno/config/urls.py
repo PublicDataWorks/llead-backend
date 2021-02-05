@@ -28,6 +28,7 @@ from documents.views import DocumentsViewSet
 from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
 from officers.views import OfficersViewSet
+from search.views import SearchViewSet
 
 api_router = routers.SimpleRouter()
 
@@ -36,6 +37,7 @@ api_router.register(r'departments', DepartmentsViewSet, basename='departments')
 api_router.register(r'app-config', AppConfigViewSet, basename='app-config')
 api_router.register(r'analytics', AnalyticsViewSet, basename='analytics')
 api_router.register(r'officers', OfficersViewSet, basename='officers')
+api_router.register(r'search', SearchViewSet, basename='search')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

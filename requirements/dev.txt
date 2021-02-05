@@ -3,3 +3,4 @@
 
 flake8==3.8.4
 django-debug-toolbar==3.2
+ipdb==0.13.4

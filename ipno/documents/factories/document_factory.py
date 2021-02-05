@@ -18,3 +18,4 @@ class DocumentFactory(factory.django.DjangoModelFactory):
     preview_image_url = factory.LazyFunction(lambda: fake.file_path(extension='jpg'))
     incident_date = factory.LazyFunction(lambda: fake.date())
     pages_count = factory.LazyFunction(lambda: random.randint(1, 20))
+    text_content = factory.LazyFunction(lambda: fake.sentence())
