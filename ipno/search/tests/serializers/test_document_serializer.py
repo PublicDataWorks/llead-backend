@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from documents.models import Document
 from officers.models import OfficerHistory
-from documents.serializers import DocumentSerializer
+from search.serializers import DocumentSerializer
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
@@ -52,9 +52,8 @@ class DocumentSerializerTestCase(TestCase):
             'document_type': document.document_type,
             'title': document.title,
             'url': document.url,
-            'preview_image_url': document.preview_image_url,
             'incident_date': document.incident_date,
-            'pages_count': document.pages_count,
+            'text_content': document.text_content,
             'departments': [
                 {
                     'id': department_1.id,

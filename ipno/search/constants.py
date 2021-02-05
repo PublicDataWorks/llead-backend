@@ -1,0 +1,1 @@
+SEARCH_LIMIT = 20
