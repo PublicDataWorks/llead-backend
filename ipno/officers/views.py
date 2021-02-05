@@ -16,8 +16,8 @@ class OfficersViewSet(viewsets.ViewSet):
         officers = Officer.objects.prefetch_related(
             Prefetch(
                 'officerhistory_set',
-                queryset=OfficerHistory.objects.order_by('-start_date')
-            ), 'officerhistory_set__department',
+                queryset=OfficerHistory.objects.order_by('-start_date').prefetch_related('department')
+            ),
         ).order_by(
             '-created_at'
         )[:OFFICERS_LIMIT]

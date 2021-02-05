@@ -9,10 +9,10 @@ class AppConfigAdmin(admin.ModelAdmin):
     )
     readonly_fields = ['name', 'description']
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # pragma: no cover
         return False
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None):  # pragma: no cover
         return False
 
 

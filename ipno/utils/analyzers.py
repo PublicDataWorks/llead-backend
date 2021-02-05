@@ -1,0 +1,30 @@
+from elasticsearch_dsl import analyzer, tokenizer, analysis
+
+
+remove_white_spaces = analysis.char_filter('remove_white_spaces', 'pattern_replace', pattern=' ', replacement='')
+remove_new_lines = analysis.char_filter('remove_new_lines', 'pattern_replace', pattern='\n', replacement=' ')
+remove_apostrophe = analysis.char_filter('remove_apostrophe', 'pattern_replace', pattern='\'', replacement='')
+
+token_min_length = analysis.token_filter('token_min_length', type="length", min=2)
+
+autocomplete_analyzer = analyzer(
+    'autocomplete_analyzer',
+    char_filter=[remove_white_spaces],
+    filter=['lowercase'],
+    tokenizer=tokenizer(
+        'autocomplete', 'ngram', min_gram=2, max_gram=20, token_chars=['letter', 'digit', 'dash_punctuation']
+    )
+)
+
+text_analyzer = analyzer(
+    'text_analyzer',
+    char_filter=[remove_new_lines, remove_apostrophe],
+    filter=['lowercase'],
+    tokenizer='standard'
+)
+
+search_analyzer = analyzer(
+    'search_analyzer',
+    filter=['lowercase', token_min_length],
+    tokenizer=tokenizer('autocomplete_search', 'pattern', pattern=r'[^a-zA-Z0-9\-]+')
+)
