@@ -4,6 +4,7 @@ from datetime import date
 from django.test import TestCase
 
 from mock import Mock
+from elasticsearch_dsl.utils import AttrDict
 
 from search.serializers.es_serializers import DocumentsESSerializer
 from documents.factories import DocumentFactory
@@ -45,9 +46,14 @@ class DocumentSerializerTestCase(TestCase):
         document_1.officers.add(officer_1, officer_2, officer_3)
 
         docs = [
-            Mock(id=document_2.id),
-            Mock(id=document_1.id),
-            Mock(id=document_3.id),
+            Mock(id=document_2.id, meta=None),
+            Mock(
+                id=document_1.id,
+                meta=Mock(
+                    highlight=AttrDict({'text_content': ['<em>text</em> content']}),
+                ),
+            ),
+            Mock(id=document_3.id, meta=None),
         ]
         expected_result = [
             {
@@ -57,6 +63,7 @@ class DocumentSerializerTestCase(TestCase):
                 'url': document_2.url,
                 'incident_date': str(document_2.incident_date),
                 'text_content': document_2.text_content,
+                'text_content_highlight': None,
                 'departments': [],
             },
             {
@@ -66,6 +73,7 @@ class DocumentSerializerTestCase(TestCase):
                 'url': document_1.url,
                 'incident_date': str(document_1.incident_date),
                 'text_content': document_1.text_content,
+                'text_content_highlight': '<em>text</em> content',
                 'departments': [
                     {
                         'id': department_1.id,
@@ -84,6 +92,7 @@ class DocumentSerializerTestCase(TestCase):
                 'url': document_3.url,
                 'incident_date': str(document_3.incident_date),
                 'text_content': document_3.text_content,
+                'text_content_highlight': None,
                 'departments': [],
             },
         ]
