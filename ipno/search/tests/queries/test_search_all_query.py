@@ -81,6 +81,7 @@ class OfficersSearchQueryTestCase(TestCase):
                     'url': document_1.url,
                     'incident_date': str(document_1.incident_date),
                     'text_content': document_1.text_content,
+                    'text_content_highlight': None,
                     'departments': [
                         {
                             'id': department_1.id,
@@ -95,6 +96,7 @@ class OfficersSearchQueryTestCase(TestCase):
                     'url': document_2.url,
                     'incident_date': str(document_2.incident_date),
                     'text_content': document_2.text_content,
+                    'text_content_highlight': 'Text content <em>keywo</em>',
                     'departments': [],
                 },
             ],

@@ -3,6 +3,9 @@ from operator import itemgetter
 from django.db.models import Prefetch
 from django.test import TestCase
 
+from mock import Mock
+from elasticsearch_dsl.utils import AttrDict
+
 from documents.models import Document
 from officers.models import OfficerHistory
 from search.serializers import DocumentSerializer
@@ -54,6 +57,7 @@ class DocumentSerializerTestCase(TestCase):
             'url': document.url,
             'incident_date': document.incident_date,
             'text_content': document.text_content,
+            'text_content_highlight': None,
             'departments': [
                 {
                     'id': department_1.id,
@@ -65,3 +69,27 @@ class DocumentSerializerTestCase(TestCase):
                 },
             ],
         }
+
+    def test_text_content_highlight(self):
+        document = DocumentFactory()
+        es_doc = Mock(
+            id=document.id,
+            meta=Mock(
+                highlight=AttrDict({'text_content': ['<em>text</em> content']}),
+            ),
+        )
+        setattr(document, 'es_doc', es_doc)
+
+        result = DocumentSerializer(document).data
+        assert result['text_content_highlight'] == '<em>text</em> content'
+
+    def test_empty_text_content_highlight(self):
+        document = DocumentFactory()
+        es_doc = Mock(
+            id=document.id,
+            meta=None
+        )
+        setattr(document, 'es_doc', es_doc)
+
+        result = DocumentSerializer(document).data
+        assert result['text_content_highlight'] is None
