@@ -1,59 +1,16 @@
 from datetime import date
 
-from django.urls import reverse
+from django.test import TestCase
 
-from rest_framework import status
-
-from test_utils.auth_api_test_case import AuthAPITestCase
+from departments.serializers import DepartmentDetailsSerializer
 from departments.factories import DepartmentFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 
 
-class DepartmentsViewSetTestCase(AuthAPITestCase):
-    def test_list_success(self):
-        department_1 = DepartmentFactory()
-        department_2 = DepartmentFactory()
-        department_3 = DepartmentFactory()
-
-        department_1_officers = OfficerFactory.create_batch(2)
-        department_2_officers = OfficerFactory.create_batch(5)
-
-        for officer in department_1_officers:
-            officer.departments.add(department_1)
-
-        for officer in department_2_officers:
-            officer.departments.add(department_2)
-
-        response = self.auth_client.get(reverse('api:departments-list'))
-        assert response.status_code == status.HTTP_200_OK
-
-        assert response.data == [{
-            'id': department_2.id,
-            'name': department_2.name,
-            'city': department_2.city,
-            'parish': department_2.parish,
-            'location_map_url': department_2.location_map_url,
-        }, {
-            'id': department_1.id,
-            'name': department_1.name,
-            'city': department_1.city,
-            'parish': department_1.parish,
-            'location_map_url': department_1.location_map_url,
-        }, {
-            'id': department_3.id,
-            'name': department_3.name,
-            'city': department_3.city,
-            'parish': department_3.parish,
-            'location_map_url': department_3.location_map_url,
-        }]
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:departments-list'))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-    def test_retrieve_success(self):
+class DepartmentDetailsSerializerTestCase(TestCase):
+    def test_data(self):
         department = DepartmentFactory()
         other_department = DepartmentFactory()
 
@@ -114,7 +71,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         complaint_5.officers.add(officer_3)
         complaint_6.officers.add(officer_2, officer_3)
 
-        expected_result = {
+        result = DepartmentDetailsSerializer(department).data
+        assert result == {
             'id': department.id,
             'name': department.name,
             'city': department.city,
@@ -124,22 +82,3 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'complaints_count': 4,
             'documents_count': 5,
         }
-
-        response = self.auth_client.get(
-            reverse('api:departments-detail', kwargs={'pk': department.id})
-        )
-        assert response.status_code == status.HTTP_200_OK
-
-        assert response.data == expected_result
-
-    def test_retrieve_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-detail', kwargs={'pk': 1})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_retrieve_unauthorized(self):
-        response = self.client.get(
-            reverse('api:departments-detail', kwargs={'pk': 1})
-        )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
