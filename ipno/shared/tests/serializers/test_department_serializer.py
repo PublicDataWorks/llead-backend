@@ -4,7 +4,7 @@ from shared.serializers import DepartmentSerializer
 from departments.factories import DepartmentFactory
 
 
-class DocumentSerializerTestCase(TestCase):
+class DepartmentSerializerTestCase(TestCase):
     def test_data(self):
         department = DepartmentFactory()
 
