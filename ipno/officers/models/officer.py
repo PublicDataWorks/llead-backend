@@ -19,3 +19,10 @@ class Officer(TimeStampsModel):
     @property
     def name(self):
         return f'{self.first_name} {self.last_name}'
+
+    @property
+    def badges(self):
+        return [
+            officer_history.badge_no for officer_history in self.officerhistory_set.all()
+            if officer_history.badge_no
+        ]
