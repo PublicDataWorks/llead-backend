@@ -3,7 +3,7 @@ from operator import itemgetter
 from django.db.models import Prefetch
 from django.test import TestCase
 
-from mock import Mock
+from mock import Mock, patch
 from elasticsearch_dsl.utils import AttrDict
 
 from documents.models import Document
@@ -69,6 +69,13 @@ class DocumentSerializerTestCase(TestCase):
                 },
             ],
         }
+
+    @patch('search.serializers.document_serializer.TEXT_CONTENT_LIMIT', 15)
+    def test_text_content(self):
+        document = DocumentFactory(text_content='This is a very long text')
+
+        result = DocumentSerializer(document).data
+        assert result['text_content'] == 'This is a very '
 
     def test_text_content_highlight(self):
         document = DocumentFactory()
