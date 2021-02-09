@@ -17,5 +17,16 @@ class OfficerESDoc(ESDoc):
     class Django:
         model = Officer
 
+    def get_indexing_queryset(self):
+        return self.get_queryset().prefetch_related(
+            'officerhistory_set',
+            'departments',
+        )
+
     id = fields.IntegerField()
     name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    badges = fields.TextField()
+    department_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+
+    def prepare_department_names(self, instance):
+        return [department.name for department in instance.departments.all()]
