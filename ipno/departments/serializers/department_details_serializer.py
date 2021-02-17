@@ -6,6 +6,16 @@ from documents.models import Document
 from complaints.models import Complaint
 
 
+class WrglFileSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
+    description = serializers.CharField()
+    url = serializers.CharField()
+    download_url = serializers.CharField()
+    default_expanded = serializers.BooleanField()
+
+
 class DepartmentDetailsSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
@@ -16,6 +26,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
     officers_count = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
     documents_count = serializers.SerializerMethodField()
+    wrgl_files = serializers.SerializerMethodField()
 
     @staticmethod
     def filter_by_department(klass, department_id):
@@ -41,3 +52,6 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return self.filter_by_department(
             Document, obj.id
         ).count()
+
+    def get_wrgl_files(self, obj):
+        return WrglFileSerializer(obj.wrglfile_set.order_by('position'), many=True).data
