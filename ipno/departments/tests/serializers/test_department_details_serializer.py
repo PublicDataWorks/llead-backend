@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from departments.serializers import DepartmentDetailsSerializer
-from departments.factories import DepartmentFactory
+from departments.factories import DepartmentFactory, WrglFileFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
@@ -71,6 +71,9 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         complaint_5.officers.add(officer_3)
         complaint_6.officers.add(officer_2, officer_3)
 
+        wrgl_file_1 = WrglFileFactory(department=department, position=2)
+        wrgl_file_2 = WrglFileFactory(department=department, position=1)
+
         result = DepartmentDetailsSerializer(department).data
         assert result == {
             'id': department.id,
@@ -81,4 +84,24 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             'officers_count': 3,
             'complaints_count': 4,
             'documents_count': 5,
+            'wrgl_files': [
+                {
+                    'id': wrgl_file_2.id,
+                    'name': wrgl_file_2.name,
+                    'slug': wrgl_file_2.slug,
+                    'description': wrgl_file_2.description,
+                    'url': wrgl_file_2.url,
+                    'download_url': wrgl_file_2.download_url,
+                    'default_expanded': wrgl_file_2.default_expanded,
+                },
+                {
+                    'id': wrgl_file_1.id,
+                    'name': wrgl_file_1.name,
+                    'slug': wrgl_file_1.slug,
+                    'description': wrgl_file_1.description,
+                    'url': wrgl_file_1.url,
+                    'download_url': wrgl_file_1.download_url,
+                    'default_expanded': wrgl_file_1.default_expanded,
+                }
+            ]
         }
