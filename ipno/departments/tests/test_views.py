@@ -166,3 +166,105 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             reverse('api:departments-detail', kwargs={'pk': 1})
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_documents_success(self):
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+
+        officer_1.departments.add(department)
+        officer_2.departments.add(department)
+
+        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
+        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
+
+        document_1.officers.add(officer_1)
+        document_2.officers.add(officer_1)
+        document_3.officers.add(officer_2)
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            {
+                'limit': 2,
+            }
+        )
+
+        expected_results = [{
+            'id': document_1.id,
+            'document_type': document_1.document_type,
+            'title': document_1.title,
+            'url': document_1.url,
+            'incident_date': str(document_1.incident_date),
+            'preview_image_url': document_1.preview_image_url,
+            'pages_count': document_1.pages_count,
+        }, {
+            'id': document_3.id,
+            'document_type': document_3.document_type,
+            'title': document_3.title,
+            'url': document_3.url,
+            'incident_date': str(document_3.incident_date),
+            'preview_image_url': document_3.preview_image_url,
+            'pages_count': document_3.pages_count,
+        }]
+
+        print(response.data)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
+        assert response.data['previous'] is None
+        assert response.data['next'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2&offset=2'
+        assert response.data['results'] == expected_results
+
+    def test_documents_with_limit_and_offset(self):
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+
+        officer_1.departments.add(department)
+        officer_2.departments.add(department)
+
+        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
+        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
+
+        document_1.officers.add(officer_1)
+        document_2.officers.add(officer_1)
+        document_3.officers.add(officer_2)
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            {
+                'limit': 2,
+                'offset': 2,
+            }
+        )
+
+        expected_results = [{
+            'id': document_2.id,
+            'document_type': document_2.document_type,
+            'title': document_2.title,
+            'url': document_2.url,
+            'incident_date': str(document_2.incident_date),
+            'preview_image_url': document_2.preview_image_url,
+            'pages_count': document_2.pages_count,
+        }]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
+        assert response.data['previous'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2'
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_documents_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': 1})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_documents_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-documents', kwargs={'pk': 1})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
