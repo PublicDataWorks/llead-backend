@@ -11,12 +11,6 @@ CORS_ORIGIN_WHITELIST = [
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
-
 MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']  # NOQA
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] += ('rest_framework.renderers.BrowsableAPIRenderer',)  # NOQA
 
