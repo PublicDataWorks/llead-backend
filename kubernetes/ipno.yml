@@ -44,6 +44,11 @@ spec:
                 secretKeyRef:
                   name: django
                   key: setting-module
+            - name: ELASTICSEARCH_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch
+                  key: host
         ports:
         - containerPort: 8000
 

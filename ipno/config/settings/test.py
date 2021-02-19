@@ -5,9 +5,3 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 TEST = True
-
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
