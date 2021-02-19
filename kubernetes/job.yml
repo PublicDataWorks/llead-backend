@@ -35,6 +35,11 @@ spec:
               secretKeyRef:
                 name: django
                 key: setting-module
+          - name: ELASTICSEARCH_HOST
+            valueFrom:
+              secretKeyRef:
+                name: elasticsearch
+                key: host
       - image: gcr.io/cloudsql-docker/gce-proxy:1.16
         name: cloudsql-proxy
         command: ["/cloud_sql_proxy", "--dir=/cloudsql",

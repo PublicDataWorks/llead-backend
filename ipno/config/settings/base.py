@@ -162,3 +162,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': env.str('ELASTICSEARCH_HOST', 'elasticsearch:9200'),
+    },
+}
