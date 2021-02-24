@@ -103,5 +103,43 @@ class DepartmentDetailsSerializerTestCase(TestCase):
                     'download_url': wrgl_file_1.download_url,
                     'default_expanded': wrgl_file_1.default_expanded,
                 }
-            ]
+            ],
+            'data_period': ['2018-2019'],
         }
+
+    def test_data_period(self):
+        department = DepartmentFactory()
+
+        OfficerHistoryFactory(
+            department=department,
+            start_date=date(2018, 2, 3),
+            end_date=date(2019, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            start_date=date(2020, 4, 5),
+            end_date=date(2020, 10, 5),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            start_date=date(2012, 2, 3),
+            end_date=date(2015, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            start_date=date(2014, 5, 6),
+            end_date=date(2016, 5, 6),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            start_date=date(2016, 3, 8),
+            end_date=None,
+        )
+        OfficerHistoryFactory(
+            department=department,
+            start_date=None,
+            end_date=None,
+        )
+
+        result = DepartmentDetailsSerializer(department).data
+        assert result['data_period'] == ['2012-2016', '2018-2019', '2020']

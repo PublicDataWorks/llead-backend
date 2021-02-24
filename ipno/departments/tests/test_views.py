@@ -145,7 +145,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'download_url': wrgl_file_1.download_url,
                     'default_expanded': wrgl_file_1.default_expanded,
                 }
-            ]
+            ],
+            'data_period': ['2018-2019'],
         }
 
         response = self.auth_client.get(
