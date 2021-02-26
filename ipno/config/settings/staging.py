@@ -5,6 +5,7 @@ DEBUG = False
 
 CORS_ORIGIN_WHITELIST = [
     'http://35.236.251.246',
+    'http://llead.co',
 ]
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
