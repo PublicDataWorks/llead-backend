@@ -9,7 +9,7 @@ class DepartmentAdmin(ModelAdmin):
 
 
 class WrglFileAdmin(ModelAdmin):
-    list_display = ('id', 'name', 'created_at', 'updated_at')
+    list_display = ('id', 'slug', 'created_at', 'updated_at')
 
 
 admin.site.register(Department, DepartmentAdmin)
