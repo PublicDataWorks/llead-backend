@@ -45,7 +45,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.officers.count()
 
     def get_complaints_count(self, obj):
-        return self.filter_by_department(
+        return obj.complaint_set.count() + self.filter_by_department(
             Complaint, obj.id
         ).count()
 

@@ -107,12 +107,16 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         complaint_4 = ComplaintFactory(incident_date=date(2018, 8, 9))
         complaint_5 = ComplaintFactory(incident_date=date(2018, 8, 9))
         complaint_6 = ComplaintFactory(incident_date=None)
+        complaint_7 = ComplaintFactory(incident_date=None)
+        complaint_8 = ComplaintFactory(incident_date=None)
         complaint_1.officers.add(officer_1)
         complaint_2.officers.add(officer_1)
         complaint_3.officers.add(officer_1)
         complaint_4.officers.add(officer_3)
         complaint_5.officers.add(officer_3)
         complaint_6.officers.add(officer_2, officer_3)
+        complaint_7.departments.add(department)
+        complaint_8.departments.add(department)
 
         wrgl_file_1 = WrglFileFactory(department=department, position=2)
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
@@ -124,7 +128,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'parish': department.parish,
             'location_map_url': department.location_map_url,
             'officers_count': 3,
-            'complaints_count': 4,
+            'complaints_count': 6,
             'documents_count': 5,
             'wrgl_files': [
                 {
