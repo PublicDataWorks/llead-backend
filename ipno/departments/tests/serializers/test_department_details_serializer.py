@@ -55,8 +55,9 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         document_3.officers.add(officer_1)
         document_4.officers.add(officer_3)
         document_5.officers.add(officer_3)
-        document_6.officers.add(officer_3)
         document_7.officers.add(officer_2, officer_3)
+        document_1.departments.add(department)
+        document_6.departments.add(department)
 
         complaint_1 = ComplaintFactory(incident_date=date(2020, 5, 4))
         complaint_2 = ComplaintFactory(incident_date=date(2017, 12, 5))
@@ -70,10 +71,11 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         complaint_2.officers.add(officer_1)
         complaint_3.officers.add(officer_1)
         complaint_4.officers.add(officer_3)
-        complaint_5.officers.add(officer_3)
         complaint_6.officers.add(officer_2, officer_3)
         complaint_7.departments.add(department)
         complaint_8.departments.add(department)
+        complaint_1.departments.add(department)
+        complaint_5.departments.add(department)
 
         wrgl_file_1 = WrglFileFactory(department=department, position=2)
         wrgl_file_2 = WrglFileFactory(department=department, position=1)

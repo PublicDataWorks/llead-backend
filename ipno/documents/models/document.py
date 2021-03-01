@@ -13,3 +13,4 @@ class Document(TimeStampsModel):
     text_content = models.TextField(blank=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True)
+    departments = models.ManyToManyField('departments.Department', blank=True)
