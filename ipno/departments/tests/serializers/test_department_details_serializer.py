@@ -143,3 +143,9 @@ class DepartmentDetailsSerializerTestCase(TestCase):
 
         result = DepartmentDetailsSerializer(department).data
         assert result['data_period'] == ['2012-2016', '2018-2019', '2020']
+
+    def test_data_period_with_empty_data(self):
+        department = DepartmentFactory()
+
+        result = DepartmentDetailsSerializer(department).data
+        assert result['data_period'] == []
