@@ -69,6 +69,7 @@ class DocumentsSearchQueryTestCase(TestCase):
         document_2 = DocumentFactory(title='Document 2', text_content='Text content 2')
         document_3 = DocumentFactory(title='Document 3', text_content='Text content 3')
         document_4 = DocumentFactory(title='Document 4', text_content='Text content 4')
+        document_5 = DocumentFactory(title='Document 5', text_content='Text content 5')
 
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
@@ -86,9 +87,11 @@ class DocumentsSearchQueryTestCase(TestCase):
         document_3.officers.add(officer_2)
         document_4.officers.add(officer_3)
 
+        document_5.departments.add(department_1)
+
         rebuild_search_index()
 
         result = DocumentsSearchQuery().search('Orlean')
         document_ids = {item['id'] for item in result}
 
-        assert document_ids == {document_1.id, document_2.id, document_3.id}
+        assert document_ids == {document_1.id, document_2.id, document_3.id, document_5.id}
