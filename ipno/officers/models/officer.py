@@ -10,9 +10,9 @@ class Officer(TimeStampsModel):
     middle_initial = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     employee_id = models.CharField(max_length=255, null=True, blank=True)
-    birth_year = models.IntegerField(null=True)
-    birth_month = models.IntegerField(null=True)
-    birth_day = models.IntegerField(null=True)
+    birth_year = models.IntegerField(null=True, blank=True)
+    birth_month = models.IntegerField(null=True, blank=True)
+    birth_day = models.IntegerField(null=True, blank=True)
 
     departments = models.ManyToManyField('departments.Department', through='officers.OfficerHistory')
 
