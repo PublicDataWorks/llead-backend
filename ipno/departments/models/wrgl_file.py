@@ -9,7 +9,10 @@ class WrglFile(TimeStampsModel):
     slug = models.CharField(max_length=255, unique=True)
     url = models.CharField(max_length=255)
     download_url = models.CharField(max_length=255)
-    position = models.IntegerField(unique=True, default=0)
+    position = models.IntegerField(default=0)
     default_expanded = models.BooleanField(default=False)
 
     department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ('department', 'position')
