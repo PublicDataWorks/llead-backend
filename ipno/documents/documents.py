@@ -20,6 +20,7 @@ class DocumentESDoc(ESDoc):
     def get_indexing_queryset(self):
         return self.get_queryset().prefetch_related(
             'officers',
+            'departments',
             'officers__officerhistory_set',
             'officers__departments',
         )
@@ -38,7 +39,7 @@ class DocumentESDoc(ESDoc):
         return [officer.badges for officer in instance.officers.all()]
 
     def prepare_department_names(self, instance):
-        return [
+        return [department.name for department in instance.departments.all()] + [
             department.name
             for officer in instance.officers.all()
             for department in officer.departments.all()

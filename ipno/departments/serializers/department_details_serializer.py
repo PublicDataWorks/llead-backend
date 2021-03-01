@@ -45,14 +45,20 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.officers.count()
 
     def get_complaints_count(self, obj):
-        return obj.complaint_set.count() + self.filter_by_department(
-            Complaint, obj.id
-        ).count()
+        complaint_ids = set(obj.complaint_set.values_list('id', flat=True))
+        complaint_ids |= set(
+            self.filter_by_department(Complaint, obj.id).values_list('id', flat=True)
+        )
+
+        return len(complaint_ids)
 
     def get_documents_count(self, obj):
-        return self.filter_by_department(
-            Document, obj.id
-        ).count()
+        document_ids = set(obj.document_set.values_list('id', flat=True))
+        document_ids |= set(
+            self.filter_by_department(Document, obj.id).values_list('id', flat=True)
+        )
+
+        return len(document_ids)
 
     def get_wrgl_files(self, obj):
         return WrglFileSerializer(obj.wrglfile_set.order_by('position'), many=True).data
