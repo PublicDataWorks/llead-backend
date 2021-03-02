@@ -21,6 +21,7 @@ class BaseDocumentSerializerTestCase(TestCase):
 
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
+        department_3 = DepartmentFactory()
 
         OfficerHistoryFactory(
             department=department_1,
@@ -35,6 +36,7 @@ class BaseDocumentSerializerTestCase(TestCase):
             officer=officer_3,
         )
         document.officers.add(officer_1, officer_2, officer_3)
+        document.departments.add(department_2, department_3)
 
         documents = Document.objects.all().prefetch_related(
             Prefetch(
@@ -61,6 +63,10 @@ class BaseDocumentSerializerTestCase(TestCase):
                 {
                     'id': department_2.id,
                     'name': department_2.name,
+                },
+                {
+                    'id': department_3.id,
+                    'name': department_3.name,
                 },
             ],
         }
