@@ -20,5 +20,6 @@ class DocumentsESSerializer(BaseESSerializer):
         ).prefetch_related('department')
 
         return super(DocumentsESSerializer, self).get_queryset(ids).prefetch_related(
+            'departments',
             Prefetch('officers__officerhistory_set', queryset=officer_histories, to_attr='prefetched_officer_histories')
         )
