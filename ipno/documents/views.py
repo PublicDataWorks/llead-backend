@@ -23,6 +23,7 @@ class DocumentsViewSet(viewsets.ViewSet):
         ).prefetch_related('department')
 
         documents = Document.objects.all().prefetch_related(
+            'departments',
             Prefetch('officers__officerhistory_set', queryset=officer_histories, to_attr='prefetched_officer_histories')
         ).order_by(
             '-created_at'

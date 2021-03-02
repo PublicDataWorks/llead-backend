@@ -13,7 +13,7 @@ class BaseDocumentSerializer(serializers.Serializer):
     departments = serializers.SerializerMethodField()
 
     def get_departments(self, obj):
-        departments = set()
+        departments = set(obj.departments.all())
         for officer in obj.officers.all():
             for officer_history in officer.prefetched_officer_histories:
                 departments.add(officer_history.department)
