@@ -26,3 +26,6 @@ class Officer(TimeStampsModel):
             officer_history.badge_no for officer_history in self.officerhistory_set.all()
             if officer_history.badge_no
         ]
+
+    def __str__(self):
+        return f"{self.id} - {self.name}"

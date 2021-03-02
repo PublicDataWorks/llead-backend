@@ -14,6 +14,9 @@ class Department(TimeStampsModel):
 
     officers = models.ManyToManyField('officers.Officer', through='officers.OfficerHistory')
 
+    def __str__(self):
+        return f"{self.id} - {self.name}"
+
     def relations_for(self, klass):
         return (
             klass.objects.filter(departments__id=self.id) |
