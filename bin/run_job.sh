@@ -69,8 +69,8 @@ echo $JOB_STATUS
 PHASE=Pending
 while [ "$PHASE" == "Pending" ]
 do
-  PHASE=$(kubectl get pods -l job-name=$JOB_NAME -o go-template --template="{{(index .items 0).status.phase}}")
   sleep 1
+  PHASE=$(kubectl get pods -l job-name=$JOB_NAME -o go-template --template="{{(index .items 0).status.phase}}")
 done
 
 NAME=$(kubectl get pods -l job-name=$JOB_NAME -o go-template --template="{{(index .items 0).metadata.name}}")
