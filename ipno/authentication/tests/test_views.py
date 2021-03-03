@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from authentication.factories import UserFactory
+from test_utils.auth_api_test_case import AuthAPITestCase
 
 
 class TokenObtainPairViewTestCase(APITestCase):
@@ -55,3 +56,39 @@ class TokenRefreshViewTestCase(APITestCase):
         validated_token = jwt_auth.get_validated_token(access_token)
 
         assert validated_token['user_id'] == user.id
+
+
+class TokenRevokeViewTestCase(AuthAPITestCase):
+    def test_refresh_token_revoke_success(self):
+        user = self.user
+        refresh_token = RefreshToken.for_user(user)
+
+        response = self.auth_client.post(reverse('revoke_token'), {
+            'refresh': str(refresh_token)
+        })
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['detail'] == 'Logout successfully'
+
+    def test_refresh_token_error_if_token_is_blacklisted(self):
+        user = self.user
+        refresh_token = RefreshToken.for_user(user)
+        refresh_token.blacklist()
+
+        response = self.auth_client.post(reverse('revoke_token'), {
+            'refresh': str(refresh_token)
+        })
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.data['detail'] == 'Token is blacklisted'
+
+    def test_refresh_token_error_if_token_is_not_match_with_access_token(self):
+        user = UserFactory()
+        refresh_token = RefreshToken.for_user(user)
+
+        response = self.auth_client.post(reverse('revoke_token'), {
+            'refresh': str(refresh_token)
+        })
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['detail'] == 'Token is invalid'
