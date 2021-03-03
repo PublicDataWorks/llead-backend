@@ -29,6 +29,7 @@ from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
 from officers.views import OfficersViewSet
 from search.views import SearchViewSet
+from authentication.views import TokenRevokeView
 
 api_router = routers.SimpleRouter()
 
@@ -44,6 +45,7 @@ urlpatterns = [
     re_path(r'^api/', include((api_router.urls, 'api'), namespace='api')),
     path('api/token/', TokenObtainPairView.as_view(), name='token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
+    path('api/token/revoke/', TokenRevokeView.as_view(), name='revoke_token')
 ]
 
 if settings.DEBUG:  # pragma: no cover
