@@ -59,8 +59,6 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         document_1.departments.add(department)
         document_6.departments.add(department)
 
-        print([document_1.id, document_2.id, document_3.id, document_4.id, document_5.id, document_6.id, document_7.id])
-
         complaint_1 = ComplaintFactory(incident_date=date(2020, 5, 4))
         complaint_2 = ComplaintFactory(incident_date=date(2017, 12, 5))
         complaint_3 = ComplaintFactory(incident_date=date(2019, 11, 6))

@@ -232,7 +232,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'pages_count': document_1.pages_count,
         }]
 
-        print(response.data)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
         assert response.data['previous'] is None

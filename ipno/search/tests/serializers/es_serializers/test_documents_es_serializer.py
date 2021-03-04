@@ -100,6 +100,4 @@ class DocumentsESSerializerTestCase(TestCase):
 
         result = DocumentsESSerializer().serialize(docs)
         result[1]['departments'] = sorted(result[1]['departments'], key=itemgetter('id'))
-        print(result)
-        print(expected_result[1])
         assert result == expected_result
