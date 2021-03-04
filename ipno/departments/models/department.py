@@ -15,7 +15,7 @@ class Department(TimeStampsModel):
     officers = models.ManyToManyField('officers.Officer', through='officers.OfficerHistory')
 
     def __str__(self):
-        return f"{self.id} - {self.name}"
+        return f"{self.name} - {self.id}"
 
     def relations_for(self, klass):
         return (
