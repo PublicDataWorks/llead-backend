@@ -12,7 +12,7 @@ from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 
 
-class DocumentSerializerTestCase(TestCase):
+class DocumentsESSerializerTestCase(TestCase):
     def test_serialize(self):
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory()
@@ -30,7 +30,7 @@ class DocumentSerializerTestCase(TestCase):
             department=department_1,
             officer=officer_1,
             start_date=date(2018, 2, 3),
-            end_date=None
+            end_date=date(2021, 2, 3),
         )
         OfficerHistoryFactory(
             department=department_2,
@@ -42,6 +42,7 @@ class DocumentSerializerTestCase(TestCase):
             department=department_2,
             officer=officer_3,
             start_date=date(2019, 12, 21),
+            end_date=date(2021, 12, 21),
         )
         document_1.officers.add(officer_1, officer_2, officer_3)
 
@@ -99,5 +100,6 @@ class DocumentSerializerTestCase(TestCase):
 
         result = DocumentsESSerializer().serialize(docs)
         result[1]['departments'] = sorted(result[1]['departments'], key=itemgetter('id'))
-
+        print(result)
+        print(expected_result[1])
         assert result == expected_result

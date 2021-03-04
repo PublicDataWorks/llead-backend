@@ -1,9 +1,4 @@
-from django.db.models import F, Q
-
 from rest_framework import serializers
-
-from documents.models import Document
-from complaints.models import Complaint
 
 
 class WrglFileSerializer(serializers.Serializer):
@@ -29,36 +24,14 @@ class DepartmentDetailsSerializer(serializers.Serializer):
     wrgl_files = serializers.SerializerMethodField()
     data_period = serializers.SerializerMethodField()
 
-    @staticmethod
-    def filter_by_department(klass, department_id):
-        return klass.objects.filter(
-            incident_date__isnull=False,
-            officers__officerhistory__start_date__isnull=False,
-            incident_date__gte=F('officers__officerhistory__start_date'),
-            officers__officerhistory__department_id=department_id,
-        ).filter(
-            Q(officers__officerhistory__end_date__isnull=True) |
-            Q(incident_date__lte=F('officers__officerhistory__end_date')),
-        )
-
     def get_officers_count(self, obj):
         return obj.officers.count()
 
     def get_complaints_count(self, obj):
-        complaint_ids = set(obj.complaint_set.values_list('id', flat=True))
-        complaint_ids |= set(
-            self.filter_by_department(Complaint, obj.id).values_list('id', flat=True)
-        )
-
-        return len(complaint_ids)
+        return obj.complaints.count()
 
     def get_documents_count(self, obj):
-        document_ids = set(obj.document_set.values_list('id', flat=True))
-        document_ids |= set(
-            self.filter_by_department(Document, obj.id).values_list('id', flat=True)
-        )
-
-        return len(document_ids)
+        return obj.documents.count()
 
     def get_wrgl_files(self, obj):
         return WrglFileSerializer(obj.wrglfile_set.order_by('position'), many=True).data

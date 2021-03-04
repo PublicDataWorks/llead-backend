@@ -65,13 +65,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             department=department,
             officer=officer_1,
             start_date=date(2018, 2, 3),
-            end_date=None
-        )
-        OfficerHistoryFactory(
-            department=other_department,
-            officer=officer_1,
-            start_date=date(2017, 2, 3),
-            end_date=date(2018, 2, 1),
+            end_date=date(2021, 2, 3),
         )
         OfficerHistoryFactory(
             department=department,
@@ -84,6 +78,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             officer=officer_3,
             start_date=date(2018, 4, 5),
             end_date=date(2019, 4, 5),
+        )
+        OfficerHistoryFactory(
+            department=other_department,
+            officer=officer_1,
+            start_date=date(2017, 2, 3),
+            end_date=date(2018, 2, 1),
         )
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
@@ -186,10 +186,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
         document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
+        document_4 = DocumentFactory(incident_date=date(2021, 7, 9))
+
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_1,
+            start_date=date(2018, 2, 3),
+            end_date=date(2021, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_2,
+            start_date=date(2019, 2, 3),
+            end_date=date(2020, 2, 3),
+        )
 
         document_1.officers.add(officer_1)
         document_2.officers.add(officer_1)
         document_3.officers.add(officer_2)
+        document_3.departments.add(department)
+        document_4.departments.add(department)
 
         response = self.auth_client.get(
             reverse('api:departments-documents', kwargs={'pk': department.id}),
@@ -199,6 +215,14 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
 
         expected_results = [{
+            'id': document_4.id,
+            'document_type': document_4.document_type,
+            'title': document_4.title,
+            'url': document_4.url,
+            'incident_date': str(document_4.incident_date),
+            'preview_image_url': document_4.preview_image_url,
+            'pages_count': document_4.pages_count,
+        }, {
             'id': document_1.id,
             'document_type': document_1.document_type,
             'title': document_1.title,
@@ -206,14 +230,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'incident_date': str(document_1.incident_date),
             'preview_image_url': document_1.preview_image_url,
             'pages_count': document_1.pages_count,
-        }, {
-            'id': document_3.id,
-            'document_type': document_3.document_type,
-            'title': document_3.title,
-            'url': document_3.url,
-            'incident_date': str(document_3.incident_date),
-            'preview_image_url': document_3.preview_image_url,
-            'pages_count': document_3.pages_count,
         }]
 
         print(response.data)
@@ -235,10 +251,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
         document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
+        document_4 = DocumentFactory(incident_date=date(2021, 7, 9))
+
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_1,
+            start_date=date(2018, 2, 3),
+            end_date=date(2021, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_2,
+            start_date=date(2019, 2, 3),
+            end_date=date(2020, 2, 3),
+        )
 
         document_1.officers.add(officer_1)
         document_2.officers.add(officer_1)
         document_3.officers.add(officer_2)
+        document_3.departments.add(department)
+        document_4.departments.add(department)
 
         response = self.auth_client.get(
             reverse('api:departments-documents', kwargs={'pk': department.id}),
@@ -249,13 +281,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
 
         expected_results = [{
-            'id': document_2.id,
-            'document_type': document_2.document_type,
-            'title': document_2.title,
-            'url': document_2.url,
-            'incident_date': str(document_2.incident_date),
-            'preview_image_url': document_2.preview_image_url,
-            'pages_count': document_2.pages_count,
+            'id': document_3.id,
+            'document_type': document_3.document_type,
+            'title': document_3.title,
+            'url': document_3.url,
+            'incident_date': str(document_3.incident_date),
+            'preview_image_url': document_3.preview_image_url,
+            'pages_count': document_3.pages_count,
         }]
 
         assert response.status_code == status.HTTP_200_OK

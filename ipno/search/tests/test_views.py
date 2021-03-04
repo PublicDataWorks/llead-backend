@@ -27,7 +27,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
             officer=officer_1,
             department=department_1,
             badge_no='12435',
-            start_date=datetime(2020, 5, 4, tzinfo=pytz.utc)
+            start_date=datetime(2020, 5, 4, tzinfo=pytz.utc),
+            end_date=datetime(2021, 5, 4, tzinfo=pytz.utc)
         )
 
         DocumentFactory(title='Document title', text_content='Text content')

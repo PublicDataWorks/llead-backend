@@ -8,7 +8,6 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
-from documents.models import Document
 from shared.serializers import DepartmentSerializer
 from departments.serializers import DepartmentDetailsSerializer, DocumentSerializer
 from departments.constants import DEPARTMENTS_LIMIT
@@ -34,9 +33,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['get'], url_path='documents')
     def documents(self, request, pk):
         department = get_object_or_404(Department, id=pk)
-        queryset = Document.objects.filter(
-            officers__officerhistory__department_id=department.id
-        ).order_by('-incident_date')
+        queryset = department.documents.order_by('-incident_date')
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(queryset, request, view=self)
         serializer = DocumentSerializer(page, many=True)
