@@ -6,4 +6,4 @@ from departments.factories import DepartmentFactory
 class DepartmentTestCase(TestCase):
     def test_str(self):
         department = DepartmentFactory()
-        assert str(department) == f"{department.id} - {department.name}"
+        assert str(department) == f"{department.name} - {department.id}"
