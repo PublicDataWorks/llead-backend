@@ -22,7 +22,7 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
             department=department_1,
             officer=officer_1,
             start_date=date(2018, 2, 3),
-            end_date=None
+            end_date=date(2021, 2, 3)
         )
         OfficerHistoryFactory(
             department=department_1,

@@ -22,13 +22,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             department=department,
             officer=officer_1,
             start_date=date(2018, 2, 3),
-            end_date=None
-        )
-        OfficerHistoryFactory(
-            department=other_department,
-            officer=officer_1,
-            start_date=date(2017, 2, 3),
-            end_date=date(2018, 2, 1),
+            end_date=date(2021, 2, 3),
         )
         OfficerHistoryFactory(
             department=department,
@@ -41,6 +35,12 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             officer=officer_3,
             start_date=date(2018, 4, 5),
             end_date=date(2019, 4, 5),
+        )
+        OfficerHistoryFactory(
+            department=other_department,
+            officer=officer_1,
+            start_date=date(2017, 2, 3),
+            end_date=date(2018, 2, 1),
         )
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
@@ -58,6 +58,8 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         document_7.officers.add(officer_2, officer_3)
         document_1.departments.add(department)
         document_6.departments.add(department)
+
+        print([document_1.id, document_2.id, document_3.id, document_4.id, document_5.id, document_6.id, document_7.id])
 
         complaint_1 = ComplaintFactory(incident_date=date(2020, 5, 4))
         complaint_2 = ComplaintFactory(incident_date=date(2017, 12, 5))
