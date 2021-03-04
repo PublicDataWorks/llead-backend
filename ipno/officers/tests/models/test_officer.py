@@ -10,4 +10,4 @@ class OfficerTestCase(TestCase):
 
     def test_str(self):
         officer = OfficerFactory()
-        assert str(officer) == f"{officer.id} - {officer.name}"
+        assert str(officer) == f"{officer.name} - {officer.id}"
