@@ -8,9 +8,12 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
+from departments.serializers.es_serializers import DocumentsESSerializer
 from shared.serializers import DepartmentSerializer
+from utils.es_pagination import ESPagination
 from departments.serializers import DepartmentDetailsSerializer, DocumentSerializer
 from departments.constants import DEPARTMENTS_LIMIT
+from departments.queries import DocumentsSearchQuery
 
 
 class DepartmentsViewSet(viewsets.ViewSet):
@@ -33,8 +36,17 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['get'], url_path='documents')
     def documents(self, request, pk):
         department = get_object_or_404(Department, id=pk)
-        queryset = department.documents.order_by('-incident_date')
-        paginator = LimitOffsetPagination()
-        page = paginator.paginate_queryset(queryset, request, view=self)
-        serializer = DocumentSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        q = self.request.query_params.get('q')
+
+        if q:
+            search_query = DocumentsSearchQuery(q, department_id=department.id)
+            paginator = ESPagination()
+            page = paginator.paginate_es_query(search_query, request)
+            data = DocumentsESSerializer(page).data
+        else:
+            queryset = department.documents.order_by('-incident_date')
+            paginator = LimitOffsetPagination()
+            page = paginator.paginate_queryset(queryset, request, view=self)
+            data = DocumentSerializer(page, many=True).data
+
+        return paginator.get_paginated_response(data)

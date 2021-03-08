@@ -1,4 +1,4 @@
-from .base_es_serializer import BaseESSerializer
+from shared.serializers.es_serializers import BaseESSerializer
 from shared.serializers import DepartmentSerializer
 from departments.models import Department
 

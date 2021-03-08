@@ -1,15 +1,9 @@
 from rest_framework import serializers
 
-from shared.serializers import (
-    DocumentWithDepartmentsSerializer,
-    BaseDocumentSearchSerializer,
-)
+from shared.serializers import BaseDocumentSearchSerializer
 
 
-class DocumentSerializer(
-    DocumentWithDepartmentsSerializer,
-    BaseDocumentSearchSerializer
-):
+class DocumentSearchSerializer(BaseDocumentSearchSerializer):
     id = serializers.IntegerField()
     document_type = serializers.CharField()
     title = serializers.CharField()
