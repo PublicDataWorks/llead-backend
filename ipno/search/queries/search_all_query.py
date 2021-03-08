@@ -3,7 +3,6 @@ from search.queries.officers_search_query import OfficersSearchQuery
 from search.queries.documents_search_query import DocumentsSearchQuery
 from search.serializers.es_serializers import DepartmentsESSerializer, OfficersESSerializer, DocumentsESSerializer
 
-
 SEARCH_MAPPINGS = {
     'DEPARTMENTS': {
         'search_query': DepartmentsSearchQuery,
@@ -24,6 +23,6 @@ class SearchAllQuery(object):
     def search(self, query):
         results = {}
         for search_key, search_mapping in SEARCH_MAPPINGS.items():
-            search_result = search_mapping['search_query']().search(query)
-            results[search_key] = search_mapping['serializer']().serialize(search_result)
+            search_result = search_mapping['search_query'](query).search()
+            results[search_key] = search_mapping['serializer'](search_result).data
         return results

@@ -16,5 +16,5 @@ class OfficerHistoryFactory(factory.django.DjangoModelFactory):
 
     officer = factory.SubFactory(OfficerFactory)
     department = factory.SubFactory(DepartmentFactory)
-    start_date = factory.LazyFunction(lambda: fake.date())
+    start_date = factory.LazyFunction(lambda: fake.date_object())
     badge_no = factory.LazyFunction(lambda: str(random.randint(10000, 99999)))

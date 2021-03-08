@@ -15,8 +15,9 @@ from departments.factories import DepartmentFactory
 
 
 class DocumentSerializerTestCase(TestCase):
+    @patch('shared.serializers.base_document_search_serializer.TEXT_CONTENT_LIMIT', 15)
     def test_data(self):
-        document = DocumentFactory()
+        document = DocumentFactory(text_content='This is a very long text')
 
         officer_1 = OfficerFactory()
         officer_2 = OfficerFactory()
@@ -47,7 +48,18 @@ class DocumentSerializerTestCase(TestCase):
             )
         )[:1]
 
-        result = DocumentSerializer(documents[0]).data
+        prefetched_document = documents[0]
+
+        es_doc = Mock(
+            id=document.id,
+            meta=Mock(
+                highlight=AttrDict({'text_content': ['<em>text</em> content']}),
+            ),
+        )
+
+        setattr(prefetched_document, 'es_doc', es_doc)
+
+        result = DocumentSerializer(prefetched_document).data
         result['departments'] = sorted(result['departments'], key=itemgetter('id'))
 
         assert result == {
@@ -55,9 +67,9 @@ class DocumentSerializerTestCase(TestCase):
             'document_type': document.document_type,
             'title': document.title,
             'url': document.url,
-            'incident_date': document.incident_date,
-            'text_content': document.text_content,
-            'text_content_highlight': None,
+            'incident_date': str(document.incident_date),
+            'text_content': 'This is a very ',
+            'text_content_highlight': '<em>text</em> content',
             'departments': [
                 {
                     'id': department_1.id,
@@ -69,34 +81,3 @@ class DocumentSerializerTestCase(TestCase):
                 },
             ],
         }
-
-    @patch('search.serializers.document_serializer.TEXT_CONTENT_LIMIT', 15)
-    def test_text_content(self):
-        document = DocumentFactory(text_content='This is a very long text')
-
-        result = DocumentSerializer(document).data
-        assert result['text_content'] == 'This is a very '
-
-    def test_text_content_highlight(self):
-        document = DocumentFactory()
-        es_doc = Mock(
-            id=document.id,
-            meta=Mock(
-                highlight=AttrDict({'text_content': ['<em>text</em> content']}),
-            ),
-        )
-        setattr(document, 'es_doc', es_doc)
-
-        result = DocumentSerializer(document).data
-        assert result['text_content_highlight'] == '<em>text</em> content'
-
-    def test_empty_text_content_highlight(self):
-        document = DocumentFactory()
-        es_doc = Mock(
-            id=document.id,
-            meta=None
-        )
-        setattr(document, 'es_doc', es_doc)
-
-        result = DocumentSerializer(document).data
-        assert result['text_content_highlight'] is None

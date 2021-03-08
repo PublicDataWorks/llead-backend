@@ -15,7 +15,7 @@ class DocumentSerializerTestCase(TestCase):
             'document_type': document.document_type,
             'title': document.title,
             'url': document.url,
-            'incident_date': document.incident_date,
+            'incident_date': str(document.incident_date),
             'preview_image_url': document.preview_image_url,
             'pages_count': document.pages_count,
         }

@@ -5,13 +5,13 @@ from django.test import TestCase
 
 from documents.models import Document
 from officers.models import OfficerHistory
-from shared.serializers import BaseDocumentSerializer
+from shared.serializers import DocumentWithDepartmentsSerializer
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 
 
-class BaseDocumentSerializerTestCase(TestCase):
+class DocumentWithDepartmentsSerializerTestCase(TestCase):
     def test_data(self):
         document = DocumentFactory()
 
@@ -46,15 +46,10 @@ class BaseDocumentSerializerTestCase(TestCase):
             )
         )[:1]
 
-        result = BaseDocumentSerializer(documents[0]).data
+        result = DocumentWithDepartmentsSerializer(documents[0]).data
         result['departments'] = sorted(result['departments'], key=itemgetter('id'))
 
         assert result == {
-            'id': document.id,
-            'document_type': document.document_type,
-            'title': document.title,
-            'url': document.url,
-            'incident_date': document.incident_date,
             'departments': [
                 {
                     'id': department_1.id,

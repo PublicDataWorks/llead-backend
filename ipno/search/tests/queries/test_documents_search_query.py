@@ -1,3 +1,4 @@
+from datetime import date
 from django.test import TestCase
 
 from documents.factories import DocumentFactory
@@ -15,7 +16,7 @@ class DocumentsSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = DocumentsSearchQuery().search('keyword')
+        result = DocumentsSearchQuery('keyword').search()
         document_ids = {item['id'] for item in result}
 
         assert document_ids == {document_1.id, document_2.id}
@@ -37,7 +38,7 @@ class DocumentsSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = DocumentsSearchQuery().search('Davi')
+        result = DocumentsSearchQuery('Davi').search()
         document_ids = {item['id'] for item in result}
 
         assert document_ids == {document_1.id, document_2.id, document_3.id}
@@ -59,17 +60,35 @@ class DocumentsSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = DocumentsSearchQuery().search('45812')
+        result = DocumentsSearchQuery('45812').search()
         document_ids = {item['id'] for item in result}
 
         assert document_ids == {document_2.id, document_3.id}
 
     def test_query_with_matched_by_department_names(self):
-        document_1 = DocumentFactory(title='Document 1', text_content='Text content 1')
-        document_2 = DocumentFactory(title='Document 2', text_content='Text content 2')
-        document_3 = DocumentFactory(title='Document 3', text_content='Text content 3')
-        document_4 = DocumentFactory(title='Document 4', text_content='Text content 4')
-        document_5 = DocumentFactory(title='Document 5', text_content='Text content 5')
+        document_1 = DocumentFactory(
+            title='Document 1',
+            text_content='Text content 1',
+            incident_date=date(2019, 10, 12),
+        )
+        document_2 = DocumentFactory(
+            title='Document 2',
+            text_content='Text content 2',
+            incident_date=date(2020, 4, 7),
+        )
+        document_3 = DocumentFactory(
+            title='Document 3',
+            text_content='Text content 3',
+            incident_date=date(2017, 1, 2),
+        )
+        document_4 = DocumentFactory(
+            title='Document 4',
+            text_content='Text content 4'
+        )
+        document_5 = DocumentFactory(
+            title='Document 5',
+            text_content='Text content 5'
+        )
 
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
@@ -78,9 +97,27 @@ class DocumentsSearchQueryTestCase(TestCase):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
-        OfficerHistoryFactory(officer=officer_1, department=department_1, badge_no='12435')
-        OfficerHistoryFactory(officer=officer_2, department=department_1, badge_no='45812')
-        OfficerHistoryFactory(officer=officer_3, department=department_2, badge_no='45812')
+        OfficerHistoryFactory(
+            officer=officer_1,
+            department=department_1,
+            badge_no='12435',
+            start_date=date(2019, 7, 5),
+            end_date=date(2020, 7, 5),
+        )
+        OfficerHistoryFactory(
+            officer=officer_2,
+            department=department_1,
+            badge_no='45812',
+            start_date=date(2018, 2, 3),
+            end_date=date(2021, 2, 3),
+        )
+        OfficerHistoryFactory(
+            officer=officer_3,
+            department=department_2,
+            badge_no='45812',
+            start_date=date(2017, 2, 6),
+            end_date=date(2018, 2, 6),
+        )
 
         document_1.officers.add(officer_1)
         document_2.officers.add(officer_2)
@@ -91,7 +128,7 @@ class DocumentsSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = DocumentsSearchQuery().search('Orlean')
+        result = DocumentsSearchQuery('Orlean').search()
         document_ids = {item['id'] for item in result}
 
-        assert document_ids == {document_1.id, document_2.id, document_3.id, document_5.id}
+        assert document_ids == {document_1.id, document_2.id, document_5.id}

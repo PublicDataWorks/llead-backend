@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 
-from .base_es_serializer import BaseESSerializer
+from shared.serializers.es_serializers import BaseESSerializer
 from shared.serializers import OfficerSerializer
 from officers.models import Officer, OfficerHistory
 

@@ -42,5 +42,5 @@ class DepartmentsESSerializerTestCase(TestCase):
             }
         ]
 
-        result = DepartmentsESSerializer().serialize(docs)
+        result = DepartmentsESSerializer(docs).data
         assert result == expected_result

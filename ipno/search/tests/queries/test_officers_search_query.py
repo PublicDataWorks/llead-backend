@@ -14,7 +14,7 @@ class OfficersSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = OfficersSearchQuery().search('Davi')
+        result = OfficersSearchQuery('Davi').search()
         officer_ids = {item['id'] for item in result}
 
         assert officer_ids == {officer_1.id, officer_2.id}
@@ -28,7 +28,7 @@ class OfficersSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = OfficersSearchQuery().search('45812')
+        result = OfficersSearchQuery('45812').search()
         document_ids = {item['id'] for item in result}
 
         assert document_ids == {officer_2.id}
@@ -47,7 +47,7 @@ class OfficersSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = OfficersSearchQuery().search('Orlean')
+        result = OfficersSearchQuery('Orlean').search()
         document_ids = {item['id'] for item in result}
 
         assert document_ids == {officer_1.id, officer_2.id}

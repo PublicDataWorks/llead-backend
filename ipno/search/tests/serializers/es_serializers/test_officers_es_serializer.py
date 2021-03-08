@@ -59,5 +59,5 @@ class OfficersESSerializerTestCase(TestCase):
             },
         ]
 
-        result = OfficersESSerializer().serialize(docs)
+        result = OfficersESSerializer(docs).data
         assert result == expected_result
