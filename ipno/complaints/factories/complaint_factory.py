@@ -10,4 +10,4 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Complaint
 
-    incident_date = factory.LazyFunction(lambda: fake.date())
+    incident_date = factory.LazyFunction(lambda: fake.date_object())

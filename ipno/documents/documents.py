@@ -30,6 +30,7 @@ class DocumentESDoc(ESDoc):
     text_content = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
     officer_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
     officer_badges = fields.TextField()
+    department_ids = fields.IntegerField()
     department_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
 
     def prepare_officer_names(self, instance):
@@ -38,9 +39,19 @@ class DocumentESDoc(ESDoc):
     def prepare_officer_badges(self, instance):
         return [officer.badges for officer in instance.officers.all()]
 
+    def _departments(self, instance):
+        departments = list(instance.departments.all())
+        if instance.incident_date:
+            for officer in instance.officers.all():
+                for officer_history in officer.officerhistory_set.all():
+                    if officer_history.start_date and \
+                            officer_history.end_date and \
+                            officer_history.start_date <= instance.incident_date <= officer_history.end_date:
+                        departments.append(officer_history.department)
+        return departments
+
     def prepare_department_names(self, instance):
-        return [department.name for department in instance.departments.all()] + [
-            department.name
-            for officer in instance.officers.all()
-            for department in officer.departments.all()
-        ]
+        return [department.name for department in self._departments(instance)]
+
+    def prepare_department_ids(self, instance):
+        return [department.id for department in self._departments(instance)]

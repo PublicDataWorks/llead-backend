@@ -13,7 +13,7 @@ class DepartmentsSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = DepartmentsSearchQuery().search('Orlea')
+        result = DepartmentsSearchQuery('Orlea').search()
         department_ids = {item['id'] for item in result}
 
         assert department_ids == {department_1.id, department_2.id}

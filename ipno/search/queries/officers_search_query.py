@@ -1,4 +1,4 @@
-from .base_search_query import BaseSearchQuery
+from shared.queries.base_search_query import BaseSearchQuery
 from officers.documents import OfficerESDoc
 
 

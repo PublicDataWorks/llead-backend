@@ -53,7 +53,7 @@ class DocumentSerializerTestCase(TestCase):
             'title': document.title,
             'url': document.url,
             'preview_image_url': document.preview_image_url,
-            'incident_date': document.incident_date,
+            'incident_date': str(document.incident_date),
             'pages_count': document.pages_count,
             'departments': [
                 {
