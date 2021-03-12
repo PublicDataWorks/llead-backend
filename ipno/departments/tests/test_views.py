@@ -222,16 +222,14 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'title': document_4.title,
             'url': document_4.url,
             'incident_date': str(document_4.incident_date),
-            'preview_image_url': document_4.preview_image_url,
-            'pages_count': document_4.pages_count,
+            'text_content': document_4.text_content
         }, {
             'id': document_1.id,
             'document_type': document_1.document_type,
             'title': document_1.title,
             'url': document_1.url,
             'incident_date': str(document_1.incident_date),
-            'preview_image_url': document_1.preview_image_url,
-            'pages_count': document_1.pages_count,
+            'text_content': document_1.text_content
         }]
 
         assert response.status_code == status.HTTP_200_OK
@@ -287,8 +285,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'title': document_3.title,
             'url': document_3.url,
             'incident_date': str(document_3.incident_date),
-            'preview_image_url': document_3.preview_image_url,
-            'pages_count': document_3.pages_count,
+            'text_content': document_3.text_content,
         }]
 
         assert response.status_code == status.HTTP_200_OK
