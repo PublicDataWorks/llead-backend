@@ -1,12 +1,15 @@
 from django.test import TestCase
 
+from mock import patch
+
 from departments.serializers import DocumentSerializer
 from documents.factories import DocumentFactory
 
 
 class DocumentSerializerTestCase(TestCase):
+    @patch('departments.serializers.document_serializer.TEXT_CONTENT_LIMIT', 15)
     def test_data(self):
-        document = DocumentFactory()
+        document = DocumentFactory(text_content='This is a very long text')
 
         result = DocumentSerializer(document).data
 
@@ -16,6 +19,5 @@ class DocumentSerializerTestCase(TestCase):
             'title': document.title,
             'url': document.url,
             'incident_date': str(document.incident_date),
-            'preview_image_url': document.preview_image_url,
-            'pages_count': document.pages_count,
+            'text_content': 'This is a very '
         }
