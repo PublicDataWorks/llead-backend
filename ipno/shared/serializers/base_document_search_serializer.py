@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from search.constants import TEXT_CONTENT_LIMIT
+from shared.constants import TEXT_CONTENT_LIMIT
 
 
 class BaseDocumentSearchSerializer(serializers.Serializer):
