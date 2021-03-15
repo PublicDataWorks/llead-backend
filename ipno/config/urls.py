@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.conf import settings
 from django.urls import re_path, include, path
+from django.views.generic.base import RedirectView
 
 from rest_framework import routers
 from rest_framework_simplejwt.views import (
@@ -30,6 +31,7 @@ from analytics.views import AnalyticsViewSet
 from officers.views import OfficersViewSet
 from search.views import SearchViewSet
 from authentication.views import TokenRevokeView
+from status.views import StatusView
 
 api_router = routers.SimpleRouter()
 
@@ -41,11 +43,13 @@ api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='admin/')),
     path('admin/', admin.site.urls),
     re_path(r'^api/', include((api_router.urls, 'api'), namespace='api')),
     path('api/token/', TokenObtainPairView.as_view(), name='token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
-    path('api/token/revoke/', TokenRevokeView.as_view(), name='revoke_token')
+    path('api/token/revoke/', TokenRevokeView.as_view(), name='revoke_token'),
+    path('api/status/', StatusView.as_view(), name='status'),
 ]
 
 if settings.DEBUG:  # pragma: no cover

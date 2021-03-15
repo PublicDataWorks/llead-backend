@@ -15,10 +15,22 @@ spec:
         app: ipno-backend
     spec:
       containers:
-      - name: ipno-backend-app
-        image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
-        imagePullPolicy: Always
-        env:
+        - name: ipno-backend-app
+          readinessProbe:
+            httpGet:
+              path: /api/status/
+              port: readiness-port
+          ports:
+            - name: readiness-port
+              hostPort: 8000
+              containerPort: 8000
+          image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 800m
+              memory: 1Gi
+          env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -49,22 +61,19 @@ spec:
                 secretKeyRef:
                   name: elasticsearch
                   key: host
-        ports:
-        - containerPort: 8000
-
-      - image: gcr.io/cloudsql-docker/gce-proxy:1.16
-        name: cloudsql-proxy
-        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
-                  "-instances=excellent-zoo-300106:us-east4:ipno-db-staging=tcp:5432",
-                  "-credential_file=/secrets/cloudsql/credentials.json"]
-        volumeMounts:
-          - name: cloudsql-oauth-credentials
-            mountPath: /secrets/cloudsql
-            readOnly: true
-          - name: ssl-certs
-            mountPath: /etc/ssl/certs
-          - name: cloudsql
-            mountPath: /cloudsql
+        - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+          name: cloudsql-proxy
+          command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                    "-instances=excellent-zoo-300106:us-east4:ipno-db-staging=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-oauth-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+            - name: cloudsql
+              mountPath: /cloudsql
       imagePullSecrets:
         - name: regcred
       volumes:
@@ -86,9 +95,9 @@ metadata:
   labels:
     app: ipno-backend
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
-  - port: 80
-    targetPort: 8000
+    - port: 80
+      targetPort: 8000
   selector:
     app: ipno-backend

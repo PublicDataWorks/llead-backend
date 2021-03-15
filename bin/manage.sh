@@ -31,5 +31,5 @@ cd $DIR/..
 POD_NAME="$(kubectl get pods --selector=app=ipno-backend --output=jsonpath={.items[0].metadata.name})"
 shift
 
-echo "kubectl exec -it $POD_NAME -c ipno-backend-app -- cpdb/manage.py $@"
+echo "kubectl exec -it $POD_NAME -c ipno-backend-app -- ipno/manage.py $@"
 kubectl exec -it $POD_NAME -c ipno-backend-app -- ipno/manage.py $@

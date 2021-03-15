@@ -12,3 +12,6 @@
   - Run a specific test  `bin/test.sh file_path::class_name::function_name`
     - ex: `bin/test.sh ipno/documents/tests/test_views.py::DocumentsViewSetTestCase::test_retrieve`
 - `bin/manage.sh` - run any and all of your Django command.
+
+## Docs
+- [Set up ingress tls](docs/setup-ingress-tls.md)
