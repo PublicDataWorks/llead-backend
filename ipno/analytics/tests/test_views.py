@@ -13,7 +13,7 @@ from officers.factories import OfficerFactory
 from analytics.views import RECENT_DAYS
 
 
-class AnalyticsTestCase(AuthAPITestCase):
+class AnalyticsViewSetTestCase(AuthAPITestCase):
     def test_summary(self):
         current_date = datetime.datetime.now(pytz.utc)
 
