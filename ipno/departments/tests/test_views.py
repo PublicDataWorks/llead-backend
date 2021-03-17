@@ -319,7 +319,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             incident_date=date(2019, 11, 6)
         )
         document_4 = DocumentFactory(
-            title='Document title 4',
+            title='Document title keyword 4',
             text_content='Text content keyword 4',
             incident_date=date(2021, 7, 9)
         )
@@ -377,6 +377,101 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['previous'] is None
         assert response.data['next'] is None
         assert results == expected_results
+
+    def test_search_documents_with_limit_and_offset(self):
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+
+        officer_1.departments.add(department)
+        officer_2.departments.add(department)
+
+        document_1 = DocumentFactory(
+            title='Document title 1',
+            text_content='Text content 1',
+            incident_date=date(2020, 5, 4)
+        )
+        document_2 = DocumentFactory(
+            title='Document title keyword2',
+            text_content='Text content keyword 2',
+            incident_date=date(2017, 12, 5)
+        )
+        document_3 = DocumentFactory(
+            title='Document title keyword3',
+            text_content='Text content 3',
+            incident_date=date(2019, 11, 6)
+        )
+        document_4 = DocumentFactory(
+            title='Document title keyword 4',
+            text_content='Text content keyword 4',
+            incident_date=date(2021, 7, 9)
+        )
+
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_1,
+            start_date=date(2018, 2, 3),
+            end_date=date(2021, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department,
+            officer=officer_2,
+            start_date=date(2019, 2, 3),
+            end_date=date(2020, 2, 3),
+        )
+
+        document_1.officers.add(officer_1)
+        document_2.officers.add(officer_1)
+        document_3.officers.add(officer_2)
+        document_3.departments.add(department)
+        document_4.departments.add(department)
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            {
+                'q': 'keyword',
+                'offset': 1,
+                'limit': 1,
+            }
+        )
+
+        expected_results = [
+            {
+                'id': document_3.id,
+                'document_type': document_3.document_type,
+                'title': document_3.title,
+                'url': document_3.url,
+                'incident_date': str(document_3.incident_date),
+                'text_content': document_3.text_content,
+                'text_content_highlight': None,
+            },
+        ]
+
+        expected_previous = f'http://testserver/api/departments/{department.id}/documents/?limit=1&q=keyword'
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 2
+        assert response.data['previous'] == expected_previous
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_search_documents_with_empty_results(self):
+        department = DepartmentFactory()
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            {'q': 'keyword'}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 0
+        assert response.data['previous'] is None
+        assert response.data['next'] is None
+        assert response.data['results'] == []
 
     def test_documents_not_found(self):
         response = self.auth_client.get(
