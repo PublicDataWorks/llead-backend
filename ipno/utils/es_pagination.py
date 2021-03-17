@@ -8,6 +8,4 @@ class ESPagination(LimitOffsetPagination):
         response = search_query.search(self.limit, self.offset)
         self.count = response.hits.total.value
         self.request = request
-        if self.count == 0 or self.offset > self.count:
-            return []
         return response

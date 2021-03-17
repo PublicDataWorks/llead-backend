@@ -30,7 +30,11 @@ class DocumentsSearchQueryTestCase(TestCase):
             text_content='Text content 3',
             incident_date=date(2019, 2, 3)
         )
-        document_4 = DocumentFactory(title='Document 4', text_content='Text content keyword 4')
+        document_4 = DocumentFactory(
+            title='Document 4',
+            text_content='Text content keyword 4',
+            incident_date=date(2021, 5, 6)
+        )
 
         document_1.departments.add(department_1)
         document_3.departments.add(department_2)
