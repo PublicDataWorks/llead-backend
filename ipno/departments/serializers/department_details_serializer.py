@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from utils.data_utils import data_period
+
 
 class WrglFileSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -37,29 +39,10 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return WrglFileSerializer(obj.wrglfile_set.order_by('position'), many=True).data
 
     def get_data_period(self, obj):
-        years = obj.officerhistory_set.filter(
+        officer_history_periods = list(obj.officerhistory_set.filter(
             start_date__isnull=False,
             end_date__isnull=False
-        ).order_by('start_date__year').values_list('start_date__year', 'end_date__year')
+        ).order_by('start_date__year').values_list('start_date__year', 'end_date__year'))
+        years = obj.document_years + obj.complaint_years
 
-        data_period = []
-        current_start_year = None
-        current_end_year = None
-        for start_year, end_year in years:
-            if current_start_year is None:
-                current_start_year = start_year
-                current_end_year = end_year
-            elif start_year <= current_end_year:
-                current_end_year = end_year
-            else:
-                data_period.append([current_start_year, current_end_year])
-                current_start_year = start_year
-                current_end_year = end_year
-
-        if current_start_year:
-            data_period.append([current_start_year, current_end_year])
-
-        return [
-            f'{start_year}{f"-{end_year}" if start_year != end_year else ""}'
-            for start_year, end_year in data_period
-        ]
+        return data_period(officer_history_periods, years)
