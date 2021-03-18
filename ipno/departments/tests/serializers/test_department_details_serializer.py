@@ -110,7 +110,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
                     'default_expanded': wrgl_file_1.default_expanded,
                 }
             ],
-            'data_period': ['2018-2019'],
+            'data_period': ['2018-2021'],
         }
 
     def test_data_period(self):
@@ -147,8 +147,22 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             end_date=None,
         )
 
+        document_1 = DocumentFactory(incident_date=date(2009, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2018, 1, 6))
+        document_1.departments.add(department)
+        document_2.departments.add(department)
+
+        complaint_1 = ComplaintFactory(incident_date=date(2019, 7, 2))
+        complaint_2 = ComplaintFactory(incident_date=date(2021, 5, 4))
+        complaint_1.departments.add(department)
+        complaint_2.departments.add(department)
+
         result = DepartmentDetailsSerializer(department).data
-        assert result['data_period'] == ['2012-2016', '2018-2019', '2020']
+        assert result['data_period'] == [
+            '2009',
+            '2012-2016',
+            '2018-2021',
+        ]
 
     def test_data_period_with_empty_data(self):
         department = DepartmentFactory()

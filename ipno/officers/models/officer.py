@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 
 from utils.models import TimeStampsModel
 
@@ -13,8 +14,13 @@ class Officer(TimeStampsModel):
     birth_year = models.IntegerField(null=True, blank=True)
     birth_month = models.IntegerField(null=True, blank=True)
     birth_day = models.IntegerField(null=True, blank=True)
+    race = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.CharField(max_length=255, null=True, blank=True)
 
     departments = models.ManyToManyField('departments.Department', through='officers.OfficerHistory')
+
+    def __str__(self):
+        return f"{self.name} - {self.id}"
 
     @property
     def name(self):
@@ -27,5 +33,14 @@ class Officer(TimeStampsModel):
             if officer_history.badge_no
         ]
 
-    def __str__(self):
-        return f"{self.name} - {self.id}"
+    @cached_property
+    def document_years(self):
+        return list(self.document_set.filter(
+            incident_date__isnull=False,
+        ).values_list('incident_date__year', flat=True))
+
+    @cached_property
+    def complaint_years(self):
+        return list(self.complaint_set.filter(
+            incident_date__isnull=False,
+        ).values_list('incident_date__year', flat=True))

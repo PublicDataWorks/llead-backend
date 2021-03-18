@@ -23,4 +23,5 @@ class OfficerHistory(TimeStampsModel):
     pay_effective_year = models.IntegerField(null=True, blank=True)
     pay_effective_month = models.IntegerField(null=True, blank=True)
     pay_effective_day = models.IntegerField(null=True, blank=True)
+    annual_salary = models.CharField(max_length=255, null=True, blank=True)
     hourly_salary = models.CharField(max_length=255, null=True, blank=True)
