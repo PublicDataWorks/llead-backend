@@ -161,8 +161,6 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'url': document_1.url,
             'incident_date': str(document_1.incident_date),
             'text_content': document_1.text_content,
-            "pages_count": document_1.pages_count,
-            "preview_image_url": document_1.preview_image_url,
             'departments': [
                 {
                     'id': department.id,
@@ -176,8 +174,6 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'url': document_3.url,
             'incident_date': str(document_3.incident_date),
             'text_content': document_3.text_content,
-            "pages_count": document_3.pages_count,
-            "preview_image_url": document_3.preview_image_url,
             'departments': [
                 {
                     'id': department.id,
@@ -191,8 +187,6 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'url': document_2.url,
             'incident_date': str(document_2.incident_date),
             'text_content': document_2.text_content,
-            "pages_count": document_2.pages_count,
-            "preview_image_url": document_2.preview_image_url,
             'departments': [
                 {
                     'id': department.id,
