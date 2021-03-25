@@ -8,10 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
-from departments.serializers.es_serializers import DocumentsESSerializer
-from shared.serializers import DepartmentSerializer
+from shared.serializers.es_serializers import DocumentsESSerializer
+from shared.serializers import DepartmentSerializer, DocumentWithTextContentSerializer
 from utils.es_pagination import ESPagination
-from departments.serializers import DepartmentDetailsSerializer, DocumentSerializer
+from departments.serializers import DepartmentDetailsSerializer
 from departments.constants import DEPARTMENTS_LIMIT
 from departments.queries import DocumentsSearchQuery
 
@@ -44,9 +44,9 @@ class DepartmentsViewSet(viewsets.ViewSet):
             page = paginator.paginate_es_query(search_query, request)
             data = DocumentsESSerializer(page).data
         else:
-            queryset = department.documents.order_by('-incident_date')
+            queryset = department.documents(prefetch_department=True).order_by('-incident_date')
             paginator = LimitOffsetPagination()
             page = paginator.paginate_queryset(queryset, request, view=self)
-            data = DocumentSerializer(page, many=True).data
+            data = DocumentWithTextContentSerializer(page, many=True).data
 
         return paginator.get_paginated_response(data)

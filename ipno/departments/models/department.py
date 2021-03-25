@@ -17,26 +17,25 @@ class Department(TimeStampsModel):
     def __str__(self):
         return f"{self.name} - {self.id}"
 
-    def relations_for(self, klass):
+    def relations_for(self, queryset):
         return (
-            klass.objects.filter(departments__id=self.id) |
-            klass.objects.filter(
-                incident_date__isnull=False,
-                officers__officerhistory__start_date__isnull=False,
-                officers__officerhistory__end_date__isnull=False,
-                incident_date__gte=F('officers__officerhistory__start_date'),
-                incident_date__lte=F('officers__officerhistory__end_date'),
-                officers__officerhistory__department_id=self.id,
-            )
+                queryset.filter(departments__id=self.id) |
+                queryset.filter(
+                    incident_date__isnull=False,
+                    officers__officerhistory__start_date__isnull=False,
+                    officers__officerhistory__end_date__isnull=False,
+                    incident_date__gte=F('officers__officerhistory__start_date'),
+                    incident_date__lte=F('officers__officerhistory__end_date'),
+                    officers__officerhistory__department_id=self.id,
+                )
         ).distinct()
 
-    @property
-    def documents(self):
-        return self.relations_for(Document)
+    def documents(self, prefetch_department=False):
+        klass = Document.objects.prefetch_departments() if prefetch_department else Document.objects.all()
+        return self.relations_for(klass)
 
-    @property
     def complaints(self):
-        return self.relations_for(Complaint)
+        return self.relations_for(Complaint.objects.all())
 
     @property
     def document_years(self):

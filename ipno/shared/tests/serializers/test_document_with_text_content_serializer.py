@@ -3,15 +3,17 @@ from operator import itemgetter
 from django.db.models import Prefetch
 from django.test import TestCase
 
+from mock import patch
+
 from documents.models import Document
 from officers.models import OfficerHistory
-from shared.serializers import DocumentWithDepartmentsSerializer
+from shared.serializers import DocumentWithTextContentSerializer
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 
 
-class DocumentWithDepartmentsSerializerTestCase(TestCase):
+class DocumentWithTextContentSerializerTestCase(TestCase):
     def test_data(self):
         document = DocumentFactory()
 
@@ -21,7 +23,6 @@ class DocumentWithDepartmentsSerializerTestCase(TestCase):
 
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        department_3 = DepartmentFactory()
 
         OfficerHistoryFactory(
             department=department_1,
@@ -36,7 +37,6 @@ class DocumentWithDepartmentsSerializerTestCase(TestCase):
             officer=officer_3,
         )
         document.officers.add(officer_1, officer_2, officer_3)
-        document.departments.add(department_2, department_3)
 
         documents = Document.objects.all().prefetch_related(
             Prefetch(
@@ -46,10 +46,18 @@ class DocumentWithDepartmentsSerializerTestCase(TestCase):
             )
         )[:1]
 
-        result = DocumentWithDepartmentsSerializer(documents[0]).data
+        result = DocumentWithTextContentSerializer(documents[0]).data
         result['departments'] = sorted(result['departments'], key=itemgetter('id'))
 
         assert result == {
+            'id': document.id,
+            'document_type': document.document_type,
+            'title': document.title,
+            'url': document.url,
+            'preview_image_url': document.preview_image_url,
+            'incident_date': str(document.incident_date),
+            'pages_count': document.pages_count,
+            'text_content': document.text_content,
             'departments': [
                 {
                     'id': department_1.id,
@@ -59,9 +67,13 @@ class DocumentWithDepartmentsSerializerTestCase(TestCase):
                     'id': department_2.id,
                     'name': department_2.name,
                 },
-                {
-                    'id': department_3.id,
-                    'name': department_3.name,
-                },
             ],
         }
+
+    @patch('shared.serializers.document_with_text_content_serializer.TEXT_CONTENT_LIMIT', 15)
+    def test_text_content(self):
+        document = DocumentFactory(text_content='This is a very long text')
+
+        result = DocumentWithTextContentSerializer(document).data
+
+        assert result['text_content'] == 'This is a very '

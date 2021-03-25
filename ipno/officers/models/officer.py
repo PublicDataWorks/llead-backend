@@ -1,7 +1,21 @@
 from django.db import models
 from django.utils.functional import cached_property
+from django.db.models import Prefetch
 
 from utils.models import TimeStampsModel
+from .officer_history import OfficerHistory
+
+
+class OfficerManager(models.Manager):
+    def prefetch_officer_histories(self):
+        return self.get_queryset().prefetch_related(
+            Prefetch(
+                'officerhistory_set',
+                queryset=OfficerHistory.objects.order_by(
+                    '-start_date'
+                ).prefetch_related('department')
+            ),
+        )
 
 
 class Officer(TimeStampsModel):
@@ -18,6 +32,8 @@ class Officer(TimeStampsModel):
     gender = models.CharField(max_length=255, null=True, blank=True)
 
     departments = models.ManyToManyField('departments.Department', through='officers.OfficerHistory')
+
+    objects = OfficerManager()
 
     def __str__(self):
         return f"{self.name} - {self.id}"
