@@ -1,3 +1,4 @@
+from operator import itemgetter
 from datetime import date
 
 from django.test import TestCase
@@ -5,8 +6,10 @@ from django.test import TestCase
 from mock import Mock
 from elasticsearch_dsl.utils import AttrDict
 
-from departments.serializers.es_serializers import DocumentsESSerializer
+from shared.serializers.es_serializers import DocumentsESSerializer
 from documents.factories import DocumentFactory
+from officers.factories import OfficerFactory, OfficerHistoryFactory
+from departments.factories import DepartmentFactory
 
 
 class DocumentsESSerializerTestCase(TestCase):
@@ -15,6 +18,33 @@ class DocumentsESSerializerTestCase(TestCase):
         document_2 = DocumentFactory()
         document_3 = DocumentFactory()
         DocumentFactory()
+
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+        officer_3 = OfficerFactory()
+
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
+
+        OfficerHistoryFactory(
+            department=department_1,
+            officer=officer_1,
+            start_date=date(2018, 2, 3),
+            end_date=date(2021, 2, 3),
+        )
+        OfficerHistoryFactory(
+            department=department_2,
+            officer=officer_2,
+            start_date=date(2019, 4, 5),
+            end_date=date(2019, 12, 20),
+        )
+        OfficerHistoryFactory(
+            department=department_2,
+            officer=officer_3,
+            start_date=date(2019, 12, 21),
+            end_date=date(2021, 12, 21),
+        )
+        document_1.officers.add(officer_1, officer_2, officer_3)
 
         docs = [
             Mock(id=document_2.id, meta=None),
@@ -33,8 +63,11 @@ class DocumentsESSerializerTestCase(TestCase):
                 'title': document_2.title,
                 'url': document_2.url,
                 'incident_date': str(document_2.incident_date),
+                'preview_image_url': document_2.preview_image_url,
+                'pages_count': document_2.pages_count,
                 'text_content': document_2.text_content,
                 'text_content_highlight': None,
+                'departments': [],
             },
             {
                 'id': document_1.id,
@@ -42,8 +75,20 @@ class DocumentsESSerializerTestCase(TestCase):
                 'title': document_1.title,
                 'url': document_1.url,
                 'incident_date': str(document_1.incident_date),
+                'preview_image_url': document_1.preview_image_url,
+                'pages_count': document_1.pages_count,
                 'text_content': document_1.text_content,
                 'text_content_highlight': '<em>text</em> content',
+                'departments': [
+                    {
+                        'id': department_1.id,
+                        'name': department_1.name,
+                    },
+                    {
+                        'id': department_2.id,
+                        'name': department_2.name,
+                    },
+                ],
             },
             {
                 'id': document_3.id,
@@ -51,10 +96,14 @@ class DocumentsESSerializerTestCase(TestCase):
                 'title': document_3.title,
                 'url': document_3.url,
                 'incident_date': str(document_3.incident_date),
+                'preview_image_url': document_3.preview_image_url,
+                'pages_count': document_3.pages_count,
                 'text_content': document_3.text_content,
                 'text_content_highlight': None,
+                'departments': [],
             },
         ]
 
         result = DocumentsESSerializer(docs).data
+        result[1]['departments'] = sorted(result[1]['departments'], key=itemgetter('id'))
         assert result == expected_result

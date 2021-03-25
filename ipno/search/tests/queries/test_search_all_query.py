@@ -81,6 +81,8 @@ class OfficersSearchQueryTestCase(TestCase):
                     'title': document_1.title,
                     'url': document_1.url,
                     'incident_date': str(document_1.incident_date),
+                    'preview_image_url': document_1.preview_image_url,
+                    'pages_count': document_1.pages_count,
                     'text_content': document_1.text_content,
                     'text_content_highlight': None,
                     'departments': [
@@ -96,6 +98,8 @@ class OfficersSearchQueryTestCase(TestCase):
                     'title': document_2.title,
                     'url': document_2.url,
                     'incident_date': str(document_2.incident_date),
+                    'preview_image_url': document_2.preview_image_url,
+                    'pages_count': document_2.pages_count,
                     'text_content': document_2.text_content,
                     'text_content_highlight': 'Text content <em>keywo</em>',
                     'departments': [],

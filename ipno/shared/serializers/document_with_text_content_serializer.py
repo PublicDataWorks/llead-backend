@@ -1,14 +1,10 @@
 from rest_framework import serializers
 
+from shared.serializers.document_serializer import DocumentSerializer
 from shared.constants import TEXT_CONTENT_LIMIT
 
 
-class DocumentSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    document_type = serializers.CharField()
-    title = serializers.CharField()
-    url = serializers.CharField()
-    incident_date = serializers.DateField()
+class DocumentWithTextContentSerializer(DocumentSerializer):
     text_content = serializers.SerializerMethodField()
 
     def get_text_content(self, obj):

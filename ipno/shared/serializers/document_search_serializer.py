@@ -1,14 +1,10 @@
 from rest_framework import serializers
 
-from shared.constants import TEXT_CONTENT_LIMIT
+from shared.serializers.document_with_text_content_serializer import DocumentWithTextContentSerializer
 
 
-class BaseDocumentSearchSerializer(serializers.Serializer):
-    text_content = serializers.SerializerMethodField()
+class DocumentSearchSerializer(DocumentWithTextContentSerializer):
     text_content_highlight = serializers.SerializerMethodField()
-
-    def get_text_content(self, obj):
-        return (obj.text_content or '')[:TEXT_CONTENT_LIMIT]
 
     def get_text_content_highlight(self, obj):
         try:

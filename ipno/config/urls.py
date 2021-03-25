@@ -32,6 +32,7 @@ from officers.views import OfficersViewSet
 from search.views import SearchViewSet
 from authentication.views import TokenRevokeView
 from status.views import StatusView
+from historical_data.views import HistoricalDataViewSet
 
 api_router = routers.SimpleRouter()
 
@@ -41,6 +42,7 @@ api_router.register(r'app-config', AppConfigViewSet, basename='app-config')
 api_router.register(r'analytics', AnalyticsViewSet, basename='analytics')
 api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')
+api_router.register(r'historical-data', HistoricalDataViewSet, basename='historical-data')
 
 urlpatterns = [
     path('', RedirectView.as_view(url='admin/')),

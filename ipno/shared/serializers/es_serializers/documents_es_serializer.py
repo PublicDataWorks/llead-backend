@@ -1,10 +1,10 @@
-from shared.serializers.es_serializers import BaseESSerializer
-from search.serializers import DocumentSerializer
+from shared.serializers.es_serializers.base_es_serializer import BaseESSerializer
+from shared.serializers import DocumentSearchSerializer
 from documents.models import Document
 
 
 class DocumentsESSerializer(BaseESSerializer):
-    serializer = DocumentSerializer
+    serializer = DocumentSearchSerializer
     model_klass = Document
 
     def get_queryset(self, ids):

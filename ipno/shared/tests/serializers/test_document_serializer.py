@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from documents.models import Document
 from officers.models import OfficerHistory
-from documents.serializers import DocumentSerializer
+from shared.serializers import DocumentSerializer
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory

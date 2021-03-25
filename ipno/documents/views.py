@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from documents.models import Document
-from documents.serializers import DocumentSerializer
+from shared.serializers import DocumentSerializer
 from documents.constants import DOCUMENTS_LIMIT
 
 
