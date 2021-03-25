@@ -1,16 +1,18 @@
 from django.test import TestCase
 
-from mock import Mock, patch
+from mock import Mock
 from elasticsearch_dsl.utils import AttrDict
 
-from departments.serializers import DocumentSearchSerializer
+from shared.serializers import DocumentSearchSerializer
 from documents.factories import DocumentFactory
+from departments.factories import DepartmentFactory
 
 
 class DocumentSearchSerializerTestCase(TestCase):
-    @patch('shared.serializers.base_document_search_serializer.TEXT_CONTENT_LIMIT', 15)
     def test_data(self):
-        document = DocumentFactory(text_content='This is a very long text')
+        document = DocumentFactory(text_content='Text content')
+        department = DepartmentFactory()
+        document.departments.add(department)
 
         es_doc = Mock(
             id=document.id,
@@ -27,7 +29,15 @@ class DocumentSearchSerializerTestCase(TestCase):
             'document_type': document.document_type,
             'title': document.title,
             'url': document.url,
+            'preview_image_url': document.preview_image_url,
             'incident_date': str(document.incident_date),
-            'text_content': 'This is a very ',
+            'pages_count': document.pages_count,
+            'departments': [
+                {
+                    'id': department.id,
+                    'name': department.name,
+                },
+            ],
+            'text_content': document.text_content,
             'text_content_highlight': '<em>text</em> content',
         }

@@ -8,6 +8,10 @@ from complaints.factories import ComplaintFactory
 
 
 class DepartmentTestCase(TestCase):
+    def test_str(self):
+        department = DepartmentFactory()
+        assert str(department) == f"{department.name} - {department.id}"
+
     def test_documents(self):
         department = DepartmentFactory()
 
@@ -58,7 +62,7 @@ class DepartmentTestCase(TestCase):
             document_6,
         }
 
-        assert set(department.documents) == expected_results
+        assert set(department.documents()) == expected_results
 
     def test_complaints(self):
         department = DepartmentFactory()
@@ -113,7 +117,7 @@ class DepartmentTestCase(TestCase):
             complaint_8,
         }
 
-        assert set(department.complaints) == expected_results
+        assert set(department.complaints()) == expected_results
 
     def test_document_years(self):
         department = DepartmentFactory()
