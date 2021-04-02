@@ -36,11 +36,11 @@ class Officer(TimeStampsModel):
     objects = OfficerManager()
 
     def __str__(self):
-        return f"{self.name} - {self.id}"
+        return f'{self.name or ""} - {self.id}'
 
     @property
     def name(self):
-        return f'{self.first_name} {self.last_name}'
+        return ' '.join([item for item in [self.first_name, self.last_name] if item])
 
     @property
     def badges(self):
