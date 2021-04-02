@@ -12,6 +12,18 @@ class OfficerTestCase(TestCase):
         officer = OfficerFactory(first_name='David', last_name='Jonesworth')
         assert officer.name == 'David Jonesworth'
 
+    def test_name_with_empty_first_name(selfs):
+        officer = OfficerFactory(first_name=None, last_name='Jonesworth')
+        assert officer.name == 'Jonesworth'
+
+    def test_name_with_empty_last_name(selfs):
+        officer = OfficerFactory(first_name='David', last_name=None)
+        assert officer.name == 'David'
+
+    def test_empty_name(selfs):
+        officer = OfficerFactory(first_name=None, last_name=None)
+        assert officer.name == ''
+
     def test_str(self):
         officer = OfficerFactory()
         assert str(officer) == f"{officer.name} - {officer.id}"
