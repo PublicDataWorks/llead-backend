@@ -90,41 +90,13 @@ class DocumentsSearchQueryTestCase(TestCase):
             text_content='Text content 5'
         )
 
-        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
-        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
-        officer_3 = OfficerFactory(first_name='Kenneth', last_name='Anderson')
-
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
-        OfficerHistoryFactory(
-            officer=officer_1,
-            department=department_1,
-            badge_no='12435',
-            start_date=date(2019, 7, 5),
-            end_date=date(2020, 7, 5),
-        )
-        OfficerHistoryFactory(
-            officer=officer_2,
-            department=department_1,
-            badge_no='45812',
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            officer=officer_3,
-            department=department_2,
-            badge_no='45812',
-            start_date=date(2017, 2, 6),
-            end_date=date(2018, 2, 6),
-        )
-
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_2)
-        document_3.officers.add(officer_2)
-        document_4.officers.add(officer_3)
-
-        document_5.departments.add(department_1)
+        for document in [document_1, document_2, document_5]:
+            document.departments.add(department_1)
+        for document in [document_3, document_4]:
+            document.departments.add(department_2)
 
         rebuild_search_index()
 

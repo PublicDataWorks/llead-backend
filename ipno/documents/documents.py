@@ -21,8 +21,6 @@ class DocumentESDoc(ESDoc):
         return self.get_queryset().prefetch_related(
             'officers',
             'departments',
-            'officers__officerhistory_set',
-            'officers__departments',
         )
 
     id = fields.IntegerField()
@@ -39,19 +37,8 @@ class DocumentESDoc(ESDoc):
     def prepare_officer_badges(self, instance):
         return [officer.badges for officer in instance.officers.all()]
 
-    def _departments(self, instance):
-        departments = list(instance.departments.all())
-        if instance.incident_date:
-            for officer in instance.officers.all():
-                for officer_history in officer.officerhistory_set.all():
-                    if officer_history.start_date and \
-                            officer_history.end_date and \
-                            officer_history.start_date <= instance.incident_date <= officer_history.end_date:
-                        departments.append(officer_history.department)
-        return departments
-
     def prepare_department_names(self, instance):
-        return [department.name for department in self._departments(instance)]
+        return [department.name for department in instance.departments.all()]
 
     def prepare_department_ids(self, instance):
-        return [department.id for department in self._departments(instance)]
+        return [department.id for department in instance.departments.all()]

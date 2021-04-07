@@ -43,39 +43,15 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             end_date=date(2018, 2, 1),
         )
 
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
-        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        document_4 = DocumentFactory(incident_date=date(2018, 8, 9))
-        document_5 = DocumentFactory(incident_date=date(2018, 8, 9))
-        document_6 = DocumentFactory(incident_date=date(2018, 8, 10))
-        document_7 = DocumentFactory(incident_date=None)
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_1)
-        document_4.officers.add(officer_3)
-        document_5.officers.add(officer_3)
-        document_7.officers.add(officer_2, officer_3)
-        document_1.departments.add(department)
-        document_6.departments.add(department)
+        documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))
+        DocumentFactory(incident_date=date(2018, 8, 10))
+        for document in documents:
+            document.departments.add(department)
 
-        complaint_1 = ComplaintFactory(incident_date=date(2020, 5, 4))
-        complaint_2 = ComplaintFactory(incident_date=date(2017, 12, 5))
-        complaint_3 = ComplaintFactory(incident_date=date(2019, 11, 6))
-        complaint_4 = ComplaintFactory(incident_date=date(2018, 8, 9))
-        complaint_5 = ComplaintFactory(incident_date=date(2018, 8, 9))
-        complaint_6 = ComplaintFactory(incident_date=None)
-        complaint_7 = ComplaintFactory(incident_date=None)
-        complaint_8 = ComplaintFactory(incident_date=None)
-        complaint_1.officers.add(officer_1)
-        complaint_2.officers.add(officer_1)
-        complaint_3.officers.add(officer_1)
-        complaint_4.officers.add(officer_3)
-        complaint_6.officers.add(officer_2, officer_3)
-        complaint_7.departments.add(department)
-        complaint_8.departments.add(department)
-        complaint_1.departments.add(department)
-        complaint_5.departments.add(department)
+        complaints = ComplaintFactory.create_batch(2, incident_date=date(2018, 3, 6))
+        ComplaintFactory(incident_date=date(2018, 3, 6))
+        for complaint in complaints:
+            complaint.departments.add(department)
 
         wrgl_file_1 = WrglFileFactory(department=department, position=2)
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
@@ -88,7 +64,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             'parish': department.parish,
             'location_map_url': department.location_map_url,
             'officers_count': 3,
-            'complaints_count': 6,
+            'complaints_count': 2,
             'documents_count': 5,
             'wrgl_files': [
                 {
