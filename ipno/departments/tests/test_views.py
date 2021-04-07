@@ -88,39 +88,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             end_date=date(2018, 2, 1),
         )
 
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
-        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        document_4 = DocumentFactory(incident_date=date(2018, 8, 9))
-        document_5 = DocumentFactory(incident_date=date(2018, 8, 9))
-        document_6 = DocumentFactory(incident_date=date(2018, 8, 10))
-        document_7 = DocumentFactory(incident_date=None)
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_1)
-        document_4.officers.add(officer_3)
-        document_5.officers.add(officer_3)
-        document_7.officers.add(officer_2, officer_3)
-        document_1.departments.add(department)
-        document_6.departments.add(department)
+        documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))
+        DocumentFactory(incident_date=date(2018, 8, 10))
+        for document in documents:
+            document.departments.add(department)
 
-        complaint_1 = ComplaintFactory(incident_date=date(2020, 5, 4))
-        complaint_2 = ComplaintFactory(incident_date=date(2017, 12, 5))
-        complaint_3 = ComplaintFactory(incident_date=date(2019, 11, 6))
-        complaint_4 = ComplaintFactory(incident_date=date(2018, 8, 9))
-        complaint_5 = ComplaintFactory(incident_date=date(2018, 8, 9))
-        complaint_6 = ComplaintFactory(incident_date=None)
-        complaint_7 = ComplaintFactory(incident_date=None)
-        complaint_8 = ComplaintFactory(incident_date=None)
-        complaint_1.officers.add(officer_1)
-        complaint_2.officers.add(officer_1)
-        complaint_3.officers.add(officer_1)
-        complaint_4.officers.add(officer_3)
-        complaint_6.officers.add(officer_2, officer_3)
-        complaint_7.departments.add(department)
-        complaint_8.departments.add(department)
-        complaint_1.departments.add(department)
-        complaint_5.departments.add(department)
+        complaints = ComplaintFactory.create_batch(2, incident_date=date(2018, 3, 6))
+        ComplaintFactory(incident_date=date(2018, 3, 6))
+        for complaint in complaints:
+            complaint.departments.add(department)
 
         wrgl_file_1 = WrglFileFactory(department=department, position=2)
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
@@ -132,7 +108,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'parish': department.parish,
             'location_map_url': department.location_map_url,
             'officers_count': 3,
-            'complaints_count': 6,
+            'complaints_count': 2,
             'documents_count': 5,
             'wrgl_files': [
                 {
@@ -179,35 +155,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     def test_documents_success(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-
-        officer_1.departments.add(department)
-        officer_2.departments.add(department)
-
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
         document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        document_4 = DocumentFactory(incident_date=date(2021, 7, 9))
+        DocumentFactory(incident_date=date(2021, 7, 9))
 
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_2,
-            start_date=date(2019, 2, 3),
-            end_date=date(2020, 2, 3),
-        )
-
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_2)
-        document_3.departments.add(department)
-        document_4.departments.add(department)
+        for document in [document_1, document_2, document_3]:
+            document.departments.add(department)
 
         response = self.auth_client.get(
             reverse('api:departments-documents', kwargs={'pk': department.id}),
@@ -217,21 +171,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
 
         expected_results = [{
-            'id': document_4.id,
-            'document_type': document_4.document_type,
-            'title': document_4.title,
-            'url': document_4.url,
-            'incident_date': str(document_4.incident_date),
-            'text_content': document_4.text_content,
-            'preview_image_url': document_4.preview_image_url,
-            'pages_count': document_4.pages_count,
-            'departments': [
-                {
-                    'id': department.id,
-                    'name': department.name,
-                },
-            ],
-        }, {
             'id': document_1.id,
             'document_type': document_1.document_type,
             'title': document_1.title,
@@ -246,56 +185,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'name': department.name,
                 },
             ],
-        }]
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] is None
-        assert response.data['next'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2&offset=2'
-        assert response.data['results'] == expected_results
-
-    def test_documents_with_limit_and_offset(self):
-        department = DepartmentFactory()
-
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-
-        officer_1.departments.add(department)
-        officer_2.departments.add(department)
-
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
-        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        document_4 = DocumentFactory(incident_date=date(2021, 7, 9))
-
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_2,
-            start_date=date(2019, 2, 3),
-            end_date=date(2020, 2, 3),
-        )
-
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_2)
-        document_3.departments.add(department)
-        document_4.departments.add(department)
-
-        response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
-            {
-                'limit': 2,
-                'offset': 2,
-            }
-        )
-
-        expected_results = [{
+        }, {
             'id': document_3.id,
             'document_type': document_3.document_type,
             'title': document_3.title,
@@ -314,6 +204,48 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
+        assert response.data['previous'] is None
+        assert response.data['next'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2&offset=2'
+        assert response.data['results'] == expected_results
+
+    def test_documents_with_limit_and_offset(self):
+        department = DepartmentFactory()
+
+        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
+        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
+        DocumentFactory(incident_date=date(2021, 7, 9))
+
+        for document in [document_1, document_2, document_3]:
+            document.departments.add(department)
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            {
+                'limit': 2,
+                'offset': 2,
+            }
+        )
+
+        expected_results = [{
+            'id': document_2.id,
+            'document_type': document_2.document_type,
+            'title': document_2.title,
+            'url': document_2.url,
+            'incident_date': str(document_2.incident_date),
+            'text_content': document_2.text_content,
+            'preview_image_url': document_2.preview_image_url,
+            'pages_count': document_2.pages_count,
+            'departments': [
+                {
+                    'id': department.id,
+                    'name': department.name,
+                },
+            ],
+        }]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
         assert response.data['previous'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2'
         assert response.data['next'] is None
         assert response.data['results'] == expected_results
@@ -321,51 +253,30 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     def test_search_documents(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-
-        officer_1.departments.add(department)
-        officer_2.departments.add(department)
-
         document_1 = DocumentFactory(
             title='Document title 1',
             text_content='Text content 1',
             incident_date=date(2020, 5, 4)
         )
         document_2 = DocumentFactory(
-            title='Document title keyword2',
-            text_content='Text content keyword 2',
-            incident_date=date(2017, 12, 5)
-        )
-        document_3 = DocumentFactory(
             title='Document title keyword3',
             text_content='Text content 3',
             incident_date=date(2019, 11, 6)
         )
-        document_4 = DocumentFactory(
+        document_3 = DocumentFactory(
             title='Document title keyword 4',
             text_content='Text content keyword 4',
             incident_date=date(2021, 7, 9)
         )
 
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_2,
-            start_date=date(2019, 2, 3),
-            end_date=date(2020, 2, 3),
+        DocumentFactory(
+            title='Document title keyword2',
+            text_content='Text content keyword 2',
+            incident_date=date(2017, 12, 5)
         )
 
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_2)
-        document_3.departments.add(department)
-        document_4.departments.add(department)
+        for document in [document_1, document_2, document_3]:
+            document.departments.add(department)
 
         rebuild_search_index()
 
@@ -376,6 +287,22 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_results = [
             {
+                'id': document_2.id,
+                'document_type': document_2.document_type,
+                'title': document_2.title,
+                'url': document_2.url,
+                'incident_date': str(document_2.incident_date),
+                'preview_image_url': document_2.preview_image_url,
+                'pages_count': document_2.pages_count,
+                'departments': [
+                    {
+                        'id': department.id,
+                        'name': department.name,
+                    },
+                ],
+                'text_content': document_2.text_content,
+                'text_content_highlight': None,
+            }, {
                 'id': document_3.id,
                 'document_type': document_3.document_type,
                 'title': document_3.title,
@@ -390,22 +317,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     },
                 ],
                 'text_content': document_3.text_content,
-                'text_content_highlight': None,
-            }, {
-                'id': document_4.id,
-                'document_type': document_4.document_type,
-                'title': document_4.title,
-                'url': document_4.url,
-                'incident_date': str(document_4.incident_date),
-                'preview_image_url': document_4.preview_image_url,
-                'pages_count': document_4.pages_count,
-                'departments': [
-                    {
-                        'id': department.id,
-                        'name': department.name,
-                    },
-                ],
-                'text_content': document_4.text_content,
                 'text_content_highlight': 'Text content <em>keyword</em> 4',
             }
         ]
@@ -421,51 +332,30 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     def test_search_documents_with_limit_and_offset(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-
-        officer_1.departments.add(department)
-        officer_2.departments.add(department)
-
         document_1 = DocumentFactory(
             title='Document title 1',
             text_content='Text content 1',
             incident_date=date(2020, 5, 4)
         )
         document_2 = DocumentFactory(
-            title='Document title keyword2',
-            text_content='Text content keyword 2',
-            incident_date=date(2017, 12, 5)
-        )
-        document_3 = DocumentFactory(
             title='Document title keyword3',
             text_content='Text content 3',
             incident_date=date(2019, 11, 6)
         )
-        document_4 = DocumentFactory(
+        document_3 = DocumentFactory(
             title='Document title keyword 4',
             text_content='Text content keyword 4',
             incident_date=date(2021, 7, 9)
         )
 
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer_2,
-            start_date=date(2019, 2, 3),
-            end_date=date(2020, 2, 3),
+        DocumentFactory(
+            title='Document title keyword2',
+            text_content='Text content keyword 2',
+            incident_date=date(2017, 12, 5)
         )
 
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_1)
-        document_3.officers.add(officer_2)
-        document_3.departments.add(department)
-        document_4.departments.add(department)
+        for document in [document_1, document_2, document_3]:
+            document.departments.add(department)
 
         rebuild_search_index()
 
@@ -480,20 +370,20 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_results = [
             {
-                'id': document_3.id,
-                'document_type': document_3.document_type,
-                'title': document_3.title,
-                'url': document_3.url,
-                'incident_date': str(document_3.incident_date),
-                'preview_image_url': document_3.preview_image_url,
-                'pages_count': document_3.pages_count,
+                'id': document_2.id,
+                'document_type': document_2.document_type,
+                'title': document_2.title,
+                'url': document_2.url,
+                'incident_date': str(document_2.incident_date),
+                'preview_image_url': document_2.preview_image_url,
+                'pages_count': document_2.pages_count,
                 'departments': [
                     {
                         'id': department.id,
                         'name': department.name,
                     },
                 ],
-                'text_content': document_3.text_content,
+                'text_content': document_2.text_content,
                 'text_content_highlight': None,
             },
         ]

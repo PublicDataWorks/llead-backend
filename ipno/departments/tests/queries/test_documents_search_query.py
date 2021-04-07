@@ -13,8 +13,6 @@ class DocumentsSearchQueryTestCase(TestCase):
     def test_query(self):
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
             title='Document keyword1',
@@ -26,7 +24,7 @@ class DocumentsSearchQueryTestCase(TestCase):
             incident_date=date(2019, 2, 3)
         )
         document_3 = DocumentFactory(
-            title='Document keyword3',
+            title='Document 3',
             text_content='Text content 3',
             incident_date=date(2019, 2, 3)
         )
@@ -36,28 +34,9 @@ class DocumentsSearchQueryTestCase(TestCase):
             incident_date=date(2021, 5, 6)
         )
 
-        document_1.departments.add(department_1)
-        document_3.departments.add(department_2)
-        document_2.officers.add(officer_1)
-        document_4.officers.add(officer_1, officer_2)
-        OfficerHistoryFactory(
-            department=department_1,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department_1,
-            officer=officer_2,
-            start_date=date(2017, 2, 3),
-            end_date=date(2018, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department_2,
-            officer=officer_2,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
+        for document in [document_1, document_2, document_3]:
+            document.departments.add(department_1)
+        document_4.departments.add(department_2)
 
         rebuild_search_index()
 

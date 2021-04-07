@@ -142,22 +142,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
     def test_documents_success(self):
         department = DepartmentFactory()
-        officer = OfficerFactory(department=department)
+        officer = OfficerFactory()
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
         document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
 
-        OfficerHistoryFactory(
-            department=department,
-            officer=officer,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3)
-        )
+        for document in [document_1, document_2, document_3]:
+            document.officers.add(officer)
 
-        document_1.officers.add(officer)
-        document_2.officers.add(officer)
-        document_3.officers.add(officer)
+        document_1.departments.add(department)
 
         expected_results = [{
             'id': document_1.id,
@@ -183,12 +177,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'preview_image_url': document_3.preview_image_url,
             'pages_count': document_3.pages_count,
             'text_content': document_3.text_content,
-            'departments': [
-                {
-                    'id': department.id,
-                    'name': department.name
-                }
-            ]
+            'departments': []
         }, {
             'id': document_2.id,
             'document_type': document_2.document_type,
@@ -198,12 +187,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'preview_image_url': document_2.preview_image_url,
             'pages_count': document_2.pages_count,
             'text_content': document_2.text_content,
-            'departments': [
-                {
-                    'id': department.id,
-                    'name': department.name
-                }
-            ]
+            'departments': []
         }]
 
         response = self.auth_client.get(
