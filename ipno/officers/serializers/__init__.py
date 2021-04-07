@@ -3,6 +3,7 @@ from .officer_timeline_serializers import (
     ComplaintTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
+    DocumentTimelineSerializer
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     'ComplaintTimelineSerializer',
     'JoinedTimelineSerializer',
     'LeftTimelineSerializer',
+    'DocumentTimelineSerializer'
 ]
