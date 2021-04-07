@@ -11,12 +11,4 @@ class DocumentSerializer(serializers.Serializer):
     incident_date = serializers.DateField()
     preview_image_url = serializers.CharField()
     pages_count = serializers.IntegerField()
-    departments = serializers.SerializerMethodField()
-
-    def get_departments(self, obj):
-        departments = set(obj.departments.all())
-        for officer in obj.officers.all():
-            for officer_history in officer.prefetched_officer_histories:
-                departments.add(officer_history.department)
-
-        return SimpleDepartmentSerializer(departments, many=True).data
+    departments = SimpleDepartmentSerializer(many=True)

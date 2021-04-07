@@ -5,48 +5,20 @@ from django.urls import reverse
 from rest_framework import status
 
 from documents.factories import DocumentFactory
-from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 
 
 class DocumentsViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-        officer_3 = OfficerFactory()
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        department_3 = DepartmentFactory()
-        OfficerHistoryFactory(
-            department=department_1,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3)
-        )
-        OfficerHistoryFactory(
-            department=department_1,
-            officer=officer_2,
-            start_date=date(2018, 4, 5),
-            end_date=date(2019, 4, 5),
-        )
-        OfficerHistoryFactory(
-            department=department_2,
-            officer=officer_2,
-            start_date=date(2019, 4, 5),
-            end_date=date(2019, 12, 20),
-        )
-        OfficerHistoryFactory(
-            department=department_3,
-            officer=officer_2,
-            start_date=date(2019, 12, 21),
-        )
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2019, 12, 5))
         document_3 = DocumentFactory()
-        document_1.officers.add(officer_1)
-        document_2.officers.add(officer_2, officer_3)
+        document_1.departments.add(department_1)
+        document_2.departments.add(department_2)
 
         response = self.auth_client.get(reverse('api:documents-list'))
         assert response.status_code == status.HTTP_200_OK

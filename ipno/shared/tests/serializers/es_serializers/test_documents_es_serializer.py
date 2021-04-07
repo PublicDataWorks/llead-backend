@@ -8,7 +8,6 @@ from elasticsearch_dsl.utils import AttrDict
 
 from shared.serializers.es_serializers import DocumentsESSerializer
 from documents.factories import DocumentFactory
-from officers.factories import OfficerFactory, OfficerHistoryFactory
 from departments.factories import DepartmentFactory
 
 
@@ -19,32 +18,10 @@ class DocumentsESSerializerTestCase(TestCase):
         document_3 = DocumentFactory()
         DocumentFactory()
 
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
-        officer_3 = OfficerFactory()
-
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
 
-        OfficerHistoryFactory(
-            department=department_1,
-            officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
-        )
-        OfficerHistoryFactory(
-            department=department_2,
-            officer=officer_2,
-            start_date=date(2019, 4, 5),
-            end_date=date(2019, 12, 20),
-        )
-        OfficerHistoryFactory(
-            department=department_2,
-            officer=officer_3,
-            start_date=date(2019, 12, 21),
-            end_date=date(2021, 12, 21),
-        )
-        document_1.officers.add(officer_1, officer_2, officer_3)
+        document_1.departments.add(department_1, department_2)
 
         docs = [
             Mock(id=document_2.id, meta=None),

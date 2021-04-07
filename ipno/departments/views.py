@@ -44,7 +44,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
             page = paginator.paginate_es_query(search_query, request)
             data = DocumentsESSerializer(page).data
         else:
-            queryset = department.documents(prefetch_department=True).order_by('-incident_date')
+            queryset = department.document_set.prefetch_departments().order_by('-incident_date')
             paginator = LimitOffsetPagination()
             page = paginator.paginate_queryset(queryset, request, view=self)
             data = DocumentWithTextContentSerializer(page, many=True).data

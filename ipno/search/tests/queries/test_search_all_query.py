@@ -36,7 +36,7 @@ class OfficersSearchQueryTestCase(TestCase):
             incident_date=date(2020, 5, 6)
         )
         document_2 = DocumentFactory(title='Document 2', text_content='Text content keywo')
-        document_1.officers.add(officer_1)
+        document_1.departments.add(department_1)
 
         rebuild_search_index()
 
