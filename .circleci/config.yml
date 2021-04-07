@@ -8,6 +8,9 @@ defaults:
     GOOGLE_PROJECT_ID: "excellent-zoo-300106"
     GOOGLE_COMPUTE_ZONE: "us-east4-a"
     GOOGLE_CLUSTER_NAME: "ipno-staging"
+  - &set-gcloud-service-key
+    command: |
+      echo 'export GCLOUD_SERVICE_KEY=$(echo $GCLOUD_SERVICE_KEY_BASE64 | base64 -d)' >> $BASH_ENV
 
 version: 2.1
 jobs:
@@ -51,13 +54,14 @@ jobs:
     environment: *gcloud-env
     steps:
       - checkout
+      - run: *set-gcloud-service-key
       - restore_cache:
           keys:
             - backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/base.txt" }}-{{ .Branch }}
           paths:
             - /home/circleci/caches/app.tar
       - run: echo "backend-$CIRCLE_BUILD_NUM" > buildnum
-      - run: echo -e "$GCLOUD_CREDENTIALS_JSON" | base64 --decode > gcloud-credentials.json
+      - run: echo -e "$GCLOUD_SERVICE_KEY_BASE64" | base64 --d > gcloud-credentials.json
       - persist_to_workspace:
           root: .
           paths:
@@ -85,6 +89,7 @@ jobs:
     machine: true
     environment: *gcloud-env
     steps:
+      - run: *set-gcloud-service-key
       - attach_workspace:
           at: /tmp/workspace
       - gcp-gke/install
@@ -102,6 +107,7 @@ jobs:
     machine: true
     environment: *gcloud-env
     steps:
+      - run: *set-gcloud-service-key
       - attach_workspace:
           at: /tmp/workspace
       - gcp-gke/install
@@ -120,6 +126,7 @@ jobs:
     environment: *gcloud-env
     steps:
       - checkout
+      - run: *set-gcloud-service-key
       - attach_workspace:
           at: /tmp/workspace
       - gcp-gke/install

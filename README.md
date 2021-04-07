@@ -15,3 +15,4 @@
 
 ## Docs
 - [Set up ingress tls](docs/setup-ingress-tls.md)
+- [Circleci](docs/circleci.md)
