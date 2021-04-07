@@ -6,14 +6,18 @@ from officers.serializers import (
     ComplaintTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
+    DocumentTimelineSerializer,
 )
 from officers.constants import (
-    JOINED_TIMELINE_TYPE,
-    COMPLAINT_TIMELINE_TYPE,
-    LEFT_TIMELINE_TYPE,
+    JOINED_TIMELINE_KIND,
+    COMPLAINT_TIMELINE_KIND,
+    LEFT_TIMELINE_KIND,
+    DOCUMENT_TIMELINE_KIND,
 )
 from officers.factories import OfficerHistoryFactory
 from complaints.factories import ComplaintFactory
+from documents.factories import DocumentFactory
+from departments.factories import DepartmentFactory
 
 
 class JoinedTimelineSerializerTestCase(TestCase):
@@ -26,8 +30,8 @@ class JoinedTimelineSerializerTestCase(TestCase):
         result = JoinedTimelineSerializer(officer_history).data
 
         assert result == {
-            'kind': JOINED_TIMELINE_TYPE,
-            'date': officer_history.start_date,
+            'kind': JOINED_TIMELINE_KIND,
+            'date': str(officer_history.start_date),
             'year': officer_history.hire_year,
         }
 
@@ -42,8 +46,8 @@ class LeftTimelineSerializerTestCase(TestCase):
         result = LeftTimelineSerializer(officer_history).data
 
         assert result == {
-            'kind': LEFT_TIMELINE_TYPE,
-            'date': officer_history.end_date,
+            'kind': LEFT_TIMELINE_KIND,
+            'date': str(officer_history.end_date),
             'year': officer_history.term_year,
         }
 
@@ -55,12 +59,39 @@ class ComplaintTimelineSerializerTestCase(TestCase):
         result = ComplaintTimelineSerializer(complaint).data
 
         assert result == {
-            'kind': COMPLAINT_TIMELINE_TYPE,
-            'date': complaint.incident_date,
+            'kind': COMPLAINT_TIMELINE_KIND,
+            'date': str(complaint.incident_date),
             'year': complaint.occur_year,
             'rule_violation': complaint.rule_violation,
             'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,
             'action': complaint.action,
             'tracking_number': complaint.tracking_number,
+        }
+
+
+class DocumentTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        document = DocumentFactory(text_content='Text content')
+        department = DepartmentFactory()
+        document.departments.add(department)
+
+        result = DocumentTimelineSerializer(document).data
+
+        assert result == {
+            'kind': DOCUMENT_TIMELINE_KIND,
+            'date': str(document.incident_date),
+            'id': document.id,
+            'document_type': document.document_type,
+            'title': document.title,
+            'url': document.url,
+            'preview_image_url': document.preview_image_url,
+            'incident_date': str(document.incident_date),
+            'pages_count': document.pages_count,
+            'departments': [
+                {
+                    'id': department.id,
+                    'name': department.name,
+                },
+            ],
         }

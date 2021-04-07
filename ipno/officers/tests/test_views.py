@@ -10,9 +10,10 @@ from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 from officers.constants import (
-    JOINED_TIMELINE_TYPE,
-    COMPLAINT_TIMELINE_TYPE,
-    LEFT_TIMELINE_TYPE,
+    JOINED_TIMELINE_KIND,
+    COMPLAINT_TIMELINE_KIND,
+    LEFT_TIMELINE_KIND,
+    DOCUMENT_TIMELINE_KIND,
 )
 
 
@@ -211,17 +212,22 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
     def test_timeline_success(self):
         officer = OfficerFactory()
+
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
         officer_history_1 = OfficerHistoryFactory(
             officer=officer,
             start_date=date(2018, 4, 8),
             hire_year=2018,
             end_date=date(2020, 4, 8),
             term_year=2020,
+            department=department_1,
         )
         officer_history_2 = OfficerHistoryFactory(
             officer=officer,
             start_date=date(2020, 5, 9),
             hire_year=2020,
+            department=department_2,
         )
         complaint_1 = ComplaintFactory(
             incident_date=date(2019, 5, 4),
@@ -234,9 +240,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         complaint_1.officers.add(officer)
         complaint_2.officers.add(officer)
 
+        document_1 = DocumentFactory(incident_date=date(2018, 6, 5))
+        document_2 = DocumentFactory(incident_date=date(2021, 2, 1))
+
+        document_1.officers.add(officer)
+        document_2.officers.add(officer)
+        document_1.departments.add(department_1)
+
         expected_result = [
             {
-                'kind': COMPLAINT_TIMELINE_TYPE,
+                'kind': COMPLAINT_TIMELINE_KIND,
                 'date': None,
                 'year': None,
                 'rule_violation': complaint_2.rule_violation,
@@ -246,13 +259,30 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'tracking_number': complaint_2.tracking_number,
             },
             {
-                'kind': JOINED_TIMELINE_TYPE,
-                'date': officer_history_1.start_date,
+                'kind': JOINED_TIMELINE_KIND,
+                'date': str(officer_history_1.start_date),
                 'year': officer_history_1.hire_year,
             },
             {
-                'kind': COMPLAINT_TIMELINE_TYPE,
-                'date': complaint_1.incident_date,
+                'kind': DOCUMENT_TIMELINE_KIND,
+                'date': str(document_1.incident_date),
+                'id': document_1.id,
+                'document_type': document_1.document_type,
+                'title': document_1.title,
+                'url': document_1.url,
+                'preview_image_url': document_1.preview_image_url,
+                'incident_date': str(document_1.incident_date),
+                'pages_count': document_1.pages_count,
+                'departments': [
+                    {
+                        'id': department_1.id,
+                        'name': department_1.name,
+                    },
+                ],
+            },
+            {
+                'kind': COMPLAINT_TIMELINE_KIND,
+                'date': str(complaint_1.incident_date),
                 'year': complaint_1.occur_year,
                 'rule_violation': complaint_1.rule_violation,
                 'paragraph_violation': complaint_1.paragraph_violation,
@@ -261,14 +291,26 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'tracking_number': complaint_1.tracking_number,
             },
             {
-                'kind': LEFT_TIMELINE_TYPE,
-                'date': officer_history_1.end_date,
+                'kind': LEFT_TIMELINE_KIND,
+                'date': str(officer_history_1.end_date),
                 'year': officer_history_1.term_year,
             },
             {
-                'kind': JOINED_TIMELINE_TYPE,
-                'date': officer_history_2.start_date,
+                'kind': JOINED_TIMELINE_KIND,
+                'date': str(officer_history_2.start_date),
                 'year': officer_history_2.hire_year,
+            },
+            {
+                'kind': DOCUMENT_TIMELINE_KIND,
+                'date': str(document_2.incident_date),
+                'id': document_2.id,
+                'document_type': document_2.document_type,
+                'title': document_2.title,
+                'url': document_2.url,
+                'preview_image_url': document_2.preview_image_url,
+                'incident_date': str(document_2.incident_date),
+                'pages_count': document_2.pages_count,
+                'departments': [],
             },
         ]
 

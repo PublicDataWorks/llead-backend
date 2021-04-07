@@ -2,6 +2,7 @@ from officers.serializers.officer_timeline_serializers import (
     ComplaintTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
+    DocumentTimelineSerializer
 )
 
 
@@ -31,5 +32,11 @@ class OfficerTimelineQuery(object):
 
         return LeftTimelineSerializer(left_timeline_query, many=True).data
 
+    @property
+    def _document_timeline(self):
+        document_timeline_queryset = self.officer.document_set.prefetch_departments()
+
+        return DocumentTimelineSerializer(document_timeline_queryset, many=True).data
+
     def query(self):
-        return self._complaint_timeline + self._join_timeline + self._left_timeline
+        return self._complaint_timeline + self._join_timeline + self._left_timeline + self._document_timeline
