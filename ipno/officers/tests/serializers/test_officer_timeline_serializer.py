@@ -7,12 +7,14 @@ from officers.serializers import (
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
+    SalaryChangeTimelineSerializer
 )
 from officers.constants import (
     JOINED_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
+    SALARY_CHANGE_TIMELINE_KIND
 )
 from officers.factories import OfficerHistoryFactory
 from complaints.factories import ComplaintFactory
@@ -94,4 +96,24 @@ class DocumentTimelineSerializerTestCase(TestCase):
                     'name': department.name,
                 },
             ],
+        }
+
+
+class SalaryChangeTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        officer_history = OfficerHistoryFactory(
+            annual_salary='57k',
+            pay_effective_year=2019,
+            pay_effective_month=12,
+            pay_effective_day=1,
+
+        )
+
+        result = SalaryChangeTimelineSerializer(officer_history).data
+
+        assert result == {
+            'kind': SALARY_CHANGE_TIMELINE_KIND,
+            'annual_salary': '57k',
+            'date': date(2019, 12, 1),
+            'year': 2019,
         }
