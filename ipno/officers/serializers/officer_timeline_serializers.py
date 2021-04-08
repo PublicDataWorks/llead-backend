@@ -2,11 +2,15 @@ from rest_framework import serializers
 
 from shared.serializers import DocumentSerializer
 
+from utils.parse_utils import parse_date
+
 from officers.constants import (
     JOINED_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
+    SALARY_CHANGE_TIMELINE_KIND,
+    RANK_CHANGE_TIMELINE_KIND
 )
 
 
@@ -51,3 +55,19 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
     def get_kind(self, obj):
         return DOCUMENT_TIMELINE_KIND
+
+
+class SalaryChangeTimelineSerializer(BaseTimelineSerializer):
+    year = serializers.IntegerField(source='pay_effective_year')
+    annual_salary = serializers.CharField()
+    date = serializers.SerializerMethodField()
+
+    def get_kind(self, obj):
+        return SALARY_CHANGE_TIMELINE_KIND
+
+    def get_date(self, obj):
+        return parse_date(
+            obj.pay_effective_year,
+            obj.pay_effective_month,
+            obj.pay_effective_day
+        )
