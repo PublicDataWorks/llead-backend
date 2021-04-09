@@ -14,6 +14,8 @@ from officers.constants import (
     COMPLAINT_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
+    SALARY_CHANGE_TIMELINE_KIND,
+    RANK_CHANGE_TIMELINE_KIND
 )
 
 
@@ -222,12 +224,21 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             end_date=date(2020, 4, 8),
             term_year=2020,
             department=department_1,
+            annual_salary='57k',
+            pay_effective_year=2019,
+            pay_effective_month=12,
+            pay_effective_day=1,
         )
         officer_history_2 = OfficerHistoryFactory(
             officer=officer,
             start_date=date(2020, 5, 9),
             hire_year=2020,
             department=department_2,
+            rank_desc='senior police office',
+            rank_code=3,
+            rank_year=2017,
+            rank_month=7,
+            rank_day=13,
         )
         complaint_1 = ComplaintFactory(
             incident_date=date(2019, 5, 4),
@@ -257,6 +268,12 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'disposition': complaint_2.disposition,
                 'action': complaint_2.action,
                 'tracking_number': complaint_2.tracking_number,
+            },
+            {
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'senior police office',
+                'date': date(2017, 7, 13),
+                'year': 2017,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
@@ -289,6 +306,12 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'disposition': complaint_1.disposition,
                 'action': complaint_1.action,
                 'tracking_number': complaint_1.tracking_number,
+            },
+            {
+                'kind': SALARY_CHANGE_TIMELINE_KIND,
+                'annual_salary': '57k',
+                'date': date(2019, 12, 1),
+                'year': 2019,
             },
             {
                 'kind': LEFT_TIMELINE_KIND,

@@ -12,7 +12,8 @@ from officers.constants import (
     COMPLAINT_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
-    SALARY_CHANGE_TIMELINE_KIND
+    SALARY_CHANGE_TIMELINE_KIND,
+    RANK_CHANGE_TIMELINE_KIND
 )
 
 
@@ -38,6 +39,11 @@ class OfficerTimelineQueryTestCase(TestCase):
             start_date=date(2020, 5, 9),
             hire_year=2020,
             department=department_2,
+            rank_desc='senior police office',
+            rank_code=3,
+            rank_year=2017,
+            rank_month=7,
+            rank_day=13,
         )
         complaint_1 = ComplaintFactory(
             incident_date=date(2019, 5, 4),
@@ -67,6 +73,12 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'disposition': complaint_2.disposition,
                 'action': complaint_2.action,
                 'tracking_number': complaint_2.tracking_number,
+            },
+            {
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'senior police office',
+                'date': date(2017, 7, 13),
+                'year': 2017,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
@@ -190,6 +202,18 @@ class OfficerTimelineQueryTestCase(TestCase):
         expected_result = [
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
+                'annual_salary': '57k',
+                'date': date(2015, 12, 1),
+                'year': 2015,
+            },
+            {
+                'kind': SALARY_CHANGE_TIMELINE_KIND,
+                'annual_salary': '65k',
+                'date': date(2019, 3, 7),
+                'year': 2019,
+            },
+            {
+                'kind': SALARY_CHANGE_TIMELINE_KIND,
                 'annual_salary': '45k',
                 'date': None,
                 'year': 2019,
@@ -206,23 +230,108 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'date': None,
                 'year': None,
             },
+
+        ]
+
+        assert OfficerTimelineQuery(officer).query() == expected_result
+
+    def test_rank_change(self):
+        officer = OfficerFactory()
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Fresh Officer',
+            rank_code=1,
+            rank_year=2015,
+            rank_month=12,
+            rank_day=1,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Senior Officer',
+            rank_code=3,
+            rank_year=2019,
+            rank_month=3,
+            rank_day=7,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Fresh Officer',
+            rank_code=1,
+            rank_year=2017,
+            rank_month=5,
+            rank_day=6,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Junior Officer',
+            rank_code=2,
+            rank_year=None,
+            rank_month=None,
+            rank_day=None,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Junior Officer',
+            rank_code=2,
+            rank_year=None,
+            rank_month=None,
+            rank_day=None,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Senior Officer',
+            rank_code=3,
+            rank_year=None,
+            rank_month=None,
+            rank_day=None,
+            start_date=None
+        )
+        OfficerHistoryFactory(
+            officer=officer,
+            rank_desc='Junior Officer',
+            rank_code=2,
+            rank_year=2019,
+            rank_month=None,
+            rank_day=None,
+            start_date=None
+        )
+
+        expected_result = [
             {
-                'kind': SALARY_CHANGE_TIMELINE_KIND,
-                'annual_salary': '57k',
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'Fresh Officer',
                 'date': date(2015, 12, 1),
                 'year': 2015,
             },
             {
-                'kind': SALARY_CHANGE_TIMELINE_KIND,
-                'annual_salary': '65k',
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'Senior Officer',
                 'date': date(2019, 3, 7),
                 'year': 2019,
             },
-
+            {
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'Junior Officer',
+                'date': None,
+                'year': 2019,
+            },
+            {
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'Junior Officer',
+                'date': None,
+                'year': None,
+            },
+            {
+                'kind': RANK_CHANGE_TIMELINE_KIND,
+                'rank_desc': 'Senior Officer',
+                'date': None,
+                'year': None,
+            },
         ]
-        result = sorted(
-            OfficerTimelineQuery(officer).query(),
-            key=lambda item: str(item['date']) if item['date'] else ''
-        )
 
-        assert result == expected_result
+        assert OfficerTimelineQuery(officer).query() == expected_result

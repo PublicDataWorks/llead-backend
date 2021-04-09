@@ -7,14 +7,16 @@ from officers.serializers import (
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
-    SalaryChangeTimelineSerializer
+    SalaryChangeTimelineSerializer,
+    RankChangeTimelineSerializer
 )
 from officers.constants import (
     JOINED_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
-    SALARY_CHANGE_TIMELINE_KIND
+    SALARY_CHANGE_TIMELINE_KIND,
+    RANK_CHANGE_TIMELINE_KIND
 )
 from officers.factories import OfficerHistoryFactory
 from complaints.factories import ComplaintFactory
@@ -116,4 +118,23 @@ class SalaryChangeTimelineSerializerTestCase(TestCase):
             'annual_salary': '57k',
             'date': date(2019, 12, 1),
             'year': 2019,
+        }
+
+
+class RankChangeTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        officer_history = OfficerHistoryFactory(
+            rank_desc='senior police office',
+            rank_year=2017,
+            rank_month=7,
+            rank_day=13,
+        )
+
+        result = RankChangeTimelineSerializer(officer_history).data
+
+        assert result == {
+            'kind': RANK_CHANGE_TIMELINE_KIND,
+            'rank_desc': 'senior police office',
+            'date': date(2017, 7, 13),
+            'year': 2017,
         }
