@@ -71,3 +71,15 @@ class SalaryChangeTimelineSerializer(BaseTimelineSerializer):
             obj.pay_effective_month,
             obj.pay_effective_day
         )
+
+
+class RankChangeTimelineSerializer(BaseTimelineSerializer):
+    year = serializers.IntegerField(source='rank_year')
+    rank_desc = serializers.CharField()
+    date = serializers.SerializerMethodField()
+
+    def get_kind(self, obj):
+        return RANK_CHANGE_TIMELINE_KIND
+
+    def get_date(self, obj):
+        return parse_date(obj.rank_year, obj.rank_month, obj.rank_day)
