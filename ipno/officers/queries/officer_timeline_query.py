@@ -3,13 +3,43 @@ from officers.serializers.officer_timeline_serializers import (
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
-    SalaryChangeTimelineSerializer
+    SalaryChangeTimelineSerializer,
+    RankChangeTimelineSerializer
 )
 
 
 class OfficerTimelineQuery(object):
     def __init__(self, officer):
         self.officer = officer
+
+    @staticmethod
+    def _filter_history_changes(officer_histories, filter_field, compared_field):
+        have_year_histories = [
+            history for history in officer_histories
+            if getattr(history, filter_field)
+        ]
+        no_year_histories = [
+            history for history in officer_histories
+            if not getattr(history, filter_field)
+        ]
+
+        previous_value = None
+        changes = []
+
+        for history in have_year_histories:
+            compared_value = getattr(history, compared_field)
+            if compared_value != previous_value:
+                changes.append(history)
+                previous_value = compared_value
+
+        previous_value = None
+        for history in no_year_histories:
+            compared_value = getattr(history, compared_field)
+            if compared_value != previous_value:
+                changes.append(history)
+                previous_value = compared_value
+
+        return changes
 
     @property
     def _complaint_timeline(self):
@@ -41,7 +71,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _salary_change_timeline(self):
-        histories = list(
+        officer_histories = list(
             self.officer.officerhistory_set.filter(
                 annual_salary__isnull=False,
             ).order_by(
@@ -52,25 +82,32 @@ class OfficerTimelineQuery(object):
             )
         )
 
-        have_year_histories = [history for history in histories if history.pay_effective_year]
-        no_year_histories = [history for history in histories if not history.pay_effective_year]
-
-        previous_salary = None
-        salary_changes = []
-
-        for history in have_year_histories:
-            if history.annual_salary != previous_salary:
-                salary_changes.append(history)
-                previous_salary = history.annual_salary
-
-        previous_salary = None
-        for history in no_year_histories:
-            if history.annual_salary != previous_salary:
-                salary_changes.append(history)
-                previous_salary = history.annual_salary
+        salary_changes = self._filter_history_changes(
+            officer_histories,
+            'pay_effective_year',
+            'annual_salary'
+        )
 
         return SalaryChangeTimelineSerializer(salary_changes, many=True).data
 
+    @property
+    def _rank_change_timeline(self):
+        officer_histories = list(
+            self.officer.officerhistory_set.filter(
+                rank_desc__isnull=False,
+                rank_code__isnull=False,
+            ).order_by(
+                'rank_year',
+                'rank_month',
+                'rank_day',
+                'rank_code'
+            )
+        )
+
+        rank_changes = self._filter_history_changes(officer_histories, 'rank_year', 'rank_code')
+
+        return RankChangeTimelineSerializer(rank_changes, many=True).data
+
     def query(self):
-        return self._complaint_timeline + self._join_timeline + self._left_timeline + self._document_timeline \
-               + self._salary_change_timeline
+        return self._complaint_timeline + self._join_timeline + self._left_timeline \
+               + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline
