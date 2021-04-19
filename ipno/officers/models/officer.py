@@ -1,18 +1,20 @@
 from django.db import models
 from django.utils.functional import cached_property
-from django.db.models import Prefetch
+from django.db.models import Prefetch, F
 
 from utils.models import TimeStampsModel
-from .officer_history import OfficerHistory
+from officers.models.event import Event
 
 
 class OfficerManager(models.Manager):
-    def prefetch_officer_histories(self):
+    def prefetch_events(self):
         return self.get_queryset().prefetch_related(
             Prefetch(
-                'officerhistory_set',
-                queryset=OfficerHistory.objects.order_by(
-                    '-start_date'
+                'event_set',
+                queryset=Event.objects.order_by(
+                    F('year').desc(nulls_last=True),
+                    F('month').desc(nulls_last=True),
+                    F('day').desc(nulls_last=True),
                 ).prefetch_related('department')
             ),
         )
@@ -31,8 +33,7 @@ class Officer(TimeStampsModel):
     race = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=255, null=True, blank=True)
 
-    departments = models.ManyToManyField('departments.Department', through='officers.OfficerHistory')
-
+    departments = models.ManyToManyField('departments.Department', through='officers.Event')
     objects = OfficerManager()
 
     def __str__(self):
@@ -45,8 +46,8 @@ class Officer(TimeStampsModel):
     @property
     def badges(self):
         return [
-            officer_history.badge_no for officer_history in self.officerhistory_set.all()
-            if officer_history.badge_no
+            event.badge_no for event in self.event_set.all()
+            if event.badge_no
         ]
 
     @cached_property

@@ -17,7 +17,7 @@ class OfficersViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        officers = Officer.objects.prefetch_officer_histories().order_by(
+        officers = Officer.objects.prefetch_events().order_by(
             '-created_at'
         )[:OFFICERS_LIMIT]
 

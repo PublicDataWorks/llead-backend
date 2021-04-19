@@ -4,11 +4,12 @@ from datetime import datetime, date
 
 from django.test import TestCase
 
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from search.queries.search_all_query import SearchAllQuery
 from utils.search_index import rebuild_search_index
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT
 
 
 class OfficersSearchQueryTestCase(TestCase):
@@ -21,12 +22,22 @@ class OfficersSearchQueryTestCase(TestCase):
         officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis keywords')
 
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer_1,
             department=department_1,
+            kind=OFFICER_HIRE,
             badge_no='12435',
-            start_date=datetime(2020, 5, 4, tzinfo=pytz.utc),
-            end_date=datetime(2021, 5, 4, tzinfo=pytz.utc),
+            year=2020,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer_1,
+            department=department_1,
+            kind=OFFICER_LEFT,
+            year=2020,
+            month=5,
+            day=4,
         )
 
         DocumentFactory(title='Document title', text_content='Text content')

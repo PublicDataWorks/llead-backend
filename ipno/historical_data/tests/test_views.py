@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from test_utils.auth_api_test_case import AuthAPITestCase
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 
@@ -17,11 +17,10 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         department_2 = DepartmentFactory()
 
         officer = OfficerFactory(first_name='David', last_name='Jonesworth')
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
             department=department_2,
             badge_no='12435',
-            start_date=date(2020, 5, 4)
         )
 
         document = DocumentFactory()
