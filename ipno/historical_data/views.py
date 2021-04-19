@@ -24,7 +24,7 @@ class HistoricalDataViewSet(ViewSet):
             },
             {
                 'item_type': 'officer',
-                'query': Officer.objects.prefetch_officer_histories(),
+                'query': Officer.objects.prefetch_events(),
                 'serializer': OfficerSerializer,
             },
             {

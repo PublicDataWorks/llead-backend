@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from documents.factories import DocumentFactory
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from departments.queries.documents_search_query import DocumentsSearchQuery
 from utils.search_index import rebuild_search_index
@@ -86,8 +86,8 @@ class DocumentsSearchQueryTestCase(TestCase):
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
 
-        OfficerHistoryFactory(officer=officer_1, badge_no='12435')
-        OfficerHistoryFactory(officer=officer_2, badge_no='45812')
+        EventFactory(officer=officer_1, badge_no='12435')
+        EventFactory(officer=officer_2, badge_no='45812')
 
         document_1.officers.add(officer_1)
         document_2.officers.add(officer_2)

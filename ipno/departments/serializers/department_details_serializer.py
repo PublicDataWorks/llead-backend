@@ -27,7 +27,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
     data_period = serializers.SerializerMethodField()
 
     def get_officers_count(self, obj):
-        return obj.officers.count()
+        return obj.officers.distinct().count()
 
     def get_complaints_count(self, obj):
         return obj.complaint_set.count()
@@ -39,10 +39,9 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return WrglFileSerializer(obj.wrglfile_set.order_by('position'), many=True).data
 
     def get_data_period(self, obj):
-        officer_history_periods = list(obj.officerhistory_set.filter(
-            start_date__isnull=False,
-            end_date__isnull=False
-        ).order_by('start_date__year').values_list('start_date__year', 'end_date__year'))
-        years = obj.document_years + obj.complaint_years
+        event_years = list(obj.event_set.filter(
+            year__isnull=False,
+        ).values_list('year', flat=True))
+        years = event_years + obj.document_years + obj.complaint_years
 
-        return data_period(officer_history_periods, years)
+        return data_period(years)

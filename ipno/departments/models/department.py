@@ -9,7 +9,7 @@ class Department(TimeStampsModel):
     parish = models.CharField(max_length=255, null=True, blank=True)
     location_map_url = models.CharField(max_length=255, null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', through='officers.OfficerHistory')
+    officers = models.ManyToManyField('officers.Officer', through='officers.Event')
 
     def __str__(self):
         return f"{self.name} - {self.id}"

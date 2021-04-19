@@ -1,8 +1,6 @@
-from django.db.models import Prefetch
-
 from shared.serializers.es_serializers import BaseESSerializer
 from shared.serializers import OfficerSerializer
-from officers.models import Officer, OfficerHistory
+from officers.models import Officer
 
 
 class OfficersESSerializer(BaseESSerializer):
@@ -10,9 +8,4 @@ class OfficersESSerializer(BaseESSerializer):
     model_klass = Officer
 
     def get_queryset(self, ids):
-        return super(OfficersESSerializer, self).get_queryset(ids).prefetch_related(
-            Prefetch(
-                'officerhistory_set',
-                queryset=OfficerHistory.objects.order_by('-start_date').prefetch_related('department')
-            ),
-        )
+        return self.model_klass.objects.prefetch_events().filter(id__in=ids)

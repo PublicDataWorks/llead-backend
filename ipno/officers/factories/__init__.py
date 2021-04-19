@@ -1,7 +1,7 @@
 from .officer_factory import OfficerFactory
-from .officer_history_factory import OfficerHistoryFactory
+from .event_factory import EventFactory
 
 __all__ = [
     'OfficerFactory',
-    'OfficerHistoryFactory',
+    'EventFactory',
 ]

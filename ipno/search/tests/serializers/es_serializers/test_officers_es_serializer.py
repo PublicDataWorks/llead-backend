@@ -1,13 +1,11 @@
-import pytz
-from datetime import datetime
-
 from django.test import TestCase
 
 from mock import Mock
 
 from search.serializers.es_serializers import OfficersESSerializer
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
+from officers.constants import OFFICER_HIRE
 
 
 class OfficersESSerializerTestCase(TestCase):
@@ -18,16 +16,21 @@ class OfficersESSerializerTestCase(TestCase):
         OfficerFactory()
 
         department = DepartmentFactory()
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer_1,
             department=department,
+            kind=OFFICER_HIRE,
             badge_no='12435',
-            start_date=datetime(2020, 5, 4, tzinfo=pytz.utc)
+            year=2020,
+            month=5,
+            day=4,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer_1,
             badge_no=None,
-            start_date=datetime(2015, 7, 20, tzinfo=pytz.utc)
+            year=2015,
+            month=7,
+            day=20,
         )
 
         docs = [

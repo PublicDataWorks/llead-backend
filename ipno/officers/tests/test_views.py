@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from test_utils.auth_api_test_case import AuthAPITestCase
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
@@ -17,30 +17,52 @@ from officers.constants import (
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND
 )
+from officers.constants import (
+    OFFICER_HIRE,
+    OFFICER_LEFT,
+    OFFICER_PAY_EFFECTIVE,
+    OFFICER_RANK,
+)
 
 
 class OfficersViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
         department = DepartmentFactory()
-        OfficerHistoryFactory(
+
+        EventFactory(
             officer=officer_1,
-            badge_no='612',
-            start_date=date(2017, 1, 5)
+            department=department,
+            badge_no='67893',
+            year=2017,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             officer=officer_1,
             department=department,
             badge_no='12435',
-            start_date=date(2020, 5, 4)
+            year=2020,
+            month=5,
+            day=4,
         )
-        OfficerHistoryFactory(
+        EventFactory(
+            officer=officer_1,
+            department=department,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
             officer=officer_1,
             badge_no=None,
-            start_date=date(2015, 7, 20)
+            year=2015,
+            month=7,
+            day=20,
         )
-
-        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
 
         response = self.auth_client.get(reverse('api:officers-list'))
         assert response.status_code == status.HTTP_200_OK
@@ -55,7 +77,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             {
                 'id': officer_1.id,
                 'name': 'David Jonesworth',
-                'badges': ['12435', '612'],
+                'badges': ['12435', '67893', '5432'],
                 'department': {
                     'id': department.id,
                     'name': department.name,
@@ -75,20 +97,38 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             gender='male',
         )
         department = DepartmentFactory()
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
             department=department,
             badge_no='12435',
             annual_salary='57K',
-            start_date=date(2020, 5, 4),
-            end_date=date(2021, 5, 4)
+            year=2020,
+            month=5,
+            day=4,
         )
-        OfficerHistoryFactory(
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='67893',
+            annual_salary='20K',
+            year=2017,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
             officer=officer,
             badge_no=None,
-            annual_salary='20K',
-            start_date=date(2015, 7, 20),
-            end_date=date(2020, 5, 4)
+            year=2015,
+            month=7,
+            day=20,
         )
 
         document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
@@ -108,7 +148,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         expected_result = {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435'],
+            'badges': ['12435', '67893', '5432'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -119,7 +159,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'annual_salary': '57K',
             'documents_count': 3,
             'complaints_count': 2,
-            'data_period': ['2015-2021'],
+            'data_period': ['2015-2020'],
             'complaints_data_period': ['2019-2020'],
             'documents_data_period': ['2016-2018'],
         }
@@ -214,31 +254,50 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
     def test_timeline_success(self):
         officer = OfficerFactory()
-
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        officer_history_1 = OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2018, 4, 8),
-            hire_year=2018,
-            end_date=date(2020, 4, 8),
-            term_year=2020,
             department=department_1,
-            annual_salary='57k',
-            pay_effective_year=2019,
-            pay_effective_month=12,
-            pay_effective_day=1,
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=4,
+            day=8,
         )
-        officer_history_2 = OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2020, 5, 9),
-            hire_year=2020,
+            department=department_1,
+            kind=OFFICER_LEFT,
+            year=2020,
+            month=4,
+            day=8,
+        )
+        EventFactory(
+            officer=officer,
+            department=department_1,
+            kind=OFFICER_PAY_EFFECTIVE,
+            annual_salary='57k',
+            year=2019,
+            month=12,
+            day=1,
+        )
+        EventFactory(
+            officer=officer,
             department=department_2,
+            kind=OFFICER_HIRE,
+            year=2020,
+            month=5,
+            day=9,
+        )
+        EventFactory(
+            officer=officer,
+            department=department_2,
+            kind=OFFICER_RANK,
             rank_desc='senior police office',
             rank_code=3,
-            rank_year=2017,
-            rank_month=7,
-            rank_day=13,
+            year=2017,
+            month=7,
+            day=13,
         )
         complaint_1 = ComplaintFactory(
             incident_date=date(2019, 5, 4),
@@ -273,17 +332,18 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
                 'rank_desc': 'senior police office',
-                'date': date(2017, 7, 13),
+                'date': str(date(2017, 7, 13)),
                 'year': 2017,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
-                'date': str(officer_history_1.start_date),
-                'year': officer_history_1.hire_year,
+                'date': str(date(2018, 4, 8)),
+                'year': 2018,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
                 'date': str(document_1.incident_date),
+                'year': document_1.incident_date.year,
                 'id': document_1.id,
                 'document_type': document_1.document_type,
                 'title': document_1.title,
@@ -312,22 +372,23 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
                 'annual_salary': '57k',
-                'date': date(2019, 12, 1),
+                'date': str(date(2019, 12, 1)),
                 'year': 2019,
             },
             {
                 'kind': LEFT_TIMELINE_KIND,
-                'date': str(officer_history_1.end_date),
-                'year': officer_history_1.term_year,
+                'date': str(date(2020, 4, 8)),
+                'year': 2020,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
-                'date': str(officer_history_2.start_date),
-                'year': officer_history_2.hire_year,
+                'date': str(date(2020, 5, 9)),
+                'year': 2020,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
                 'date': str(document_2.incident_date),
+                'year': document_2.incident_date.year,
                 'id': document_2.id,
                 'document_type': document_2.document_type,
                 'title': document_2.title,
