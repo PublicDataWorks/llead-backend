@@ -63,6 +63,7 @@ class ComplaintTimelineSerializerTestCase(TestCase):
         result = ComplaintTimelineSerializer(complaint).data
 
         assert result == {
+            'id': complaint.id,
             'kind': COMPLAINT_TIMELINE_KIND,
             'date': str(complaint.incident_date),
             'year': complaint.occur_year,
