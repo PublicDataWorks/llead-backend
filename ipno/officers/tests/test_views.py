@@ -260,6 +260,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
         expected_result = [
             {
+                'id': complaint_2.id,
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': None,
                 'year': None,
@@ -298,6 +299,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 ],
             },
             {
+                'id': complaint_1.id,
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': str(complaint_1.incident_date),
                 'year': complaint_1.occur_year,
