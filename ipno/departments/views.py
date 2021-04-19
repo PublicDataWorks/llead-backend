@@ -28,7 +28,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
     def list(self, request):
         departments = Department.objects.all().annotate(
-            officersCount=Count('officers__id')
+            officersCount=Count('officers__id', distinct=True)
         ).order_by('-officersCount')[:DEPARTMENTS_LIMIT]
         serializer = DepartmentSerializer(departments, many=True)
         return Response(serializer.data)

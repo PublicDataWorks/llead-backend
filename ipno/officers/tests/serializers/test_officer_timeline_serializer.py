@@ -18,47 +18,89 @@ from officers.constants import (
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND
 )
-from officers.factories import OfficerHistoryFactory
+from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
+from officers.constants import (
+    OFFICER_HIRE,
+    OFFICER_LEFT,
+    OFFICER_PAY_EFFECTIVE,
+    OFFICER_RANK,
+)
 
 
 class JoinedTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        officer_history = OfficerHistoryFactory(
-            start_date=date(2018, 4, 8),
-            hire_year=2018,
+        event = EventFactory(
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=4,
+            day=8,
         )
 
-        result = JoinedTimelineSerializer(officer_history).data
+        result = JoinedTimelineSerializer(event).data
 
         assert result == {
             'kind': JOINED_TIMELINE_KIND,
-            'date': str(officer_history.start_date),
-            'year': officer_history.hire_year,
+            'date': str(date(2018, 4, 8)),
+            'year': 2018,
+        }
+
+    def test_data_with_only_year(self):
+        event = EventFactory(
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=None,
+            day=None,
+        )
+
+        result = JoinedTimelineSerializer(event).data
+
+        assert result == {
+            'kind': JOINED_TIMELINE_KIND,
+            'date': None,
+            'year': 2018,
+        }
+
+    def test_data_with_empty_date(self):
+        event = EventFactory(
+            kind=OFFICER_HIRE,
+            year=None,
+            month=None,
+            day=None,
+        )
+
+        result = JoinedTimelineSerializer(event).data
+
+        assert result == {
+            'kind': JOINED_TIMELINE_KIND,
+            'date': None,
+            'year': None,
         }
 
 
 class LeftTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        officer_history = OfficerHistoryFactory(
-            end_date=date(2020, 4, 8),
-            term_year=2020,
+        event = EventFactory(
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=4,
+            day=8,
         )
 
-        result = LeftTimelineSerializer(officer_history).data
+        result = LeftTimelineSerializer(event).data
 
         assert result == {
             'kind': LEFT_TIMELINE_KIND,
-            'date': str(officer_history.end_date),
-            'year': officer_history.term_year,
+            'date': str(date(2018, 4, 8)),
+            'year': 2018,
         }
 
 
 class ComplaintTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        complaint = ComplaintFactory(incident_date=date(2019, 5, 4), )
+        complaint = ComplaintFactory(incident_date=date(2019, 5, 4))
 
         result = ComplaintTimelineSerializer(complaint).data
 
@@ -86,6 +128,7 @@ class DocumentTimelineSerializerTestCase(TestCase):
         assert result == {
             'kind': DOCUMENT_TIMELINE_KIND,
             'date': str(document.incident_date),
+            'year': document.incident_date.year,
             'id': document.id,
             'document_type': document.document_type,
             'title': document.title,
@@ -104,38 +147,39 @@ class DocumentTimelineSerializerTestCase(TestCase):
 
 class SalaryChangeTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        officer_history = OfficerHistoryFactory(
+        event = EventFactory(
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='57k',
-            pay_effective_year=2019,
-            pay_effective_month=12,
-            pay_effective_day=1,
-
+            year=2019,
+            month=12,
+            day=1,
         )
 
-        result = SalaryChangeTimelineSerializer(officer_history).data
+        result = SalaryChangeTimelineSerializer(event).data
 
         assert result == {
             'kind': SALARY_CHANGE_TIMELINE_KIND,
             'annual_salary': '57k',
-            'date': date(2019, 12, 1),
+            'date': str(date(2019, 12, 1)),
             'year': 2019,
         }
 
 
 class RankChangeTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        officer_history = OfficerHistoryFactory(
+        event = EventFactory(
+            kind=OFFICER_RANK,
             rank_desc='senior police office',
-            rank_year=2017,
-            rank_month=7,
-            rank_day=13,
+            year=2017,
+            month=7,
+            day=13,
         )
 
-        result = RankChangeTimelineSerializer(officer_history).data
+        result = RankChangeTimelineSerializer(event).data
 
         assert result == {
             'kind': RANK_CHANGE_TIMELINE_KIND,
             'rank_desc': 'senior police office',
-            'date': date(2017, 7, 13),
+            'date': str(date(2017, 7, 13)),
             'year': 2017,
         }

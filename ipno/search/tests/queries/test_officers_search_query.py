@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from search.queries.officers_search_query import OfficersSearchQuery
 from utils.search_index import rebuild_search_index
@@ -23,8 +23,8 @@ class OfficersSearchQueryTestCase(TestCase):
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
 
-        OfficerHistoryFactory(officer=officer_1, badge_no='12435')
-        OfficerHistoryFactory(officer=officer_2, badge_no='45812')
+        EventFactory(officer=officer_1, badge_no='12435')
+        EventFactory(officer=officer_2, badge_no='45812')
 
         rebuild_search_index()
 
@@ -41,9 +41,9 @@ class OfficersSearchQueryTestCase(TestCase):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
-        OfficerHistoryFactory(officer=officer_1, department=department_1, badge_no='12435')
-        OfficerHistoryFactory(officer=officer_2, department=department_1, badge_no='45812')
-        OfficerHistoryFactory(officer=officer_3, department=department_2, badge_no='45812')
+        EventFactory(officer=officer_1, department=department_1, badge_no='12435')
+        EventFactory(officer=officer_2, department=department_1, badge_no='45812')
+        EventFactory(officer=officer_3, department=department_2, badge_no='45812')
 
         rebuild_search_index()
 

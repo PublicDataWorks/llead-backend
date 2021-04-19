@@ -1,12 +1,8 @@
-def data_period(periods, years):
+def data_period(years):
     results = []
-
-    all_years = set(years)
     current_year = None
-    for start_year, end_year in periods:
-        all_years |= set(range(start_year, end_year + 1))
 
-    for year in sorted(list(all_years)):
+    for year in sorted(list(set(years))):
         if current_year and year == current_year + 1:
             results[-1].append(year)
         else:

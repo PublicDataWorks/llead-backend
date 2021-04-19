@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from rest_framework import status
 
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from utils.search_index import rebuild_search_index
@@ -23,12 +23,10 @@ class SearchViewSetTestCase(AuthAPITestCase):
         officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis keywords')
 
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer_1,
             department=department_1,
             badge_no='12435',
-            start_date=datetime(2020, 5, 4, tzinfo=pytz.utc),
-            end_date=datetime(2021, 5, 4, tzinfo=pytz.utc)
         )
 
         DocumentFactory(title='Document title', text_content='Text content')

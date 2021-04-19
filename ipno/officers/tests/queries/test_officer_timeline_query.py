@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from officers.queries import OfficerTimelineQuery
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from complaints.factories import ComplaintFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
@@ -15,6 +15,12 @@ from officers.constants import (
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND
 )
+from officers.constants import (
+    OFFICER_HIRE,
+    OFFICER_LEFT,
+    OFFICER_PAY_EFFECTIVE,
+    OFFICER_RANK,
+)
 
 
 class OfficerTimelineQueryTestCase(TestCase):
@@ -22,28 +28,48 @@ class OfficerTimelineQueryTestCase(TestCase):
         officer = OfficerFactory()
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        officer_history_1 = OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2018, 4, 8),
-            hire_year=2018,
-            end_date=date(2020, 4, 8),
-            term_year=2020,
             department=department_1,
-            annual_salary='57k',
-            pay_effective_year=2019,
-            pay_effective_month=12,
-            pay_effective_day=1,
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=4,
+            day=8,
         )
-        officer_history_2 = OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2020, 5, 9),
-            hire_year=2020,
+            department=department_1,
+            kind=OFFICER_LEFT,
+            year=2020,
+            month=4,
+            day=8,
+        )
+        EventFactory(
+            officer=officer,
+            department=department_1,
+            kind=OFFICER_PAY_EFFECTIVE,
+            annual_salary='57k',
+            year=2019,
+            month=12,
+            day=1,
+        )
+        EventFactory(
+            officer=officer,
             department=department_2,
+            kind=OFFICER_HIRE,
+            year=2020,
+            month=5,
+            day=9,
+        )
+        EventFactory(
+            officer=officer,
+            department=department_2,
+            kind=OFFICER_RANK,
             rank_desc='senior police office',
             rank_code=3,
-            rank_year=2017,
-            rank_month=7,
-            rank_day=13,
+            year=2017,
+            month=7,
+            day=13,
         )
         complaint_1 = ComplaintFactory(
             incident_date=date(2019, 5, 4),
@@ -78,17 +104,18 @@ class OfficerTimelineQueryTestCase(TestCase):
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
                 'rank_desc': 'senior police office',
-                'date': date(2017, 7, 13),
+                'date': str(date(2017, 7, 13)),
                 'year': 2017,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
-                'date': str(officer_history_1.start_date),
-                'year': officer_history_1.hire_year,
+                'date': str(date(2018, 4, 8)),
+                'year': 2018,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
                 'date': str(document_1.incident_date),
+                'year': document_1.incident_date.year,
                 'id': document_1.id,
                 'document_type': document_1.document_type,
                 'title': document_1.title,
@@ -117,22 +144,23 @@ class OfficerTimelineQueryTestCase(TestCase):
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
                 'annual_salary': '57k',
-                'date': date(2019, 12, 1),
+                'date': str(date(2019, 12, 1)),
                 'year': 2019,
             },
             {
                 'kind': LEFT_TIMELINE_KIND,
-                'date': str(officer_history_1.end_date),
-                'year': officer_history_1.term_year,
+                'date': str(date(2020, 4, 8)),
+                'year': 2020,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
-                'date': str(officer_history_2.start_date),
-                'year': officer_history_2.hire_year,
+                'date': str(date(2020, 5, 9)),
+                'year': 2020,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
                 'date': str(document_2.incident_date),
+                'year': document_2.incident_date.year,
                 'id': document_2.id,
                 'document_type': document_2.document_type,
                 'title': document_2.title,
@@ -152,66 +180,74 @@ class OfficerTimelineQueryTestCase(TestCase):
 
     def test_salary_change(self):
         officer = OfficerFactory()
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='57k',
-            pay_effective_year=2015,
-            pay_effective_month=12,
-            pay_effective_day=1,
-            start_date=None
+            year=2015,
+            month=12,
+            day=1,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='65k',
-            pay_effective_year=2019,
-            pay_effective_month=3,
-            pay_effective_day=7,
-            start_date=None
+            year=2019,
+            month=3,
+            day=7,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='57k',
-            pay_effective_year=2017,
-            pay_effective_month=5,
-            pay_effective_day=6,
-            start_date=None
+            year=2017,
+            month=5,
+            day=6,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='45k',
-            pay_effective_year=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='45k',
-            pay_effective_year=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='60k',
-            pay_effective_year=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_PAY_EFFECTIVE,
             annual_salary='45k',
-            pay_effective_year=2019,
-            start_date=None
+            year=2019,
+            month=None,
+            day=None,
         )
 
         expected_result = [
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
                 'annual_salary': '57k',
-                'date': date(2015, 12, 1),
+                'date': str(date(2015, 12, 1)),
                 'year': 2015,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
                 'annual_salary': '65k',
-                'date': date(2019, 3, 7),
+                'date': str(date(2019, 3, 7)),
                 'year': 2019,
             },
             {
@@ -239,81 +275,81 @@ class OfficerTimelineQueryTestCase(TestCase):
 
     def test_rank_change(self):
         officer = OfficerFactory()
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Fresh Officer',
             rank_code=1,
-            rank_year=2015,
-            rank_month=12,
-            rank_day=1,
-            start_date=None
+            year=2015,
+            month=12,
+            day=1,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Senior Officer',
             rank_code=3,
-            rank_year=2019,
-            rank_month=3,
-            rank_day=7,
-            start_date=None
+            year=2019,
+            month=3,
+            day=7,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Fresh Officer',
             rank_code=1,
-            rank_year=2017,
-            rank_month=5,
-            rank_day=6,
-            start_date=None
+            year=2017,
+            month=5,
+            day=6,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Junior Officer',
             rank_code=2,
-            rank_year=None,
-            rank_month=None,
-            rank_day=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Junior Officer',
             rank_code=2,
-            rank_year=None,
-            rank_month=None,
-            rank_day=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Senior Officer',
             rank_code=3,
-            rank_year=None,
-            rank_month=None,
-            rank_day=None,
-            start_date=None
+            year=None,
+            month=None,
+            day=None,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
+            kind=OFFICER_RANK,
             rank_desc='Junior Officer',
             rank_code=2,
-            rank_year=2019,
-            rank_month=None,
-            rank_day=None,
-            start_date=None
+            year=2019,
+            month=None,
+            day=None,
         )
 
         expected_result = [
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
                 'rank_desc': 'Fresh Officer',
-                'date': date(2015, 12, 1),
+                'date': str(date(2015, 12, 1)),
                 'year': 2015,
             },
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
                 'rank_desc': 'Senior Officer',
-                'date': date(2019, 3, 7),
+                'date': str(date(2019, 3, 7)),
                 'year': 2019,
             },
             {

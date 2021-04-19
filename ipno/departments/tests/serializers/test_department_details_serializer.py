@@ -4,9 +4,10 @@ from django.test import TestCase
 
 from departments.serializers import DepartmentDetailsSerializer
 from departments.factories import DepartmentFactory, WrglFileFactory
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT
 
 
 class DepartmentDetailsSerializerTestCase(TestCase):
@@ -17,30 +18,69 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         officer_1 = OfficerFactory()
         officer_2 = OfficerFactory()
         officer_3 = OfficerFactory()
+        officer_4 = OfficerFactory()
 
-        OfficerHistoryFactory(
+        EventFactory(
             department=department,
             officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=2,
+            day=3,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2021,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
             department=department,
             officer=officer_2,
-            start_date=date(2018, 4, 5),
-            end_date=date(2019, 4, 5),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=4,
+            day=5,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
             department=department,
             officer=officer_3,
-            start_date=date(2018, 4, 5),
-            end_date=date(2019, 4, 5),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=5,
+            day=8,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=other_department,
             officer=officer_1,
-            start_date=date(2017, 2, 3),
-            end_date=date(2018, 2, 1),
+            kind=OFFICER_HIRE,
+            year=2017,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
+            department=other_department,
+            officer=officer_4,
+            kind=OFFICER_HIRE,
+            year=2017,
+            month=2,
+            day=3,
         )
 
         documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))
@@ -92,35 +132,33 @@ class DepartmentDetailsSerializerTestCase(TestCase):
     def test_data_period(self):
         department = DepartmentFactory()
 
-        OfficerHistoryFactory(
+        EventFactory(
             department=department,
-            start_date=date(2018, 2, 3),
-            end_date=date(2019, 2, 3),
+            year=2016,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=department,
-            start_date=date(2020, 4, 5),
-            end_date=date(2020, 10, 5),
+            year=2012,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=department,
-            start_date=date(2012, 2, 3),
-            end_date=date(2015, 2, 3),
+            year=2013,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=department,
-            start_date=date(2014, 5, 6),
-            end_date=date(2016, 5, 6),
+            year=2014,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=department,
-            start_date=date(2016, 3, 8),
-            end_date=None,
+            year=2020,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             department=department,
-            start_date=None,
-            end_date=None,
+            year=None,
         )
 
         document_1 = DocumentFactory(incident_date=date(2009, 5, 4))
@@ -136,7 +174,8 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         result = DepartmentDetailsSerializer(department).data
         assert result['data_period'] == [
             '2009',
-            '2012-2016',
+            '2012-2014',
+            '2016',
             '2018-2021',
         ]
 

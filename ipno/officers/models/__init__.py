@@ -1,7 +1,7 @@
 from .officer import Officer
-from .officer_history import OfficerHistory
+from .event import Event
 
 __all__ = [
     'Officer',
-    'OfficerHistory',
+    'Event',
 ]

@@ -7,10 +7,11 @@ from rest_framework import status
 
 from test_utils.auth_api_test_case import AuthAPITestCase
 from departments.factories import DepartmentFactory, WrglFileFactory
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 from utils.search_index import rebuild_search_index
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT
 
 
 class DepartmentsViewSetTestCase(AuthAPITestCase):
@@ -20,13 +21,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department_3 = DepartmentFactory()
 
         department_1_officers = OfficerFactory.create_batch(2)
-        department_2_officers = OfficerFactory.create_batch(5)
+        department_2_officers = OfficerFactory.create_batch(3)
 
         for officer in department_1_officers:
-            officer.departments.add(department_1)
+            EventFactory.create_batch(2, department=department_1, officer=officer)
 
         for officer in department_2_officers:
-            officer.departments.add(department_2)
+            EventFactory(department=department_2, officer=officer)
 
         response = self.auth_client.get(reverse('api:departments-list'))
         assert response.status_code == status.HTTP_200_OK
@@ -62,30 +63,69 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         officer_1 = OfficerFactory()
         officer_2 = OfficerFactory()
         officer_3 = OfficerFactory()
+        officer_4 = OfficerFactory()
 
-        OfficerHistoryFactory(
+        EventFactory(
             department=department,
             officer=officer_1,
-            start_date=date(2018, 2, 3),
-            end_date=date(2021, 2, 3),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=2,
+            day=3,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2021,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
             department=department,
             officer=officer_2,
-            start_date=date(2018, 4, 5),
-            end_date=date(2019, 4, 5),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=4,
+            day=5,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
             department=department,
             officer=officer_3,
-            start_date=date(2018, 4, 5),
-            end_date=date(2019, 4, 5),
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=5,
+            day=8,
         )
-        OfficerHistoryFactory(
+
+        EventFactory(
             department=other_department,
             officer=officer_1,
-            start_date=date(2017, 2, 3),
-            end_date=date(2018, 2, 1),
+            kind=OFFICER_HIRE,
+            year=2017,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
+            department=other_department,
+            officer=officer_4,
+            kind=OFFICER_HIRE,
+            year=2017,
+            month=2,
+            day=3,
         )
 
         documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))

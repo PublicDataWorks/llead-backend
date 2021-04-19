@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from officers.serializers import OfficerDetailsSerializer
-from officers.factories import OfficerFactory, OfficerHistoryFactory
+from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
@@ -19,20 +19,38 @@ class OfficerDetailsSerializerTestCase(TestCase):
             gender='male',
         )
         department = DepartmentFactory()
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
             department=department,
             badge_no='12435',
             annual_salary='57K',
-            start_date=date(2020, 5, 4),
-            end_date=date(2021, 5, 4)
+            year=2020,
+            month=5,
+            day=4,
         )
-        OfficerHistoryFactory(
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='67893',
+            annual_salary='20K',
+            year=2017,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
             officer=officer,
             badge_no=None,
-            annual_salary='20K',
-            start_date=date(2015, 7, 20),
-            end_date=date(2020, 5, 4)
+            year=2015,
+            month=7,
+            day=20,
         )
 
         document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
@@ -53,7 +71,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
         assert result == {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435'],
+            'badges': ['12435', '67893', '5432'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -64,7 +82,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'annual_salary': '57K',
             'documents_count': 3,
             'complaints_count': 2,
-            'data_period': ['2015-2021'],
+            'data_period': ['2015-2020'],
             'complaints_data_period': ['2019-2020'],
             'documents_data_period': ['2016-2018'],
         }
@@ -72,35 +90,29 @@ class OfficerDetailsSerializerTestCase(TestCase):
     def test_data_period(self):
         officer = OfficerFactory()
 
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2018, 2, 3),
-            end_date=date(2019, 2, 3),
+            year=2018,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2020, 4, 5),
-            end_date=date(2020, 10, 5),
+            year=2020,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2012, 2, 3),
-            end_date=date(2015, 2, 3),
+            year=2012,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2014, 5, 6),
-            end_date=date(2016, 5, 6),
+            year=2013,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=date(2016, 3, 8),
-            end_date=None,
+            year=2014,
         )
-        OfficerHistoryFactory(
+        EventFactory(
             officer=officer,
-            start_date=None,
-            end_date=None,
+            year=None,
         )
 
         document_1 = DocumentFactory(incident_date=date(2009, 5, 4))
@@ -116,7 +128,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
         result = OfficerDetailsSerializer(officer).data
         assert result['data_period'] == [
             '2009',
-            '2012-2016',
+            '2012-2014',
             '2018-2021',
         ]
 

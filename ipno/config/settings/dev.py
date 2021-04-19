@@ -3,6 +3,7 @@ from datetime import timedelta
 
 INSTALLED_APPS += (  # NOQA
     'debug_toolbar',
+    'django_extensions',
 )
 
 CORS_ORIGIN_WHITELIST = [
