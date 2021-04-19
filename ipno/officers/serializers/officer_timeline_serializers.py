@@ -38,6 +38,7 @@ class LeftTimelineSerializer(BaseTimelineSerializer):
 
 
 class ComplaintTimelineSerializer(BaseTimelineSerializer):
+    id = serializers.IntegerField()
     date = serializers.DateField(source='incident_date')
     year = serializers.IntegerField(source='occur_year')
     rule_violation = serializers.CharField()
