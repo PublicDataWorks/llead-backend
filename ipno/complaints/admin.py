@@ -5,7 +5,7 @@ from complaints.models import Complaint
 
 
 class ComplaintAdmin(ModelAdmin):
-    list_display = ('id', 'incident_date', 'tracking_number', 'created_at', 'updated_at')
+    list_display = ('id', 'complaint_uid', 'allegation_uid', 'charge_uid', 'created_at', 'updated_at')
 
 
 admin.site.register(Complaint, ComplaintAdmin)

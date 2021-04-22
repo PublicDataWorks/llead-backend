@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from shared.serializers import SimpleDepartmentSerializer
 from utils.data_utils import data_period
+from officers.constants import COMPLAINT_EVENT_KINDS
 
 
 class OfficerDetailsSerializer(serializers.Serializer):
@@ -55,11 +56,15 @@ class OfficerDetailsSerializer(serializers.Serializer):
             year__isnull=False,
         ).values_list('year', flat=True))
 
-        years = event_years + obj.document_years + obj.complaint_years
+        years = event_years + obj.document_years
         return data_period(years)
 
     def get_documents_data_period(self, obj):
         return data_period(obj.document_years)
 
     def get_complaints_data_period(self, obj):
-        return data_period(obj.complaint_years)
+        complaint_years = list(obj.event_set.filter(
+            year__isnull=False,
+            kind__in=COMPLAINT_EVENT_KINDS
+        ).values_list('year', flat=True))
+        return data_period(complaint_years)

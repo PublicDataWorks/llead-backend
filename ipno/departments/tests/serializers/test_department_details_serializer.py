@@ -88,8 +88,8 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         for document in documents:
             document.departments.add(department)
 
-        complaints = ComplaintFactory.create_batch(2, incident_date=date(2018, 3, 6))
-        ComplaintFactory(incident_date=date(2018, 3, 6))
+        complaints = ComplaintFactory.create_batch(2)
+        ComplaintFactory()
         for complaint in complaints:
             complaint.departments.add(department)
 
@@ -158,6 +158,10 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         )
         EventFactory(
             department=department,
+            year=2019,
+        )
+        EventFactory(
+            department=department,
             year=None,
         )
 
@@ -166,17 +170,12 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         document_1.departments.add(department)
         document_2.departments.add(department)
 
-        complaint_1 = ComplaintFactory(incident_date=date(2019, 7, 2))
-        complaint_2 = ComplaintFactory(incident_date=date(2021, 5, 4))
-        complaint_1.departments.add(department)
-        complaint_2.departments.add(department)
-
         result = DepartmentDetailsSerializer(department).data
         assert result['data_period'] == [
             '2009',
             '2012-2014',
             '2016',
-            '2018-2021',
+            '2018-2020',
         ]
 
     def test_data_period_with_empty_data(self):

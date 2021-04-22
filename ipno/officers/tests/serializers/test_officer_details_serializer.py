@@ -7,6 +7,7 @@ from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
+from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
 
 
 class OfficerDetailsSerializerTestCase(TestCase):
@@ -61,11 +62,28 @@ class OfficerDetailsSerializerTestCase(TestCase):
         document_2.officers.add(officer)
         document_3.officers.add(officer)
 
-        complaint_1 = ComplaintFactory(incident_date=date(2019, 5, 4))
-        complaint_2 = ComplaintFactory(incident_date=date(2020, 5, 4))
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
 
         complaint_1.officers.add(officer)
         complaint_2.officers.add(officer)
+
+        EventFactory(
+            officer=officer,
+            kind=COMPLAINT_RECEIVE,
+            badge_no=None,
+            year=2019,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            kind=ALLEGATION_CREATE,
+            badge_no=None,
+            year=2020,
+            month=5,
+            day=4,
+        )
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
@@ -112,6 +130,10 @@ class OfficerDetailsSerializerTestCase(TestCase):
         )
         EventFactory(
             officer=officer,
+            year=2019,
+        )
+        EventFactory(
+            officer=officer,
             year=None,
         )
 
@@ -120,16 +142,11 @@ class OfficerDetailsSerializerTestCase(TestCase):
         document_1.officers.add(officer)
         document_2.officers.add(officer)
 
-        complaint_1 = ComplaintFactory(incident_date=date(2019, 7, 2))
-        complaint_2 = ComplaintFactory(incident_date=date(2021, 5, 4))
-        complaint_1.officers.add(officer)
-        complaint_2.officers.add(officer)
-
         result = OfficerDetailsSerializer(officer).data
         assert result['data_period'] == [
             '2009',
             '2012-2014',
-            '2018-2021',
+            '2018-2020',
         ]
 
     def test_data_period_with_empty_data(self):

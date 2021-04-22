@@ -40,16 +40,3 @@ class OfficerTestCase(TestCase):
         document_3.officers.add(officer)
 
         assert sorted(officer.document_years) == [2016, 2018, 2019]
-
-    def test_complaint_years(self):
-        officer = OfficerFactory()
-
-        complaint_1 = ComplaintFactory(incident_date=date(2012, 5, 4))
-        complaint_2 = ComplaintFactory(incident_date=date(2020, 5, 4))
-        complaint_3 = ComplaintFactory(incident_date=date(2018, 5, 4))
-
-        complaint_1.officers.add(officer)
-        complaint_2.officers.add(officer)
-        complaint_3.officers.add(officer)
-
-        assert sorted(officer.complaint_years) == [2012, 2018, 2020]

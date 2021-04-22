@@ -38,9 +38,9 @@ class LeftTimelineSerializer(BaseTimelineSerializer):
 
 
 class ComplaintTimelineSerializer(BaseTimelineSerializer):
+    year = serializers.SerializerMethodField()
     id = serializers.IntegerField()
-    date = serializers.DateField(source='incident_date')
-    year = serializers.IntegerField(source='occur_year')
+    rule_code = serializers.CharField()
     rule_violation = serializers.CharField()
     paragraph_violation = serializers.CharField()
     disposition = serializers.CharField()
@@ -49,6 +49,18 @@ class ComplaintTimelineSerializer(BaseTimelineSerializer):
 
     def get_kind(self, obj):
         return COMPLAINT_TIMELINE_KIND
+
+    def get_date(self, obj):
+        if obj.prefetched_receive_events:
+            receive_event = obj.prefetched_receive_events[0]
+            if receive_event:
+                date = parse_date(receive_event.year, receive_event.month, receive_event.day)
+                return str(date) if date else None
+
+    def get_year(self, obj):
+        if obj.prefetched_receive_events:
+            receive_event = obj.prefetched_receive_events[0]
+            return receive_event.year if receive_event else None
 
 
 class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):

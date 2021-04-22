@@ -5,14 +5,17 @@ from officers.constants import EVENT_KINDS
 
 
 class Event(TimeStampsModel):
-    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True)
-    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
-    kind = models.CharField(max_length=255, choices=EVENT_KINDS)
-    year = models.IntegerField(null=True, blank=True)
-    month = models.IntegerField(null=True, blank=True)
-    day = models.IntegerField(null=True, blank=True)
+    event_uid = models.CharField(max_length=255, db_index=True)
+    kind = models.CharField(max_length=255, choices=EVENT_KINDS, db_index=True)
+    year = models.IntegerField(null=True, blank=True, db_index=True)
+    month = models.IntegerField(null=True, blank=True, db_index=True)
+    day = models.IntegerField(null=True, blank=True, db_index=True)
     time = models.CharField(max_length=255, null=True, blank=True)
     raw_date = models.CharField(max_length=255, null=True, blank=True)
+    complaint_uid = models.CharField(max_length=255, null=True, blank=True)
+    allegation_uid = models.CharField(max_length=255, null=True, blank=True)
+    appeal_uid = models.CharField(max_length=255, null=True, blank=True)
+    use_of_force_uid = models.CharField(max_length=255, null=True, blank=True)
     badge_no = models.CharField(max_length=255, null=True, blank=True)
     employee_id = models.CharField(max_length=255, null=True, blank=True)
     department_code = models.CharField(max_length=255, null=True, blank=True)
@@ -29,3 +32,6 @@ class Event(TimeStampsModel):
     years_employed = models.IntegerField(null=True, blank=True)
     annual_salary = models.CharField(max_length=255, null=True, blank=True)
     hourly_salary = models.CharField(max_length=255, null=True, blank=True)
+
+    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)

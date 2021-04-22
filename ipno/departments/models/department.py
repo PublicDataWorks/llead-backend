@@ -19,9 +19,3 @@ class Department(TimeStampsModel):
         return list(self.document_set.filter(
             incident_date__isnull=False,
         ).values_list('incident_date__year', flat=True))
-
-    @property
-    def complaint_years(self):
-        return list(self.complaint_set.filter(
-            incident_date__isnull=False,
-        ).values_list('incident_date__year', flat=True))
