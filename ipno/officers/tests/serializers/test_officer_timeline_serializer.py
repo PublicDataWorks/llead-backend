@@ -27,6 +27,7 @@ from officers.constants import (
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
+    COMPLAINT_RECEIVE,
 )
 
 
@@ -100,15 +101,42 @@ class LeftTimelineSerializerTestCase(TestCase):
 
 class ComplaintTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        complaint = ComplaintFactory(incident_date=date(2019, 5, 4))
+        complaint = ComplaintFactory()
+        event = EventFactory(
+            kind=COMPLAINT_RECEIVE,
+            year=2019,
+            month=5,
+            day=4,
+        )
+        setattr(complaint, 'prefetched_receive_events', [event])
 
         result = ComplaintTimelineSerializer(complaint).data
 
         assert result == {
             'id': complaint.id,
             'kind': COMPLAINT_TIMELINE_KIND,
-            'date': str(complaint.incident_date),
-            'year': complaint.occur_year,
+            'date': str(date(2019, 5, 4)),
+            'year': 2019,
+            'rule_code': complaint.rule_code,
+            'rule_violation': complaint.rule_violation,
+            'paragraph_violation': complaint.paragraph_violation,
+            'disposition': complaint.disposition,
+            'action': complaint.action,
+            'tracking_number': complaint.tracking_number,
+        }
+
+    def test_data_with_empty_date(self):
+        complaint = ComplaintFactory()
+        setattr(complaint, 'prefetched_receive_events', [])
+
+        result = ComplaintTimelineSerializer(complaint).data
+
+        assert result == {
+            'id': complaint.id,
+            'kind': COMPLAINT_TIMELINE_KIND,
+            'date': None,
+            'year': None,
+            'rule_code': complaint.rule_code,
             'rule_violation': complaint.rule_violation,
             'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,

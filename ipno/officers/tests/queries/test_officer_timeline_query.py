@@ -20,6 +20,7 @@ from officers.constants import (
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
+    COMPLAINT_RECEIVE,
 )
 
 
@@ -28,6 +29,11 @@ class OfficerTimelineQueryTestCase(TestCase):
         officer = OfficerFactory()
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+
         EventFactory(
             officer=officer,
             department=department_1,
@@ -71,16 +77,15 @@ class OfficerTimelineQueryTestCase(TestCase):
             month=7,
             day=13,
         )
-        complaint_1 = ComplaintFactory(
-            incident_date=date(2019, 5, 4),
-            occur_year=2019
+        complaint_receive_event = EventFactory(
+            officer=officer,
+            department=department_1,
+            kind=COMPLAINT_RECEIVE,
+            year=2019,
+            month=5,
+            day=4,
         )
-        complaint_2 = ComplaintFactory(
-            incident_date=None,
-            occur_year=None
-        )
-        complaint_1.officers.add(officer)
-        complaint_2.officers.add(officer)
+        complaint_1.events.add(complaint_receive_event)
 
         document_1 = DocumentFactory(incident_date=date(2018, 6, 5))
         document_2 = DocumentFactory(incident_date=date(2021, 2, 1))
@@ -95,6 +100,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': None,
                 'year': None,
+                'rule_code': complaint_2.rule_code,
                 'rule_violation': complaint_2.rule_violation,
                 'paragraph_violation': complaint_2.paragraph_violation,
                 'disposition': complaint_2.disposition,
@@ -133,8 +139,9 @@ class OfficerTimelineQueryTestCase(TestCase):
             {
                 'id': complaint_1.id,
                 'kind': COMPLAINT_TIMELINE_KIND,
-                'date': str(complaint_1.incident_date),
-                'year': complaint_1.occur_year,
+                'date': str(date(2019, 5, 4)),
+                'year': 2019,
+                'rule_code': complaint_1.rule_code,
                 'rule_violation': complaint_1.rule_violation,
                 'paragraph_violation': complaint_1.paragraph_violation,
                 'disposition': complaint_1.disposition,

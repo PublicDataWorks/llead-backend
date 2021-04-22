@@ -26,7 +26,6 @@ class Officer(TimeStampsModel):
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     middle_initial = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
-    employee_id = models.CharField(max_length=255, null=True, blank=True)
     birth_year = models.IntegerField(null=True, blank=True)
     birth_month = models.IntegerField(null=True, blank=True)
     birth_day = models.IntegerField(null=True, blank=True)
@@ -53,11 +52,5 @@ class Officer(TimeStampsModel):
     @cached_property
     def document_years(self):
         return list(self.document_set.filter(
-            incident_date__isnull=False,
-        ).values_list('incident_date__year', flat=True))
-
-    @cached_property
-    def complaint_years(self):
-        return list(self.complaint_set.filter(
             incident_date__isnull=False,
         ).values_list('incident_date__year', flat=True))
