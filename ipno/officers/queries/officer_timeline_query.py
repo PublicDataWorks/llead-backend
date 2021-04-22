@@ -1,3 +1,5 @@
+from django.db.models import Prefetch
+
 from officers.serializers.officer_timeline_serializers import (
     ComplaintTimelineSerializer,
     JoinedTimelineSerializer,
@@ -11,7 +13,9 @@ from officers.constants import (
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
+    COMPLAINT_RECEIVE,
 )
+from officers.models import Event
 
 
 class OfficerTimelineQuery(object):
@@ -43,7 +47,13 @@ class OfficerTimelineQuery(object):
 
     @property
     def _complaint_timeline(self):
-        complaint_timeline_queryset = self.officer.complaint_set.all()
+        complaint_timeline_queryset = self.officer.complaint_set.prefetch_related(
+            Prefetch(
+                'events',
+                queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
+                to_attr='prefetched_receive_events'
+            ),
+        )
 
         return ComplaintTimelineSerializer(complaint_timeline_queryset, many=True).data
 

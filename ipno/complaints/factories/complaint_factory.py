@@ -12,10 +12,10 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Complaint
 
-    incident_date = factory.LazyFunction(lambda: fake.date_object())
-    occur_year = factory.LazyFunction(lambda: int(fake.year()))
-    occur_month = factory.LazyFunction(lambda: int(fake.month()))
-    occur_day = factory.LazyFunction(lambda: int(fake.day_of_month()))
+    complaint_uid = factory.LazyFunction(lambda: fake.uuid4())
+    allegation_uid = factory.LazyFunction(lambda: fake.uuid4())
+    charge_uid = factory.LazyFunction(lambda: fake.uuid4())
+    rule_code = factory.LazyFunction(lambda: fake.word())
     rule_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     paragraph_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     disposition = factory.LazyFunction(lambda: fake.word())

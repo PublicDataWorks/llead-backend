@@ -42,6 +42,6 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         event_years = list(obj.event_set.filter(
             year__isnull=False,
         ).values_list('year', flat=True))
-        years = event_years + obj.document_years + obj.complaint_years
+        years = event_years + obj.document_years
 
         return data_period(years)
