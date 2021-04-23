@@ -42,6 +42,7 @@ class ComplaintTimelineSerializer(BaseTimelineSerializer):
     id = serializers.IntegerField()
     rule_code = serializers.CharField()
     rule_violation = serializers.CharField()
+    paragraph_code = serializers.CharField()
     paragraph_violation = serializers.CharField()
     disposition = serializers.CharField()
     action = serializers.CharField()
