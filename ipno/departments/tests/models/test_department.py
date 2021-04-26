@@ -3,7 +3,6 @@ from django.test.testcases import TestCase
 
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
-from complaints.factories import ComplaintFactory
 
 
 class DepartmentTestCase(TestCase):

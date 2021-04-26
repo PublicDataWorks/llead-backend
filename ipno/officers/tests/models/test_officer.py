@@ -4,7 +4,6 @@ from django.test.testcases import TestCase
 
 from officers.factories import OfficerFactory
 from documents.factories import DocumentFactory
-from complaints.factories import ComplaintFactory
 
 
 class OfficerTestCase(TestCase):
