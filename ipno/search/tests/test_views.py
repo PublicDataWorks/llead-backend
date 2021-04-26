@@ -1,6 +1,5 @@
-import pytz
 from operator import itemgetter
-from datetime import datetime, date
+from datetime import date
 
 from django.urls import reverse
 

@@ -1,4 +1,3 @@
-from datetime import date
 from operator import itemgetter
 
 from django.urls import reverse
