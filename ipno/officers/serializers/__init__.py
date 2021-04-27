@@ -5,7 +5,8 @@ from .officer_timeline_serializers import (
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
     SalaryChangeTimelineSerializer,
-    RankChangeTimelineSerializer
+    RankChangeTimelineSerializer,
+    UnitChangeTimelineSerializer
 )
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     'LeftTimelineSerializer',
     'DocumentTimelineSerializer',
     'SalaryChangeTimelineSerializer',
-    'RankChangeTimelineSerializer'
+    'RankChangeTimelineSerializer',
+    'UnitChangeTimelineSerializer'
 ]
