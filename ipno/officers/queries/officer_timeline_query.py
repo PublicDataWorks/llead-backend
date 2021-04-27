@@ -6,7 +6,8 @@ from officers.serializers.officer_timeline_serializers import (
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
     SalaryChangeTimelineSerializer,
-    RankChangeTimelineSerializer
+    RankChangeTimelineSerializer,
+    UnitChangeTimelineSerializer
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -14,6 +15,7 @@ from officers.constants import (
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
     COMPLAINT_RECEIVE,
+    OFFICER_DEPT
 )
 from officers.models import Event
 
@@ -23,25 +25,30 @@ class OfficerTimelineQuery(object):
         self.officer = officer
 
     @staticmethod
-    def _filter_event_changes(events, compared_field):
+    def _filter_event_changes(events, compared_field, previous_fields=[]):
         have_year_events = [event for event in events if event.year]
         no_year_events = [event for event in events if not event.year]
 
-        previous_value = None
+        previous_event = None
         changes = []
 
         for event in have_year_events:
+            previous_value = getattr(previous_event, compared_field) if previous_event else None
             compared_value = getattr(event, compared_field)
             if compared_value != previous_value:
+                if previous_event:
+                    for field in previous_fields:
+                        setattr(event, f'prev_{field}', getattr(previous_event, field))
                 changes.append(event)
-                previous_value = compared_value
+                previous_event = event
 
-        previous_value = None
+        previous_event = None
         for event in no_year_events:
+            previous_value = getattr(previous_event, compared_field) if previous_event else None
             compared_value = getattr(event, compared_field)
             if compared_value != previous_value:
                 changes.append(event)
-                previous_value = compared_value
+                previous_event = event
 
         return changes
 
@@ -118,6 +125,25 @@ class OfficerTimelineQuery(object):
 
         return RankChangeTimelineSerializer(rank_changes, many=True).data
 
+    @property
+    def _unit_change_timeline(self):
+        events = self.officer.event_set.filter(
+                kind=OFFICER_DEPT
+            ).order_by(
+                'year',
+                'month',
+                'day',
+            )
+
+        unit_changes = self._filter_event_changes(
+            events,
+            'department_code',
+            ['department_code', 'department_desc']
+        )
+
+        return UnitChangeTimelineSerializer(unit_changes, many=True).data
+
     def query(self):
         return self._complaint_timeline + self._join_timeline + self._left_timeline \
-               + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline
+               + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
+               + self._unit_change_timeline

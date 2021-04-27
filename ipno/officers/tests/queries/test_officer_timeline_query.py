@@ -13,7 +13,8 @@ from officers.constants import (
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
-    RANK_CHANGE_TIMELINE_KIND
+    RANK_CHANGE_TIMELINE_KIND,
+    UNIT_CHANGE_TIMELINE_KIND,
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -21,6 +22,7 @@ from officers.constants import (
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
     COMPLAINT_RECEIVE,
+    OFFICER_DEPT,
 )
 
 
@@ -87,6 +89,27 @@ class OfficerTimelineQueryTestCase(TestCase):
         )
         complaint_1.events.add(complaint_receive_event)
 
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer,
+            department=department_1,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2017,
+            month=7,
+            day=14,
+        )
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer,
+            department=department_1,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=2018,
+            month=8,
+            day=10,
+        )
+
         document_1 = DocumentFactory(incident_date=date(2018, 6, 5))
         document_2 = DocumentFactory(incident_date=date(2021, 2, 1))
 
@@ -115,6 +138,15 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'year': 2017,
             },
             {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '193',
+                'department_desc': 'Gang Investigation Division',
+                'prev_department_code': None,
+                'prev_department_desc': None,
+                'date': str(date(2017, 7, 14)),
+                'year': 2017,
+            },
+            {
                 'kind': JOINED_TIMELINE_KIND,
                 'date': str(date(2018, 4, 8)),
                 'year': 2018,
@@ -136,6 +168,15 @@ class OfficerTimelineQueryTestCase(TestCase):
                         'name': department_1.name,
                     },
                 ],
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '610',
+                'department_desc': 'Detective Area - Central',
+                'prev_department_code': '193',
+                'prev_department_desc': 'Gang Investigation Division',
+                'date': str(date(2018, 8, 10)),
+                'year': 2018,
             },
             {
                 'id': complaint_1.id,
@@ -376,6 +417,122 @@ class OfficerTimelineQueryTestCase(TestCase):
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
                 'rank_desc': 'Senior Officer',
+                'date': None,
+                'year': None,
+            },
+        ]
+
+        assert OfficerTimelineQuery(officer).query() == expected_result
+
+    def test_unit_change(self):
+        officer = OfficerFactory()
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2015,
+            month=12,
+            day=1,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=2019,
+            month=3,
+            day=7,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2017,
+            month=5,
+            day=6,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='5020',
+            department_desc='police-uniform patrol bureau',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='5020',
+            department_desc='police-uniform patrol bureau',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            kind=OFFICER_DEPT,
+            department_code='5020',
+            department_desc='police-uniform patrol bureau',
+            year=2019,
+            month=None,
+            day=None,
+        )
+
+        expected_result = [
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '193',
+                'department_desc': 'Gang Investigation Division',
+                'prev_department_code': None,
+                'prev_department_desc': None,
+                'date': str(date(2015, 12, 1)),
+                'year': 2015,
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '610',
+                'department_desc': 'Detective Area - Central',
+                'prev_department_code': '193',
+                'prev_department_desc': 'Gang Investigation Division',
+                'date': str(date(2019, 3, 7)),
+                'year': 2019,
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '5020',
+                'department_desc': 'police-uniform patrol bureau',
+                'prev_department_code': '610',
+                'prev_department_desc': 'Detective Area - Central',
+                'date': None,
+                'year': 2019,
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '5020',
+                'department_desc': 'police-uniform patrol bureau',
+                'prev_department_code': None,
+                'prev_department_desc': None,
+                'date': None,
+                'year': None,
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '610',
+                'department_desc': 'Detective Area - Central',
+                'prev_department_code': None,
+                'prev_department_desc': None,
                 'date': None,
                 'year': None,
             },

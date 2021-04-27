@@ -15,13 +15,15 @@ from officers.constants import (
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
-    RANK_CHANGE_TIMELINE_KIND
+    RANK_CHANGE_TIMELINE_KIND,
+    UNIT_CHANGE_TIMELINE_KIND,
 )
 from officers.constants import (
     OFFICER_HIRE,
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
+    OFFICER_DEPT,
 )
 from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
 
@@ -263,6 +265,27 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         )
         complaint_1.events.add(complaint_receive_event)
 
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer,
+            department=department_1,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2017,
+            month=7,
+            day=14,
+        )
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer,
+            department=department_1,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=2018,
+            month=8,
+            day=10,
+        )
+
         document_1 = DocumentFactory(incident_date=date(2018, 6, 5))
         document_2 = DocumentFactory(incident_date=date(2021, 2, 1))
 
@@ -291,6 +314,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'year': 2017,
             },
             {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '193',
+                'department_desc': 'Gang Investigation Division',
+                'prev_department_code': None,
+                'prev_department_desc': None,
+                'date': str(date(2017, 7, 14)),
+                'year': 2017,
+            },
+            {
                 'kind': JOINED_TIMELINE_KIND,
                 'date': str(date(2018, 4, 8)),
                 'year': 2018,
@@ -312,6 +344,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                         'name': department_1.name,
                     },
                 ],
+            },
+            {
+                'kind': UNIT_CHANGE_TIMELINE_KIND,
+                'department_code': '610',
+                'department_desc': 'Detective Area - Central',
+                'prev_department_code': '193',
+                'prev_department_desc': 'Gang Investigation Division',
+                'date': str(date(2018, 8, 10)),
+                'year': 2018,
             },
             {
                 'id': complaint_1.id,
