@@ -8,7 +8,8 @@ from officers.serializers import (
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
     SalaryChangeTimelineSerializer,
-    RankChangeTimelineSerializer
+    RankChangeTimelineSerializer,
+    UnitChangeTimelineSerializer,
 )
 from officers.constants import (
     JOINED_TIMELINE_KIND,
@@ -16,7 +17,8 @@ from officers.constants import (
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
-    RANK_CHANGE_TIMELINE_KIND
+    RANK_CHANGE_TIMELINE_KIND,
+    UNIT_CHANGE_TIMELINE_KIND,
 )
 from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
@@ -28,6 +30,7 @@ from officers.constants import (
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
     COMPLAINT_RECEIVE,
+    OFFICER_DEPT,
 )
 
 
@@ -210,6 +213,32 @@ class RankChangeTimelineSerializerTestCase(TestCase):
         assert result == {
             'kind': RANK_CHANGE_TIMELINE_KIND,
             'rank_desc': 'senior police office',
+            'date': str(date(2017, 7, 13)),
+            'year': 2017,
+        }
+
+
+class UnitChangeTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_DEPT,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=2017,
+            month=7,
+            day=13,
+        )
+        setattr(event, 'prev_department_code', '193')
+        setattr(event, 'prev_department_desc', 'Gang Investigation Division')
+
+        result = UnitChangeTimelineSerializer(event).data
+
+        assert result == {
+            'kind': UNIT_CHANGE_TIMELINE_KIND,
+            'department_code': '610',
+            'department_desc': 'Detective Area - Central',
+            'prev_department_code': '193',
+            'prev_department_desc': 'Gang Investigation Division',
             'date': str(date(2017, 7, 13)),
             'year': 2017,
         }

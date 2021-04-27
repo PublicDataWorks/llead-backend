@@ -10,7 +10,8 @@ from officers.constants import (
     COMPLAINT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
-    RANK_CHANGE_TIMELINE_KIND
+    RANK_CHANGE_TIMELINE_KIND,
+    UNIT_CHANGE_TIMELINE_KIND
 )
 
 
@@ -87,3 +88,13 @@ class RankChangeTimelineSerializer(BaseTimelineSerializer):
 
     def get_kind(self, obj):
         return RANK_CHANGE_TIMELINE_KIND
+
+
+class UnitChangeTimelineSerializer(BaseTimelineSerializer):
+    department_code = serializers.CharField()
+    department_desc = serializers.CharField()
+    prev_department_code = serializers.CharField(default=None)
+    prev_department_desc = serializers.CharField(default=None)
+
+    def get_kind(self, obj):
+        return UNIT_CHANGE_TIMELINE_KIND
