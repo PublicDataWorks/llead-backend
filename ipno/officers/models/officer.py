@@ -44,10 +44,10 @@ class Officer(TimeStampsModel):
 
     @property
     def badges(self):
-        return [
+        return list(dict.fromkeys([
             event.badge_no for event in self.event_set.all()
             if event.badge_no
-        ]
+        ]))
 
     @cached_property
     def document_years(self):

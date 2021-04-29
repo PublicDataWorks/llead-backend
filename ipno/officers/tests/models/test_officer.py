@@ -2,8 +2,9 @@ from datetime import date
 
 from django.test.testcases import TestCase
 
-from officers.factories import OfficerFactory
+from officers.factories import OfficerFactory, EventFactory
 from documents.factories import DocumentFactory
+from officers.models import Officer
 
 
 class OfficerTestCase(TestCase):
@@ -26,6 +27,48 @@ class OfficerTestCase(TestCase):
     def test_str(self):
         officer = OfficerFactory()
         assert str(officer) == f"{officer.name} - {officer.id}"
+
+    def test_badges(self):
+        officer = OfficerFactory()
+        EventFactory(
+            officer=officer,
+            badge_no='12435',
+            year=2020,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no='67893',
+            year=2017,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no='12435',
+            year=2015,
+            month=7,
+            day=20,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no=None,
+            year=2016,
+            month=7,
+            day=20,
+        )
+
+        prefetch_officer = Officer.objects.prefetch_events()[0]
+
+        assert prefetch_officer.badges == ['12435', '67893', '5432']
 
     def test_document_years(self):
         officer = OfficerFactory()
