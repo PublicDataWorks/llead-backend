@@ -208,12 +208,10 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         officer = OfficerFactory()
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
-        complaint_1 = ComplaintFactory(allegation_finding='Sustained')
-        complaint_2 = ComplaintFactory(allegation_finding='not sustained')
-        complaint_3 = ComplaintFactory(allegation_finding='unfounded')
-        complaint_4 = ComplaintFactory(allegation_finding='illegitimate outcome')
-        for complaint in [complaint_1, complaint_2, complaint_3, complaint_4]:
-            complaint.officers.add(officer)
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
 
         EventFactory(
             officer=officer,
