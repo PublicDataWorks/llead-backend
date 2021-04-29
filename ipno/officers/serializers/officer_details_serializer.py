@@ -1,4 +1,4 @@
-from django.db.models import F
+from django.db.models import F, Q
 
 from rest_framework import serializers
 
@@ -17,11 +17,21 @@ class OfficerDetailsSerializer(serializers.Serializer):
 
     department = serializers.SerializerMethodField()
     annual_salary = serializers.SerializerMethodField()
+    hourly_salary = serializers.SerializerMethodField()
     documents_count = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
     data_period = serializers.SerializerMethodField()
     documents_data_period = serializers.SerializerMethodField()
     complaints_data_period = serializers.SerializerMethodField()
+
+    def _get_latest_salary_event(self, obj):
+        if not hasattr(self, '_latest_salary_event'):
+            self._latest_salary_event = obj.event_set.filter(
+                Q(annual_salary__isnull=False) | Q(hourly_salary__isnull=False),
+            ).order_by(
+                '-year', '-month', '-day'
+            ).first()
+        return self._latest_salary_event
 
     def get_badges(self, obj):
         return list(dict.fromkeys(obj.event_set.order_by(
@@ -38,12 +48,12 @@ class OfficerDetailsSerializer(serializers.Serializer):
             return SimpleDepartmentSerializer(event.department).data
 
     def get_annual_salary(self, obj):
-        event = obj.event_set.filter(
-            annual_salary__isnull=False
-        ).order_by(
-            '-year', '-month', '-day'
-        ).first()
+        event = self._get_latest_salary_event(obj)
         return event.annual_salary if event else None
+
+    def get_hourly_salary(self, obj):
+        event = self._get_latest_salary_event(obj)
+        return event.hourly_salary if event else None
 
     def get_documents_count(self, obj):
         return obj.document_set.count()

@@ -24,7 +24,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='12435',
-            annual_salary='57K',
+            annual_salary='57000',
             year=2020,
             month=5,
             day=4,
@@ -33,7 +33,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='67893',
-            annual_salary='20K',
+            annual_salary='20000',
             year=2017,
             month=None,
             day=None,
@@ -97,7 +97,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
                 'id': department.id,
                 'name': department.name,
             },
-            'annual_salary': '57K',
+            'annual_salary': '57000',
+            'hourly_salary': None,
             'documents_count': 3,
             'complaints_count': 2,
             'data_period': ['2015-2020'],
@@ -154,3 +155,99 @@ class OfficerDetailsSerializerTestCase(TestCase):
 
         result = OfficerDetailsSerializer(officer).data
         assert result['data_period'] == []
+
+    def test_salary_fields(self):
+        officer = OfficerFactory()
+
+        EventFactory(
+            officer=officer,
+            annual_salary='57000',
+            hourly_salary='16.14',
+            year=2021,
+            month=2,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary='20000',
+            hourly_salary=None,
+            year=2020,
+            month=1,
+            day=2,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary=None,
+            hourly_salary=None,
+            year=2021,
+            month=3,
+            day=6,
+        )
+
+        result = OfficerDetailsSerializer(officer).data
+        assert result['annual_salary'] == '57000'
+        assert result['hourly_salary'] == '16.14'
+
+    def test_salary_fields_with_empty_hourly_salary(self):
+        officer = OfficerFactory()
+
+        EventFactory(
+            officer=officer,
+            annual_salary='57000',
+            hourly_salary=None,
+            year=2021,
+            month=2,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary='20000',
+            hourly_salary='16.14',
+            year=2020,
+            month=1,
+            day=2,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary=None,
+            hourly_salary=None,
+            year=2021,
+            month=3,
+            day=6,
+        )
+
+        result = OfficerDetailsSerializer(officer).data
+        assert result['annual_salary'] == '57000'
+        assert result['hourly_salary'] is None
+
+    def test_salary_fields_with_empty_annual_salary(self):
+        officer = OfficerFactory()
+
+        EventFactory(
+            officer=officer,
+            annual_salary=None,
+            hourly_salary='16.14',
+            year=2021,
+            month=2,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary='20000',
+            hourly_salary='16.14',
+            year=2020,
+            month=1,
+            day=2,
+        )
+        EventFactory(
+            officer=officer,
+            annual_salary=None,
+            hourly_salary=None,
+            year=2021,
+            month=3,
+            day=6,
+        )
+
+        result = OfficerDetailsSerializer(officer).data
+        assert result['annual_salary'] is None
+        assert result['hourly_salary'] == '16.14'
