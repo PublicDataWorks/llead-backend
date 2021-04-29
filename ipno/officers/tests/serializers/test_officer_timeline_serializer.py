@@ -182,7 +182,8 @@ class SalaryChangeTimelineSerializerTestCase(TestCase):
     def test_data(self):
         event = EventFactory(
             kind=OFFICER_PAY_EFFECTIVE,
-            annual_salary='57k',
+            annual_salary='57000',
+            hourly_salary='16.15',
             year=2019,
             month=12,
             day=1,
@@ -192,7 +193,8 @@ class SalaryChangeTimelineSerializerTestCase(TestCase):
 
         assert result == {
             'kind': SALARY_CHANGE_TIMELINE_KIND,
-            'annual_salary': '57k',
+            'annual_salary': '57000',
+            'hourly_salary': '16.15',
             'date': str(date(2019, 12, 1)),
             'year': 2019,
         }
@@ -202,6 +204,7 @@ class RankChangeTimelineSerializerTestCase(TestCase):
     def test_data(self):
         event = EventFactory(
             kind=OFFICER_RANK,
+            rank_code='3',
             rank_desc='senior police office',
             year=2017,
             month=7,
@@ -212,6 +215,7 @@ class RankChangeTimelineSerializerTestCase(TestCase):
 
         assert result == {
             'kind': RANK_CHANGE_TIMELINE_KIND,
+            'rank_code': '3',
             'rank_desc': 'senior police office',
             'date': str(date(2017, 7, 13)),
             'year': 2017,
