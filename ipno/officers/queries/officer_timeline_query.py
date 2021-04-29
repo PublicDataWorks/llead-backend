@@ -60,9 +60,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _complaint_timeline(self):
-        complaint_timeline_queryset = self.officer.complaint_set.filter(
-            allegation_finding__icontains='sustained'
-        ).prefetch_related(
+        complaint_timeline_queryset = self.officer.complaint_set.prefetch_related(
             Prefetch(
                 'events',
                 queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
