@@ -30,7 +30,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.officers.distinct().count()
 
     def get_complaints_count(self, obj):
-        return obj.complaint_set.count()
+        return obj.complaint_set.values('complaint_uid').distinct().count()
 
     def get_documents_count(self, obj):
         return obj.document_set.count()
