@@ -133,7 +133,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         for document in documents:
             document.departments.add(department)
 
-        complaints = ComplaintFactory.create_batch(2)
+        complaints = ComplaintFactory.create_batch(2, complaint_uid='complaint_uid1') + \
+            ComplaintFactory.create_batch(3, complaint_uid='complaint_uid2')
         ComplaintFactory()
         for complaint in complaints:
             complaint.departments.add(department)
