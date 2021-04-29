@@ -24,13 +24,13 @@ class OfficerDetailsSerializer(serializers.Serializer):
     complaints_data_period = serializers.SerializerMethodField()
 
     def get_badges(self, obj):
-        return list(obj.event_set.order_by(
+        return list(dict.fromkeys(obj.event_set.order_by(
             F('year').desc(nulls_last=True),
             F('month').desc(nulls_last=True),
             F('day').desc(nulls_last=True),
         ).filter(
             badge_no__isnull=False
-        ).values_list('badge_no', flat=True))
+        ).values_list('badge_no', flat=True)))
 
     def get_department(self, obj):
         event = obj.event_set.order_by('-year', '-month', '-day').first()
