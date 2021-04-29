@@ -48,7 +48,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
         )
         EventFactory(
             officer=officer,
-            badge_no=None,
+            badge_no='12435',
             year=2015,
             month=7,
             day=20,
