@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from officers.serializers import (
     ComplaintTimelineSerializer,
+    UseOfForceTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
@@ -14,6 +15,7 @@ from officers.serializers import (
 from officers.constants import (
     JOINED_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
+    UOF_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
@@ -22,6 +24,7 @@ from officers.constants import (
 )
 from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
+from use_of_forces.factories import UseOfForceFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
 from officers.constants import (
@@ -147,6 +150,66 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'disposition': complaint.disposition,
             'action': complaint.action,
             'tracking_number': complaint.tracking_number,
+        }
+
+
+class UseOfForceTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        use_of_force = UseOfForceFactory()
+        EventFactory(
+            year=2019,
+            month=5,
+            day=4,
+            use_of_force=use_of_force,
+        )
+
+        result = UseOfForceTimelineSerializer(use_of_force).data
+        assert result == {
+            'id': use_of_force.id,
+            'kind': UOF_TIMELINE_KIND,
+            'date': str(date(2019, 5, 4)),
+            'year': 2019,
+            'force_type': use_of_force.force_type,
+            'force_description': use_of_force.force_description,
+            'force_reason': use_of_force.force_reason,
+            'disposition': use_of_force.disposition,
+            'service_type': use_of_force.service_type,
+            'citizen_involvement': use_of_force.citizen_involvement,
+            'citizen_age': use_of_force.citizen_age,
+            'citizen_race': use_of_force.citizen_race,
+            'citizen_sex': use_of_force.citizen_sex,
+            'uof_tracking_number': use_of_force.uof_tracking_number,
+            'citizen_arrested': use_of_force.citizen_arrested,
+            'citizen_injured': use_of_force.citizen_injured,
+            'citizen_hospitalized': use_of_force.citizen_hospitalized,
+            'officer_injured': use_of_force.officer_injured,
+            'traffic_stop': use_of_force.traffic_stop,
+        }
+
+    def test_data_with_empty_date(self):
+        use_of_force = UseOfForceFactory()
+        result = UseOfForceTimelineSerializer(use_of_force).data
+
+        assert result == {
+            'id': use_of_force.id,
+            'kind': UOF_TIMELINE_KIND,
+            'date': None,
+            'year': None,
+            'force_type': use_of_force.force_type,
+            'force_description': use_of_force.force_description,
+            'force_reason': use_of_force.force_reason,
+            'disposition': use_of_force.disposition,
+            'service_type': use_of_force.service_type,
+            'citizen_involvement': use_of_force.citizen_involvement,
+            'citizen_age': use_of_force.citizen_age,
+            'citizen_race': use_of_force.citizen_race,
+            'citizen_sex': use_of_force.citizen_sex,
+            'uof_tracking_number': use_of_force.uof_tracking_number,
+            'citizen_arrested': use_of_force.citizen_arrested,
+            'citizen_injured': use_of_force.citizen_injured,
+            'citizen_hospitalized': use_of_force.citizen_hospitalized,
+            'officer_injured': use_of_force.officer_injured,
+            'traffic_stop': use_of_force.traffic_stop,
         }
 
 

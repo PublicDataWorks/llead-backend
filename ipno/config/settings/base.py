@@ -60,6 +60,7 @@ LOCAL_APPS = (
     'departments',
     'officers',
     'complaints',
+    'use_of_forces',
     'analytics'
 )
 

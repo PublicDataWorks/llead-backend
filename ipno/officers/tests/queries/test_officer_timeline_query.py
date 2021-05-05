@@ -5,11 +5,13 @@ from django.test import TestCase
 from officers.queries import OfficerTimelineQuery
 from officers.factories import OfficerFactory, EventFactory
 from complaints.factories import ComplaintFactory
+from use_of_forces.factories import UseOfForceFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
 from officers.constants import (
     JOINED_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
+    UOF_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
@@ -23,6 +25,7 @@ from officers.constants import (
     OFFICER_RANK,
     COMPLAINT_RECEIVE,
     OFFICER_DEPT,
+    UOF_RECEIVE,
 )
 
 
@@ -117,6 +120,15 @@ class OfficerTimelineQueryTestCase(TestCase):
         document_2.officers.add(officer)
         document_1.departments.add(department_1)
 
+        use_of_force = UseOfForceFactory(officer=officer)
+        EventFactory(
+            kind=UOF_RECEIVE,
+            year=2019,
+            month=5,
+            day=5,
+            use_of_force=use_of_force,
+        )
+
         expected_result = [
             {
                 'id': complaint_2.id,
@@ -191,6 +203,27 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'disposition': complaint_1.disposition,
                 'action': complaint_1.action,
                 'tracking_number': complaint_1.tracking_number,
+            },
+            {
+                'id': use_of_force.id,
+                'kind': UOF_TIMELINE_KIND,
+                'date': str(date(2019, 5, 5)),
+                'year': 2019,
+                'force_type': use_of_force.force_type,
+                'force_description': use_of_force.force_description,
+                'force_reason': use_of_force.force_reason,
+                'disposition': use_of_force.disposition,
+                'service_type': use_of_force.service_type,
+                'citizen_involvement': use_of_force.citizen_involvement,
+                'citizen_age': use_of_force.citizen_age,
+                'citizen_race': use_of_force.citizen_race,
+                'citizen_sex': use_of_force.citizen_sex,
+                'uof_tracking_number': use_of_force.uof_tracking_number,
+                'citizen_arrested': use_of_force.citizen_arrested,
+                'citizen_injured': use_of_force.citizen_injured,
+                'citizen_hospitalized': use_of_force.citizen_hospitalized,
+                'officer_injured': use_of_force.officer_injured,
+                'traffic_stop': use_of_force.traffic_stop,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
