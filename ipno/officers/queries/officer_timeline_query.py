@@ -1,7 +1,8 @@
 from django.db.models import Prefetch, Q
 
-from officers.serializers.officer_timeline_serializers import (
+from officers.serializers import (
     ComplaintTimelineSerializer,
+    UseOfForceTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
@@ -69,6 +70,12 @@ class OfficerTimelineQuery(object):
         )
 
         return ComplaintTimelineSerializer(complaint_timeline_queryset, many=True).data
+
+    @property
+    def _use_of_force_timeline(self):
+        use_of_force_timeline_queryset = self.officer.use_of_forces.prefetch_related('events')
+
+        return UseOfForceTimelineSerializer(use_of_force_timeline_queryset, many=True).data
 
     @property
     def _join_timeline(self):
@@ -142,6 +149,7 @@ class OfficerTimelineQuery(object):
         return UnitChangeTimelineSerializer(unit_changes, many=True).data
 
     def query(self):
-        return self._complaint_timeline + self._join_timeline + self._left_timeline \
-               + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
-               + self._unit_change_timeline
+        return self._complaint_timeline + self._use_of_force_timeline \
+               + self._join_timeline + self._left_timeline \
+               + self._document_timeline + self._salary_change_timeline \
+               + self._rank_change_timeline + self._unit_change_timeline

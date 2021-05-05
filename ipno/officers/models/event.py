@@ -15,7 +15,6 @@ class Event(TimeStampsModel):
     complaint_uid = models.CharField(max_length=255, null=True, blank=True)
     allegation_uid = models.CharField(max_length=255, null=True, blank=True)
     appeal_uid = models.CharField(max_length=255, null=True, blank=True)
-    use_of_force_uid = models.CharField(max_length=255, null=True, blank=True)
     badge_no = models.CharField(max_length=255, null=True, blank=True)
     employee_id = models.CharField(max_length=255, null=True, blank=True)
     department_code = models.CharField(max_length=255, null=True, blank=True)
@@ -35,3 +34,6 @@ class Event(TimeStampsModel):
 
     officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True)
     department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
+    use_of_force = models.ForeignKey(
+        'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, related_name='events'
+    )
