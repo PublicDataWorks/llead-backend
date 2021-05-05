@@ -25,13 +25,17 @@ class OfficerDetailsSerializer(serializers.Serializer):
     complaints_data_period = serializers.SerializerMethodField()
 
     def _get_latest_salary_event(self, obj):
-        if not hasattr(self, '_latest_salary_event'):
-            self._latest_salary_event = obj.event_set.filter(
-                Q(annual_salary__isnull=False) | Q(hourly_salary__isnull=False),
-            ).order_by(
-                '-year', '-month', '-day'
-            ).first()
-        return self._latest_salary_event
+        if not hasattr(obj, 'latest_salary_event'):
+            setattr(
+                obj,
+                'latest_salary_event',
+                obj.event_set.filter(
+                    Q(annual_salary__isnull=False) | Q(hourly_salary__isnull=False),
+                ).order_by(
+                    '-year', '-month', '-day'
+                ).first()
+            )
+        return obj.latest_salary_event
 
     def get_badges(self, obj):
         return list(dict.fromkeys(obj.event_set.order_by(

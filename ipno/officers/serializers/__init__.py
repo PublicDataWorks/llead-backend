@@ -1,6 +1,7 @@
 from .officer_details_serializer import OfficerDetailsSerializer
 from .officer_timeline_serializers import (
     ComplaintTimelineSerializer,
+    UseOfForceTimelineSerializer,
     JoinedTimelineSerializer,
     LeftTimelineSerializer,
     DocumentTimelineSerializer,
@@ -12,6 +13,7 @@ from .officer_timeline_serializers import (
 __all__ = [
     'OfficerDetailsSerializer',
     'ComplaintTimelineSerializer',
+    'UseOfForceTimelineSerializer',
     'JoinedTimelineSerializer',
     'LeftTimelineSerializer',
     'DocumentTimelineSerializer',
