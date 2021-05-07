@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
@@ -16,8 +17,10 @@ class OfficersViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        officers = Officer.objects.prefetch_events().order_by(
-            '-created_at'
+        officers = Officer.objects.prefetch_events().annotate(
+            complaint_count=Count('complaint__id', distinct=True)
+        ).order_by(
+            '-complaint_count'
         )[:OFFICERS_LIMIT]
 
         serializer = OfficerSerializer(officers, many=True)

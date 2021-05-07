@@ -70,6 +70,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             day=20,
         )
 
+        officer_1_complaints = ComplaintFactory.create_batch(2)
+        officer_2_complaints = ComplaintFactory.create_batch(3)
+
+        for complaint in officer_1_complaints:
+            complaint.officers.add(officer_1)
+
+        for complaint in officer_2_complaints:
+            complaint.officers.add(officer_2)
+
         response = self.auth_client.get(reverse('api:officers-list'))
         assert response.status_code == status.HTTP_200_OK
 
