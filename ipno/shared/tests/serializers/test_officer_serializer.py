@@ -50,7 +50,7 @@ class OfficerSerializerTestCase(TestCase):
             'name': 'David Jonesworth',
             'badges': ['12435', '5432', '67893'],
             'department': {
-                'id': department.id,
+                'id': department.slug,
                 'name': department.name,
             },
         }

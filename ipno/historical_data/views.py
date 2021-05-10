@@ -21,6 +21,7 @@ class HistoricalDataViewSet(ViewSet):
                 'item_type': 'department',
                 'query': Department.objects.all(),
                 'serializer': DepartmentSerializer,
+                'key': 'slug',
             },
             {
                 'item_type': 'officer',
@@ -37,9 +38,10 @@ class HistoricalDataViewSet(ViewSet):
         recent_search_data = {}
         for recent_items_query in recent_items_queries:
             item_type = recent_items_query['item_type']
+            item_key = recent_items_query.get('key', 'id')
             ids = self.request.query_params.getlist(f'{item_type}_ids[]', None)
             if ids:
-                items = recent_items_query['query'].filter(id__in=ids)
+                items = recent_items_query['query'].filter(**{f'{item_key}__in': ids})
                 recent_search_data[item_type] = recent_items_query['serializer'](items, many=True).data
 
         return Response(recent_search_data)

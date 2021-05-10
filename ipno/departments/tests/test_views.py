@@ -33,19 +33,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
 
         assert response.data == [{
-            'id': department_2.id,
+            'id': department_2.slug,
             'name': department_2.name,
             'city': department_2.city,
             'parish': department_2.parish,
             'location_map_url': department_2.location_map_url,
         }, {
-            'id': department_1.id,
+            'id': department_1.slug,
             'name': department_1.name,
             'city': department_1.city,
             'parish': department_1.parish,
             'location_map_url': department_1.location_map_url,
         }, {
-            'id': department_3.id,
+            'id': department_3.slug,
             'name': department_3.name,
             'city': department_3.city,
             'parish': department_3.parish,
@@ -142,7 +142,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
 
         expected_result = {
-            'id': department.id,
+            'id': department.slug,
             'name': department.name,
             'city': department.city,
             'parish': department.parish,
@@ -174,7 +174,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         }
 
         response = self.auth_client.get(
-            reverse('api:departments-detail', kwargs={'pk': department.id})
+            reverse('api:departments-detail', kwargs={'pk': department.slug})
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -182,13 +182,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_retrieve_not_found(self):
         response = self.auth_client.get(
-            reverse('api:departments-detail', kwargs={'pk': 1})
+            reverse('api:departments-detail', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_retrieve_unauthorized(self):
         response = self.client.get(
-            reverse('api:departments-detail', kwargs={'pk': 1})
+            reverse('api:departments-detail', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -204,7 +204,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             document.departments.add(department)
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            reverse('api:departments-documents', kwargs={'pk': department.slug}),
             {
                 'limit': 2,
             }
@@ -221,7 +221,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'pages_count': document_1.pages_count,
             'departments': [
                 {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             ],
@@ -236,7 +236,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'pages_count': document_3.pages_count,
             'departments': [
                 {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             ],
@@ -245,7 +245,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
         assert response.data['previous'] is None
-        assert response.data['next'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2&offset=2'
+        assert response.data['next'] == f'http://testserver/api/departments/{department.slug}/documents/?limit=2&offset=2'
         assert response.data['results'] == expected_results
 
     def test_documents_with_limit_and_offset(self):
@@ -260,7 +260,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             document.departments.add(department)
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            reverse('api:departments-documents', kwargs={'pk': department.slug}),
             {
                 'limit': 2,
                 'offset': 2,
@@ -278,7 +278,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'pages_count': document_2.pages_count,
             'departments': [
                 {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             ],
@@ -286,7 +286,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
-        assert response.data['previous'] == f'http://testserver/api/departments/{department.id}/documents/?limit=2'
+        assert response.data['previous'] == f'http://testserver/api/departments/{department.slug}/documents/?limit=2'
         assert response.data['next'] is None
         assert response.data['results'] == expected_results
 
@@ -321,7 +321,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            reverse('api:departments-documents', kwargs={'pk': department.slug}),
             {'q': 'keyword'}
         )
 
@@ -336,7 +336,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'pages_count': document_2.pages_count,
                 'departments': [
                     {
-                        'id': department.id,
+                        'id': department.slug,
                         'name': department.name,
                     },
                 ],
@@ -352,7 +352,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'pages_count': document_3.pages_count,
                 'departments': [
                     {
-                        'id': department.id,
+                        'id': department.slug,
                         'name': department.name,
                     },
                 ],
@@ -400,7 +400,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            reverse('api:departments-documents', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
                 'offset': 1,
@@ -419,7 +419,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'pages_count': document_2.pages_count,
                 'departments': [
                     {
-                        'id': department.id,
+                        'id': department.slug,
                         'name': department.name,
                     },
                 ],
@@ -428,7 +428,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             },
         ]
 
-        expected_previous = f'http://testserver/api/departments/{department.id}/documents/?limit=1&q=keyword'
+        expected_previous = f'http://testserver/api/departments/{department.slug}/documents/?limit=1&q=keyword'
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 2
@@ -441,7 +441,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.id}),
+            reverse('api:departments-documents', kwargs={'pk': department.slug}),
             {'q': 'keyword'}
         )
 
@@ -453,12 +453,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_documents_not_found(self):
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': 1})
+            reverse('api:departments-documents', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_documents_unauthorized(self):
         response = self.client.get(
-            reverse('api:departments-documents', kwargs={'pk': 1})
+            reverse('api:departments-documents', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

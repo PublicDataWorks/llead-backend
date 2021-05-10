@@ -94,7 +94,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'name': 'David Jonesworth',
                 'badges': ['12435', '67893', '5432'],
                 'department': {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             }]
@@ -185,7 +185,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'race': 'white',
             'gender': 'male',
             'department': {
-                'id': department.id,
+                'id': department.slug,
                 'name': department.name,
             },
             'annual_salary': '57000',
@@ -363,7 +363,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'pages_count': document_1.pages_count,
                 'departments': [
                     {
-                        'id': department_1.id,
+                        'id': department_1.slug,
                         'name': department_1.name,
                     },
                 ],

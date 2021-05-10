@@ -177,7 +177,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'pages_count': document_1.pages_count,
                 'departments': [
                     {
-                        'id': department_1.id,
+                        'id': department_1.slug,
                         'name': department_1.name,
                     },
                 ],

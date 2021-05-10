@@ -18,8 +18,8 @@ class DocumentsESSerializerTestCase(TestCase):
         document_3 = DocumentFactory()
         DocumentFactory()
 
-        department_1 = DepartmentFactory()
-        department_2 = DepartmentFactory()
+        department_1 = DepartmentFactory(name='Baton Rouge PD')
+        department_2 = DepartmentFactory(name='New Orleans PD')
 
         document_1.departments.add(department_1, department_2)
 
@@ -58,11 +58,11 @@ class DocumentsESSerializerTestCase(TestCase):
                 'text_content_highlight': '<em>text</em> content',
                 'departments': [
                     {
-                        'id': department_1.id,
+                        'id': department_1.slug,
                         'name': department_1.name,
                     },
                     {
-                        'id': department_2.id,
+                        'id': department_2.slug,
                         'name': department_2.name,
                     },
                 ],

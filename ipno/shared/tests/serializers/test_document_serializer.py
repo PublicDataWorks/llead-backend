@@ -10,8 +10,8 @@ from departments.factories import DepartmentFactory
 class DocumentSerializerTestCase(TestCase):
     def test_data(self):
         document = DocumentFactory()
-        department_1 = DepartmentFactory()
-        department_2 = DepartmentFactory()
+        department_1 = DepartmentFactory(name='Baton Rouge PD')
+        department_2 = DepartmentFactory(name='New Orleans PD')
         document.departments.add(department_1, department_2)
 
         result = DocumentSerializer(document).data
@@ -27,11 +27,11 @@ class DocumentSerializerTestCase(TestCase):
             'pages_count': document.pages_count,
             'departments': [
                 {
-                    'id': department_1.id,
+                    'id': department_1.slug,
                     'name': department_1.name,
                 },
                 {
-                    'id': department_2.id,
+                    'id': department_2.slug,
                     'name': department_2.name,
                 },
             ],
