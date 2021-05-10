@@ -4,6 +4,7 @@ from utils.models import TimeStampsModel
 
 
 class Department(TimeStampsModel):
+    slug = models.CharField(max_length=255, unique=True, db_index=True)
     name = models.CharField(max_length=255)
     city = models.CharField(max_length=255, null=True, blank=True)
     parish = models.CharField(max_length=255, null=True, blank=True)

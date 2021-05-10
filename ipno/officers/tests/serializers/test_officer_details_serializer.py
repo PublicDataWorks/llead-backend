@@ -94,7 +94,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'race': 'white',
             'gender': 'male',
             'department': {
-                'id': department.id,
+                'id': department.slug,
                 'name': department.name,
             },
             'annual_salary': '57000',

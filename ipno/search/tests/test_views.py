@@ -40,15 +40,16 @@ class SearchViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         expected_data = {
-            'DEPARTMENTS': [{
-                'id': department_1.id,
-                'name': department_1.name,
-                'city': department_1.city,
-                'parish': department_1.parish,
-                'location_map_url': department_1.location_map_url,
-            },
+            'DEPARTMENTS': [
                 {
-                    'id': department_2.id,
+                    'id': department_1.slug,
+                    'name': department_1.name,
+                    'city': department_1.city,
+                    'parish': department_1.parish,
+                    'location_map_url': department_1.location_map_url,
+                },
+                {
+                    'id': department_2.slug,
                     'name': department_2.name,
                     'city': department_2.city,
                     'parish': department_2.parish,
@@ -60,7 +61,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
                     'name': officer_1.name,
                     'badges': ['12435'],
                     'department': {
-                        'id': department_1.id,
+                        'id': department_1.slug,
                         'name': department_1.name,
                     },
                 },
@@ -84,7 +85,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
                     'text_content_highlight': None,
                     'departments': [
                         {
-                            'id': department_1.id,
+                            'id': department_1.slug,
                             'name': department_1.name,
                         },
                     ],

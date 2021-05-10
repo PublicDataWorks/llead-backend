@@ -234,7 +234,7 @@ class DocumentTimelineSerializerTestCase(TestCase):
             'pages_count': document.pages_count,
             'departments': [
                 {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             ],
