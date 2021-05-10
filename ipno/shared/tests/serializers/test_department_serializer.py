@@ -10,7 +10,7 @@ class DepartmentSerializerTestCase(TestCase):
 
         result = DepartmentSerializer(department).data
         assert result == {
-            'id': department.id,
+            'id': department.slug,
             'name': department.name,
             'city': department.city,
             'parish': department.parish,

@@ -50,7 +50,7 @@ class OfficersESSerializerTestCase(TestCase):
                 'name': 'Kenneth Anderson',
                 'badges': ['12435'],
                 'department': {
-                    'id': department.id,
+                    'id': department.slug,
                     'name': department.name,
                 },
             },

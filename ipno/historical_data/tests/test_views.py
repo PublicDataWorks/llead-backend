@@ -12,8 +12,8 @@ from documents.factories import DocumentFactory
 
 class HistoricalDataViewSetTestCase(AuthAPITestCase):
     def test_recent_items(self):
-        department_1 = DepartmentFactory()
-        department_2 = DepartmentFactory()
+        department_1 = DepartmentFactory(name='Baton Rouge PD')
+        department_2 = DepartmentFactory(name='New Orleans PD')
 
         officer = OfficerFactory(first_name='David', last_name='Jonesworth')
         EventFactory(
@@ -32,7 +32,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         response = self.auth_client.get(
             reverse('api:historical-data-recent-items'),
             {
-                'department_ids[]': [department_1.id, department_2.id],
+                'department_ids[]': [department_1.slug, department_2.slug],
                 'officer_ids[]': [officer.id],
                 'document_ids[]': [document.id],
             }
@@ -41,13 +41,13 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         expected_data = {
             'department': [
                 {
-                    'id': department_1.id,
+                    'id': department_1.slug,
                     'name': department_1.name,
                     'city': department_1.city,
                     'parish': department_1.parish,
                     'location_map_url': department_1.location_map_url,
                 }, {
-                    'id': department_2.id,
+                    'id': department_2.slug,
                     'name': department_2.name,
                     'city': department_2.city,
                     'parish': department_2.parish,
@@ -60,7 +60,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                     'name': 'David Jonesworth',
                     'badges': ['12435'],
                     'department': {
-                        'id': department_2.id,
+                        'id': department_2.slug,
                         'name': department_2.name,
                     }
                 }
@@ -76,7 +76,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                     'pages_count': document.pages_count,
                     'departments': [
                         {
-                            'id': department_1.id,
+                            'id': department_1.slug,
                             'name': department_1.name,
                         }
                     ],

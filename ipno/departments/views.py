@@ -21,7 +21,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk):
         queryset = Department.objects.all()
-        department = get_object_or_404(queryset, id=pk)
+        department = get_object_or_404(queryset, slug=pk)
         serializer = DepartmentDetailsSerializer(department)
 
         return Response(serializer.data)
@@ -35,7 +35,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'], url_path='documents')
     def documents(self, request, pk):
-        department = get_object_or_404(Department, id=pk)
+        department = get_object_or_404(Department, slug=pk)
         q = self.request.query_params.get('q')
 
         if q:

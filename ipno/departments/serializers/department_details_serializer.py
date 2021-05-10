@@ -14,7 +14,7 @@ class WrglFileSerializer(serializers.Serializer):
 
 
 class DepartmentDetailsSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.CharField(source='slug')
     name = serializers.CharField()
     city = serializers.CharField()
     parish = serializers.CharField()
