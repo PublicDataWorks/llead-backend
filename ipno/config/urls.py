@@ -52,6 +52,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
     path('api/token/revoke/', TokenRevokeView.as_view(), name='revoke_token'),
     path('api/status/', StatusView.as_view(), name='status'),
+    path('martor/', include('martor.urls')),
 ]
 
 if settings.DEBUG:  # pragma: no cover
