@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from django.test import TestCase
 
@@ -24,7 +25,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='12435',
-            annual_salary='57000',
+            salary='57000.145',
+            salary_freq='yearly',
             year=2020,
             month=5,
             day=4,
@@ -33,7 +35,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='67893',
-            annual_salary='20000',
+            salary='20.23',
+            salary_freq='hourly',
             year=2017,
             month=None,
             day=None,
@@ -97,8 +100,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
                 'id': department.slug,
                 'name': department.name,
             },
-            'annual_salary': '57000',
-            'hourly_salary': None,
+            'salary': '57000.14',
+            'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
             'data_period': ['2015-2020'],
@@ -161,93 +164,93 @@ class OfficerDetailsSerializerTestCase(TestCase):
 
         EventFactory(
             officer=officer,
-            annual_salary='57000',
-            hourly_salary='16.14',
+            salary='57000.145',
+            salary_freq='yearly',
             year=2021,
             month=2,
             day=4,
         )
         EventFactory(
             officer=officer,
-            annual_salary='20000',
-            hourly_salary=None,
+            salary=20000.23,
+            salary_freq=None,
             year=2020,
             month=1,
             day=2,
         )
         EventFactory(
             officer=officer,
-            annual_salary=None,
-            hourly_salary=None,
+            salary=None,
+            salary_freq=None,
             year=2021,
             month=3,
             day=6,
         )
 
         result = OfficerDetailsSerializer(officer).data
-        assert result['annual_salary'] == '57000'
-        assert result['hourly_salary'] == '16.14'
+        assert result['salary'] == '57000.14'
+        assert result['salary_freq'] == 'yearly'
 
-    def test_salary_fields_with_empty_hourly_salary(self):
+    def test_salary_fields_with_empty_salary_freq(self):
         officer = OfficerFactory()
 
         EventFactory(
             officer=officer,
-            annual_salary='57000',
-            hourly_salary=None,
+            salary='57000.122',
+            salary_freq=None,
             year=2021,
             month=2,
             day=4,
         )
         EventFactory(
             officer=officer,
-            annual_salary='20000',
-            hourly_salary='16.14',
+            salary='20000.152',
+            salary_freq=None,
             year=2020,
             month=1,
             day=2,
         )
         EventFactory(
             officer=officer,
-            annual_salary=None,
-            hourly_salary=None,
+            salary=None,
+            salary_freq=None,
             year=2021,
             month=3,
             day=6,
         )
 
         result = OfficerDetailsSerializer(officer).data
-        assert result['annual_salary'] == '57000'
-        assert result['hourly_salary'] is None
+        assert result['salary'] is None
+        assert result['salary_freq'] is None
 
-    def test_salary_fields_with_empty_annual_salary(self):
+    def test_salary_fields_with_empty_salary(self):
         officer = OfficerFactory()
 
         EventFactory(
             officer=officer,
-            annual_salary=None,
-            hourly_salary='16.14',
+            salary=None,
+            salary_freq='yearly',
             year=2021,
             month=2,
             day=4,
         )
         EventFactory(
             officer=officer,
-            annual_salary='20000',
-            hourly_salary='16.14',
+            salary=None,
+            salary_freq='monthly',
             year=2020,
             month=1,
             day=2,
         )
         EventFactory(
             officer=officer,
-            annual_salary=None,
-            hourly_salary=None,
+            salary=None,
+            salary_freq='hourly',
             year=2021,
             month=3,
             day=6,
         )
 
         result = OfficerDetailsSerializer(officer).data
-        assert result['annual_salary'] is None
-        assert result['hourly_salary'] == '16.14'
+        assert result['salary'] is None
+        assert result['salary_freq'] is None

@@ -29,8 +29,8 @@ class Event(TimeStampsModel):
     officer_inactive = models.CharField(max_length=255, null=True, blank=True)
     employee_type = models.CharField(max_length=255, null=True, blank=True)
     years_employed = models.IntegerField(null=True, blank=True)
-    annual_salary = models.CharField(max_length=255, null=True, blank=True)
-    hourly_salary = models.CharField(max_length=255, null=True, blank=True)
+    salary = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=2)
+    salary_freq = models.CharField(max_length=255, null=True, blank=True)
 
     officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True)
     department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
