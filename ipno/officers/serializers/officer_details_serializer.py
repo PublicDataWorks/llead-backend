@@ -16,8 +16,8 @@ class OfficerDetailsSerializer(serializers.Serializer):
     gender = serializers.CharField()
 
     department = serializers.SerializerMethodField()
-    annual_salary = serializers.SerializerMethodField()
-    hourly_salary = serializers.SerializerMethodField()
+    salary = serializers.SerializerMethodField()
+    salary_freq = serializers.SerializerMethodField()
     documents_count = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
     data_period = serializers.SerializerMethodField()
@@ -30,7 +30,8 @@ class OfficerDetailsSerializer(serializers.Serializer):
                 obj,
                 'latest_salary_event',
                 obj.event_set.filter(
-                    Q(annual_salary__isnull=False) | Q(hourly_salary__isnull=False),
+                    salary__isnull=False,
+                    salary_freq__isnull=False,
                 ).order_by(
                     '-year', '-month', '-day'
                 ).first()
@@ -51,13 +52,14 @@ class OfficerDetailsSerializer(serializers.Serializer):
         if event:
             return SimpleDepartmentSerializer(event.department).data
 
-    def get_annual_salary(self, obj):
+    def get_salary(self, obj):
         event = self._get_latest_salary_event(obj)
-        return event.annual_salary if event else None
+        salary_field = serializers.DecimalField(max_digits=8, decimal_places=2)
+        return salary_field.to_representation(event.salary) if event else None
 
-    def get_hourly_salary(self, obj):
+    def get_salary_freq(self, obj):
         event = self._get_latest_salary_event(obj)
-        return event.hourly_salary if event else None
+        return event.salary_freq if event else None
 
     def get_documents_count(self, obj):
         return obj.document_set.count()

@@ -104,14 +104,12 @@ class OfficerTimelineQuery(object):
         events = list(
             self.officer.event_set.filter(
                 kind=OFFICER_PAY_EFFECTIVE,
-            ).filter(
-                Q(annual_salary__isnull=False) | Q(hourly_salary__isnull=False),
-            )
+            ).filter(salary__isnull=False, salary_freq__isnull=False)
         )
 
         salary_changes = self._filter_event_changes(
             events,
-            ['annual_salary', 'hourly_salary']
+            ['salary', 'salary_freq']
         )
 
         return SalaryChangeTimelineSerializer(salary_changes, many=True).data
