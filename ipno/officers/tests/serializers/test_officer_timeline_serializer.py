@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from django.test import TestCase
 
@@ -245,8 +246,8 @@ class SalaryChangeTimelineSerializerTestCase(TestCase):
     def test_data(self):
         event = EventFactory(
             kind=OFFICER_PAY_EFFECTIVE,
-            annual_salary='57000',
-            hourly_salary='16.15',
+            salary='57000.15',
+            salary_freq='yearly',
             year=2019,
             month=12,
             day=1,
@@ -256,8 +257,8 @@ class SalaryChangeTimelineSerializerTestCase(TestCase):
 
         assert result == {
             'kind': SALARY_CHANGE_TIMELINE_KIND,
-            'annual_salary': '57000',
-            'hourly_salary': '16.15',
+            'salary': '57000.15',
+            'salary_freq': 'yearly',
             'date': str(date(2019, 12, 1)),
             'year': 2019,
         }

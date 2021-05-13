@@ -125,8 +125,8 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
 
 class SalaryChangeTimelineSerializer(BaseTimelineSerializer):
-    annual_salary = serializers.CharField()
-    hourly_salary = serializers.CharField()
+    salary = serializers.CharField()
+    salary_freq = serializers.CharField()
 
     def get_kind(self, obj):
         return SALARY_CHANGE_TIMELINE_KIND
