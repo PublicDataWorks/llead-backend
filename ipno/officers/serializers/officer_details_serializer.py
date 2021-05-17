@@ -1,4 +1,4 @@
-from django.db.models import F, Q
+from django.db.models import F
 
 from rest_framework import serializers
 
