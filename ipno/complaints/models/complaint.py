@@ -27,6 +27,7 @@ class Complaint(TimeStampsModel):
     paragraph_code = models.CharField(max_length=255, null=True, blank=True)
     paragraph_violation = models.CharField(max_length=255, null=True, blank=True)
     charges = models.TextField(null=True, blank=True)
+    complainant_name = models.CharField(max_length=255, null=True, blank=True)
     complainant_type = models.CharField(max_length=255, null=True, blank=True)
     complainant_sex = models.CharField(max_length=255, null=True, blank=True)
     complainant_race = models.CharField(max_length=255, null=True, blank=True)
@@ -40,6 +41,7 @@ class Complaint(TimeStampsModel):
     department_code = models.CharField(max_length=255, null=True, blank=True)
     department_desc = models.CharField(max_length=255, null=True, blank=True)
     rank_desc = models.CharField(max_length=255, null=True, blank=True)
+    employment_status = models.CharField(max_length=255, null=True, blank=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='complaints')
     departments = models.ManyToManyField('departments.Department', blank=True, related_name='complaints')

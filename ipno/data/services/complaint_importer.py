@@ -29,6 +29,7 @@ ATTRIBUTES = [
     'paragraph_code',
     'paragraph_violation',
     'charges',
+    'complainant_name',
     'complainant_type',
     'complainant_sex',
     'complainant_race',
@@ -42,6 +43,7 @@ ATTRIBUTES = [
     'department_code',
     'department_desc',
     'rank_desc',
+    'employment_status',
 ]
 
 UPDATE_ATTRIBUTES = ATTRIBUTES
@@ -80,7 +82,6 @@ class ComplaintImporter(BaseImporter):
                 department_relations.append(
                     DepartmentRelation(complaint_id=complaint.id, department_id=department_id)
                 )
-
 
         DepartmentRelation.objects.all().delete()
         DepartmentRelation.objects.bulk_create(department_relations, batch_size=BATCH_SIZE)

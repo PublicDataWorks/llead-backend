@@ -24,6 +24,7 @@ class UseOfForce(TimeStampsModel):
     distance_from_officer = models.CharField(max_length=255, null=True, blank=True)
     body_worn_camera_available = models.CharField(max_length=255, null=True, blank=True)
     app_used = models.CharField(max_length=255, null=True, blank=True)
+    citizen_uid = models.CharField(max_length=255, null=True, blank=True)
     citizen_arrested = models.CharField(max_length=255, null=True, blank=True)
     citizen_hospitalized = models.CharField(max_length=255, null=True, blank=True)
     citizen_injured = models.CharField(max_length=255, null=True, blank=True)

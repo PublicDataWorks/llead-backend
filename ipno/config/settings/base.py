@@ -25,7 +25,7 @@ environ.Env.read_env(f'{BASE_DIR}/.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = env.str('DJANGO_SECRET_KEY')
+SECRET_KEY = env.str('DJANGO_SECRET_KEY', None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -115,8 +115,6 @@ DATABASES = {
     }
 }
 
-WRGL_API_KEY = env.str('WRGL_API_KEY')
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -177,3 +175,5 @@ ELASTICSEARCH_DSL = {
         'hosts': env.str('ELASTICSEARCH_HOST', 'elasticsearch:9200'),
     },
 }
+
+WRGL_API_KEY = env.str('WRGL_API_KEY', None)
