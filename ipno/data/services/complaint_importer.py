@@ -54,6 +54,12 @@ BATCH_SIZE = 1000
 class ComplaintImporter(BaseImporter):
     data_model = COMPLAINT_MODEL_NAME
 
+    def complaint_mappings(self):
+        return {
+            f'{complaint.complaint_uid}-{complaint.allegation_uid}-{complaint.charge_uid}': complaint.id
+            for complaint in Complaint.objects.only('id', 'complaint_uid', 'allegation_uid', 'charge_uid')
+        }
+
     def update_relations(self, complaints):
         DepartmentRelation = Complaint.departments.through
         OfficerRelation = Complaint.officers.through
@@ -94,6 +100,8 @@ class ComplaintImporter(BaseImporter):
         update_complaints = []
         new_complaint_uids = []
 
+        complaint_mappings = self.complaint_mappings()
+
         for row in tqdm(data):
             complaint_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
 
@@ -101,19 +109,14 @@ class ComplaintImporter(BaseImporter):
             allegation_uid = complaint_data['allegation_uid']
             charge_uid = complaint_data['charge_uid']
 
-            complaint = Complaint.objects.filter(
-                complaint_uid=complaint_uid,
-                allegation_uid=allegation_uid,
-                charge_uid=charge_uid,
-            ).first()
             uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
+            complaint_id = complaint_mappings.get(uniq_key)
 
-            if complaint:
-                for attr, value in complaint_data.items():
-                    setattr(complaint, attr, value)
+            complaint = Complaint(**complaint_data)
+            if complaint_id:
+                complaint.id = complaint_id
                 update_complaints.append(complaint)
             elif uniq_key not in new_complaint_uids:
-                complaint = Complaint(**complaint_data)
                 new_complaints.append(complaint)
                 new_complaint_uids.append(uniq_key)
 

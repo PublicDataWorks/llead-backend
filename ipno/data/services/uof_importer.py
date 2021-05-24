@@ -69,6 +69,8 @@ class UofImporter(BaseImporter):
         agencies = {row['agency'] for row in data if row['agency']}
         department_mappings = self.department_mappings(agencies)
 
+        uof_mappings = self.uof_mappings()
+
         for row in tqdm(data):
             agency = row['agency']
             uof_uid = row['uof_uid']
@@ -83,13 +85,11 @@ class UofImporter(BaseImporter):
             uof_data['department_id'] = department_id
             uof_data['officer_id'] = officer_id
 
-            uof = UseOfForce.objects.filter(
-                uof_uid=uof_uid,
-            ).first()
+            uof_id = uof_mappings.get(uof_uid)
 
-            if uof:
-                for attr, value in uof_data.items():
-                    setattr(uof, attr, value)
+            if uof_id:
+                uof = UseOfForce(**uof_data)
+                uof.id = uof_id
                 update_uofs.append(uof)
             elif uof_uid not in new_uof_uids:
                 new_uof_uids.append(uof_uid)
