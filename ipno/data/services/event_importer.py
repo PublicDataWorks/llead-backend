@@ -2,7 +2,6 @@ from tqdm import tqdm
 
 from officers.models import Event
 from complaints.models import Complaint
-from use_of_forces.models import UseOfForce
 from data.services.base_importer import BaseImporter
 from data.constants import EVENT_MODEL_NAME
 
@@ -51,8 +50,8 @@ BATCH_SIZE = 1000
 class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
 
-    def uof_mappings(self):
-        return {use_of_force.uof_uid: use_of_force.id for use_of_force in UseOfForce.objects.only('id', 'uof_uid')}
+    def event_mappings(self):
+        return {event.event_uid: event.id for event in Event.objects.only('id', 'event_uid')}
 
     def update_relations(self):
         ComplaintRelation = Event.complaints.through
@@ -78,6 +77,8 @@ class EventImporter(BaseImporter):
         officer_mappings = self.officer_mappings()
         agencies = {row['agency'] for row in data if row['agency']}
         department_mappings = self.department_mappings(agencies)
+
+        event_mappings = self.event_mappings()
         uof_mappings = self.uof_mappings()
 
         for row in tqdm(data):
@@ -97,13 +98,11 @@ class EventImporter(BaseImporter):
             event_data['department_id'] = department_id
             event_data['officer_id'] = officer_id
 
-            event = Event.objects.filter(
-                event_uid=event_uid,
-            ).first()
+            event_id = event_mappings.get(event_uid)
 
-            if event:
-                for attr, value in event_data.items():
-                    setattr(event, attr, value)
+            if event_id:
+                event = Event(**event_data)
+                event.id = event_id
                 update_events.append(event)
             elif event_uid not in new_event_uids:
                 new_event_uids.append(event_uid)
