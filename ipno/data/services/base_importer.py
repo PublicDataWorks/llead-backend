@@ -10,6 +10,7 @@ from django.conf import settings
 
 from departments.models import Department
 from officers.models import Officer
+from use_of_forces.models import UseOfForce
 from data.models import WrglRepo, ImportLog
 from data.constants import (
     WRGL_USER,
@@ -45,6 +46,9 @@ class BaseImporter(object):
 
     def officer_mappings(self):
         return {officer.uid: officer.id for officer in Officer.objects.only('id', 'uid')}
+
+    def uof_mappings(self):
+        return {use_of_force.uof_uid: use_of_force.id for use_of_force in UseOfForce.objects.only('id', 'uof_uid')}
 
     def read_wrgl_csv(self, repo_name, commit_hash):
         url = f'https://www.wrgl.co/api/v1/users/{WRGL_USER}/repos/{repo_name}/commits/{commit_hash}/csv'

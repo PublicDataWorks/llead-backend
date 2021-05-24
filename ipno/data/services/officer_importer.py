@@ -28,13 +28,15 @@ class OfficerImporter(BaseImporter):
         update_officers = []
         new_officer_uids = []
 
+        officer_mappings = self.officer_mappings()
         for row in tqdm(data):
             officer_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
 
-            officer = Officer.objects.filter(uid=row['uid']).first()
-            if officer:
-                for attr, value in officer_data.items():
-                    setattr(officer, attr, value)
+            officer_id = officer_mappings.get(row['uid'])
+
+            if officer_id:
+                officer = Officer(**officer_data)
+                officer.id = officer_id
                 update_officers.append(officer)
             elif row['uid'] not in new_officer_uids:
                 new_officer_uids.append(row['uid'])
