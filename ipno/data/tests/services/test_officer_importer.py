@@ -123,6 +123,16 @@ class OfficerImporterTestCase(TestCase):
 
         OfficerImporter().process()
 
+        import_log = ImportLog.objects.order_by('-created_at').last()
+        assert import_log.data_model == OfficerImporter.data_model
+        assert import_log.status == IMPORT_LOG_STATUS_FINISHED
+        assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
+        assert import_log.created_rows == 2
+        assert import_log.updated_rows == 3
+        assert import_log.deleted_rows == 1
+        assert not import_log.error_message
+        assert import_log.finished_at
+
         assert Officer.objects.count() == 5
 
         repo_details_request = urlopen_mock.call_args_list[0][0][0]
@@ -134,7 +144,7 @@ class OfficerImporterTestCase(TestCase):
         for officer_data in self.officers_data:
             officer = Officer.objects.filter(uid=officer_data['uid']).first()
             assert officer
-            char_field_attrs = [
+            field_attrs = [
                 'last_name',
                 'middle_name',
                 'middle_initial',
@@ -148,18 +158,8 @@ class OfficerImporterTestCase(TestCase):
                 'birth_day',
             ]
 
-            for attr in char_field_attrs:
+            for attr in field_attrs:
                 assert getattr(officer, attr) == (officer_data[attr] if officer_data[attr] else None)
 
             for attr in integer_field_attrs:
                 assert getattr(officer, attr) == (int(officer_data[attr]) if officer_data[attr] else None)
-
-        import_log = ImportLog.objects.order_by('-created_at').last()
-        assert import_log.data_model == OfficerImporter.data_model
-        assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
-        assert import_log.created_rows == 2
-        assert import_log.updated_rows == 3
-        assert import_log.deleted_rows == 1
-        assert not import_log.error_message
-        assert import_log.finished_at

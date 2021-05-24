@@ -5,6 +5,7 @@ import urllib
 from datetime import datetime
 import pytz
 import re
+import traceback
 
 from django.conf import settings
 
@@ -124,7 +125,7 @@ class BaseImporter(object):
                             {
                                 'status': IMPORT_LOG_STATUS_ERROR,
                                 'finished_at': datetime.now(pytz.utc),
-                                'error_message': 'Error occurs while importing data!',
+                                'error_message': f'Error occurs while importing data!\n{traceback.format_exc()}',
                             }
                         )
                 else:
