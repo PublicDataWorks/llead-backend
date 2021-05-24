@@ -5,3 +5,4 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 TEST = True
+WRGL_API_KEY = 'test-wrgl-api-key'

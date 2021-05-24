@@ -9,4 +9,3 @@ class Command(BaseCommand):
             wrgl_repo_object = WrglRepo.objects.filter(repo_name=wrgl_repo['repo_name']).first()
             if not wrgl_repo_object:
                 WrglRepo.objects.create(**wrgl_repo)
-

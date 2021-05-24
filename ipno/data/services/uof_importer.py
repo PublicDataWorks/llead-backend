@@ -26,6 +26,7 @@ ATTRIBUTES = [
     'distance_from_officer',
     'body_worn_camera_available',
     'app_used',
+    'citizen_uid',
     'citizen_arrested',
     'citizen_hospitalized',
     'citizen_injured',
@@ -85,7 +86,6 @@ class UofImporter(BaseImporter):
             uof = UseOfForce.objects.filter(
                 uof_uid=uof_uid,
             ).first()
-
 
             if uof:
                 for attr, value in uof_data.items():
