@@ -14,7 +14,7 @@ class ImportLog(TimeStampsModel):
     deleted_rows = models.IntegerField(null=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
-    error_message = models.CharField(max_length=255)
+    error_message = models.TextField(null=True)
 
     def __str__(self):
         return f'{self.repo_name}-{self.data_model} {self.commit_hash}'
