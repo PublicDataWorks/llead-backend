@@ -143,7 +143,7 @@ class BaseImporterTestCase(TestCase):
         assert import_log.data_model == TEST_MODEL_NAME
         assert import_log.status == IMPORT_LOG_STATUS_ERROR
         assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
-        assert import_log.error_message == 'Error occurs while importing data!'
+        assert 'Error occurs while importing data!' in import_log.error_message
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
