@@ -20,7 +20,13 @@ class Migration(migrations.Migration):
                 ('data_model', models.CharField(max_length=255)),
                 ('repo_name', models.CharField(max_length=255, null=True)),
                 ('commit_hash', models.CharField(max_length=255, null=True)),
-                ('status', models.CharField(choices=[('started', 'Started'), ('no_new_commit', 'No new commit'), ('running', 'Running'), ('finished', 'Finished'), ('error', 'Error')], max_length=32)),
+                ('status', models.CharField(choices=[
+                    ('started', 'Started'),
+                    ('no_new_commit', 'No new commit'),
+                    ('running', 'Running'),
+                    ('finished', 'Finished'),
+                    ('error', 'Error')
+                ], max_length=32)),
                 ('created_rows', models.IntegerField(null=True)),
                 ('updated_rows', models.IntegerField(null=True)),
                 ('deleted_rows', models.IntegerField(null=True)),
