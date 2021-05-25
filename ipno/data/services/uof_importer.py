@@ -76,13 +76,14 @@ class UofImporter(BaseImporter):
             uof_uid = row['uof_uid']
             officer_uid = row['uid']
 
-            formatted_agency = self.format_agency(agency)
-            officer_id = officer_mappings.get(officer_uid)
-            department_id = department_mappings.get(formatted_agency)
-
             uof_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
 
-            uof_data['department_id'] = department_id
+            if agency:
+                formatted_agency = self.format_agency(agency)
+                department_id = department_mappings.get(formatted_agency)
+                uof_data['department_id'] = department_id
+
+            officer_id = officer_mappings.get(officer_uid)
             uof_data['officer_id'] = officer_id
 
             uof_id = uof_mappings.get(uof_uid)

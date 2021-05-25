@@ -124,7 +124,7 @@ class UofImporterTestCase(TestCase):
             'uof_uid': 'uof-uid2',
             'uof_tracking_number': 'FTN2015-0710',
             'report_year': '2015',
-            'uid': 'officer-uid1',
+            'uid': 'officer-uid-invalid',
             'force_description': 'L1-Hands',
             'force_type': 'Hands / Escort tech',
             'force_level': 'L1',
@@ -166,7 +166,7 @@ class UofImporterTestCase(TestCase):
             'officer_division': 'Second District',
             'officer_sub_division_a': 'C Platoon',
             'officer_sub_division_b': '',
-            'agency': 'New Orleans PD',
+            'agency': '',
             'data_production_year': '2019'
         }
         self.uof3_data = {
@@ -322,6 +322,7 @@ class UofImporterTestCase(TestCase):
             self.uof3_data,
             self.uof4_data,
             self.uof5_data,
+            self.uof5_data,
         ]
         writer.writeheader()
         writer.writerows(self.uofs_data)
@@ -381,8 +382,8 @@ class UofImporterTestCase(TestCase):
         expected_uof1_data['officer_id'] = officer_1.id
 
         expected_uof2_data = self.uof2_data.copy()
-        expected_uof2_data['department_id'] = department_1.id
-        expected_uof2_data['officer_id'] = officer_1.id
+        expected_uof2_data['department_id'] = None
+        expected_uof2_data['officer_id'] = None
 
         expected_uof3_data = self.uof3_data.copy()
         expected_uof3_data['department_id'] = department_2.id

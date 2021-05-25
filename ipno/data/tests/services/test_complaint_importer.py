@@ -110,7 +110,7 @@ class ComplaintImporterTestCase(TestCase):
             'complaint_uid': 'complaint-uid1',
             'allegation_uid': 'allegation-uid1',
             'charge_uid': 'charge-uid2',
-            'uid': 'officer-uid1',
+            'uid': 'officer-uid-invalid',
             'tracking_number': '',
             'investigation_type': 'administrative investigation',
             'investigation_status': '',
@@ -138,7 +138,7 @@ class ComplaintImporterTestCase(TestCase):
             'recommended_action': '',
             'action': '1 day suspension without pay',
             'data_production_year': '2020',
-            'agency': 'New Orleans PD',
+            'agency': '',
             'incident_type': '',
             'supervisor_uid': '',
             'supervisor_rank': '',
@@ -280,6 +280,7 @@ class ComplaintImporterTestCase(TestCase):
             self.complaint3_data,
             self.complaint4_data,
             self.complaint5_data,
+            self.complaint5_data,
         ]
         writer.writeheader()
         writer.writerows(self.complaints_data)
@@ -340,8 +341,8 @@ class ComplaintImporterTestCase(TestCase):
         expected_complaint1_data['officer_ids'] = [officer_1.id]
 
         expected_complaint2_data = self.complaint2_data.copy()
-        expected_complaint2_data['department_ids'] = [department_1.id]
-        expected_complaint2_data['officer_ids'] = [officer_1.id]
+        expected_complaint2_data['department_ids'] = []
+        expected_complaint2_data['officer_ids'] = []
 
         expected_complaint3_data = self.complaint3_data.copy()
         expected_complaint3_data['department_ids'] = [department_2.id]

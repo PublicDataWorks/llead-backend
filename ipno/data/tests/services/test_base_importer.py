@@ -5,6 +5,7 @@ from csv import DictWriter
 from django.test.testcases import TestCase, override_settings
 
 from mock import patch
+from pytest import raises
 
 from data.services import BaseImporter
 from data.models import ImportLog
@@ -14,6 +15,10 @@ from data.constants import (
     IMPORT_LOG_STATUS_ERROR
 )
 from data.factories import WrglRepoFactory
+from departments.factories import DepartmentFactory
+from officers.factories import OfficerFactory
+from use_of_forces.factories import UseOfForceFactory
+from departments.models import Department
 
 
 TEST_MODEL_NAME = 'TestModelName'
@@ -48,7 +53,7 @@ class BaseImporterTestCase(TestCase):
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
 
     def test_process_wrgl_repo_not_found(self):
-        TestImporter().process()
+        assert not TestImporter().process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == TEST_MODEL_NAME
@@ -68,7 +73,7 @@ class BaseImporterTestCase(TestCase):
         repo_details_stream = BytesIO(json.dumps({}).encode('utf-8'))
         urlopen_mock.return_value = repo_details_stream
 
-        TestImporter().process()
+        assert not TestImporter().process()
 
         repo_details_request = urlopen_mock.call_args[0][0]
         assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
@@ -98,7 +103,7 @@ class BaseImporterTestCase(TestCase):
         repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
         urlopen_mock.return_value = repo_details_stream
 
-        TestImporter().process()
+        assert not TestImporter().process()
 
         repo_details_request = urlopen_mock.call_args[0][0]
         assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
@@ -131,7 +136,7 @@ class BaseImporterTestCase(TestCase):
         urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
         import_data_mock.side_effect = Exception()
 
-        TestImporter().process()
+        assert not TestImporter().process()
 
         repo_details_request = urlopen_mock.call_args_list[0][0][0]
         assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
@@ -168,7 +173,7 @@ class BaseImporterTestCase(TestCase):
             'deleted_rows': 1,
         }
 
-        TestImporter().process()
+        assert TestImporter().process()
 
         repo_details_request = urlopen_mock.call_args_list[0][0][0]
         assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
@@ -193,3 +198,49 @@ class BaseImporterTestCase(TestCase):
         assert import_log.deleted_rows == 1
         assert not import_log.error_message
         assert import_log.finished_at
+
+    def test_import_data(self):
+        with raises(NotImplementedError):
+            BaseImporter().import_data([])
+
+    def test_format_agency(self):
+        assert BaseImporter().format_agency('Baton Rouge CSD') == 'Baton Rouge PD'
+        assert BaseImporter().format_agency('Baton Rouge SO') == 'Baton Rouge Sheriff'
+
+    def test_department_mappings(self):
+        department_1 = DepartmentFactory(name='New Orleans PD')
+        department_2 = DepartmentFactory(name='Baton Rouge PD')
+        agencies = ['St. Tammany Sheriff', 'Baton Rouge CSD', 'New Orleans PD']
+
+        mappings = BaseImporter().department_mappings(agencies)
+
+        department_3 = Department.objects.filter(name='St. Tammany Sheriff').first()
+        expected_mappings = {
+            'New Orleans PD': department_1.id,
+            'Baton Rouge PD': department_2.id,
+            'St. Tammany Sheriff': department_3.id
+        }
+        assert department_3
+        assert mappings == expected_mappings
+
+    def test_officer_mappings(self):
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+        mappings = BaseImporter().officer_mappings()
+        expected_mappings = {
+            officer_1.uid: officer_1.id,
+            officer_2.uid: officer_2.id,
+        }
+
+        assert mappings == expected_mappings
+
+    def test_uof_mappings(self):
+        uof_1 = UseOfForceFactory()
+        uof_2 = UseOfForceFactory()
+        mappings = BaseImporter().uof_mappings()
+        expected_mappings = {
+            uof_1.uof_uid: uof_1.id,
+            uof_2.uof_uid: uof_2.id,
+        }
+
+        assert mappings == expected_mappings
