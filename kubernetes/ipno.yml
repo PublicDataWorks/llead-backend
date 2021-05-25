@@ -61,6 +61,11 @@ spec:
                 secretKeyRef:
                   name: elasticsearch
                   key: host
+            - name: WRGL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: wrgl
+                  key: api-key
         - image: gcr.io/cloudsql-docker/gce-proxy:1.16
           name: cloudsql-proxy
           command: ["/cloud_sql_proxy", "--dir=/cloudsql",
