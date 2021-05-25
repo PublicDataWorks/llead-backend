@@ -15,6 +15,3 @@ class ImportLog(TimeStampsModel):
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     error_message = models.TextField(null=True)
-
-    def __str__(self):
-        return f'{self.repo_name}-{self.data_model} {self.commit_hash}'

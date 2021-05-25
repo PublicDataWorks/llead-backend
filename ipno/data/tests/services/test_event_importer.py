@@ -100,11 +100,11 @@ class EventImporterTestCase(TestCase):
             'day': '',
             'time': '',
             'raw_date': '',
-            'uid': 'officer-uid1',
+            'uid': 'officer-uid-invalid',
             'complaint_uid': '',
             'appeal_uid': '',
             'uof_uid': 'uof-uid1',
-            'agency': 'New Orleans PD',
+            'agency': '',
             'badge_no': '',
             'employee_id': '',
             'department_code': '',
@@ -234,6 +234,7 @@ class EventImporterTestCase(TestCase):
             self.event3_data,
             self.event4_data,
             self.event5_data,
+            self.event5_data,
         ]
         writer.writeheader()
         writer.writerows(self.events_data)
@@ -303,8 +304,8 @@ class EventImporterTestCase(TestCase):
         expected_event1_data['complaint_ids'] = {complaint_1.id, complaint_2.id}
 
         expected_event2_data = self.event2_data.copy()
-        expected_event2_data['department_id'] = department_1.id
-        expected_event2_data['officer_id'] = officer_1.id
+        expected_event2_data['department_id'] = None
+        expected_event2_data['officer_id'] = None
         expected_event2_data['use_of_force_id'] = uof_1.id
         expected_event2_data['complaint_ids'] = set()
 

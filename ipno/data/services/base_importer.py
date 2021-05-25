@@ -30,12 +30,6 @@ class BaseImporter(object):
         agency = re.sub('CSD$', 'PD', agency)
         return re.sub('SO$', 'Sheriff', agency)
 
-    def get_or_create_department(self, agency):
-        agency = re.sub('CSD$', 'PD', agency)
-        agency = re.sub('SO$', 'Sheriff', agency)
-        department, _ = Department.objects.get_or_create(name=agency)
-        return department
-
     def department_mappings(self, agencies):
         mappings = {department.name: department.id for department in Department.objects.only('id', 'name')}
         for agency in agencies:
@@ -66,9 +60,6 @@ class BaseImporter(object):
         ftp_stream = urllib.request.urlopen(request)
         json_data = json.loads(ftp_stream.read().decode('utf-8'))
         return json_data.get('hash')
-
-    def wrgl_repo(self):
-        return WrglRepo.objects.filter(data_model=self.data_model).first()
 
     def import_data(self, data):
         raise NotImplementedError
@@ -119,6 +110,7 @@ class BaseImporter(object):
                                 'deleted_rows': import_results.get('deleted_rows')
                             }
                         )
+                        return True
                     except Exception:
                         self.update_import_log(
                             import_log,

@@ -9,6 +9,3 @@ fake = Faker()
 class WrglRepoFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = WrglRepo
-
-    data_model = factory.LazyFunction(lambda: fake.word())
-    repo_name = factory.LazyFunction(lambda: fake.word())

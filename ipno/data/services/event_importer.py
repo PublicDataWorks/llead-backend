@@ -89,15 +89,16 @@ class EventImporter(BaseImporter):
             officer_uid = row['uid']
             uof_uid = row['uof_uid']
 
-            formatted_agency = self.format_agency(agency)
             officer_id = officer_mappings.get(officer_uid)
-            department_id = department_mappings.get(formatted_agency)
             uof_id = uof_mappings.get(uof_uid)
 
             event_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
+            if agency:
+                formatted_agency = self.format_agency(agency)
+                department_id = department_mappings.get(formatted_agency)
+                event_data['department_id'] = department_id
 
             event_data['use_of_force_id'] = uof_id
-            event_data['department_id'] = department_id
             event_data['officer_id'] = officer_id
 
             event_id = event_mappings.get(event_uid)

@@ -93,6 +93,18 @@ class OfficerImporterTestCase(TestCase):
                 'race': '',
                 'gender': 'male',
             },
+            {
+                'uid': 'uid5',
+                'last_name': 'Bull',
+                'middle_name': '',
+                'middle_initial': '',
+                'first_name': 'Edward',
+                'birth_year': '',
+                'birth_month': '',
+                'birth_day': '',
+                'race': '',
+                'gender': 'male',
+            },
         ]
         writer.writeheader()
         writer.writerows(self.officers_data)
