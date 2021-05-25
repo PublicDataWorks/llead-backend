@@ -138,6 +138,10 @@ jobs:
           command: |
             export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
             cat kubernetes/ipno.yml | envsubst | kubectl apply -f -
+      - run:
+          name: Setup cronjobs
+          command: |
+            bin/run_cronjob.sh --staging $(cat /tmp/workspace/buildnum) import_data "0 5 * * *"
 
 workflows:
   version: 2
