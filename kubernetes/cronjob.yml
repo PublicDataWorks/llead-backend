@@ -1,0 +1,81 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ${CRONJOB_NAME}
+spec:
+  schedule: "${CRONJOB_SCHEDULE}"
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: gunicorn
+              image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
+              resources:
+                requests:
+                  cpu: 800m
+                  memory: 1Gi
+              command: ["ipno/manage.py", "${CRONJOB_COMMAND}"]
+              env:
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudsql
+                      key: username
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudsql
+                      key: password
+                - name: POSTGRES_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudsql
+                      key: host
+                - name: DJANGO_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: django
+                      key: secret-key
+                - name: DJANGO_SETTINGS_MODULE
+                  valueFrom:
+                    secretKeyRef:
+                      name: django
+                      key: setting-module
+                - name: ELASTICSEARCH_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: elasticsearch
+                      key: host
+                - name: WRGL_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: wrgl
+                      key: api-key
+            - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+              name: cloudsql-proxy
+              command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                        "-instances=excellent-zoo-300106:us-east4:ipno-db-staging=tcp:5432",
+                        "-credential_file=/secrets/cloudsql/credentials.json"]
+              volumeMounts:
+                - name: cloudsql-oauth-credentials
+                  mountPath: /secrets/cloudsql
+                  readOnly: true
+                - name: ssl-certs
+                  mountPath: /etc/ssl/certs
+                - name: cloudsql
+                  mountPath: /cloudsql
+          imagePullSecrets:
+            - name: regcred
+          volumes:
+            - name: cloudsql-oauth-credentials
+              secret:
+                secretName: cloudsql-oauth-credentials
+            - name: ssl-certs
+              hostPath:
+                path: /etc/ssl/certs
+            - name: cloudsql
+              emptyDir: {}
+          restartPolicy: "Never"
+  concurrencyPolicy: Replace
