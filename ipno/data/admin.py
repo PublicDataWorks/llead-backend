@@ -4,16 +4,16 @@ from data.models import WrglRepo, ImportLog
 
 
 class WrglRepoAdmin(admin.ModelAdmin):
-    list_display = ('data_model', 'repo_name', 'commit_hash')
+    list_display = ('data_model', 'repo_name', 'commit_hash', 'updated_at')
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
     def has_change_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
 
 class ImportLogAdmin(admin.ModelAdmin):
@@ -30,13 +30,13 @@ class ImportLogAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
     def has_change_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return False  # pragma: no cover
 
 
 admin.site.register(WrglRepo, WrglRepoAdmin)
