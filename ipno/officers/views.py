@@ -18,7 +18,7 @@ class OfficersViewSet(viewsets.ViewSet):
 
     def list(self, request):
         officers = Officer.objects.prefetch_events().annotate(
-            complaint_count=Count('complaint__id', distinct=True)
+            complaint_count=Count('complaints__id', distinct=True)
         ).order_by(
             '-complaint_count'
         )[:OFFICERS_LIMIT]

@@ -62,7 +62,8 @@ LOCAL_APPS = (
     'officers',
     'complaints',
     'use_of_forces',
-    'analytics'
+    'analytics',
+    'data',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
@@ -113,6 +114,8 @@ DATABASES = {
         'PORT': 5432,
     }
 }
+
+WRGL_API_KEY = env.str('WRGL_API_KEY')
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

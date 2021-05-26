@@ -10,6 +10,6 @@ class OfficerSerializer(serializers.Serializer):
     department = serializers.SerializerMethodField()
 
     def get_department(self, obj):
-        event = obj.event_set.first()
+        event = obj.events.first()
         if event:
             return SimpleDepartmentSerializer(event.department).data

@@ -19,7 +19,7 @@ class Document(TimeStampsModel):
     pages_count = models.IntegerField(null=True, blank=True)
     text_content = models.TextField(blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', blank=True)
-    departments = models.ManyToManyField('departments.Department', blank=True)
+    officers = models.ManyToManyField('officers.Officer', blank=True, related_name='documents')
+    departments = models.ManyToManyField('departments.Department', blank=True, related_name='documents')
 
     objects = DocumentManager()

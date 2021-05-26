@@ -12,7 +12,9 @@ class WrglFile(TimeStampsModel):
     position = models.IntegerField(default=0)
     default_expanded = models.BooleanField(default=False)
 
-    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(
+        'departments.Department', on_delete=models.CASCADE, null=True, related_name='wrgl_files'
+    )
 
     class Meta:
         unique_together = ('department', 'position')

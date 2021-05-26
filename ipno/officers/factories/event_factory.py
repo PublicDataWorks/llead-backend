@@ -15,6 +15,7 @@ class EventFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Event
 
+    event_uid = factory.LazyFunction(lambda: fake.uuid4())
     officer = factory.SubFactory(OfficerFactory)
     department = factory.SubFactory(DepartmentFactory)
     kind = factory.LazyFunction(lambda: random.choice(EVENT_KINDS))

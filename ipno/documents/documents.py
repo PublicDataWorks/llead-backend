@@ -16,6 +16,7 @@ class DocumentESDoc(ESDoc):
 
     class Django:
         model = Document
+        ignore_signals = True
 
     def get_indexing_queryset(self):
         return self.get_queryset().prefetch_related(
