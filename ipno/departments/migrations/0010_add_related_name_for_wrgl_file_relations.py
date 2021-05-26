@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('departments', '0006_department_officers'),
+        ('departments', '0009_add_unique_and_index_for_department_slug'),
     ]
 
     operations = [
