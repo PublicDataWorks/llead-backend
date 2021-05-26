@@ -11,3 +11,10 @@ def parse_date(year, month, day):
             )
         except ValueError or TypeError:
             return None
+
+
+def parse_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None

@@ -4,61 +4,64 @@ from use_of_forces.models import UseOfForce
 from data.services.base_importer import BaseImporter
 from data.constants import USE_OF_FORCE_MODEL_NAME
 
-
-ATTRIBUTES = [
-    'uof_uid',
-    'uof_tracking_number',
-    'report_year',
-    'force_description',
-    'force_type',
-    'force_level',
-    'effective_uof',
-    'accidental_discharge',
-    'less_than_lethal',
-    'status',
-    'source',
-    'service_type',
-    'county',
-    'traffic_stop',
-    'sustained',
-    'force_reason',
-    'weather_description',
-    'distance_from_officer',
-    'body_worn_camera_available',
-    'app_used',
-    'citizen_uid',
-    'citizen_arrested',
-    'citizen_hospitalized',
-    'citizen_injured',
-    'citizen_body_type',
-    'citizen_height',
-    'citizen_age',
-    'citizen_involvement',
-    'disposition',
-    'citizen_sex',
-    'citizen_race',
-    'citizen_age_1',
-    'officer_current_supervisor',
-    'officer_title',
-    'officer_injured',
-    'officer_age',
-    'officer_years_exp',
-    'officer_years_with_unit',
-    'officer_type',
-    'officer_employment_status',
-    'officer_department',
-    'officer_division',
-    'officer_sub_division_a',
-    'officer_sub_division_b',
-    'data_production_year',
-]
-UPDATE_ATTRIBUTES = ATTRIBUTES + ['officer_id', 'department_id']
-
 BATCH_SIZE = 1000
 
 
 class UofImporter(BaseImporter):
     data_model = USE_OF_FORCE_MODEL_NAME
+    ATTRIBUTES = [
+        'uof_uid',
+        'uof_tracking_number',
+        'force_description',
+        'force_type',
+        'force_level',
+        'effective_uof',
+        'accidental_discharge',
+        'less_than_lethal',
+        'status',
+        'source',
+        'service_type',
+        'county',
+        'traffic_stop',
+        'sustained',
+        'force_reason',
+        'weather_description',
+        'distance_from_officer',
+        'body_worn_camera_available',
+        'app_used',
+        'citizen_uid',
+        'citizen_arrested',
+        'citizen_hospitalized',
+        'citizen_injured',
+        'citizen_body_type',
+        'citizen_height',
+        'citizen_involvement',
+        'disposition',
+        'citizen_sex',
+        'citizen_race',
+        'citizen_age_1',
+        'officer_current_supervisor',
+        'officer_title',
+        'officer_injured',
+        'officer_age',
+        'officer_type',
+        'officer_employment_status',
+        'officer_department',
+        'officer_division',
+        'officer_sub_division_a',
+        'officer_sub_division_b',
+
+    ]
+
+    INT_ATTRIBUTES = [
+        'report_year',
+        'citizen_age',
+        'officer_years_exp',
+        'officer_years_with_unit',
+        'data_production_year',
+    ]
+
+    UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + ['officer_id', 'department_id']
 
     def import_data(self, data):
         new_uofs = []
@@ -76,8 +79,7 @@ class UofImporter(BaseImporter):
             uof_uid = row['uof_uid']
             officer_uid = row['uid']
 
-            uof_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
-
+            uof_data = self.parse_row_data(row)
             if agency:
                 formatted_agency = self.format_agency(agency)
                 department_id = department_mappings.get(formatted_agency)
@@ -104,7 +106,7 @@ class UofImporter(BaseImporter):
         delete_uofs.delete()
 
         UseOfForce.objects.bulk_create(new_uofs, batch_size=BATCH_SIZE)
-        UseOfForce.objects.bulk_update(update_uofs, UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        UseOfForce.objects.bulk_update(update_uofs, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
 
         return {
             'created_rows': len(new_uofs),
