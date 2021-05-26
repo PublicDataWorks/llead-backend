@@ -12,6 +12,7 @@ class DocumentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Document
 
+    docid = factory.LazyFunction(lambda: fake.uuid4())
     title = factory.LazyFunction(lambda: fake.sentence())
     document_type = factory.LazyFunction(lambda: fake.file_extension())
     url = factory.LazyFunction(lambda: fake.file_path(extension='pdf'))

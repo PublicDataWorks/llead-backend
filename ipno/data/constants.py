@@ -4,6 +4,7 @@ OFFICER_MODEL_NAME = 'Officer'
 EVENT_MODEL_NAME = 'Event'
 COMPLAINT_MODEL_NAME = 'Complaint'
 USE_OF_FORCE_MODEL_NAME = 'UseOfForce'
+DOCUMENT_MODEL_NAME = 'Document'
 WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'personnel',
@@ -20,6 +21,10 @@ WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'use-of-force',
         'data_model': USE_OF_FORCE_MODEL_NAME,
+    },
+    {
+        'repo_name': 'documents',
+        'data_model': DOCUMENT_MODEL_NAME,
     },
 ]
 
