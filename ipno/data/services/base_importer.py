@@ -13,6 +13,7 @@ from departments.models import Department
 from officers.models import Officer
 from use_of_forces.models import UseOfForce
 from data.models import WrglRepo, ImportLog
+from utils.parse_utils import parse_int
 from data.constants import (
     WRGL_USER,
     IMPORT_LOG_STATUS_STARTED,
@@ -25,10 +26,18 @@ from data.constants import (
 
 class BaseImporter(object):
     data_model = None
+    ATTRIBUTES = []
+    INT_ATTRIBUTES = []
 
     def format_agency(self, agency):
         agency = re.sub('CSD$', 'PD', agency)
         return re.sub('SO$', 'Sheriff', agency)
+
+    def parse_row_data(self, row):
+        row_data = {attr: row[attr] if row[attr] else None for attr in self.ATTRIBUTES if attr in row}
+        for attr in self.INT_ATTRIBUTES:
+            row_data[attr] = parse_int(row[attr]) if row[attr] else None
+        return row_data
 
     def department_mappings(self, agencies):
         mappings = {department.name: department.id for department in Department.objects.only('id', 'name')}

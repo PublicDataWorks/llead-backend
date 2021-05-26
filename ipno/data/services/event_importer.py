@@ -5,49 +5,52 @@ from complaints.models import Complaint
 from data.services.base_importer import BaseImporter
 from data.constants import EVENT_MODEL_NAME
 
-
-ATTRIBUTES = [
-    'event_uid',
-    'kind',
-    'year',
-    'month',
-    'day',
-    'time',
-    'raw_date',
-    'complaint_uid',
-    'appeal_uid',
-    'badge_no',
-    'employee_id',
-    'department_code',
-    'department_desc',
-    'division_desc',
-    'sub_division_a_desc',
-    'sub_division_b_desc',
-    'current_supervisor',
-    'employee_class',
-    'rank_code',
-    'rank_desc',
-    'employment_status',
-    'sworn',
-    'event_inactive',
-    'employee_type',
-    'years_employed',
-    'salary',
-    'salary_freq',
-    'award',
-    'award_comments',
-]
-UPDATE_ATTRIBUTES = ATTRIBUTES + [
-    'officer_id',
-    'department_id',
-    'use_of_force_id'
-]
-
 BATCH_SIZE = 1000
 
 
 class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
+
+    ATTRIBUTES = [
+        'event_uid',
+        'kind',
+
+        'time',
+        'raw_date',
+        'complaint_uid',
+        'appeal_uid',
+        'badge_no',
+        'employee_id',
+        'department_code',
+        'department_desc',
+        'division_desc',
+        'sub_division_a_desc',
+        'sub_division_b_desc',
+        'current_supervisor',
+        'employee_class',
+        'rank_code',
+        'rank_desc',
+        'employment_status',
+        'sworn',
+        'event_inactive',
+        'employee_type',
+
+        'salary',
+        'salary_freq',
+        'award',
+        'award_comments',
+    ]
+    INT_ATTRIBUTES = [
+        'year',
+        'month',
+        'day',
+        'years_employed',
+    ]
+    UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + [
+        'officer_id',
+        'department_id',
+        'use_of_force_id'
+    ]
 
     def event_mappings(self):
         return {event.event_uid: event.id for event in Event.objects.only('id', 'event_uid')}
@@ -92,7 +95,7 @@ class EventImporter(BaseImporter):
             officer_id = officer_mappings.get(officer_uid)
             uof_id = uof_mappings.get(uof_uid)
 
-            event_data = {attr: row[attr] if row[attr] else None for attr in ATTRIBUTES if attr in row}
+            event_data = self.parse_row_data(row)
             if agency:
                 formatted_agency = self.format_agency(agency)
                 department_id = department_mappings.get(formatted_agency)
@@ -120,7 +123,7 @@ class EventImporter(BaseImporter):
 
         Event.objects.bulk_create(new_events, batch_size=BATCH_SIZE)
 
-        Event.objects.bulk_update(update_events, UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        Event.objects.bulk_update(update_events, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
 
         self.update_relations()
 
