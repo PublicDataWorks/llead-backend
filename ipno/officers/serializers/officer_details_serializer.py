@@ -29,7 +29,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
             setattr(
                 obj,
                 'latest_salary_event',
-                obj.event_set.filter(
+                obj.events.filter(
                     salary__isnull=False,
                     salary_freq__isnull=False,
                 ).order_by(
@@ -39,7 +39,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return obj.latest_salary_event
 
     def get_badges(self, obj):
-        return list(dict.fromkeys(obj.event_set.order_by(
+        return list(dict.fromkeys(obj.events.order_by(
             F('year').desc(nulls_last=True),
             F('month').desc(nulls_last=True),
             F('day').desc(nulls_last=True),
@@ -48,7 +48,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
         ).values_list('badge_no', flat=True)))
 
     def get_department(self, obj):
-        event = obj.event_set.order_by('-year', '-month', '-day').first()
+        event = obj.events.order_by('-year', '-month', '-day').first()
         if event:
             return SimpleDepartmentSerializer(event.department).data
 
@@ -62,13 +62,13 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return event.salary_freq if event else None
 
     def get_documents_count(self, obj):
-        return obj.document_set.count()
+        return obj.documents.count()
 
     def get_complaints_count(self, obj):
-        return obj.complaint_set.count()
+        return obj.complaints.count()
 
     def get_data_period(self, obj):
-        event_years = list(obj.event_set.filter(
+        event_years = list(obj.events.filter(
             year__isnull=False,
         ).values_list('year', flat=True))
 
@@ -79,7 +79,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return data_period(obj.document_years)
 
     def get_complaints_data_period(self, obj):
-        complaint_years = list(obj.event_set.filter(
+        complaint_years = list(obj.events.filter(
             year__isnull=False,
             kind__in=COMPLAINT_EVENT_KINDS
         ).values_list('year', flat=True))

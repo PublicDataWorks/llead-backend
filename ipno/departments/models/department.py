@@ -17,6 +17,6 @@ class Department(TimeStampsModel):
 
     @property
     def document_years(self):
-        return list(self.document_set.filter(
+        return list(self.documents.filter(
             incident_date__isnull=False,
         ).values_list('incident_date__year', flat=True))

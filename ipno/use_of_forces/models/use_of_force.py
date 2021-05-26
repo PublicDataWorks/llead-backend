@@ -4,7 +4,7 @@ from utils.models import TimeStampsModel
 
 
 class UseOfForce(TimeStampsModel):
-    uof_uid = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    uof_uid = models.CharField(max_length=255, unique=True, db_index=True)
     uof_tracking_number = models.CharField(max_length=255, null=True, blank=True)
     report_year = models.IntegerField(null=True, blank=True)
     force_description = models.CharField(max_length=255, null=True, blank=True)
@@ -50,4 +50,6 @@ class UseOfForce(TimeStampsModel):
     data_production_year = models.IntegerField(null=True, blank=True)
 
     officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True, related_name='use_of_forces')
-    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(
+        'departments.Department', on_delete=models.CASCADE, null=True, related_name='use_of_forces'
+    )

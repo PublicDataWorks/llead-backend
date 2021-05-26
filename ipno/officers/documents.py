@@ -18,6 +18,7 @@ class OfficerESDoc(ESDoc):
 
     class Django:
         model = Officer
+        ignore_signals = True
 
     def get_indexing_queryset(self):
         return self.get_queryset().prefetch_related(

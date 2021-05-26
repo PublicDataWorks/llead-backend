@@ -10,7 +10,7 @@ class OfficerManager(models.Manager):
     def prefetch_events(self):
         return self.get_queryset().prefetch_related(
             Prefetch(
-                'event_set',
+                'events',
                 queryset=Event.objects.order_by(
                     F('year').desc(nulls_last=True),
                     F('month').desc(nulls_last=True),
@@ -45,12 +45,12 @@ class Officer(TimeStampsModel):
     @property
     def badges(self):
         return list(dict.fromkeys([
-            event.badge_no for event in self.event_set.all()
+            event.badge_no for event in self.events.all()
             if event.badge_no
         ]))
 
     @cached_property
     def document_years(self):
-        return list(self.document_set.filter(
+        return list(self.documents.filter(
             incident_date__isnull=False,
         ).values_list('incident_date__year', flat=True))
