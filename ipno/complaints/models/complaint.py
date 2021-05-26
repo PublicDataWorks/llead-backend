@@ -4,9 +4,9 @@ from utils.models import TimeStampsModel
 
 
 class Complaint(TimeStampsModel):
-    complaint_uid = models.CharField(max_length=255, null=True, blank=True)
-    allegation_uid = models.CharField(max_length=255, null=True, blank=True)
-    charge_uid = models.CharField(max_length=255, null=True, blank=True)
+    complaint_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    allegation_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    charge_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     tracking_number = models.CharField(max_length=255, null=True, blank=True)
     investigation_type = models.CharField(max_length=255, null=True, blank=True)
     investigation_status = models.CharField(max_length=255, null=True, blank=True)
@@ -41,9 +41,9 @@ class Complaint(TimeStampsModel):
     department_desc = models.CharField(max_length=255, null=True, blank=True)
     rank_desc = models.CharField(max_length=255, null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', blank=True)
-    departments = models.ManyToManyField('departments.Department', blank=True)
-    events = models.ManyToManyField('officers.Event', blank=True)
+    officers = models.ManyToManyField('officers.Officer', blank=True, related_name='complaints')
+    departments = models.ManyToManyField('departments.Department', blank=True, related_name='complaints')
+    events = models.ManyToManyField('officers.Event', blank=True, related_name='complaints')
 
     class Meta:
         unique_together = ('complaint_uid', 'allegation_uid', 'charge_uid')

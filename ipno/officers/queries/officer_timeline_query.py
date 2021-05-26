@@ -61,7 +61,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _complaint_timeline(self):
-        complaint_timeline_queryset = self.officer.complaint_set.prefetch_related(
+        complaint_timeline_queryset = self.officer.complaints.prefetch_related(
             Prefetch(
                 'events',
                 queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
@@ -79,7 +79,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _join_timeline(self):
-        joined_timeline_query = self.officer.event_set.filter(
+        joined_timeline_query = self.officer.events.filter(
             kind=OFFICER_HIRE
         )
 
@@ -87,7 +87,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _left_timeline(self):
-        left_timeline_query = self.officer.event_set.filter(
+        left_timeline_query = self.officer.events.filter(
             kind=OFFICER_LEFT
         )
 
@@ -95,14 +95,14 @@ class OfficerTimelineQuery(object):
 
     @property
     def _document_timeline(self):
-        document_timeline_queryset = self.officer.document_set.prefetch_departments()
+        document_timeline_queryset = self.officer.documents.prefetch_departments()
 
         return DocumentTimelineSerializer(document_timeline_queryset, many=True).data
 
     @property
     def _salary_change_timeline(self):
         events = list(
-            self.officer.event_set.filter(
+            self.officer.events.filter(
                 kind=OFFICER_PAY_EFFECTIVE,
             ).filter(salary__isnull=False, salary_freq__isnull=False)
         )
@@ -117,7 +117,7 @@ class OfficerTimelineQuery(object):
     @property
     def _rank_change_timeline(self):
         events = list(
-            self.officer.event_set.filter(
+            self.officer.events.filter(
                 kind=OFFICER_RANK,
             ).filter(
                 Q(rank_code__isnull=False) | Q(rank_desc__isnull=False),
@@ -133,7 +133,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _unit_change_timeline(self):
-        events = self.officer.event_set.filter(
+        events = self.officer.events.filter(
                 kind=OFFICER_DEPT
             ).filter(
                 Q(department_code__isnull=False) | Q(department_desc__isnull=False),

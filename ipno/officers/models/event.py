@@ -5,7 +5,7 @@ from officers.constants import EVENT_KINDS
 
 
 class Event(TimeStampsModel):
-    event_uid = models.CharField(max_length=255, db_index=True)
+    event_uid = models.CharField(max_length=255, unique=True, db_index=True)
     kind = models.CharField(max_length=255, choices=EVENT_KINDS, db_index=True)
     year = models.IntegerField(null=True, blank=True, db_index=True)
     month = models.IntegerField(null=True, blank=True, db_index=True)
@@ -32,8 +32,8 @@ class Event(TimeStampsModel):
     salary = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=2)
     salary_freq = models.CharField(max_length=255, null=True, blank=True)
 
-    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True)
-    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True)
+    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True, related_name='events')
+    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True, related_name='events')
     use_of_force = models.ForeignKey(
         'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, related_name='events'
     )
