@@ -28,6 +28,7 @@ from data.constants import (
 class BaseImporter(object):
     data_model = None
     ATTRIBUTES = []
+    NA_ATTRIBUTES = []
     INT_ATTRIBUTES = []
     BATCH_SIZE = 1000
 
@@ -37,8 +38,13 @@ class BaseImporter(object):
 
     def parse_row_data(self, row):
         row_data = {attr: row[attr] if row[attr] else None for attr in self.ATTRIBUTES if attr in row}
+
+        for attr in self.NA_ATTRIBUTES:
+            row_data[attr] = row[attr] if row[attr] != 'NA' else None
+
         for attr in self.INT_ATTRIBUTES:
             row_data[attr] = parse_int(row[attr]) if row[attr] else None
+
         return row_data
 
     def department_mappings(self, agencies):
@@ -72,9 +78,13 @@ class BaseImporter(object):
         json_data = json.loads(ftp_stream.read().decode('utf-8'))
         return json_data.get('hash')
 
-    def bulk_import(self, klass, new_items_attrs, update_items_attrs):
+    def bulk_import(self, klass, new_items_attrs, update_items_attrs, cleanup_action=None):
         update_item_ids = [attrs['id'] for attrs in update_items_attrs]
         delete_items = klass.objects.exclude(id__in=update_item_ids)
+
+        if cleanup_action:
+            cleanup_action(delete_items.values())
+
         delete_items_count = delete_items.count()
         delete_items.delete()
 

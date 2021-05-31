@@ -49,6 +49,21 @@ spec:
               secretKeyRef:
                 name: wrgl
                 key: api-key
+          - name: DROPBOX_APP_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dropbox
+                key: app-key
+          - name: DROPBOX_APP_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: dropbox
+                key: app-secret
+          - name: DROPBOX_REFRESH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dropbox
+                key: refresh-token
       - image: gcr.io/cloudsql-docker/gce-proxy:1.16
         name: cloudsql-proxy
         command: ["/cloud_sql_proxy", "--dir=/cloudsql",

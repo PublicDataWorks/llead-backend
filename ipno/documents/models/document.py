@@ -11,9 +11,12 @@ class DocumentManager(models.Manager):
 
 
 class Document(TimeStampsModel):
-    docid = models.CharField(max_length=255, unique=True, db_index=True)
+    docid = models.CharField(max_length=255, null=True, blank=True)
+    hrg_no = models.CharField(max_length=255, null=True, blank=True)
+    matched_uid = models.CharField(max_length=255, null=True, blank=True)
     fileid = models.CharField(max_length=255, null=True, blank=True)
     file_db_path = models.CharField(max_length=255, null=True, blank=True)
+    file_db_content_hash = models.CharField(max_length=255, null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     document_type = models.CharField(max_length=255, null=True, blank=True)
     url = models.CharField(max_length=255, null=True, blank=True)
@@ -30,3 +33,6 @@ class Document(TimeStampsModel):
     departments = models.ManyToManyField('departments.Department', blank=True, related_name='documents')
 
     objects = DocumentManager()
+
+    class Meta:
+        unique_together = ('docid', 'hrg_no', 'matched_uid')
