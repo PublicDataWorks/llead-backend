@@ -10,3 +10,5 @@ django-storages[google]==1.11.1
 djangorestframework-simplejwt==4.6.0
 martor==1.6.2
 tqdm==4.57.0
+dropbox==11.9.0
+Wand==0.6.6

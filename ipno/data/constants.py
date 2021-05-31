@@ -41,3 +41,5 @@ IMPORT_LOG_STATUSES = (
     (IMPORT_LOG_STATUS_FINISHED, 'Finished'),
     (IMPORT_LOG_STATUS_ERROR, 'Error')
 )
+
+GC_PATH = 'https://storage.googleapis.com/llead-documents/'
