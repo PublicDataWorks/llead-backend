@@ -75,14 +75,14 @@ class EventImporter(BaseImporter):
         ComplaintRelation.objects.bulk_create(complaint_relations, batch_size=BATCH_SIZE)
 
     def import_data(self, data):
-        new_events = []
-        update_events = []
+        new_events_attrs = []
+        update_events_attrs = []
         new_event_uids = []
 
-        officer_mappings = self.officer_mappings()
         agencies = {row['agency'] for row in data if row['agency']}
         department_mappings = self.department_mappings(agencies)
 
+        officer_mappings = self.officer_mappings()
         event_mappings = self.event_mappings()
         uof_mappings = self.uof_mappings()
 
@@ -96,10 +96,9 @@ class EventImporter(BaseImporter):
             uof_id = uof_mappings.get(uof_uid)
 
             event_data = self.parse_row_data(row)
-            if agency:
-                formatted_agency = self.format_agency(agency)
-                department_id = department_mappings.get(formatted_agency)
-                event_data['department_id'] = department_id
+            formatted_agency = self.format_agency(agency)
+            department_id = department_mappings.get(formatted_agency)
+            event_data['department_id'] = department_id
 
             event_data['use_of_force_id'] = uof_id
             event_data['officer_id'] = officer_id
@@ -107,28 +106,29 @@ class EventImporter(BaseImporter):
             event_id = event_mappings.get(event_uid)
 
             if event_id:
-                event = Event(**event_data)
-                event.id = event_id
-                update_events.append(event)
+                event_data['id'] = event_id
+                update_events_attrs.append(event_data)
             elif event_uid not in new_event_uids:
                 new_event_uids.append(event_uid)
-                new_events.append(
-                    Event(**event_data)
-                )
+                new_events_attrs.append(event_data)
 
-        update_event_ids = [event.id for event in update_events]
+        update_event_ids = [attrs['id'] for attrs in update_events_attrs]
         delete_events = Event.objects.exclude(id__in=update_event_ids)
         delete_events_count = delete_events.count()
         delete_events.delete()
 
-        Event.objects.bulk_create(new_events, batch_size=BATCH_SIZE)
+        for i in range(0, len(new_events_attrs), BATCH_SIZE):
+            new_objects = [Event(**attrs) for attrs in new_events_attrs[i:i + BATCH_SIZE]]
+            Event.objects.bulk_create(new_objects)
 
-        Event.objects.bulk_update(update_events, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        for i in range(0, len(update_events_attrs), BATCH_SIZE):
+            update_objects = [Event(**attrs) for attrs in update_events_attrs[i:i + BATCH_SIZE]]
+            Event.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
 
         self.update_relations()
 
         return {
-            'created_rows': len(new_events),
-            'updated_rows': len(update_events),
+            'created_rows': len(new_events_attrs),
+            'updated_rows': len(update_events_attrs),
             'deleted_rows': delete_events_count,
         }

@@ -64,8 +64,8 @@ class UofImporter(BaseImporter):
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + ['officer_id', 'department_id']
 
     def import_data(self, data):
-        new_uofs = []
-        update_uofs = []
+        new_uofs_attrs = []
+        update_uofs_attrs = []
         new_uof_uids = []
 
         officer_mappings = self.officer_mappings()
@@ -80,10 +80,9 @@ class UofImporter(BaseImporter):
             officer_uid = row['uid']
 
             uof_data = self.parse_row_data(row)
-            if agency:
-                formatted_agency = self.format_agency(agency)
-                department_id = department_mappings.get(formatted_agency)
-                uof_data['department_id'] = department_id
+            formatted_agency = self.format_agency(agency)
+            department_id = department_mappings.get(formatted_agency)
+            uof_data['department_id'] = department_id
 
             officer_id = officer_mappings.get(officer_uid)
             uof_data['officer_id'] = officer_id
@@ -91,25 +90,27 @@ class UofImporter(BaseImporter):
             uof_id = uof_mappings.get(uof_uid)
 
             if uof_id:
-                uof = UseOfForce(**uof_data)
-                uof.id = uof_id
-                update_uofs.append(uof)
+                uof_data['id'] = uof_id
+                update_uofs_attrs.append(uof_data)
             elif uof_uid not in new_uof_uids:
                 new_uof_uids.append(uof_uid)
-                new_uofs.append(
-                    UseOfForce(**uof_data)
-                )
+                new_uofs_attrs.append(uof_data)
 
-        update_uof_ids = [uof.id for uof in update_uofs]
+        update_uof_ids = [attrs['id'] for attrs in update_uofs_attrs]
         delete_uofs = UseOfForce.objects.exclude(id__in=update_uof_ids)
         delete_uofs_count = delete_uofs.count()
         delete_uofs.delete()
 
-        UseOfForce.objects.bulk_create(new_uofs, batch_size=BATCH_SIZE)
-        UseOfForce.objects.bulk_update(update_uofs, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        for i in range(0, len(new_uofs_attrs), BATCH_SIZE):
+            new_objects = [UseOfForce(**attrs) for attrs in new_uofs_attrs[i:i + BATCH_SIZE]]
+            UseOfForce.objects.bulk_create(new_objects)
+
+        for i in range(0, len(update_uofs_attrs), BATCH_SIZE):
+            update_objects = [UseOfForce(**attrs) for attrs in update_uofs_attrs[i:i + BATCH_SIZE]]
+            UseOfForce.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
 
         return {
-            'created_rows': len(new_uofs),
-            'updated_rows': len(update_uofs),
+            'created_rows': len(new_uofs_attrs),
+            'updated_rows': len(update_uofs_attrs),
             'deleted_rows': delete_uofs_count,
         }
