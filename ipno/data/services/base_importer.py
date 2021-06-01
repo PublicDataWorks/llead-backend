@@ -8,6 +8,7 @@ import re
 import traceback
 
 from django.conf import settings
+from django.utils.text import slugify
 
 from departments.models import Department
 from officers.models import Officer
@@ -44,7 +45,7 @@ class BaseImporter(object):
         for agency in agencies:
             formatted_agency = self.format_agency(agency)
             if not mappings.get(formatted_agency):
-                department = Department.objects.create(name=formatted_agency)
+                department = Department.objects.create(name=formatted_agency, slug=slugify(formatted_agency))
                 mappings[department.name] = department.id
         return mappings
 
