@@ -61,29 +61,41 @@ class ComplaintImporter(BaseImporter):
             for complaint in Complaint.objects.only('id', 'complaint_uid', 'allegation_uid', 'charge_uid')
         }
 
-    def update_relations(self, complaints):
+    def update_relations(self, data):
         DepartmentRelation = Complaint.departments.through
         OfficerRelation = Complaint.officers.through
         department_relation_ids = {}
         officer_relation_ids = {}
 
         officer_mappings = self.officer_mappings()
-        agencies = {complaint.agency for complaint in complaints if complaint.agency}
+        agencies = {row['agency'] for row in data if row['agency']}
         department_mappings = self.department_mappings(agencies)
 
-        for complaint in tqdm(complaints):
-            officer_uid = complaint.officer_uid
-            agency = complaint.agency
+        complaint_mappings = self.complaint_mappings()
 
-            if agency:
-                formatted_agency = self.format_agency(agency)
-                department_id = department_mappings.get(formatted_agency)
-                department_relation_ids[complaint.id] = department_id
+        for row in tqdm(data):
+            officer_uid = row['uid']
+            agency = row['agency']
 
-            if officer_uid:
-                officer_id = officer_mappings.get(officer_uid)
-                if officer_id:
-                    officer_relation_ids[complaint.id] = officer_id
+            if officer_uid or agency:
+                complaint_uid = row['complaint_uid'] if row['complaint_uid'] else None
+                allegation_uid = row['allegation_uid'] if row['allegation_uid'] else None
+                charge_uid = row['charge_uid'] if row['charge_uid'] else None
+
+                uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
+                complaint_id = complaint_mappings.get(uniq_key)
+
+                if complaint_id:
+                    if officer_uid:
+                        officer_id = officer_mappings.get(officer_uid)
+                        if officer_id:
+                            officer_relation_ids[complaint_id] = officer_id
+
+                    if agency:
+                        formatted_agency = self.format_agency(agency)
+                        department_id = department_mappings.get(formatted_agency)
+
+                        department_relation_ids[complaint_id] = department_id
 
         department_relations = [
             DepartmentRelation(complaint_id=complaint_id, department_id=department_id)
@@ -102,8 +114,8 @@ class ComplaintImporter(BaseImporter):
         OfficerRelation.objects.bulk_create(officer_relations, batch_size=BATCH_SIZE)
 
     def import_data(self, data):
-        new_complaints = []
-        update_complaints = []
+        new_complaints_attrs = []
+        update_complaints_attrs = []
         new_complaint_uids = []
 
         complaint_mappings = self.complaint_mappings()
@@ -117,31 +129,30 @@ class ComplaintImporter(BaseImporter):
             uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
             complaint_id = complaint_mappings.get(uniq_key)
 
-            complaint = Complaint(**complaint_data)
-            officer_uid = row['uid']
-            agency = row['agency']
-            setattr(complaint, 'officer_uid', officer_uid)
-            setattr(complaint, 'agency', agency)
-
             if complaint_id:
-                complaint.id = complaint_id
-                update_complaints.append(complaint)
+                complaint_data['id'] = complaint_id
+                update_complaints_attrs.append(complaint_data)
             elif uniq_key not in new_complaint_uids:
-                new_complaints.append(complaint)
+                new_complaints_attrs.append(complaint_data)
                 new_complaint_uids.append(uniq_key)
 
-        update_complaint_ids = [complaint.id for complaint in update_complaints]
+        update_complaint_ids = [attrs['id'] for attrs in update_complaints_attrs]
         delete_complaints = Complaint.objects.exclude(id__in=update_complaint_ids)
         delete_complaints_count = delete_complaints.count()
         delete_complaints.delete()
 
-        created_complaints = Complaint.objects.bulk_create(new_complaints, batch_size=BATCH_SIZE)
-        Complaint.objects.bulk_update(update_complaints, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        for i in range(0, len(new_complaints_attrs), BATCH_SIZE):
+            new_objects = [Complaint(**attrs) for attrs in new_complaints_attrs[i:i + BATCH_SIZE]]
+            Complaint.objects.bulk_create(new_objects)
 
-        self.update_relations(created_complaints + update_complaints)
+        for i in range(0, len(update_complaints_attrs), BATCH_SIZE):
+            update_objects = [Complaint(**attrs) for attrs in update_complaints_attrs[i:i + BATCH_SIZE]]
+            Complaint.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
+
+        self.update_relations(data)
 
         return {
-            'created_rows': len(new_complaints),
-            'updated_rows': len(update_complaints),
+            'created_rows': len(new_complaints_attrs),
+            'updated_rows': len(update_complaints_attrs),
             'deleted_rows': delete_complaints_count,
         }

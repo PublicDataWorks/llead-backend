@@ -26,8 +26,8 @@ class OfficerImporter(BaseImporter):
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES
 
     def import_data(self, data):
-        new_officers = []
-        update_officers = []
+        new_officers_atrs = []
+        update_officers_attrs = []
         new_officer_uids = []
 
         officer_mappings = self.officer_mappings()
@@ -36,25 +36,27 @@ class OfficerImporter(BaseImporter):
             officer_id = officer_mappings.get(row['uid'])
 
             if officer_id:
-                officer = Officer(**officer_data)
-                officer.id = officer_id
-                update_officers.append(officer)
+                officer_data['id'] = officer_id
+                update_officers_attrs.append(officer_data)
             elif row['uid'] not in new_officer_uids:
                 new_officer_uids.append(row['uid'])
-                new_officers.append(
-                    Officer(**officer_data)
-                )
+                new_officers_atrs.append(officer_data)
 
-        update_officer_ids = [officer.id for officer in update_officers]
+        update_officer_ids = [attrs['id'] for attrs in update_officers_attrs]
         delete_officers = Officer.objects.exclude(id__in=update_officer_ids)
         delete_officers_count = delete_officers.count()
         delete_officers.delete()
 
-        Officer.objects.bulk_create(new_officers, batch_size=BATCH_SIZE)
-        Officer.objects.bulk_update(update_officers, self.UPDATE_ATTRIBUTES, batch_size=BATCH_SIZE)
+        for i in range(0, len(new_officers_atrs), BATCH_SIZE):
+            new_objects = [Officer(**attrs) for attrs in new_officers_atrs[i:i + BATCH_SIZE]]
+            Officer.objects.bulk_create(new_objects)
+
+        for i in range(0, len(update_officers_attrs), BATCH_SIZE):
+            update_objects = [Officer(**attrs) for attrs in update_officers_attrs[i:i + BATCH_SIZE]]
+            Officer.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
 
         return {
-            'created_rows': len(new_officers),
-            'updated_rows': len(update_officers),
+            'created_rows': len(new_officers_atrs),
+            'updated_rows': len(update_officers_attrs),
             'deleted_rows': delete_officers_count,
         }
