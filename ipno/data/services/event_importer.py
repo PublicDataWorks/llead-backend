@@ -5,8 +5,6 @@ from complaints.models import Complaint
 from data.services.base_importer import BaseImporter
 from data.constants import EVENT_MODEL_NAME
 
-BATCH_SIZE = 1000
-
 
 class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
@@ -72,7 +70,7 @@ class EventImporter(BaseImporter):
             ]
 
         ComplaintRelation.objects.all().delete()
-        ComplaintRelation.objects.bulk_create(complaint_relations, batch_size=BATCH_SIZE)
+        ComplaintRelation.objects.bulk_create(complaint_relations, batch_size=self.BATCH_SIZE)
 
     def import_data(self, data):
         new_events_attrs = []
@@ -112,23 +110,8 @@ class EventImporter(BaseImporter):
                 new_event_uids.append(event_uid)
                 new_events_attrs.append(event_data)
 
-        update_event_ids = [attrs['id'] for attrs in update_events_attrs]
-        delete_events = Event.objects.exclude(id__in=update_event_ids)
-        delete_events_count = delete_events.count()
-        delete_events.delete()
-
-        for i in range(0, len(new_events_attrs), BATCH_SIZE):
-            new_objects = [Event(**attrs) for attrs in new_events_attrs[i:i + BATCH_SIZE]]
-            Event.objects.bulk_create(new_objects)
-
-        for i in range(0, len(update_events_attrs), BATCH_SIZE):
-            update_objects = [Event(**attrs) for attrs in update_events_attrs[i:i + BATCH_SIZE]]
-            Event.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
+        import_result = self.bulk_import(Event, new_events_attrs, update_events_attrs)
 
         self.update_relations()
 
-        return {
-            'created_rows': len(new_events_attrs),
-            'updated_rows': len(update_events_attrs),
-            'deleted_rows': delete_events_count,
-        }
+        return import_result
