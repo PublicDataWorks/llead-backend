@@ -4,8 +4,6 @@ from complaints.models import Complaint
 from data.services.base_importer import BaseImporter
 from data.constants import COMPLAINT_MODEL_NAME
 
-BATCH_SIZE = 1000
-
 
 class ComplaintImporter(BaseImporter):
     data_model = COMPLAINT_MODEL_NAME
@@ -108,10 +106,10 @@ class ComplaintImporter(BaseImporter):
         ]
 
         DepartmentRelation.objects.all().delete()
-        DepartmentRelation.objects.bulk_create(department_relations, batch_size=BATCH_SIZE)
+        DepartmentRelation.objects.bulk_create(department_relations, batch_size=self.BATCH_SIZE)
 
         OfficerRelation.objects.all().delete()
-        OfficerRelation.objects.bulk_create(officer_relations, batch_size=BATCH_SIZE)
+        OfficerRelation.objects.bulk_create(officer_relations, batch_size=self.BATCH_SIZE)
 
     def import_data(self, data):
         new_complaints_attrs = []
@@ -136,23 +134,6 @@ class ComplaintImporter(BaseImporter):
                 new_complaints_attrs.append(complaint_data)
                 new_complaint_uids.append(uniq_key)
 
-        update_complaint_ids = [attrs['id'] for attrs in update_complaints_attrs]
-        delete_complaints = Complaint.objects.exclude(id__in=update_complaint_ids)
-        delete_complaints_count = delete_complaints.count()
-        delete_complaints.delete()
-
-        for i in range(0, len(new_complaints_attrs), BATCH_SIZE):
-            new_objects = [Complaint(**attrs) for attrs in new_complaints_attrs[i:i + BATCH_SIZE]]
-            Complaint.objects.bulk_create(new_objects)
-
-        for i in range(0, len(update_complaints_attrs), BATCH_SIZE):
-            update_objects = [Complaint(**attrs) for attrs in update_complaints_attrs[i:i + BATCH_SIZE]]
-            Complaint.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
-
+        import_result = self.bulk_import(Complaint, new_complaints_attrs, update_complaints_attrs)
         self.update_relations(data)
-
-        return {
-            'created_rows': len(new_complaints_attrs),
-            'updated_rows': len(update_complaints_attrs),
-            'deleted_rows': delete_complaints_count,
-        }
+        return import_result
