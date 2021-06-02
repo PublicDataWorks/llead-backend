@@ -280,6 +280,7 @@ class EventImporterTestCase(TestCase):
         EventImporter().process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
+        print(import_log.error_message)
         assert import_log.data_model == EventImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
         assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'

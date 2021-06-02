@@ -29,6 +29,7 @@ class BaseImporter(object):
     data_model = None
     ATTRIBUTES = []
     INT_ATTRIBUTES = []
+    BATCH_SIZE = 1000
 
     def format_agency(self, agency):
         agency = re.sub('CSD$', 'PD', agency)
@@ -70,6 +71,27 @@ class BaseImporter(object):
         ftp_stream = urllib.request.urlopen(request)
         json_data = json.loads(ftp_stream.read().decode('utf-8'))
         return json_data.get('hash')
+
+    def bulk_import(self, klass, new_items_attrs, update_items_attrs):
+        update_item_ids = [attrs['id'] for attrs in update_items_attrs]
+        delete_items = klass.objects.exclude(id__in=update_item_ids)
+        delete_items_count = delete_items.count()
+        delete_items.delete()
+
+        for i in range(0, len(new_items_attrs), self.BATCH_SIZE):
+            new_objects = [klass(**attrs) for attrs in new_items_attrs[i:i + self.BATCH_SIZE]]
+            klass.objects.bulk_create(new_objects)
+
+        for i in range(0, len(update_items_attrs), self.BATCH_SIZE):
+            update_objects = [klass(**attrs) for attrs in update_items_attrs[i:i + self.BATCH_SIZE]]
+            klass.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
+
+        return {
+            'created_rows': len(new_items_attrs),
+            'updated_rows': len(update_items_attrs),
+            'deleted_rows': delete_items_count,
+        }
+
 
     def import_data(self, data):
         raise NotImplementedError

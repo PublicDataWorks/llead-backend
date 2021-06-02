@@ -4,8 +4,6 @@ from use_of_forces.models import UseOfForce
 from data.services.base_importer import BaseImporter
 from data.constants import USE_OF_FORCE_MODEL_NAME
 
-BATCH_SIZE = 1000
-
 
 class UofImporter(BaseImporter):
     data_model = USE_OF_FORCE_MODEL_NAME
@@ -96,21 +94,4 @@ class UofImporter(BaseImporter):
                 new_uof_uids.append(uof_uid)
                 new_uofs_attrs.append(uof_data)
 
-        update_uof_ids = [attrs['id'] for attrs in update_uofs_attrs]
-        delete_uofs = UseOfForce.objects.exclude(id__in=update_uof_ids)
-        delete_uofs_count = delete_uofs.count()
-        delete_uofs.delete()
-
-        for i in range(0, len(new_uofs_attrs), BATCH_SIZE):
-            new_objects = [UseOfForce(**attrs) for attrs in new_uofs_attrs[i:i + BATCH_SIZE]]
-            UseOfForce.objects.bulk_create(new_objects)
-
-        for i in range(0, len(update_uofs_attrs), BATCH_SIZE):
-            update_objects = [UseOfForce(**attrs) for attrs in update_uofs_attrs[i:i + BATCH_SIZE]]
-            UseOfForce.objects.bulk_update(update_objects, self.UPDATE_ATTRIBUTES)
-
-        return {
-            'created_rows': len(new_uofs_attrs),
-            'updated_rows': len(update_uofs_attrs),
-            'deleted_rows': delete_uofs_count,
-        }
+        return self.bulk_import(UseOfForce, new_uofs_attrs, update_uofs_attrs)
