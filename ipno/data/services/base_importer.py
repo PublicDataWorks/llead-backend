@@ -92,7 +92,6 @@ class BaseImporter(object):
             'deleted_rows': delete_items_count,
         }
 
-
     def import_data(self, data):
         raise NotImplementedError
 
