@@ -68,6 +68,8 @@ spec:
                     secretKeyRef:
                       name: dropbox
                       key: refresh-token
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: "gcloud-credentials.json"
             - image: gcr.io/cloudsql-docker/gce-proxy:1.16
               name: cloudsql-proxy
               command: ["/cloud_sql_proxy", "--dir=/cloudsql",
