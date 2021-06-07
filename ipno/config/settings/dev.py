@@ -30,3 +30,5 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 DEBUG = True
+
+GCLOUD_SUB_STORAGE = 'develop/'

@@ -181,3 +181,6 @@ WRGL_API_KEY = env.str('WRGL_API_KEY', None)
 DROPBOX_APP_KEY = env.str('DROPBOX_APP_KEY', None)
 DROPBOX_APP_SECRET = env.str('DROPBOX_APP_SECRET', None)
 DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
+
+# google cloud nested folder for develop, test vs staging
+GCLOUD_SUB_STORAGE = ''

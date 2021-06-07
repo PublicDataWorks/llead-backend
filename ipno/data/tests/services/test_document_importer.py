@@ -31,9 +31,10 @@ class DocumentImporterTestCase(TestCase):
                 'docid',
                 'page_count',
                 'fileid',
-                'file_db_path',
-                'file_db_id',
-                'file_db_content_hash',
+                'pdf_db_path',
+                'pdf_db_content_hash',
+                'txt_db_id',
+                'txt_db_content_hash',
                 'year',
                 'month',
                 'day',
@@ -42,17 +43,19 @@ class DocumentImporterTestCase(TestCase):
                 'accused',
                 'matched_uid',
                 'hrg_text',
-                'ocr_text',
-                'agency'
+                'agency',
+                'title'
             ]
         )
         self.document1_data = {
             'docid': '00fa809e',
             'page_count': '4',
             'fileid': 'f0fcc0d',
-            'file_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
-            'file_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmQ',
-            'file_db_content_hash': 'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
+            'title': 'document 1 title',
+            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
+            'pdf_db_content_hash': 'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
+            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmQ',
+            'txt_db_content_hash': 'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff',
             'year': '2018',
             'month': '6',
             'day': '14',
@@ -73,29 +76,17 @@ class DocumentImporterTestCase(TestCase):
                 In Favor: All
                 Opposed: None
                 SPC Minutes, 6/14/2018, pg. 3
-            """),
-            'ocr_text': cleandoc("""
-                Action/Minutes
-                AGENDA
-                John Bel Edwards
-                LOUISIANA STATE POLICE COMMISSION Governor
-                GENERAL BUSINESS MEETING
-                THURSDAY. JUNE 14, 2018 Jason Hannaman
-                9:00 A.M. Executive Director
-                STATE POLICE COMMISSION, VETERANS MEMORIAL AUDITORIUM, SUITE 1247,
-                DEPT. OF AGRICULTURE & FORESTRY BLDG., 5825 FLORIDA BLVD., BATON ROUGE, LA 70806
-                I. Call to Order
-                The State Police Commission convened its monthly general business meeting at 9:09 A.M.
-                on Thursday, June 14, 2018.
             """)
         }
         self.document2_data = {
             'docid': '0236e725',
             'page_count': '1',
             'fileid': 'd4fb65b',
-            'file_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
-            'file_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmw',
-            'file_db_content_hash': '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
+            'title': 'document 2 title',
+            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
+            'pdf_db_content_hash': '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
+            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmw',
+            'txt_db_content_hash': '2c668256378a491fd2f2812fcd4fc0f22af292b66f3f63ce6070321c57497f5a',
             'year': '2018',
             'month': '12',
             'day': '18',
@@ -104,42 +95,17 @@ class DocumentImporterTestCase(TestCase):
             'accused': 'Officer Terry Guillory, Docket 17-201',
             'matched_uid': 'officer-uid-2',
             'agency': '',
-            'hrg_text': cleandoc("""
-                3. Discussion of Subpoenas Requested in the Appeal of Joseph Jones, Docket No. 17-
-                237-S
-                Lenore Feeney, State Police Commission Referee, advised that the hearing has been
-                set for August 9, 2018, and noted that the majority of subpoenas issued for this
-                hearing are to persons residing in the Monroe area.
-                On motion duly made by Mr. Riecke, seconded, and unanimously passed, the
-                Commission voted to move the Commission hearing as well as the regular public
-                meeting to a suitable location in Monroe on August 9, 2018.
-                In Favor: All
-                Opposed: None
-                SPC Minutes, 6/14/2018, pg. 3
-            """),
-            'ocr_text': cleandoc("""
-                Municipal Police Employees Civil Service Board
-                MINUTES OF MUNICIPAL POLICE EMPLOYEES’ MEETING
-                DATE: Tuesday, December 18, 2018
-                TIME: 5:07PM
-                LOCATION: Mandeville City Hall Courtroom
-                3101 East Causeway Approach
-                Mandeville, LA 70448
-                ATTENDANCE:
-                Brian Burke, Chairman Present
-                Roxanne Luquet, Vice-Chairman Present
-                Jack McGuire Present
-                Richard Ainsworth Absent
-                Dr. Dennis Mutell Absent
-            """)
+            'hrg_text': ''
         }
         self.document3_data = {
             'docid': '0dd28391',
             'page_count': '3',
             'fileid': '77d489c',
-            'file_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'file_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'file_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'title': 'document 3 title',
+            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
+            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
             'year': '1999',
             'month': '9',
             'day': '30',
@@ -154,31 +120,16 @@ class DocumentImporterTestCase(TestCase):
                 Henry Clark to accept this request for withdrawal and seconded by Lyle Johnson. Motion
                 approved unanimously.
             """),
-            'ocr_text': cleandoc("""
-                — APPROVED
-                MUNICIPAL FIRE AND POLICE CIVIL SERVICE BOARD
-                THURSDAY, SEPTEMBER 30, 1999 @ 9:30 A.M.
-                METROPOLITAN COUNCIL CHAMBERS
-                3RD FLOOR - GOVERNMENTAL BUILDING
-                BATON ROUGE, LOUISIANA
-                ROLL CALL
-                Johnny Johnston, Chairman
-                Henry Clark, Vice Chairman
-                Dary! Edgens
-                Lyle Johnson
-                Cynthia Wilkinson
-                David Hamilton, Attorney
-                Margaret Johnson, Secretary to Board
-                APPROVE MINUTES
-            """)
         }
         self.document4_data = {
             'docid': '0dd28391',
             'page_count': '3',
             'fileid': '77d489c',
-            'file_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'file_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'file_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'title': 'document 4 title',
+            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
+            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
             'year': '1999',
             'month': '9',
             'day': '30',
@@ -195,64 +146,26 @@ class DocumentImporterTestCase(TestCase):
                 Cynthia Wilkinson made a motion to accept the letter tentatively until a Personnel Action
                 form is received from Chief Phares regarding the agreement. This motion was seconded by
                 Lyle Johnson. Motion approved unanimously.
-            """),
-            'ocr_text': cleandoc("""
-                — APPROVED
-                MUNICIPAL FIRE AND POLICE CIVIL SERVICE BOARD
-                THURSDAY, SEPTEMBER 30, 1999 @ 9:30 A.M.
-                METROPOLITAN COUNCIL CHAMBERS
-                3RD FLOOR - GOVERNMENTAL BUILDING
-                BATON ROUGE, LOUISIANA
-                ROLL CALL
-                Johnny Johnston, Chairman
-                Henry Clark, Vice Chairman
-                Dary! Edgens
-                Lyle Johnson
-                Cynthia Wilkinson
-                David Hamilton, Attorney
-                Margaret Johnson, Secretary to Board
-                APPROVE MINUTES
             """)
         }
         self.document5_data = {
             'docid': '0dd28391',
             'page_count': '3',
             'fileid': '77d489c',
-            'file_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'file_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'file_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'title': 'document 5 title',
+            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
+            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
             'year': '1999',
             'month': '9',
             'day': '30',
             'dt_source': 'scraped',
             'hrg_no': '3',
             'accused': 'OFFICER KEVIN LAPEYROUSE',
-            'matched_uid': 'NA',
+            'matched_uid': '',
             'agency': '',
-            'hrg_text': cleandoc("""
-                APPEAL HEARING FOR OFFICER KEVIN LAPEYROUSE
-                Kevin Lapeyrouse did not appear for this hearing, therefore Henry Clark made a motion to
-                not hear this appeal due to the appellant not appearing or contacting anyone in regard to this
-                hearing and Cynthia Wilkinson seconded this motion. Motion approved unanimously.
-                Ma.
-            """),
-            'ocr_text': cleandoc("""
-                — APPROVED
-                MUNICIPAL FIRE AND POLICE CIVIL SERVICE BOARD
-                THURSDAY, SEPTEMBER 30, 1999 @ 9:30 A.M.
-                METROPOLITAN COUNCIL CHAMBERS
-                3RD FLOOR - GOVERNMENTAL BUILDING
-                BATON ROUGE, LOUISIANA
-                ROLL CALL
-                Johnny Johnston, Chairman
-                Henry Clark, Vice Chairman
-                Dary! Edgens
-                Lyle Johnson
-                Cynthia Wilkinson
-                David Hamilton, Attorney
-                Margaret Johnson, Secretary to Board
-                APPROVE MINUTES
-            """)
+            'hrg_text': ''
         }
         self.documents_data = [
             self.document1_data,
@@ -277,7 +190,7 @@ class DocumentImporterTestCase(TestCase):
             docid='0dd28391',
             hrg_no='3',
             matched_uid=None,
-            file_db_content_hash='a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            pdf_db_content_hash='a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
             url='https://storage.googleapis.com/llead-documents/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             preview_image_url='https://storage.googleapis.com/llead-documents/meeting-minutes-extraction/export/pdfs/0dd28391-preview.jpeg',
         )
@@ -314,6 +227,12 @@ class DocumentImporterTestCase(TestCase):
 
         mock_get_temporary_link_from_path = Mock(return_value='https://example.com')
         document_importer.ds = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        def get_ocr_text_side_effect(ocr_text_id):
+            return f'ocr text for {ocr_text_id}'
+        mock_get_ocr_text = Mock(side_effect=get_ocr_text_side_effect)
+        document_importer.get_ocr_text = mock_get_ocr_text
+
         document_importer.process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
@@ -368,16 +287,19 @@ class DocumentImporterTestCase(TestCase):
             document = Document.objects.filter(
                 docid=document_data['docid'] if document_data['docid'] else None,
                 hrg_no=document_data['hrg_no'] if document_data['hrg_no'] else None,
-                matched_uid=document_data['matched_uid'] if document_data['matched_uid'] != 'NA' else None,
+                matched_uid=document_data['matched_uid'] if document_data['matched_uid'] else None,
             ).first()
             assert document
             field_attrs = [
                 'docid',
                 'hrg_no',
-                'fileid',
-                'file_db_path',
-                'file_db_content_hash',
+                'matched_uid',
+                'pdf_db_path',
+                'pdf_db_content_hash',
+                'txt_db_id',
+                'txt_db_content_hash',
                 'accused',
+                'title'
             ]
             integer_field_attrs = [
                 'year',
@@ -391,7 +313,7 @@ class DocumentImporterTestCase(TestCase):
             for attr in integer_field_attrs:
                 assert getattr(document, attr) == (int(document_data[attr]) if document_data[attr] else None)
 
-            base_url = document_data['file_db_path'].replace('/PPACT/', '')
+            base_url = document_data['pdf_db_path'].replace('/PPACT/', '')
             document_url = f"{GC_PATH}{base_url}".replace(' ', '%20').replace("'", '%27')
 
             upload_document_call = call(base_url, ANY, 'application/pdf')
@@ -400,9 +322,13 @@ class DocumentImporterTestCase(TestCase):
             gs_upload_file_calls.append(upload_document_call)
             gs_upload_file_calls.append(upload_document_preview_call)
 
+            ocr_text = f'ocr text for {document_data["txt_db_id"]}'
+            document_text_content = document_data['hrg_text'] if document_data['hrg_text'] else ocr_text
+
+            assert document.text_content == document_text_content
+
             assert document.url == document_url
             assert document.preview_image_url == document_url.replace('.pdf', '-preview.jpeg').replace('.PDF', '-preview.jpeg')
-            assert document.title == document_data['file_db_path'].split('/')[-1].replace('.pdf', '').replace('_', ' ')
 
             assert list(document.departments.values_list('id', flat=True)) == document_data['department_ids']
             assert list(document.officers.values_list('id', flat=True)) == document_data['officer_ids']
@@ -537,6 +463,22 @@ class DocumentImporterTestCase(TestCase):
 
         assert download_url == 'https://storage.googleapis.com/llead-documents/location'
 
+    @override_settings(GCLOUD_SUB_STORAGE='develop/')
+    def test_upload_file_success_in_development(self):
+        upload_location = 'location'
+        file_blob = 'file_blob'
+        file_type = 'file_type'
+
+        mock_upload_file_from_string = MagicMock()
+        document_importer = DocumentImporter()
+        document_importer.gs = MagicMock(upload_file_from_string=mock_upload_file_from_string)
+
+        download_url = document_importer.upload_file(upload_location, file_blob, file_type)
+
+        mock_upload_file_from_string.assert_called_with(f'develop/{upload_location}', file_blob, file_type)
+
+        assert download_url == 'https://storage.googleapis.com/llead-documents/develop/location'
+
     def test_upload_file_fail_not_raise_exception(self):
         upload_location = 'location'
         file_blob = 'file_blob'
@@ -584,3 +526,39 @@ class DocumentImporterTestCase(TestCase):
 
         mock_upload_file_from_string.assert_not_called()
         assert preview_image_url is None
+
+    @patch('data.services.document_importer.urlopen')
+    def test_get_ocr_text_success(self, urlopen_mock):
+        mock_decode = Mock(return_value='decoded_value')
+        mock_read = Mock(return_value=Mock(decode=mock_decode))
+        urlopen_mock_return = Mock(read=mock_read)
+        urlopen_mock.return_value = urlopen_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+
+        ocr_text_id = 'ocr_text_id'
+        ocr_text = document_importer.get_ocr_text(ocr_text_id)
+
+        mock_get_temporary_link_from_path.assert_called_with(ocr_text_id)
+        urlopen_mock.assert_called_with('temp_link')
+        mock_read.assert_called()
+        mock_decode.assert_called_with('utf-8')
+        assert ocr_text == 'decoded_value'
+
+    @patch('data.services.document_importer.urlopen')
+    def test_get_ocr_text_fail(self, urlopen_mock):
+        mock_get_temporary_link_from_path = Mock()
+        mock_get_temporary_link_from_path.side_effect = Exception()
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+
+        ocr_text_id = 'ocr_text_id'
+        ocr_text = document_importer.get_ocr_text(ocr_text_id)
+
+        assert ocr_text == ''
