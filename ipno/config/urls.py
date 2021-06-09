@@ -30,7 +30,7 @@ from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
 from officers.views import OfficersViewSet
 from search.views import SearchViewSet
-from authentication.views import TokenRevokeView
+from authentication.views import TokenRevokeView, UserView
 from status.views import StatusView
 from historical_data.views import HistoricalDataViewSet
 
@@ -51,6 +51,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
     path('api/token/revoke/', TokenRevokeView.as_view(), name='revoke_token'),
+    path('api/user/', UserView.as_view(), name='user'),
     path('api/status/', StatusView.as_view(), name='status'),
     path('martor/', include('martor.urls')),
 ]
