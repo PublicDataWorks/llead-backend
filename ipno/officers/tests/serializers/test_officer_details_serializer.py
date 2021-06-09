@@ -104,8 +104,6 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'documents_count': 3,
             'complaints_count': 2,
             'data_period': ['2015-2020'],
-            'complaints_data_period': ['2019-2020'],
-            'documents_data_period': ['2016-2018'],
         }
 
     def test_data_period(self):
