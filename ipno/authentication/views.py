@@ -5,6 +5,8 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from authentication.serializers import UserSerializer
+
 
 class TokenRevokeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -23,3 +25,11 @@ class TokenRevokeView(APIView):
 
         refresh_token.blacklist()
         return Response({'detail': 'Logout successfully'})
+
+
+class UserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response(UserSerializer(user).data)
