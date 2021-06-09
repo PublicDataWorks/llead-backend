@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from shared.serializers import SimpleDepartmentSerializer
 from utils.data_utils import data_period
-from officers.constants import COMPLAINT_EVENT_KINDS
 
 
 class OfficerDetailsSerializer(serializers.Serializer):
@@ -21,8 +20,6 @@ class OfficerDetailsSerializer(serializers.Serializer):
     documents_count = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
     data_period = serializers.SerializerMethodField()
-    documents_data_period = serializers.SerializerMethodField()
-    complaints_data_period = serializers.SerializerMethodField()
 
     def _get_latest_salary_event(self, obj):
         if not hasattr(obj, 'latest_salary_event'):
@@ -74,13 +71,3 @@ class OfficerDetailsSerializer(serializers.Serializer):
 
         years = event_years + obj.document_years
         return data_period(years)
-
-    def get_documents_data_period(self, obj):
-        return data_period(obj.document_years)
-
-    def get_complaints_data_period(self, obj):
-        complaint_years = list(obj.events.filter(
-            year__isnull=False,
-            kind__in=COMPLAINT_EVENT_KINDS
-        ).values_list('year', flat=True))
-        return data_period(complaint_years)
