@@ -12,8 +12,8 @@ class DocumentsViewSet(viewsets.ViewSet):
 
     def list(self, request):
         documents = Document.objects.prefetch_departments().order_by(
-            '-created_at'
-        )[:DOCUMENTS_LIMIT]
+            'docid',
+        ).distinct('docid')[:DOCUMENTS_LIMIT]
 
         serializer = DocumentSerializer(documents, many=True)
         return Response(serializer.data)

@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.urls import reverse
 
 from rest_framework import status
@@ -14,9 +12,10 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
 
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2019, 12, 5))
-        document_3 = DocumentFactory()
+        document_1 = DocumentFactory(docid='docid-3')
+        document_2 = DocumentFactory(docid='docid-2')
+        document_3 = DocumentFactory(docid='docid-1')
+        DocumentFactory(docid='docid-2')
         document_1.departments.add(department_1)
         document_2.departments.add(department_2)
 
