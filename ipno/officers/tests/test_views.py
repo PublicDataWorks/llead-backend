@@ -194,7 +194,6 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
-            'data_period': ['2015-2020'],
         }
 
         response = self.auth_client.get(
@@ -448,13 +447,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             reverse('api:officers-timeline', kwargs={'pk': officer.id})
         )
 
-        data = sorted(
-            response.data,
+        timeline_data = sorted(
+            response.data['timeline'],
             key=lambda item: str(item['date']) if item['date'] else ''
         )
+        timeline_period_data = response.data['timeline_period']
 
         assert response.status_code == status.HTTP_200_OK
-        assert data == expected_result
+        assert timeline_data == expected_result
+        assert timeline_period_data == ['2017-2021']
 
     def test_timelime_not_found(self):
         response = self.auth_client.get(
