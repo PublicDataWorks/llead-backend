@@ -103,58 +103,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
-            'data_period': ['2015-2020'],
         }
-
-    def test_data_period(self):
-        officer = OfficerFactory()
-
-        EventFactory(
-            officer=officer,
-            year=2018,
-        )
-        EventFactory(
-            officer=officer,
-            year=2020,
-        )
-        EventFactory(
-            officer=officer,
-            year=2012,
-        )
-        EventFactory(
-            officer=officer,
-            year=2013,
-        )
-        EventFactory(
-            officer=officer,
-            year=2014,
-        )
-        EventFactory(
-            officer=officer,
-            year=2019,
-        )
-        EventFactory(
-            officer=officer,
-            year=None,
-        )
-
-        document_1 = DocumentFactory(incident_date=date(2009, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2018, 1, 6))
-        document_1.officers.add(officer)
-        document_2.officers.add(officer)
-
-        result = OfficerDetailsSerializer(officer).data
-        assert result['data_period'] == [
-            '2009',
-            '2012-2014',
-            '2018-2020',
-        ]
-
-    def test_data_period_with_empty_data(self):
-        officer = OfficerFactory()
-
-        result = OfficerDetailsSerializer(officer).data
-        assert result['data_period'] == []
 
     def test_salary_fields(self):
         officer = OfficerFactory()

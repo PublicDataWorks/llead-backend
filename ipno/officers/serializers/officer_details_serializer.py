@@ -3,7 +3,6 @@ from django.db.models import F
 from rest_framework import serializers
 
 from shared.serializers import SimpleDepartmentSerializer
-from utils.data_utils import data_period
 
 
 class OfficerDetailsSerializer(serializers.Serializer):
@@ -19,7 +18,6 @@ class OfficerDetailsSerializer(serializers.Serializer):
     salary_freq = serializers.SerializerMethodField()
     documents_count = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
-    data_period = serializers.SerializerMethodField()
 
     def _get_latest_salary_event(self, obj):
         if not hasattr(obj, 'latest_salary_event'):
@@ -63,11 +61,3 @@ class OfficerDetailsSerializer(serializers.Serializer):
 
     def get_complaints_count(self, obj):
         return obj.complaints.count()
-
-    def get_data_period(self, obj):
-        event_years = list(obj.events.filter(
-            year__isnull=False,
-        ).values_list('year', flat=True))
-
-        years = event_years + obj.document_years
-        return data_period(years)

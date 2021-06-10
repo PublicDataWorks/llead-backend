@@ -27,6 +27,7 @@ from officers.constants import (
     OFFICER_DEPT,
     UOF_RECEIVE,
 )
+from utils.data_utils import data_period
 
 
 class OfficerTimelineQueryTestCase(TestCase):
@@ -257,12 +258,18 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'departments': [],
             },
         ]
-        result = sorted(
-            OfficerTimelineQuery(officer).query(),
+
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
+
+        timeline = sorted(
+            officer_timeline_data['timeline'],
             key=lambda item: str(item['date']) if item['date'] else ''
         )
 
-        assert result == expected_result
+        timeline_period = data_period(event['year'] for event in expected_result if event['year'])
+
+        assert timeline == expected_result
+        assert officer_timeline_data['timeline_period'] == timeline_period
 
     def test_salary_change(self):
         officer = OfficerFactory()
@@ -400,7 +407,9 @@ class OfficerTimelineQueryTestCase(TestCase):
             },
         ]
 
-        assert OfficerTimelineQuery(officer).query() == expected_result
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
+
+        assert officer_timeline_data['timeline'] == expected_result
 
     def test_rank_change(self):
         officer = OfficerFactory()
@@ -538,7 +547,9 @@ class OfficerTimelineQueryTestCase(TestCase):
             },
         ]
 
-        assert OfficerTimelineQuery(officer).query() == expected_result
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
+
+        assert officer_timeline_data['timeline'] == expected_result
 
     def test_unit_change(self):
         officer = OfficerFactory()
@@ -690,4 +701,6 @@ class OfficerTimelineQueryTestCase(TestCase):
             },
         ]
 
-        assert OfficerTimelineQuery(officer).query() == expected_result
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
+
+        assert officer_timeline_data['timeline'] == expected_result
