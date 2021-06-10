@@ -3,6 +3,11 @@ APP_CONFIG = [
         'name': 'NO_OF_RECENT_SEARCHES',
         'value': '5',
         'description': 'Number of recent searches'
+    },
+    {
+        'name': 'ANALYTIC_RECENT_DAYS',
+        'value': '30',
+        'description': 'Number of analytic recent days'
     }
 ]
 
