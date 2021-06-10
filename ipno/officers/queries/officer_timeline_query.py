@@ -20,6 +20,7 @@ from officers.constants import (
 )
 from officers.models import Event
 from utils.data_utils import sort_items
+from utils.data_utils import data_period
 
 
 class OfficerTimelineQuery(object):
@@ -147,7 +148,11 @@ class OfficerTimelineQuery(object):
         return UnitChangeTimelineSerializer(unit_changes, many=True).data
 
     def query(self):
-        return self._complaint_timeline + self._use_of_force_timeline \
+        timeline = self._complaint_timeline + self._use_of_force_timeline \
                + self._join_timeline + self._left_timeline \
                + self._document_timeline + self._salary_change_timeline \
                + self._rank_change_timeline + self._unit_change_timeline
+
+        timeline_period = data_period([i["year"] for i in timeline if i["year"]])
+
+        return {'timeline': timeline, 'timeline_period': timeline_period}
