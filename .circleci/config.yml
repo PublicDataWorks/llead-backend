@@ -141,7 +141,7 @@ jobs:
       - run:
           name: Setup cronjobs
           command: |
-            bin/run_cronjob.sh --staging $(cat /tmp/workspace/buildnum) import_data "0 5 * * *"
+            bin/run_cronjob.sh --staging $(cat /tmp/workspace/buildnum) import_data "0 */2 * * *"
 
 workflows:
   version: 2
