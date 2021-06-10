@@ -9,8 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from documents.models import Document
 from officers.models import Officer
 from departments.models import Department
+from app_config.models import AppConfig
 
-RECENT_DAYS = 30
+DEFAULT_RECENT_DAYS = 30
 
 
 class AnalyticsViewSet(ViewSet):
@@ -18,7 +19,11 @@ class AnalyticsViewSet(ViewSet):
 
     @action(detail=False, methods=['get'], url_path='summary')
     def summary(self, request):
-        date_n = datetime.datetime.now(pytz.utc) - datetime.timedelta(days=RECENT_DAYS)
+        recent_date_config = AppConfig.objects.filter(name='ANALYTIC_RECENT_DAYS').first()
+
+        recent_date = int(recent_date_config.value) if recent_date_config else DEFAULT_RECENT_DAYS
+
+        date_n = datetime.datetime.now(pytz.utc) - datetime.timedelta(days=recent_date)
 
         summary_data = {
             'documents_count': Document.objects.count(),
@@ -27,7 +32,7 @@ class AnalyticsViewSet(ViewSet):
             'recent_documents_count': Document.objects.filter(created_at__gt=date_n).count(),
             'recent_officers_count': Officer.objects.filter(created_at__gt=date_n).count(),
             'recent_departments_count': Department.objects.filter(created_at__gt=date_n).count(),
-            'recent_days': RECENT_DAYS,
+            'recent_days': recent_date,
         }
 
         return Response(summary_data)
