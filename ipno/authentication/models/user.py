@@ -37,6 +37,7 @@ class User(AbstractBaseUser, TimeStampsModel):  # pragma: no cover
     )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    recent_items = models.JSONField(null=True, blank=True)
 
     objects = MyUserManager()
 
