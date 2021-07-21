@@ -49,7 +49,7 @@ class UserAdmin(BaseUserAdmin):  # pragma: no cover
     list_display = ('email', 'is_admin')
     list_filter = ('is_admin',)
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'recent_items')}),
+        (None, {'fields': ('email', 'password', 'recent_items', 'recent_queries')}),
         ('Permissions', {'fields': ('is_admin',)}),
     )
     add_fieldsets = (

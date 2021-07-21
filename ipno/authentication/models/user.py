@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
+from django.contrib.postgres.fields import ArrayField
 
 from utils.models import TimeStampsModel
 
@@ -38,6 +39,7 @@ class User(AbstractBaseUser, TimeStampsModel):  # pragma: no cover
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     recent_items = models.JSONField(null=True, blank=True)
+    recent_queries = ArrayField(models.CharField(max_length=255), blank=True, null=True)
 
     objects = MyUserManager()
 
