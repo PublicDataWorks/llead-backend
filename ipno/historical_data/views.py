@@ -95,3 +95,26 @@ class HistoricalDataViewSet(ViewSet):
         user.save()
 
         return Response({"detail": "updated user recent items"})
+
+    @action(detail=False, methods=['get'], url_path='recent-queries')
+    def recent_queries(self, request):
+        user = request.user
+        user_recent_queries = user.recent_queries
+
+        return Response(user_recent_queries)
+
+    @recent_queries.mapping.post
+    def update_recent_queries(self, request):
+        recent_query = request.data['q']
+
+        user = request.user
+        user_recent_queries = user.recent_queries or []
+
+        if recent_query in user_recent_queries:
+            user_recent_queries.remove(recent_query)
+        user_recent_queries.insert(0, recent_query)
+
+        user.recent_queries = user_recent_queries[:10]
+        user.save()
+
+        return Response({"detail": "updated user recent queries"})

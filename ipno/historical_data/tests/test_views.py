@@ -246,3 +246,69 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 'id': officer.id
             }
         ]
+
+    def test_recent_queries(self):
+        self.user.recent_queries = ['query 2', 'query 1']
+        self.user.save()
+
+        response = self.auth_client.get(
+            reverse('api:historical-data-recent-queries')
+        )
+        result = response.data
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == ['query 2', 'query 1']
+
+    def test_no_recent_queries(self):
+        response = self.auth_client.get(
+            reverse('api:historical-data-recent-queries')
+        )
+        result = response.data
+
+        assert response.status_code == status.HTTP_200_OK
+        assert not result
+
+    def test_update_new_recent_queries(self):
+
+        self.user.recent_queries = ['query 2', 'query 1']
+        self.user.save()
+
+        data = {'q': 'query 3'}
+
+        response = self.auth_client.post(
+            reverse('api:historical-data-recent-queries'),
+            data,
+            format='json'
+        )
+
+        expected_data = {'detail': 'updated user recent queries'}
+
+        result = response.data
+
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_queries == [data.get('q'), 'query 2', 'query 1']
+
+    def test_update_existed_recent_queries(self):
+        self.user.recent_queries = ['query 2', 'query 1']
+        self.user.save()
+
+        data = {'q': 'query 1'}
+
+        response = self.auth_client.post(
+            reverse('api:historical-data-recent-queries'),
+            data,
+            format='json'
+        )
+
+        expected_data = {'detail': 'updated user recent queries'}
+
+        result = response.data
+
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_queries == ['query 1', 'query 2']
