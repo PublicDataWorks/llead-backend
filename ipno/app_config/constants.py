@@ -22,6 +22,12 @@ APP_TEXT_CONTENTS = [
         'value': '[**Innocence Project New Orleans**](https://ip-no.org) in collaboration with [**Public Data Works**]'
                  '(https://publicdata.works)',
         'description': 'The footer text display in every page.'
+    },
+    {
+        'name': 'FORGOT_PASSWORD_EMAIL',
+        'value': 'Here is the [link]({HOST}/reset-password/{reset_password_token}) to reset your '
+                 'password.',
+        'description': 'The forgot password email content.'
     }
 ]
 

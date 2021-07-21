@@ -32,3 +32,5 @@ DEBUG_TOOLBAR_CONFIG = {
 DEBUG = True
 
 GCLOUD_SUB_STORAGE = 'develop/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

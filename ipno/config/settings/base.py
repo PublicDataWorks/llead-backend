@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import environ
+import os
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,6 +53,8 @@ THIRD_PARTY_APPS = (
     'corsheaders',
     'django_elasticsearch_dsl',
     'martor',
+    'django_rest_passwordreset',
+    'anymail',
 )
 
 LOCAL_APPS = (
@@ -86,7 +89,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [os.path.join(APPS_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -184,3 +187,7 @@ DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
 
 # google cloud nested folder for develop, test vs staging
 GCLOUD_SUB_STORAGE = ''
+
+FROM_EMAIL = os.getenv('FROM_EMAIL')
+
+HOST = os.getenv('HOST', 'localhost:8080')

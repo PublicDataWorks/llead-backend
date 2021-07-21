@@ -1,3 +1,5 @@
+import os
+
 from .base import *  # NOQA
 from google.oauth2 import service_account
 
@@ -15,3 +17,13 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'ipno-staging'
 
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+
+HOST = os.getenv('HOST', 'https://llead.co')
+
+EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
+
+ANYMAIL = {
+    "SENDINBLUE_API_KEY": os.getenv('SENDINBLUE_API_KEY', ''),
+}
+
+SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
