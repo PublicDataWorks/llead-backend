@@ -24,13 +24,15 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from django_rest_passwordreset.views import reset_password_request_token
+
 from departments.views import DepartmentsViewSet
 from documents.views import DocumentsViewSet
 from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
 from officers.views import OfficersViewSet
 from search.views import SearchViewSet
-from authentication.views import TokenRevokeView, UserView
+from authentication.views import TokenRevokeView, UserView, CustomPasswordTokenVerificationView
 from status.views import StatusView
 from historical_data.views import HistoricalDataViewSet
 
@@ -44,6 +46,7 @@ api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')
 api_router.register(r'historical-data', HistoricalDataViewSet, basename='historical-data')
 
+
 urlpatterns = [
     path('', RedirectView.as_view(url='admin/')),
     path('admin/', admin.site.urls),
@@ -54,6 +57,8 @@ urlpatterns = [
     path('api/user/', UserView.as_view(), name='user'),
     path('api/status/', StatusView.as_view(), name='status'),
     path('martor/', include('martor.urls')),
+    path('api/password-reset/', reset_password_request_token, name="reset-password-request"),
+    path('api/password-reset/confirm/', CustomPasswordTokenVerificationView.as_view(), name="reset-password-confirm"),
 ]
 
 if settings.DEBUG:  # pragma: no cover

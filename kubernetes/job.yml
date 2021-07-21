@@ -64,6 +64,21 @@ spec:
               secretKeyRef:
                 name: dropbox
                 key: refresh-token
+          - name: SENDINBLUE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sendinblue
+                key: api-key
+          - name: FROM_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: ipno
+                key: from-email
+          - name: HOST
+            valueFrom:
+              secretKeyRef:
+                name: ipno
+                key: host
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: "gcloud-credentials.json"
       - image: gcr.io/cloudsql-docker/gce-proxy:1.16
