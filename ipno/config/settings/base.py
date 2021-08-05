@@ -190,4 +190,4 @@ GCLOUD_SUB_STORAGE = ''
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 
-HOST = os.getenv('HOST', 'localhost:8080')
+SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"

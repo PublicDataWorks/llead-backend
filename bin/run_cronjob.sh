@@ -51,5 +51,7 @@ export CRONJOB_NAME=$CRONJOB_NAME
 export CRONJOB_COMMAND=$CRONJOB_COMMAND
 export CRONJOB_SCHEDULE=$CRONJOB_SCHEDULE
 
+kubectl config set-context --current --namespace=$NAMESPACE
+
 cat kubernetes/cronjob.yml | envsubst | kubectl apply -f - -n $NAMESPACE
 kubectl get cronjobs -n $NAMESPACE

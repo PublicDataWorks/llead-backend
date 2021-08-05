@@ -1,12 +1,12 @@
 from google.cloud.storage import Client
 
-from utils.constants import BUCKET_NAME
+from django.conf import settings
 
 
 class GoogleCloudService:
     def __init__(self):
         storage_client = Client()
-        bucket = storage_client.bucket(BUCKET_NAME)
+        bucket = storage_client.bucket(settings.DOCUMENTS_BUCKET_NAME)
         self.bucket = bucket
 
     def upload_file_from_string(self, destination_location, file_blob, content_type):

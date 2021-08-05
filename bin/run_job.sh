@@ -48,6 +48,8 @@ export BACKEND_IMAGE_TAG=$IMAGE_TAG
 export JOB_NAME
 export COMMAND="$(echo $REST | sed 's/ /\", \"/g')"
 
+kubectl config set-context --current --namespace=$NAMESPACE
+
 cat kubernetes/job.yml | envsubst | kubectl delete -f - -n $NAMESPACE || true
 
 trap stop_job_or_not 2

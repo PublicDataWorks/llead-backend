@@ -8,10 +8,6 @@ spec:
       containers:
       - name: gunicorn
         image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
-        resources:
-          requests:
-            cpu: 800m
-            memory: 1Gi
         command: ["ipno/manage.py", "${COMMAND}"]
         env:
           - name: POSTGRES_USER

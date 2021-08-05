@@ -2,8 +2,6 @@ from tqdm import tqdm
 from urllib.request import urlopen
 from dropbox.exceptions import ApiError
 
-from django.conf import settings
-
 from documents.models import Document
 from data.services.base_importer import BaseImporter
 from data.constants import DOCUMENT_MODEL_NAME, GC_PATH
@@ -118,11 +116,9 @@ class DocumentImporter(BaseImporter):
 
     def upload_file(self, upload_location, file_blob, file_type):
         try:
-            file_upload_location = f'{settings.GCLOUD_SUB_STORAGE}{upload_location}'
+            self.gs.upload_file_from_string(upload_location, file_blob, file_type)
 
-            self.gs.upload_file_from_string(file_upload_location, file_blob, file_type)
-
-            download_url = f"{GC_PATH}{file_upload_location}".replace(' ', '%20').replace("'", '%27')
+            download_url = f"{GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
 
             return download_url
         except Exception:

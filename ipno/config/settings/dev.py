@@ -1,3 +1,5 @@
+import os
+
 from .base import *  # NOQA
 from datetime import timedelta
 
@@ -31,6 +33,8 @@ DEBUG_TOOLBAR_CONFIG = {
 
 DEBUG = True
 
-GCLOUD_SUB_STORAGE = 'develop/'
+DOCUMENTS_BUCKET_NAME = 'llead-documents-staging'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+HOST = os.getenv('HOST', 'localhost:8080')
