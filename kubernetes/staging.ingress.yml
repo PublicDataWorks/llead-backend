@@ -1,0 +1,38 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ipno-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "web-staging-ipno-ip"
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    kubernetes.io/ingress.class: gce
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+spec:
+  tls:
+    - hosts:
+        - api-staging.llead.co
+        - admin-staging.llead.co
+        - staging.llead.co
+      secretName: letsencrypt-tls
+  rules:
+    - host: staging.llead.co
+      http:
+        paths:
+          - backend:
+              serviceName: ipno-frontend
+              servicePort: 80
+    - host: admin-staging.llead.co
+      http:
+        paths:
+          - backend:
+              serviceName: ipno-backend
+              servicePort: 80
+    - host: api-staging.llead.co
+      http:
+        paths:
+          - backend:
+              serviceName: ipno-backend
+              servicePort: 80

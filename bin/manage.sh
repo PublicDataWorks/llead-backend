@@ -12,9 +12,9 @@ elif [ -z "$1" ]; then
     echo "Must specify command."
     exit 1
 elif [ "$1" == "--production" ]; then
-    NAMESPACE=production
+    NAMESPACE=default
 elif [ "$1" == "--staging" ]; then
-    NAMESPACE=staging
+    NAMESPACE=ipno-staging
 else
     if [ "$1" == "--dev" ]; then
         shift
@@ -28,8 +28,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd $DIR/..
 
-POD_NAME="$(kubectl get pods --selector=app=ipno-backend --output=jsonpath={.items[0].metadata.name})"
+POD_NAME="$(kubectl get pods --selector=app=ipno-backend -n $NAMESPACE --output=jsonpath={.items[0].metadata.name})"
 shift
 
-echo "kubectl exec -it $POD_NAME -c ipno-backend-app -- ipno/manage.py $@"
-kubectl exec -it $POD_NAME -c ipno-backend-app -- ipno/manage.py $@
+echo "kubectl exec -it -n $NAMESPACE $POD_NAME -c ipno-backend-app -- ipno/manage.py $@"
+kubectl exec -it -n $NAMESPACE $POD_NAME -c ipno-backend-app -- ipno/manage.py $@

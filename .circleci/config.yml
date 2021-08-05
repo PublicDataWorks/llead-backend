@@ -136,8 +136,33 @@ jobs:
       - run:
           name: Deploy
           command: |
+            export CLOUD_SQL_DATABASE=$CLOUD_SQL_PRODUCTION
             export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
-            cat kubernetes/ipno.yml | envsubst | kubectl apply -f -
+            cat kubernetes/ipno.yml | envsubst | kubectl apply -n default -f -
+      - run:
+          name: Setup cronjobs
+          command: |
+            bin/run_cronjob.sh --staging $(cat /tmp/workspace/buildnum) import_data "0 5 * * *"
+
+  deploy-staging:
+    description: Deploy staging application to Google Kubernetes Engine
+    machine: true
+    environment: *gcloud-env
+    steps:
+      - checkout
+      - run: *set-gcloud-service-key
+      - attach_workspace:
+          at: /tmp/workspace
+      - gcp-gke/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: $GOOGLE_CLUSTER_NAME
+          perform-login: true
+      - run:
+          name: Deploy
+          command: |
+            export CLOUD_SQL_DATABASE=CLOUD_SQL_DATABASE
+            export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
+            cat kubernetes/ipno.yml | envsubst | kubectl apply -n ipno-staging -f -
       - run:
           name: Setup cronjobs
           command: |
@@ -160,6 +185,26 @@ workflows:
           filters:
             branches:
               only: staging
+      - push_image:
+          requires:
+            - test
+      - django_migrate:
+          requires:
+            - push_image
+      - django_collect_static:
+          requires:
+            - push_image
+      - deploy-staging:
+          requires:
+            - django_migrate
+            - django_collect_static
+
+  deploy_backend_production:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: main
       - push_image:
           requires:
             - test

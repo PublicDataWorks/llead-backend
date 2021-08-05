@@ -84,7 +84,7 @@ spec:
       - image: gcr.io/cloudsql-docker/gce-proxy:1.16
         name: cloudsql-proxy
         command: ["/cloud_sql_proxy", "--dir=/cloudsql",
-                  "-instances=excellent-zoo-300106:us-east4:ipno-db-staging=tcp:5432",
+                  "-instances=excellent-zoo-300106:us-east4:$CLOUD_SQL_DATABASE=tcp:5432",
                   "-credential_file=/secrets/cloudsql/credentials.json"]
         volumeMounts:
           - name: cloudsql-oauth-credentials
