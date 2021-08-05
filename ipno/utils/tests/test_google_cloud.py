@@ -1,4 +1,5 @@
 from django.test.testcases import TestCase
+from django.conf import settings
 from mock import patch, Mock
 
 from utils.google_cloud import GoogleCloudService
@@ -21,7 +22,7 @@ class GoogleCloudTestCase(TestCase):
         google_cloud_service.upload_file_from_string(destination_url, file_blob, content_type)
 
         mock_client.assert_called()
-        mock_bucket.assert_called_with('llead-documents')
+        mock_bucket.assert_called_with(settings.DOCUMENTS_BUCKET_NAME)
         mock_blob.assert_called_with(destination_url)
         mock_upload_from_string.assert_called_with(file_blob, content_type=content_type)
 
@@ -39,6 +40,6 @@ class GoogleCloudTestCase(TestCase):
         google_cloud_service.delete_file_from_url(destination_url)
 
         mock_client.assert_called()
-        mock_bucket.assert_called_with('llead-documents')
+        mock_bucket.assert_called_with(settings.DOCUMENTS_BUCKET_NAME)
         mock_blob.assert_called_with(destination_url)
         mock_delete.assert_called()

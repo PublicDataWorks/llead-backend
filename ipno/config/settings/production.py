@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 DEBUG = False
 
 CORS_ORIGIN_WHITELIST = [
-    'https://staging.llead.co',
+    'https://llead.co',
 ]
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
@@ -15,11 +15,10 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'llead-static-staging'
-DOCUMENTS_BUCKET_NAME = 'llead-documents-staging'
+GS_BUCKET_NAME = 'llead-static'
+DOCUMENTS_BUCKET_NAME = 'llead-documents'
 
-
-HOST = os.getenv('HOST', 'https://staging.llead.co')
+HOST = os.getenv('HOST', 'https://llead.co')
 
 EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
 

@@ -463,7 +463,6 @@ class DocumentImporterTestCase(TestCase):
 
         assert download_url == 'https://storage.googleapis.com/llead-documents/location'
 
-    @override_settings(GCLOUD_SUB_STORAGE='develop/')
     def test_upload_file_success_in_development(self):
         upload_location = 'location'
         file_blob = 'file_blob'
@@ -475,9 +474,9 @@ class DocumentImporterTestCase(TestCase):
 
         download_url = document_importer.upload_file(upload_location, file_blob, file_type)
 
-        mock_upload_file_from_string.assert_called_with(f'develop/{upload_location}', file_blob, file_type)
+        mock_upload_file_from_string.assert_called_with(f'{upload_location}', file_blob, file_type)
 
-        assert download_url == 'https://storage.googleapis.com/llead-documents/develop/location'
+        assert download_url == 'https://storage.googleapis.com/llead-documents/location'
 
     def test_upload_file_fail_not_raise_exception(self):
         upload_location = 'location'
