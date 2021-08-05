@@ -12,9 +12,9 @@ elif [ -z "$1" ]; then
     echo "Must specify either --production or --staging."
     exit 1
 elif [ "$1" == "--production" ]; then
-    NAMESPACE=production
+    NAMESPACE=default
 elif [ "$1" == "--staging" ]; then
-    NAMESPACE=staging
+    NAMESPACE=ipno-staging
 else
     echo "Unrecognized first argument. See help with --help"
     exit 1
@@ -51,5 +51,5 @@ export CRONJOB_NAME=$CRONJOB_NAME
 export CRONJOB_COMMAND=$CRONJOB_COMMAND
 export CRONJOB_SCHEDULE=$CRONJOB_SCHEDULE
 
-cat kubernetes/cronjob.yml | envsubst | kubectl apply -f -
-kubectl get cronjobs
+cat kubernetes/cronjob.yml | envsubst | kubectl apply -f - -n $NAMESPACE
+kubectl get cronjobs -n $NAMESPACE

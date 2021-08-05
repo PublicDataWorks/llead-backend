@@ -13,9 +13,9 @@ elif [ -z "$1" ]; then
     echo "Must specify either --production or --staging."
     exit 1
 elif [ "$1" == "--production" ]; then
-    NAMESPACE=production
+    NAMESPACE=default
 elif [ "$1" == "--staging" ]; then
-    NAMESPACE=staging
+    NAMESPACE=ipno-staging
 else
     echo "Unrecognized first argument. See help with --help"
     exit 1
@@ -48,7 +48,7 @@ export BACKEND_IMAGE_TAG=$IMAGE_TAG
 export JOB_NAME
 export COMMAND="$(echo $REST | sed 's/ /\", \"/g')"
 
-cat kubernetes/job.yml | envsubst | kubectl delete -f - || true
+cat kubernetes/job.yml | envsubst | kubectl delete -f - -n $NAMESPACE || true
 
 trap stop_job_or_not 2
 
@@ -58,27 +58,27 @@ function stop_job_or_not() {
     read dodelete
     dodelete_lower="$(echo $dodelete | tr '[:upper:]' '[:lower:]')"
     if [ "$dodelete_lower" == "y" ]; then
-        kubectl delete job $JOB_NAME
+        kubectl delete job $JOB_NAME -n $NAMESPACE
     fi
     exit 0
 }
 
-JOB_STATUS="$(cat kubernetes/job.yml | envsubst | kubectl apply -f -)"
+JOB_STATUS="$(cat kubernetes/job.yml | envsubst | kubectl apply -f - -n $NAMESPACE)"
 echo $JOB_STATUS
 
 PHASE=Pending
 while [ "$PHASE" == "Pending" ]
 do
   sleep 1
-  PHASE=$(kubectl get pods -l job-name=$JOB_NAME -o go-template --template="{{(index .items 0).status.phase}}")
+  PHASE=$(kubectl get pods -l job-name=$JOB_NAME -n $NAMESPACE -o go-template --template="{{(index .items 0).status.phase}}")
 done
 
-NAME=$(kubectl get pods -l job-name=$JOB_NAME -o go-template --template="{{(index .items 0).metadata.name}}")
+NAME=$(kubectl get pods -l job-name=$JOB_NAME -n $NAMESPACE -o go-template --template="{{(index .items 0).metadata.name}}")
 kubectl logs $NAME -c gunicorn -f
 
-FAILED=$(kubectl get jobs $JOB_NAME -o go-template --template={{.status.failed}})
+FAILED=$(kubectl get jobs $JOB_NAME -n $NAMESPACE -o go-template --template={{.status.failed}})
 
-kubectl delete job $JOB_NAME
+kubectl delete job $JOB_NAME -n $NAMESPACE
 
 if [ -n "$FAILED" ] && [ "$FAILED" -eq "$FAILED" ] 2>/dev/null; then
     exit 1
