@@ -1,3 +1,4 @@
+from django.template.defaultfilters import slugify
 from tqdm import tqdm
 from urllib.request import urlopen
 from dropbox.exceptions import ApiError
@@ -87,7 +88,7 @@ class DocumentImporter(BaseImporter):
 
                     if agency:
                         formatted_agency = self.format_agency(agency)
-                        department_id = department_mappings.get(formatted_agency)
+                        department_id = department_mappings.get(slugify(formatted_agency))
                         if department_id:
                             department_relation_ids[document_id] = department_id
 

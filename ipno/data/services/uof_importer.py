@@ -1,3 +1,4 @@
+from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from use_of_forces.models import UseOfForce
@@ -79,7 +80,7 @@ class UofImporter(BaseImporter):
 
             uof_data = self.parse_row_data(row)
             formatted_agency = self.format_agency(agency)
-            department_id = department_mappings.get(formatted_agency)
+            department_id = department_mappings.get(slugify(formatted_agency))
             uof_data['department_id'] = department_id
 
             officer_id = officer_mappings.get(officer_uid)

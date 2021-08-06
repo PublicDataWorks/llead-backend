@@ -1,3 +1,4 @@
+from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from officers.models import Event
@@ -95,7 +96,7 @@ class EventImporter(BaseImporter):
 
             event_data = self.parse_row_data(row)
             formatted_agency = self.format_agency(agency)
-            department_id = department_mappings.get(formatted_agency)
+            department_id = department_mappings.get(slugify(formatted_agency))
             event_data['department_id'] = department_id
 
             event_data['use_of_force_id'] = uof_id

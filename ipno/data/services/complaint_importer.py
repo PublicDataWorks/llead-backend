@@ -1,3 +1,4 @@
+from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from complaints.models import Complaint
@@ -91,7 +92,7 @@ class ComplaintImporter(BaseImporter):
 
                     if agency:
                         formatted_agency = self.format_agency(agency)
-                        department_id = department_mappings.get(formatted_agency)
+                        department_id = department_mappings.get(slugify(formatted_agency))
 
                         department_relation_ids[complaint_id] = department_id
 
