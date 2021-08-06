@@ -1,11 +1,12 @@
 from django.template.defaultfilters import slugify
+from django.conf import settings
 from tqdm import tqdm
 from urllib.request import urlopen
 from dropbox.exceptions import ApiError
 
 from documents.models import Document
 from data.services.base_importer import BaseImporter
-from data.constants import DOCUMENT_MODEL_NAME, GC_PATH
+from data.constants import DOCUMENT_MODEL_NAME
 from utils.parse_utils import parse_date
 from utils.image_generator import generate_from_blob
 from utils.google_cloud import GoogleCloudService
@@ -119,7 +120,7 @@ class DocumentImporter(BaseImporter):
         try:
             self.gs.upload_file_from_string(upload_location, file_blob, file_type)
 
-            download_url = f"{GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
+            download_url = f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
 
             return download_url
         except Exception:
@@ -139,13 +140,13 @@ class DocumentImporter(BaseImporter):
 
         if document_url:
             try:
-                self.gs.delete_file_from_url(document_url.replace(GC_PATH, ''))
+                self.gs.delete_file_from_url(document_url.replace(settings.GC_PATH, ''))
             except Exception:
                 pass
 
         if document_preview_url:
             try:
-                self.gs.delete_file_from_url(document_preview_url.replace(GC_PATH, ''))
+                self.gs.delete_file_from_url(document_preview_url.replace(settings.GC_PATH, ''))
             except Exception:
                 pass
 
