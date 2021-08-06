@@ -5,13 +5,14 @@ from csv import DictWriter
 
 from unittest.mock import call, ANY
 from django.test.testcases import TestCase, override_settings
+from django.conf import settings
 from mock import patch, Mock, MagicMock
 
 from dropbox.exceptions import ApiError
 
 from data.services import DocumentImporter
 from data.models import ImportLog
-from data.constants import IMPORT_LOG_STATUS_FINISHED, GC_PATH, IMPORT_LOG_STATUS_ERROR
+from data.constants import IMPORT_LOG_STATUS_FINISHED, IMPORT_LOG_STATUS_ERROR
 from data.factories import WrglRepoFactory
 from documents.models import Document
 from documents.factories import DocumentFactory
@@ -191,8 +192,8 @@ class DocumentImporterTestCase(TestCase):
             hrg_no='3',
             matched_uid=None,
             pdf_db_content_hash='a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
-            url='https://storage.googleapis.com/llead-documents/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            preview_image_url='https://storage.googleapis.com/llead-documents/meeting-minutes-extraction/export/pdfs/0dd28391-preview.jpeg',
+            url=f'{settings.GC_PATH}meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            preview_image_url=f'{settings.GC_PATH}meeting-minutes-extraction/export/pdfs/0dd28391-preview.jpeg',
         )
 
         department_1 = DepartmentFactory(name='New Orleans PD')
@@ -219,7 +220,7 @@ class DocumentImporterTestCase(TestCase):
         document_importer = DocumentImporter()
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
-            return f"{GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
+            return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         mock_clean_up_document = MagicMock()
         document_importer.upload_file = mock_upload_file
@@ -314,7 +315,7 @@ class DocumentImporterTestCase(TestCase):
                 assert getattr(document, attr) == (int(document_data[attr]) if document_data[attr] else None)
 
             base_url = document_data['pdf_db_path'].replace('/PPACT/', '')
-            document_url = f"{GC_PATH}{base_url}".replace(' ', '%20').replace("'", '%27')
+            document_url = f"{settings.GC_PATH}{base_url}".replace(' ', '%20').replace("'", '%27')
 
             upload_document_call = call(base_url, ANY, 'application/pdf')
             preview_image_dest = base_url.replace('.pdf', '-preview.jpeg').replace('.PDF', '-preview.jpeg')
@@ -355,7 +356,7 @@ class DocumentImporterTestCase(TestCase):
         document_importer = DocumentImporter()
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
-            return f"{GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
+            return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
 
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         mock_clean_up_document = MagicMock()
@@ -380,8 +381,8 @@ class DocumentImporterTestCase(TestCase):
 
     def test_clean_up_document_success(self):
         doc = {
-            'url': 'https://storage.googleapis.com/llead-documents/00fa809e.pdf',
-            'preview_image_url': 'https://storage.googleapis.com/llead-documents/00fa809e-preview.img'
+            'url': f'{settings.GC_PATH}00fa809e.pdf',
+            'preview_image_url': f'{settings.GC_PATH}00fa809e-preview.img'
         }
 
         mock_delete_file_from_url = MagicMock()
@@ -408,8 +409,8 @@ class DocumentImporterTestCase(TestCase):
 
     def test_clean_up_document_success_event_delete_raise_exception(self):
         doc = {
-            'url': 'https://storage.googleapis.com/llead-documents/00fa809e.pdf',
-            'preview_image_url': 'https://storage.googleapis.com/llead-documents/00fa809e-preview.img'
+            'url': f'{settings.GC_PATH}00fa809e.pdf',
+            'preview_image_url': f'{settings.GC_PATH}00fa809e-preview.img'
         }
 
         mock_delete_file_from_url = MagicMock()
@@ -426,12 +427,12 @@ class DocumentImporterTestCase(TestCase):
 
     def test_clean_up_documents(self):
         doc1 = {
-            'url': 'https://storage.googleapis.com/llead-documents/00fa809e.pdf',
-            'preview_image_url': 'https://storage.googleapis.com/llead-documents/00fa809e-preview.img'
+            'url': f'{settings.GC_PATH}00fa809e.pdf',
+            'preview_image_url': f'{settings.GC_PATH}00fa809e-preview.img'
         }
         doc2 = {
-            'url': 'https://storage.googleapis.com/llead-documents/abc/doc2.pdf',
-            'preview_image_url': 'https://storage.googleapis.com/llead-documents/abc/doc2-preview.img'
+            'url': f'{settings.GC_PATH}abc/doc2.pdf',
+            'preview_image_url': f'{settings.GC_PATH}abc/doc2-preview.img'
         }
         documents = [doc1, doc2]
 
@@ -461,7 +462,7 @@ class DocumentImporterTestCase(TestCase):
 
         mock_upload_file_from_string.assert_called_with(upload_location, file_blob, file_type)
 
-        assert download_url == 'https://storage.googleapis.com/llead-documents/location'
+        assert download_url == f'{settings.GC_PATH}location'
 
     def test_upload_file_success_in_development(self):
         upload_location = 'location'
@@ -476,7 +477,7 @@ class DocumentImporterTestCase(TestCase):
 
         mock_upload_file_from_string.assert_called_with(f'{upload_location}', file_blob, file_type)
 
-        assert download_url == 'https://storage.googleapis.com/llead-documents/location'
+        assert download_url == f'{settings.GC_PATH}location'
 
     def test_upload_file_fail_not_raise_exception(self):
         upload_location = 'location'
@@ -510,7 +511,7 @@ class DocumentImporterTestCase(TestCase):
             'preview_image_blob',
             'image/jpeg'
         )
-        assert preview_image_url == 'https://storage.googleapis.com/llead-documents/path/to/file-preview.jpeg'
+        assert preview_image_url == f'{settings.GC_PATH}path/to/file-preview.jpeg'
 
     @patch('data.services.document_importer.generate_from_blob', return_value=None)
     def test_generate_preview_image_fail(self, _):

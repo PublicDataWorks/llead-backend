@@ -17,6 +17,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'llead-static'
 DOCUMENTS_BUCKET_NAME = 'llead-documents'
+GC_PATH = f'https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/'
 
 HOST = os.getenv('HOST', 'https://llead.co')
 
