@@ -3,6 +3,7 @@ from io import StringIO, BytesIO
 from csv import DictWriter
 
 from django.test.testcases import TestCase, override_settings
+from django.utils.text import slugify
 
 from mock import patch
 from pytest import raises
@@ -216,11 +217,25 @@ class BaseImporterTestCase(TestCase):
 
         department_3 = Department.objects.filter(name='St. Tammany Sheriff').first()
         expected_mappings = {
-            'New Orleans PD': department_1.id,
-            'Baton Rouge PD': department_2.id,
-            'St. Tammany Sheriff': department_3.id
+            slugify('New Orleans PD'): department_1.id,
+            slugify('Baton Rouge PD'): department_2.id,
+            slugify('St. Tammany Sheriff'): department_3.id
         }
         assert department_3
+        assert mappings == expected_mappings
+
+    def test_department_mappings_case_sensitive(self):
+        department_1 = DepartmentFactory(name='New Orleans PD')
+        agencies = ['St. Tammany Sheriff', 'New Orleans PD', 'st. tammany sheriff']
+
+        mappings = BaseImporter().department_mappings(agencies)
+
+        department_2 = Department.objects.filter(name='St. Tammany Sheriff').first()
+        expected_mappings = {
+            slugify('New Orleans PD'): department_1.id,
+            slugify('St. Tammany Sheriff'): department_2.id
+        }
+        assert department_2
         assert mappings == expected_mappings
 
     def test_officer_mappings(self):

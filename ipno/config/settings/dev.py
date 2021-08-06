@@ -1,6 +1,7 @@
 import os
 
 from .base import *  # NOQA
+from google.oauth2 import service_account
 from datetime import timedelta
 
 INSTALLED_APPS += (  # NOQA
@@ -33,7 +34,11 @@ DEBUG_TOOLBAR_CONFIG = {
 
 DEBUG = True
 
-DOCUMENTS_BUCKET_NAME = 'llead-documents-staging'
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    f'{BASE_DIR}/gcloud-credentials.json'  # NOQA
+)
+
+DOCUMENTS_BUCKET_NAME = 'llead-documents-develop'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
