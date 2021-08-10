@@ -8,6 +8,8 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: "web-ipno-ip"
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   tls:
     - hosts:
