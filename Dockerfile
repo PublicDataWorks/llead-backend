@@ -12,4 +12,4 @@ ADD . /code
 
 CMD ls -la
 
-CMD gunicorn config.wsgi --bind 0.0.0.0:8000 --chdir /code/ipno
+CMD gunicorn config.wsgi -c gunicorn.conf.py --chdir /code/ipno
