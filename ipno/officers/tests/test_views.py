@@ -1,31 +1,34 @@
 from datetime import date
+from io import BytesIO as IO
 
 from django.urls import reverse
 
 from rest_framework import status
-
 from test_utils.auth_api_test_case import AuthAPITestCase
-from officers.factories import OfficerFactory, EventFactory
+from unittest.mock import patch
+import pandas as pd
+
+from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
-from complaints.factories import ComplaintFactory
+from officers.factories import OfficerFactory, EventFactory
 from use_of_forces.factories import UseOfForceFactory
 from officers.constants import (
-    JOINED_TIMELINE_KIND,
     COMPLAINT_TIMELINE_KIND,
-    UOF_TIMELINE_KIND,
-    LEFT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
-    SALARY_CHANGE_TIMELINE_KIND,
+    JOINED_TIMELINE_KIND,
+    LEFT_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND,
+    SALARY_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
+    UOF_TIMELINE_KIND,
 )
 from officers.constants import (
+    OFFICER_DEPT,
     OFFICER_HIRE,
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
-    OFFICER_DEPT,
     UOF_RECEIVE,
 )
 from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
@@ -468,3 +471,43 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             reverse('api:officers-timeline', kwargs={'pk': 1})
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_download_xlsx_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:officers-download-xlsx', kwargs={'pk': 1})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_download_xlsx_unauthorized(self):
+        response = self.client.get(
+            reverse('api:officers-download-xlsx', kwargs={'pk': 1})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    @patch('officers.queries.officer_data_file_query.OfficerDatafileQuery.generate_sheets_file')
+    def test_download_xlsx_success(self, generate_sheets_file_mock):
+        officer = OfficerFactory()
+
+        data = pd.DataFrame([{'a': 1, 'b': 2}])
+
+        excel_file = IO()
+        xlwriter = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+
+        data.to_excel(xlwriter, 'Test', index=False)
+
+        xlwriter.save()
+
+        generate_sheets_file_mock.return_value = excel_file
+
+        expected_content_disposition = f'attachment; filename=officer-{officer.id}.xlsx'
+
+        response = self.auth_client.get(
+            reverse('api:officers-download-xlsx', kwargs={'pk': officer.id})
+        )
+        content = response.content
+        data_file = IO(content)
+        xlsx_data = pd.read_excel(data_file, sheet_name='Test')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response['Content-Disposition'] == expected_content_disposition
+        pd.testing.assert_frame_equal(xlsx_data, data)
