@@ -1,16 +1,17 @@
 from django.db.models import Count
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
-from officers.models import Officer
-from shared.serializers import OfficerSerializer
-from officers.serializers import OfficerDetailsSerializer
 from officers.constants import OFFICERS_LIMIT
-from officers.queries import OfficerTimelineQuery
+from officers.models import Officer
+from officers.queries import OfficerTimelineQuery, OfficerDatafileQuery
+from officers.serializers import OfficerDetailsSerializer
+from shared.serializers import OfficerSerializer
 
 
 class OfficersViewSet(viewsets.ViewSet):
@@ -37,3 +38,16 @@ class OfficersViewSet(viewsets.ViewSet):
         officer = get_object_or_404(Officer, id=pk)
 
         return Response(OfficerTimelineQuery(officer).query())
+
+    @action(detail=True, methods=['get'], url_path='download-xlsx')
+    def download_xlsx(self, request, pk):
+        officer = get_object_or_404(Officer, id=pk)
+
+        excel_file = OfficerDatafileQuery(officer).generate_sheets_file()
+        filename = f'officer-{pk}.xlsx'
+
+        response = HttpResponse(excel_file.getvalue(),
+                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        return response
