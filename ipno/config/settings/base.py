@@ -67,6 +67,7 @@ LOCAL_APPS = (
     'use_of_forces',
     'analytics',
     'data',
+    'news_articles',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
@@ -188,3 +189,7 @@ DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 
 SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
+
+WRGL_USER = os.getenv('WRGL_USER', '')
+NEWS_ARTICLE_WRGL_REPO = 'news_article'
+NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
