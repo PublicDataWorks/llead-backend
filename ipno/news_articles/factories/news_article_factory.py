@@ -10,7 +10,7 @@ class NewsArticleFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = NewsArticle
 
-    name = factory.LazyFunction(lambda: fake.word())
+    source_name = factory.LazyFunction(lambda: fake.word())
     guid = factory.LazyFunction(lambda: fake.uuid4())
     title = factory.LazyFunction(lambda: fake.sentence())
     link = factory.LazyFunction(lambda: fake.uri())

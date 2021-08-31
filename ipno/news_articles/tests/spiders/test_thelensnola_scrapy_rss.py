@@ -18,6 +18,9 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
     def setUp(self, mock_gcloud_service):
         self.spider = TheLensNolaScrapyRssSpider()
 
+    def test_init_spider(self):
+        assert self.spider.guid_limit == 100
+
     def test_parse_item_path(self):
         with open(join(dirname(__file__), 'files', 'thelensnola.xml'), 'r') as f:
             file_content = f.read()
@@ -165,7 +168,7 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         self.spider.nlp.process.assert_called_with('header content body content', officers_data)
 
         new_article = NewsArticle.objects.first()
-        assert new_article.name == 'thelensnola'
+        assert new_article.source_name == 'thelensnola'
         assert new_article.link == 'response link'
         assert new_article.title == 'response title'
         assert new_article.content == 'header content body content'
@@ -182,7 +185,7 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         assert crawled_article.officers.count() == 1
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.name == 'thelensnola'
+        assert crawled_post.source_name == 'thelensnola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()
@@ -238,7 +241,7 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         assert count_news_article == 0
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.name == 'thelensnola'
+        assert crawled_post.source_name == 'thelensnola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()

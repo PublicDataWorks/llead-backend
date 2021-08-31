@@ -10,5 +10,5 @@ class CrawledPostFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CrawledPost
 
-    name = factory.LazyFunction(lambda: fake.word())
+    source_name = factory.LazyFunction(lambda: fake.word())
     post_guid = factory.LazyFunction(lambda: fake.uuid4())

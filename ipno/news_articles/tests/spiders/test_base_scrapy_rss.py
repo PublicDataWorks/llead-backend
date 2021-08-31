@@ -28,8 +28,9 @@ class ScrapyRssSpiderTestCase(TestCase):
         assert not self.spider.contains_keyword('lorem if sum')
 
     def test_get_crawled_post_guid(self):
-        CrawledPostFactory(name='thelens')
+        CrawledPostFactory(source_name='thelens')
         self.spider.name = 'thelens'
+        self.spider.guid_limit = 100
         self.spider.get_crawled_post_guid()
         assert self.spider.post_guids
 

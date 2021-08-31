@@ -86,7 +86,7 @@ class CommandTestCase(TestCase):
         NewsArticleOfficer = NewsArticle.officers.through
         news = NewsArticle.objects.all()
         news_officer = NewsArticleOfficer.objects.annotate(
-            uid=F('officer__id'),
+            uid=F('officer__uid'),
             created_at=F('newsarticle__created_at')
         ).all()
 
@@ -179,7 +179,7 @@ class CommandTestCase(TestCase):
         NewsArticleOfficer = NewsArticle.officers.through
         news = NewsArticle.objects.all()
         news_officer = NewsArticleOfficer.objects.annotate(
-            uid=F('officer__id'),
+            uid=F('officer__uid'),
             created_at=F('newsarticle__created_at')
         ).all()
 

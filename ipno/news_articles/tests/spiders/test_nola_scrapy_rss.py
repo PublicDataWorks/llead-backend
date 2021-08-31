@@ -18,6 +18,9 @@ class NolaScrapyRssSpiderTestCase(TestCase):
     def setUp(self, mock_gcloud_service):
         self.spider = NolaScrapyRssSpider()
 
+    def test_init_spider(self):
+        assert self.spider.guid_limit == 300
+
     def test_parse_item_path(self):
         with open(join(dirname(__file__), 'files', 'nola.xml'), 'r') as f:
             file_content = f.read()
@@ -41,7 +44,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
 
     @patch('news_articles.spiders.nola_scrapy_rss.ItemLoader')
     @patch('news_articles.spiders.nola_scrapy_rss.RSSItem')
-    def test_call_parse_items_call_params(self, mock_rss_item, mock_item_loader):
+    def test_call_parse_items_call_params_with_creator(self, mock_rss_item, mock_item_loader):
         mock_rss_item_instance = Mock()
         mock_rss_item.return_value = mock_rss_item_instance
 
@@ -50,7 +53,11 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         mock_xpath.return_value = ['item1']
         mock_response.xpath = mock_xpath
 
-        mock_get_xpath = Mock(return_value='author')
+        def mock_get_xpath(xpath):
+            if xpath == './creator/text()':
+                return ['author']
+
+        mock_get_xpath = Mock(side_effect=mock_get_xpath)
         mock_item_loader_instance = MagicMock(get_xpath=mock_get_xpath)
         mock_item_loader.return_value = mock_item_loader_instance
 
@@ -72,7 +79,47 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         ]
 
         mock_item_loader_instance.add_xpath.assert_has_calls(add_xpath_calls_expected)
-        mock_item_loader_instance.add_value.assert_called_with('author', 'author')
+        mock_item_loader_instance.add_value.assert_called_with('author', 'Author')
+        mock_item_loader_instance.load_item.assert_called()
+
+    @patch('news_articles.spiders.nola_scrapy_rss.ItemLoader')
+    @patch('news_articles.spiders.nola_scrapy_rss.RSSItem')
+    def test_call_parse_items_call_params_with_author(self, mock_rss_item, mock_item_loader):
+        mock_rss_item_instance = Mock()
+        mock_rss_item.return_value = mock_rss_item_instance
+
+        mock_response = Mock()
+        mock_xpath = Mock()
+        mock_xpath.return_value = ['item1']
+        mock_response.xpath = mock_xpath
+
+        def mock_get_xpath(xpath):
+            if xpath == './author/text()':
+                return ['author@gmail.com (Author)']
+
+        mock_get_xpath = Mock(side_effect=mock_get_xpath)
+        mock_item_loader_instance = MagicMock(get_xpath=mock_get_xpath)
+        mock_item_loader.return_value = mock_item_loader_instance
+
+        self.spider.parse_item(mock_response)
+
+        mock_response.xpath.assert_called_with("//channel/item")
+
+        mock_item_loader.assert_called_with(
+            item=mock_rss_item_instance,
+            selector='item1',
+        )
+
+        add_xpath_calls_expected = [
+            call('title', './title/text()'),
+            call('description', './description/text()'),
+            call('link', './link/text()'),
+            call('guid', './guid/text()'),
+            call('published_date', './pubDate/text()'),
+        ]
+
+        mock_item_loader_instance.add_xpath.assert_has_calls(add_xpath_calls_expected)
+        mock_item_loader_instance.add_value.assert_called_with('author', 'Author')
         mock_item_loader_instance.load_item.assert_called()
 
     @patch('news_articles.spiders.nola_scrapy_rss.ItemLoader')
@@ -108,7 +155,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         ]
 
         mock_item_loader_instance.add_xpath.assert_has_calls(add_xpath_calls_expected)
-        mock_item_loader_instance.add_value.assert_called_with('author', 'nola')
+        mock_item_loader_instance.add_value.assert_called_with('author', [''])
         mock_item_loader_instance.load_item.assert_called()
 
     @patch('news_articles.spiders.nola_scrapy_rss.ArticlePdfCreator')
@@ -202,7 +249,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         self.spider.nlp.process.assert_called_with('header content body content', officers_data)
 
         new_article = NewsArticle.objects.first()
-        assert new_article.name == 'nola'
+        assert new_article.source_name == 'nola'
         assert new_article.link == 'response link'
         assert new_article.title == 'response title'
         assert new_article.content == 'header content body content'
@@ -219,7 +266,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         assert crawled_article.officers.count() == 1
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.name == 'nola'
+        assert crawled_post.source_name == 'nola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()
@@ -275,7 +322,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         assert count_news_article == 0
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.name == 'nola'
+        assert crawled_post.source_name == 'nola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()
