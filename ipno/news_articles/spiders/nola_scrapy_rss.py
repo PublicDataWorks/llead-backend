@@ -1,3 +1,5 @@
+import re
+
 from scrapy.loader import ItemLoader
 
 from news_articles.models import NewsArticle, CrawledPost
@@ -38,8 +40,18 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
             loader.add_xpath('guid', './guid/text()')
             loader.add_xpath('published_date', './pubDate/text()')
 
-            author = loader.get_xpath('./creator/text() | ./author/text()')
-            loader.add_value('author', author if author else self.name)
+            creator = loader.get_xpath('./creator/text()')
+            author = loader.get_xpath('./author/text()')
+
+            if creator:
+                by_name = creator[0].split(' | ')[0]
+                name = by_name.replace('BY ', '').replace(' and', ',').title()
+                loader.add_value('author', name)
+            elif author:
+                name = re.search(r'\((.+?)\)', author[0]).group(1)
+                loader.add_value('author', name)
+            else:
+                loader.add_value('author', [''])
 
             items.append(loader.load_item())
 
@@ -80,7 +92,7 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
                 matched_officers_obj = [Officer.objects.get(id=id) for id in matched_officers]
 
                 news_article_data = NewsArticle(
-                    name=self.name,
+                    source_name=self.name,
                     link=link,
                     title=title,
                     content=text_content,
@@ -97,5 +109,5 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
                 save_crawled_post = False
 
         if save_crawled_post:
-            crawled_post = CrawledPost(name=self.name, post_guid=guid)
+            crawled_post = CrawledPost(source_name=self.name, post_guid=guid)
             crawled_post.save()

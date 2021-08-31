@@ -10,10 +10,11 @@ import logging
 import scrapy
 
 from news_articles.constants import (
+    BASE_CRAWLER_LIMIT,
     NEWS_ARTICLE_CLOUD_SPACES,
     TAG_STYLE_MAPPINGS,
     UNPARSED_TAGS,
-    ARTICLE_MATCHING_KEYWORDS
+    ARTICLE_MATCHING_KEYWORDS,
 )
 from news_articles.models import CrawledPost
 from officers.models import Officer
@@ -40,11 +41,14 @@ class ScrapyRssSpider(scrapy.Spider):
     urls = []
     post_guids = []
     guid_pre = ''
+    guid_limit = BASE_CRAWLER_LIMIT
 
     def __init__(self):
         self.gcloud = GoogleCloudService()
         self.nlp = NLP()
         self.officers = self.get_officer_data()
+
+        self.guid_limit = BASE_CRAWLER_LIMIT * len(self.urls)
 
     def start_requests(self):
         urls = self.urls
@@ -70,20 +74,20 @@ class ScrapyRssSpider(scrapy.Spider):
                         'link': rss_item_link,
                         'guid': guid,
                         'title': item['title'],
-                        'author': item['author'],
+                        'author': item.get('author'),
                         'published_date': published_date,
                     }
                 )
 
     def get_crawled_post_guid(self):
         self.post_guids = CrawledPost.objects.filter(
-            name=self.name
+            source_name=self.name
         ).order_by(
             '-created_at'
         ).values_list(
             'post_guid',
             flat=True
-        )[:100]
+        )[:self.guid_limit]
 
     def get_upload_pdf_location(self, published_date, record_id):
         file_name = f'{published_date.strftime("%Y-%m-%d")}_{self.name}_{record_id}.pdf'

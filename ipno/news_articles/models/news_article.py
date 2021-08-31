@@ -4,13 +4,13 @@ from utils.models import TimeStampsModel
 
 
 class NewsArticle(TimeStampsModel):
-    name = models.CharField(max_length=255)
+    source_name = models.CharField(max_length=255)
     guid = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=255)
     content = models.TextField()
     published_date = models.DateField()
-    author = models.CharField(max_length=255)
+    author = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=255, blank=True, null=True)
     preview_image_url = models.CharField(max_length=255, blank=True, null=True)
 

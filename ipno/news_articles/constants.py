@@ -22,8 +22,10 @@ ARTICLE_MATCHING_KEYWORDS = [
 
 
 NEWS_ARTICLE_WRGL_COLUMNS = [
-    'id', 'name', 'guid', 'link', 'url', 'preview_image_url',
+    'id', 'source_name', 'guid', 'link', 'url', 'preview_image_url',
     'published_date', 'author', 'title', 'content',
 ]
 
 NEWS_ARTICLE_OFFICER_WRGL_COLUMNS = ['uid', 'officer_id', 'newsarticle_id', 'id']
+
+BASE_CRAWLER_LIMIT = 100

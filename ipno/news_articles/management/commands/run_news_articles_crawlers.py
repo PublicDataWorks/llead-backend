@@ -33,7 +33,7 @@ class Command(BaseCommand):
             },
             {
                 'data': NewsArticleOfficer.objects.annotate(
-                    uid=F('officer__id'),
+                    uid=F('officer__uid'),
                     created_at=F('newsarticle__created_at')
                 ).all(),
                 'columns': NEWS_ARTICLE_OFFICER_WRGL_COLUMNS,

@@ -59,14 +59,16 @@ class ArticlePdfCreator:
         date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
         link_metadata = f'Source URL: <link href="{self.link}">{self.link}</link>'
 
-        flows = [
+        raw_flows = [
             Paragraph(self.title, header_style),
-            Paragraph(self.author, meta_style),
+            Paragraph(self.author, meta_style) if self.author else None,
             Paragraph(date_metadata, meta_style),
             Paragraph(link_metadata, meta_style),
             Spacer(SPACER['x'], SPACER['y']),
             *self.build_body()
         ]
+
+        flows = [item for item in raw_flows if item is not None]
 
         pdf_builder.multiBuild(
             flows,

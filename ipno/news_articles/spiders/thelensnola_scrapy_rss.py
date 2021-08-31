@@ -67,7 +67,7 @@ class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
                 matched_officers_obj = [Officer.objects.get(id=id) for id in matched_officers]
 
                 news_article_data = NewsArticle(
-                    name=self.name,
+                    source_name=self.name,
                     link=link,
                     title=title,
                     content=text_content,
@@ -84,5 +84,5 @@ class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
                 save_crawled_post = False
 
         if save_crawled_post:
-            crawled_post = CrawledPost(name=self.name, post_guid=guid)
+            crawled_post = CrawledPost(source_name=self.name, post_guid=guid)
             crawled_post.save()
