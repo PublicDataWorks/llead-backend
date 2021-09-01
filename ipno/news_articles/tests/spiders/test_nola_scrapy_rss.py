@@ -84,6 +84,46 @@ class NolaScrapyRssSpiderTestCase(TestCase):
 
     @patch('news_articles.spiders.nola_scrapy_rss.ItemLoader')
     @patch('news_articles.spiders.nola_scrapy_rss.RSSItem')
+    def test_call_parse_items_call_params_with_creator_parse_case_sensitive(self, mock_rss_item, mock_item_loader):
+        mock_rss_item_instance = Mock()
+        mock_rss_item.return_value = mock_rss_item_instance
+
+        mock_response = Mock()
+        mock_xpath = Mock()
+        mock_xpath.return_value = ['item1']
+        mock_response.xpath = mock_xpath
+
+        def mock_get_xpath(xpath):
+            if xpath == './creator/text()':
+                return ['BY JEFF ADELSON and JESSICA WILLIAMS | Staff writers']
+
+        mock_get_xpath = Mock(side_effect=mock_get_xpath)
+        mock_item_loader_instance = MagicMock(get_xpath=mock_get_xpath)
+        mock_item_loader.return_value = mock_item_loader_instance
+
+        self.spider.parse_item(mock_response)
+
+        mock_response.xpath.assert_called_with("//channel/item")
+
+        mock_item_loader.assert_called_with(
+            item=mock_rss_item_instance,
+            selector='item1',
+        )
+
+        add_xpath_calls_expected = [
+            call('title', './title/text()'),
+            call('description', './description/text()'),
+            call('link', './link/text()'),
+            call('guid', './guid/text()'),
+            call('published_date', './pubDate/text()'),
+        ]
+
+        mock_item_loader_instance.add_xpath.assert_has_calls(add_xpath_calls_expected)
+        mock_item_loader_instance.add_value.assert_called_with('author', 'Jeff Adelson, Jessica Williams')
+        mock_item_loader_instance.load_item.assert_called()
+
+    @patch('news_articles.spiders.nola_scrapy_rss.ItemLoader')
+    @patch('news_articles.spiders.nola_scrapy_rss.RSSItem')
     def test_call_parse_items_call_params_with_author(self, mock_rss_item, mock_item_loader):
         mock_rss_item_instance = Mock()
         mock_rss_item.return_value = mock_rss_item_instance

@@ -45,11 +45,14 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
 
             if creator:
                 by_name = creator[0].split(' | ')[0]
-                name = by_name.replace('BY ', '').replace(' and', ',').title()
-                loader.add_value('author', name)
+                by_pattern = re.compile('by ', re.IGNORECASE)
+                name = by_pattern.sub('', by_name)
+                and_pattern = re.compile(' and', re.IGNORECASE)
+                name = and_pattern.sub(',', name)
+                loader.add_value('author', name.title())
             elif author:
                 name = re.search(r'\((.+?)\)', author[0]).group(1)
-                loader.add_value('author', name)
+                loader.add_value('author', name.title())
             else:
                 loader.add_value('author', [''])
 
