@@ -3,12 +3,24 @@ from dateutil.parser import parse
 
 from django.conf import settings
 from django.test import TestCase
-
-from unittest.mock import patch, Mock, MagicMock
+from scrapy import signals
 from scrapy.http import XmlResponse, Request
+from unittest.mock import call, patch, Mock, MagicMock
 
-from news_articles.constants import TAG_STYLE_MAPPINGS, NEWS_ARTICLE_CLOUD_SPACES
-from news_articles.factories import CrawledPostFactory
+from news_articles.constants import (
+    CRAWL_STATUS_ERROR,
+    CRAWL_STATUS_FINISHED,
+    CRAWL_STATUS_OPENED,
+    NEWS_ARTICLE_CLOUD_SPACES,
+    TAG_STYLE_MAPPINGS,
+)
+from news_articles.factories import (
+    CrawledPostFactory,
+    CrawlerErrorFactory,
+    CrawlerLogFactory,
+    NewsArticleFactory,
+)
+from news_articles.models import CrawlerError, CrawlerLog
 from news_articles.spiders import ScrapyRssSpider
 from officers.factories import OfficerFactory
 from utils.constants import FILE_TYPES
@@ -211,3 +223,76 @@ class ScrapyRssSpiderTestCase(TestCase):
 
         mock_generate_from_blob.assert_called_with('pdf_buffer')
         self.spider.upload_file_to_gcloud.assert_not_called()
+
+    def test_spider_opened(self):
+        self.spider.spider_opened(self.spider)
+
+        log = CrawlerLog.objects.first()
+        assert log
+        assert log.source_name == self.spider.name
+        assert log.status == CRAWL_STATUS_OPENED
+
+    def test_spider_closed(self):
+        log = CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_OPENED)
+        CrawlerErrorFactory(log=log)
+        NewsArticleFactory(source_name=self.spider.name)
+        self.spider.spider_closed(self.spider, 'reason')
+
+        log = CrawlerLog.objects.first()
+        assert log
+        assert log.source_name == self.spider.name
+        assert log.status == CRAWL_STATUS_FINISHED
+        assert log.created_rows == 1
+        assert log.error_rows == 1
+
+    def test_spider_closed_with_error(self):
+        log = CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_ERROR)
+        CrawlerErrorFactory(log=log)
+
+        self.spider.spider_closed(self.spider, 'reason')
+
+        log = CrawlerLog.objects.first()
+        assert log
+        assert log.source_name == self.spider.name
+        assert log.status == CRAWL_STATUS_ERROR
+        assert log.created_rows == 0
+        assert log.error_rows == 1
+
+    def test_spider_error(self):
+        CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_OPENED)
+
+        response = Mock(url='url', status='status')
+
+        failure = Mock(getTraceback=Mock(return_value='traceback'))
+
+        self.spider.spider_error(failure, response, self.spider)
+
+        log = CrawlerLog.objects.first()
+        assert log
+        assert log.source_name == self.spider.name
+        assert log.status == CRAWL_STATUS_ERROR
+
+        error = CrawlerError.objects.first()
+        assert error
+        assert error.response_url == 'url'
+        assert error.response_status_code == 'status'
+        assert error.error_message == 'Error occurs while crawling data!\ntraceback'
+
+    @patch('news_articles.spiders.base_scrapy_rss.scrapy.Spider.from_crawler')
+    def test_from_crawler(self, mock_from_crawler):
+        mock_from_crawler.return_value = self.spider
+
+        mock_connect = Mock()
+        crawler = Mock(signals=Mock(connect=mock_connect))
+
+        result = self.spider.from_crawler(crawler)
+
+        expected_calls = [
+            call(self.spider.spider_opened, signal=signals.spider_opened),
+            call(self.spider.spider_closed, signal=signals.spider_closed),
+            call(self.spider.spider_error, signal=signals.spider_error)
+        ]
+
+        mock_connect.assert_has_calls(expected_calls)
+
+        assert result == self.spider

@@ -1,22 +1,29 @@
 from collections import defaultdict
-
 from dateutil.parser import parse
 
 from django.conf import settings
-
 from bs4 import BeautifulSoup
 from itemloaders.processors import TakeFirst
 import logging
 import scrapy
+from scrapy import signals
 
 from news_articles.constants import (
+    ARTICLE_MATCHING_KEYWORDS,
     BASE_CRAWLER_LIMIT,
+    CRAWL_STATUS_ERROR,
+    CRAWL_STATUS_FINISHED,
+    CRAWL_STATUS_OPENED,
     NEWS_ARTICLE_CLOUD_SPACES,
     TAG_STYLE_MAPPINGS,
     UNPARSED_TAGS,
-    ARTICLE_MATCHING_KEYWORDS,
 )
-from news_articles.models import CrawledPost
+from news_articles.models import (
+    CrawledPost,
+    CrawlerError,
+    CrawlerLog,
+    NewsArticle,
+)
 from officers.models import Officer
 from utils.constants import FILE_TYPES
 from utils.google_cloud import GoogleCloudService
@@ -49,6 +56,49 @@ class ScrapyRssSpider(scrapy.Spider):
         self.officers = self.get_officer_data()
 
         self.guid_limit = BASE_CRAWLER_LIMIT * len(self.urls)
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(ScrapyRssSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        crawler.signals.connect(spider.spider_error, signal=signals.spider_error)
+        return spider
+
+    def spider_closed(self, spider, reason):
+        crawler_log = CrawlerLog.objects.filter(source_name=spider.name).last()
+
+        news_article_count = NewsArticle.objects.filter(
+            source_name=spider.name,
+            created_at__gte=crawler_log.created_at
+        ).count()
+
+        crawler_log.created_rows = news_article_count
+        crawler_log.error_rows = crawler_log.errors.count()
+
+        if crawler_log.status != CRAWL_STATUS_ERROR:
+            crawler_log.status = CRAWL_STATUS_FINISHED
+
+        crawler_log.save()
+
+    def spider_opened(self, spider):
+        crawler_log = CrawlerLog(source_name=spider.name, status=CRAWL_STATUS_OPENED)
+        crawler_log.save()
+
+    def spider_error(self, failure, response, spider):
+        crawler_log = CrawlerLog.objects.filter(source_name=spider.name).last()
+
+        crawler_log.status = CRAWL_STATUS_ERROR
+        crawler_log.save()
+
+        error = CrawlerError(
+            response_url=response.url,
+            response_status_code=response.status,
+            error_message=f'Error occurs while crawling data!\n{failure.getTraceback()}',
+            log=crawler_log
+        )
+
+        error.save()
 
     def start_requests(self):
         urls = self.urls
