@@ -68,6 +68,7 @@ LOCAL_APPS = (
     'analytics',
     'data',
     'news_articles',
+    'tasks',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
