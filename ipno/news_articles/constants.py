@@ -29,3 +29,13 @@ NEWS_ARTICLE_WRGL_COLUMNS = [
 NEWS_ARTICLE_OFFICER_WRGL_COLUMNS = ['uid', 'officer_id', 'newsarticle_id', 'id']
 
 BASE_CRAWLER_LIMIT = 100
+
+CRAWL_STATUS_OPENED = 'started'
+CRAWL_STATUS_FINISHED = 'finished'
+CRAWL_STATUS_ERROR = 'error'
+
+CRAWL_STATUSES = (
+    (CRAWL_STATUS_OPENED, 'Started'),
+    (CRAWL_STATUS_FINISHED, 'Finished'),
+    (CRAWL_STATUS_ERROR, 'Error')
+)
