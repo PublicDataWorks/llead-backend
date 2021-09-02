@@ -121,8 +121,6 @@ class OfficerDatafileQueryTestCase(TestCase):
         }
 
         expected_incidents = [
-            expected_event_1,
-            expected_event_2,
             expected_complaint_receive_event,
             expected_uof_receive_event,
         ]

@@ -42,6 +42,8 @@ class OfficerDatafileQuery(object):
             uid=F('officer__uid'),
             uof_uid=F('use_of_force__uof_uid'),
             officer_inactive=F('event_inactive')
+        ).exclude(
+            kind__in=OFFICER_CAREER_KINDS
         ).values(*OFFICER_INCIDENT_FIELDS)
 
         return pd.DataFrame(incidents)
