@@ -11,6 +11,7 @@ from news_articles.models import (
 
 class NewsArticleAdmin(ModelAdmin):
     list_display = ('id', 'source_name', 'author', 'title')
+    filter_horizontal = ('officers', )
 
 
 class CrawledPostAdmin(ModelAdmin):
