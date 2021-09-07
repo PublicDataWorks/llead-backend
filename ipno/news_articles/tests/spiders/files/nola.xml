@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.theadvocate.com - RSS Results in baton_rouge/news*,baton_rouge/opinion*,baton_rouge/sports*,new_orleans/sports/saints of type article</title>
+        <link>https://www.theadvocate.com/search/?q=&amp;t=article&amp;l=35&amp;d=&amp;d1=&amp;d2=&amp;s=start_time&amp;sd=desc&amp;c%5b%5d=baton_rouge/news*,baton_rouge/opinion*,baton_rouge/sports*,new_orleans/sports/saints&amp;nk=%23tncen&amp;f=rss</link>
+        <atom:link href="https://www.theadvocate.com/search/?q=&amp;t=article&amp;l=35&amp;d=&amp;d1=&amp;d2=&amp;s=start_time&amp;sd=desc&amp;c%5b%5d=baton_rouge/news*,baton_rouge/opinion*,baton_rouge/sports*,new_orleans/sports/saints&amp;nk=%23tncen&amp;f=rss" rel="self" type="application/rss+xml" />
+        <description>
+		www.theadvocate.com - RSS Results
+		in section(s) baton_rouge/news*,baton_rouge/opinion*,baton_rouge/sports*,new_orleans/sports/saints
+		only for asset type(s) of article
+	</description>
+        <generator>TNCMS 1.59.2</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Our Views: Saints, LSU vaccine and test mandates are for the best. We need more.</title>
+            <description>The New Orleans Saints won their preseason football game with the Jacksonville Jaguars, but the more important win was the implementation of COVID-19 protocols requiring fans to show proof they have been vaccinated, or evidence that they tested negative for&#8230;</description>
+            <pubDate>Mon, 30 Aug 2021 03:00:00 -0500</pubDate>
+            <guid isPermaLink="false">http://www.theadvocate.com/tncms/asset/editorial/46cdaacc-05b3-11ec-9b27-27262c67532c</guid>
+            <link>https://www.theadvocate.com/baton_rouge/opinion/our_views/article_46cdaacc-05b3-11ec-9b27-27262c67532c.html</link>
+            <dc:creator>STAFF EDITORIAL</dc:creator>
+            <enclosure url="http://bloximages.newyork1.vip.townnews.com/theadvocate.com/content/tncms/assets/v3/editorial/1/a0/1a0f9bca-6244-56e6-9646-a3828459dc4a/61244248c8b80.image.jpg?resize=300%2C200" length="233179" type="image/jpeg" />
+        </item>
+
+        <item>
+            <title>Livingston sports: New season, new challenges for Springfield</title>
+            <description>Playing district rivals is usually an exercise that produces games at well-known stadiums against familiar coaches and athletes. It will be a little different this year for Springfield.</description>
+            <pubDate>Mon, 30 Aug 2021 02:15:00 -0500</pubDate>
+            <guid isPermaLink="false">http://www.theadvocate.com/tncms/asset/editorial/9f662d9e-0784-11ec-b674-af86932a79a7</guid>
+            <link>https://www.theadvocate.com/baton_rouge/news/communities/livingston_tangipahoa/article_9f662d9e-0784-11ec-b674-af86932a79a7.html</link>
+            <dc:creator>BY CHARLES SALZER | Contributing writer</dc:creator>
+            <enclosure url="http://bloximages.newyork1.vip.townnews.com/theadvocate.com/content/tncms/assets/v3/editorial/3/88/388e727e-0785-11ec-a35a-9390e4d257cc/5b7878a751bbe.image.jpg?resize=300%2C439" length="382239" type="image/jpeg" />
+        </item>
+
+        <item>
+            <title>Home Depot grant breaths new life into cemetery project</title>
+            <description>The Home Depot Foundation has awarded a $10,000 grant to address the continued upkeep of the Zachary Public Cemetery.</description>
+            <pubDate>Mon, 30 Aug 2021 02:15:00 -0500</pubDate>
+            <guid isPermaLink="false">http://www.theadvocate.com/tncms/asset/editorial/011369f6-077d-11ec-bc56-ef356e0fb111</guid>
+            <link>https://www.theadvocate.com/baton_rouge/news/communities/zachary/article_011369f6-077d-11ec-bc56-ef356e0fb111.html</link>
+            <dc:creator>BY FRANCES Y. SPENCER | Contributing writer</dc:creator>
+            <enclosure url="http://bloximages.newyork1.vip.townnews.com/theadvocate.com/content/tncms/assets/v3/editorial/0/87/087425fd-ffab-5c9f-9376-2369e348fb2d/60b3e1ed776ec.image.jpg?resize=300%2C450" length="550023" type="image/jpeg" />
+        </item>
+
+    </channel>
+</rss>
