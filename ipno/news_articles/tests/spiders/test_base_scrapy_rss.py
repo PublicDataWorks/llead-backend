@@ -23,7 +23,6 @@ from news_articles.factories import (
 from news_articles.models import CrawlerError, CrawlerLog
 from news_articles.spiders import ScrapyRssSpider
 from officers.factories import OfficerFactory
-from utils.constants import FILE_TYPES
 
 
 class ScrapyRssSpiderTestCase(TestCase):
@@ -202,27 +201,6 @@ class ScrapyRssSpiderTestCase(TestCase):
         result = self.spider.upload_file_to_gcloud('buffer', 'file_location', 'pdf')
         mock_logger_error.assert_called_with(error)
         assert result is None
-
-    @patch('news_articles.spiders.base_scrapy_rss.generate_from_blob')
-    def test_generate_preview_image(self, mock_generate_from_blob):
-        mock_generate_from_blob.return_value = 'image_buffer'
-        self.spider.upload_file_to_gcloud = Mock(return_value='url')
-
-        result = self.spider.generate_preview_image('pdf_buffer', 'location')
-
-        mock_generate_from_blob.assert_called_with('pdf_buffer')
-        self.spider.upload_file_to_gcloud.assert_called_with('image_buffer', 'location', FILE_TYPES['IMG'])
-        assert result == 'url'
-
-    @patch('news_articles.spiders.base_scrapy_rss.generate_from_blob')
-    def test_not_generating_preview_image(self, mock_generate_from_blob):
-        mock_generate_from_blob.return_value = None
-        self.spider.upload_file_to_gcloud = Mock(return_value='url')
-
-        self.spider.generate_preview_image('pdf_buffer', 'location')
-
-        mock_generate_from_blob.assert_called_with('pdf_buffer')
-        self.spider.upload_file_to_gcloud.assert_not_called()
 
     def test_spider_opened(self):
         self.spider.spider_opened(self.spider)

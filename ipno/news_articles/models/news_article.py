@@ -12,6 +12,5 @@ class NewsArticle(TimeStampsModel):
     published_date = models.DateField()
     author = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=255, blank=True, null=True)
-    preview_image_url = models.CharField(max_length=255, blank=True, null=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='news_articles')
