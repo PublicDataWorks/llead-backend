@@ -1,10 +1,9 @@
-import json
 from io import StringIO, BytesIO
 from csv import DictWriter
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import patch
+from mock import patch, Mock, call
 
 from data.services import ComplaintImporter
 from data.models import ImportLog
@@ -285,11 +284,12 @@ class ComplaintImporterTestCase(TestCase):
         writer.writeheader()
         writer.writerows(self.complaints_data)
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
+        self.csv_text = csv_content.getvalue()
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_successfully(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_successfully(self, get_mock):
         ComplaintFactory(complaint_uid='complaint-uid1', allegation_uid='allegation-uid1', charge_uid='charge-uid1')
         ComplaintFactory(complaint_uid='complaint-uid1', allegation_uid='allegation-uid1', charge_uid='charge-uid2')
         ComplaintFactory(complaint_uid='complaint-uid1', allegation_uid=None, charge_uid=None)
@@ -313,8 +313,11 @@ class ComplaintImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
+        mock_json = Mock(return_value=data)
+        get_mock.return_value = Mock(
+            json=mock_json,
+            text=self.csv_text,
+        )
 
         ComplaintImporter().process()
 
@@ -330,11 +333,10 @@ class ComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 5
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/complaint_repo'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/complaint_repo',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         expected_complaint1_data = self.complaint1_data.copy()
         expected_complaint1_data['department_ids'] = [department_1.id]

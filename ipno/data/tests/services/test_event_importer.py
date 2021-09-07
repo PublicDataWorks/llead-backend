@@ -1,11 +1,10 @@
-import json
 from io import StringIO, BytesIO
 from csv import DictWriter
 from decimal import Decimal
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import patch
+from mock import patch, Mock, call
 
 from data.services import EventImporter
 from data.models import ImportLog
@@ -239,11 +238,12 @@ class EventImporterTestCase(TestCase):
         writer.writeheader()
         writer.writerows(self.events_data)
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
+        self.csv_text = csv_content.getvalue()
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_successfully(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_successfully(self, get_mock):
         EventFactory(event_uid='event-uid1')
         EventFactory(event_uid='event-uid2')
         EventFactory(event_uid='event-uid3')
@@ -274,13 +274,16 @@ class EventImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
+        mock_json = Mock(return_value=data)
+        get_mock.return_value = Mock(
+            json=mock_json,
+            text=self.csv_text,
+        )
 
         EventImporter().process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
-        print(import_log.error_message)
+
         assert import_log.data_model == EventImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
         assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
@@ -292,11 +295,10 @@ class EventImporterTestCase(TestCase):
 
         assert Event.objects.count() == 5
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/event_repo'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/event_repo',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         expected_event1_data = self.event1_data.copy()
         expected_event1_data['department_id'] = department_1.id
