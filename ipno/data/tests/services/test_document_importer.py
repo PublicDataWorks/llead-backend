@@ -1,4 +1,3 @@
-import json
 from inspect import cleandoc
 from io import StringIO, BytesIO
 from csv import DictWriter
@@ -48,6 +47,7 @@ class DocumentImporterTestCase(TestCase):
                 'title'
             ]
         )
+
         self.document1_data = {
             'docid': '00fa809e',
             'page_count': '4',
@@ -178,13 +178,14 @@ class DocumentImporterTestCase(TestCase):
         ]
         writer.writeheader()
         writer.writerows(self.documents_data)
+        self.csv_text = csv_content.getvalue()
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    @patch('urllib.request.urlopen')
-    def test_process_successfully(self, urlopen_mock, generate_from_blob_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_successfully(self, get_mock, generate_from_blob_mock):
         DocumentFactory(docid='00fa809e', hrg_no='1', matched_uid='officer-uid-1')
         DocumentFactory(docid='00fa809e', hrg_no='10', matched_uid=None)
         DocumentFactory(
@@ -214,9 +215,12 @@ class DocumentImporterTestCase(TestCase):
         data = {
             'hash': '87d27e0616d9ef342e1728f5533162a3'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream, 'file_blob']
-
+        mock_json = Mock(return_value=data)
+        get_mock.return_value = Mock(
+            json=mock_json,
+            text=self.csv_text,
+            content='file_blob'
+        )
         document_importer = DocumentImporter()
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
@@ -237,6 +241,8 @@ class DocumentImporterTestCase(TestCase):
         document_importer.process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
+        # import pdb
+        # pdb.set_trace()
         assert import_log.data_model == DocumentImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
         assert import_log.commit_hash == '87d27e0616d9ef342e1728f5533162a3'
@@ -248,11 +254,10 @@ class DocumentImporterTestCase(TestCase):
 
         assert Document.objects.count() == 5
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/document_repo'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/document_repo',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         expected_document1_data = self.document1_data.copy()
         expected_document1_data['department_ids'] = [department_1.id]
@@ -339,8 +344,8 @@ class DocumentImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_fail_dueto_dropbox_get_file_error(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_fail_dueto_dropbox_get_file_error(self, get_mock):
         WrglRepoFactory(
             data_model=DocumentImporter.data_model,
             repo_name='document_repo',
@@ -350,8 +355,12 @@ class DocumentImporterTestCase(TestCase):
         data = {
             'hash': '87d27e0616d9ef342e1728f5533162a3'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream, 'file_blob']
+        mock_json = Mock(return_value=data)
+        get_mock.return_value = Mock(
+            json=mock_json,
+            text=self.csv_text,
+            content='file_blob'
+        )
 
         document_importer = DocumentImporter()
 
@@ -527,12 +536,10 @@ class DocumentImporterTestCase(TestCase):
         mock_upload_file_from_string.assert_not_called()
         assert preview_image_url is None
 
-    @patch('data.services.document_importer.urlopen')
-    def test_get_ocr_text_success(self, urlopen_mock):
-        mock_decode = Mock(return_value='decoded_value')
-        mock_read = Mock(return_value=Mock(decode=mock_decode))
-        urlopen_mock_return = Mock(read=mock_read)
-        urlopen_mock.return_value = urlopen_mock_return
+    @patch('data.services.document_importer.requests.get')
+    def test_get_ocr_text_success(self, get_mock):
+        get_mock_return = Mock(text='decoded_value')
+        get_mock.return_value = get_mock_return
 
         mock_get_temporary_link_from_path = Mock(return_value='temp_link')
         mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
@@ -544,13 +551,11 @@ class DocumentImporterTestCase(TestCase):
         ocr_text = document_importer.get_ocr_text(ocr_text_id)
 
         mock_get_temporary_link_from_path.assert_called_with(ocr_text_id)
-        urlopen_mock.assert_called_with('temp_link')
-        mock_read.assert_called()
-        mock_decode.assert_called_with('utf-8')
+        get_mock.assert_called_with('temp_link')
         assert ocr_text == 'decoded_value'
 
-    @patch('data.services.document_importer.urlopen')
-    def test_get_ocr_text_fail(self, urlopen_mock):
+    @patch('data.services.document_importer.requests.get')
+    def test_get_ocr_text_fail(self, get_mock):
         mock_get_temporary_link_from_path = Mock()
         mock_get_temporary_link_from_path.side_effect = Exception()
         mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
