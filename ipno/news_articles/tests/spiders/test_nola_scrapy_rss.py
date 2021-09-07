@@ -255,10 +255,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         )
         self.spider.upload_file_to_gcloud = mock_upload_file_to_gcloud
 
-        mock_generate_preview_image = Mock(
-            return_value='pdf_url-preview.jpg'
-        )
-        self.spider.generate_preview_image = mock_generate_preview_image
         officers_data = defaultdict(list)
         officers_data[officer.name].append(officer.id)
 
@@ -284,7 +280,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
-        mock_generate_preview_image.assert_called_with(mocked_pdf_built, 'pdf_location-preview.jpg')
 
         self.spider.nlp.process.assert_called_with('header content body content', officers_data)
 
@@ -297,7 +292,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         assert new_article.author == 'response author'
         assert new_article.published_date == published_date
         assert new_article.url == 'pdf_url.pdf'
-        assert new_article.preview_image_url == 'pdf_url-preview.jpg'
 
         count_news_article = NewsArticle.objects.count()
         assert count_news_article == 1
@@ -424,11 +418,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         )
         self.spider.upload_file_to_gcloud = mock_upload_file_to_gcloud
 
-        mock_generate_preview_image = Mock(
-            return_value=''
-        )
-        self.spider.generate_preview_image = mock_generate_preview_image
-
         self.spider.parse_article(response)
 
         mock_css.assert_called_with("div[itemprop=\"articleBody\"]>:not(meta):not(div)")
@@ -448,7 +437,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
-        mock_generate_preview_image.assert_called_with(mocked_pdf_built, 'pdf_location-preview.jpg')
 
         count_news_article = NewsArticle.objects.count()
         assert count_news_article == 0

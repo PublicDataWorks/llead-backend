@@ -56,10 +56,8 @@ class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
             ).build_pdf()
 
             pdf_location = self.get_upload_pdf_location(published_date, guid)
-            preview_location = pdf_location.replace('.pdf', '-preview.jpg')
 
             uploaded_url = self.upload_file_to_gcloud(pdf_buffer, pdf_location, FILE_TYPES['PDF'])
-            preview_image_url = self.generate_preview_image(pdf_buffer, preview_location)
 
             if uploaded_url:
                 matched_officers = self.nlp.process(text_content, self.officers)
@@ -75,7 +73,6 @@ class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
                     author=author,
                     published_date=published_date,
                     url=uploaded_url,
-                    preview_image_url=preview_image_url
                 )
                 news_article_data.save()
                 news_article_data.officers.add(*matched_officers_obj)
