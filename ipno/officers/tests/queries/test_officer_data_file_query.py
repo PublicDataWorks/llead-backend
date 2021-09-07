@@ -156,14 +156,20 @@ class OfficerDatafileQueryTestCase(TestCase):
         }]
 
         expected_officer_sheet = pd.DataFrame(expected_officer_profile)
+        expected_officer_sheet.dropna(how='all', axis=1, inplace=True)
         expected_uof_sheet = pd.DataFrame(expected_uof)
+        expected_uof_sheet.dropna(how='all', axis=1, inplace=True)
         expected_incident_sheet = pd.DataFrame(expected_incidents)
         expected_incident_sheet_sorted = expected_incident_sheet.sort_values(by=['event_uid']).reset_index(drop=True)
+        expected_incident_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_career_sheet = pd.DataFrame(expected_career_history)
         expected_career_sheet_sorted = expected_career_sheet.sort_values(by=['event_uid']).reset_index(drop=True)
+        expected_career_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_complaint_sheet = pd.DataFrame(expected_complaints)
         expected_complaint_sheet_sorted = expected_complaint_sheet.sort_values(by=['complaint_uid']).reset_index(drop=True)
+        expected_complaint_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_doc_sheet = pd.DataFrame([expected_document])
+        expected_doc_sheet.dropna(how='all', axis=1, inplace=True)
 
         data_file = OfficerDatafileQuery(officer).generate_sheets_file()
 
@@ -187,3 +193,22 @@ class OfficerDatafileQueryTestCase(TestCase):
                                       check_dtype=False)
         pd.testing.assert_frame_equal(xlsx_complaint_data_sorted, expected_complaint_sheet_sorted, check_like=True,
                                       check_dtype=False)
+
+    def test_do_not_generate_sheets_with_empty_dataframe(self):
+        officer = OfficerFactory()
+
+        expected_officer_profile = [{
+            key: getattr(officer, key) for key in OFFICER_PROFILE_FIELDS
+        }]
+
+        expected_officer_sheet = pd.DataFrame(expected_officer_profile)
+        expected_officer_sheet.dropna(how='all', axis=1, inplace=True)
+
+        data_file = OfficerDatafileQuery(officer).generate_sheets_file()
+
+        xlsx_officer_data = pd.read_excel(data_file, sheet_name=OFFICER_PROFILE_SHEET, dtype=str)
+
+        no_of_sheets = len(pd.read_excel(data_file))
+
+        pd.testing.assert_frame_equal(xlsx_officer_data, expected_officer_sheet)
+        assert no_of_sheets == 1
