@@ -1,12 +1,11 @@
 import csv
-import json
 from io import StringIO
-import urllib
 from datetime import datetime
 import pytz
 import re
 import traceback
 
+import requests
 from django.conf import settings
 from django.utils.text import slugify
 
@@ -69,18 +68,15 @@ class BaseImporter(object):
 
     def read_wrgl_csv(self, repo_name, commit_hash):
         url = f'https://www.wrgl.co/api/v1/users/{WRGL_USER}/repos/{repo_name}/commits/{commit_hash}/csv'
-        ftp_stream = urllib.request.urlopen(url)
-        text = ftp_stream.read().decode('utf-8')
+        text = requests.get(url).text
         csv_file = csv.DictReader(StringIO(text), delimiter=',')
         return list(csv_file)
 
     def latest_commit_hash(self, repo_name):
         url = f'https://www.wrgl.co/api/v1/users/{WRGL_USER}/repos/{repo_name}'
-        request = urllib.request.Request(url)
-        request.add_header('Authorization', f'APIKEY {settings.WRGL_API_KEY}')
+        headers = {'Authorization': f'APIKEY {settings.WRGL_API_KEY}'}
 
-        ftp_stream = urllib.request.urlopen(request)
-        json_data = json.loads(ftp_stream.read().decode('utf-8'))
+        json_data = requests.get(url, headers=headers).json()
         return json_data.get('hash')
 
     def bulk_import(self, klass, new_items_attrs, update_items_attrs, cleanup_action=None):
