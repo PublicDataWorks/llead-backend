@@ -18,4 +18,3 @@ class NewsArticleFactory(factory.django.DjangoModelFactory):
     published_date = factory.LazyFunction(lambda: fake.date_object())
     author = factory.LazyFunction(lambda: fake.word())
     url = factory.LazyFunction(lambda: fake.uri())
-    preview_image_url = factory.LazyFunction(lambda: fake.uri())
