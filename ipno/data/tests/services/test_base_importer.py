@@ -1,11 +1,10 @@
-import json
 from io import StringIO, BytesIO
 from csv import DictWriter
 
 from django.test.testcases import TestCase, override_settings
 from django.utils.text import slugify
 
-from mock import patch
+from mock import patch, Mock, call
 from pytest import raises
 
 from data.services import BaseImporter
@@ -52,6 +51,7 @@ class BaseImporterTestCase(TestCase):
             },
         ])
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
+        self.csv_text = csv_content.getvalue()
 
     def test_process_wrgl_repo_not_found(self):
         assert not TestImporter().process()
@@ -64,23 +64,23 @@ class BaseImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_invalid_wrgl_repo_name(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_invalid_wrgl_repo_name(self, get_mock):
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name='test_repo_name'
         )
 
-        repo_details_stream = BytesIO(json.dumps({}).encode('utf-8'))
-        urlopen_mock.return_value = repo_details_stream
+        mock_json = Mock(return_value={})
+        get_mock_return = Mock(json=mock_json)
+        get_mock.return_value = get_mock_return
 
         assert not TestImporter().process()
 
-        repo_details_request = urlopen_mock.call_args[0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        get_mock.assert_called_with(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == TEST_MODEL_NAME
@@ -90,8 +90,8 @@ class BaseImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_no_new_commit(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_no_new_commit(self, get_mock):
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name='test_repo_name',
@@ -101,16 +101,16 @@ class BaseImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.return_value = repo_details_stream
+        mock_json = Mock(return_value=data)
+        get_mock_return = Mock(json=mock_json)
+        get_mock.return_value = get_mock_return
 
         assert not TestImporter().process()
 
-        repo_details_request = urlopen_mock.call_args[0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        get_mock.assert_called_with(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == TEST_MODEL_NAME
@@ -122,8 +122,8 @@ class BaseImporterTestCase(TestCase):
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.base_importer.BaseImporter.import_data')
-    @patch('urllib.request.urlopen')
-    def test_process_error_while_processing_data(self, urlopen_mock, import_data_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_error_while_processing_data(self, get_mock, import_data_mock):
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name='test_repo_name',
@@ -133,17 +133,17 @@ class BaseImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
+        mock_json = Mock(return_value=data)
+        get_mock_return = Mock(json=mock_json)
+        get_mock.return_value = get_mock_return
         import_data_mock.side_effect = Exception()
 
         assert not TestImporter().process()
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == TEST_MODEL_NAME
@@ -155,8 +155,8 @@ class BaseImporterTestCase(TestCase):
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.base_importer.BaseImporter.import_data')
-    @patch('urllib.request.urlopen')
-    def test_process_successfully(self, urlopen_mock, import_data_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_successfully(self, get_mock, import_data_mock):
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name='test_repo_name',
@@ -166,8 +166,9 @@ class BaseImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
+        mock_json = Mock(return_value=data)
+        get_mock_return = Mock(json=mock_json, text=self.csv_text)
+        get_mock.return_value = get_mock_return
         import_data_mock.return_value = {
             'created_rows': 3,
             'updated_rows': 5,
@@ -176,11 +177,10 @@ class BaseImporterTestCase(TestCase):
 
         assert TestImporter().process()
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/test_repo_name',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
 
         import_data_mock.assert_called_with(
             [

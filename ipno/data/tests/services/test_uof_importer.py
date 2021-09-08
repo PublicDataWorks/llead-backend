@@ -1,10 +1,9 @@
-import json
 from io import StringIO, BytesIO
 from csv import DictWriter
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import patch
+from mock import patch, Mock, call
 
 from data.services import UofImporter
 from data.models import ImportLog
@@ -327,11 +326,12 @@ class UofImporterTestCase(TestCase):
         writer.writeheader()
         writer.writerows(self.uofs_data)
         self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
+        self.csv_text = csv_content.getvalue()
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('urllib.request.urlopen')
-    def test_process_successfully(self, urlopen_mock):
+    @patch('data.services.base_importer.requests.get')
+    def test_process_successfully(self, get_mock):
         UseOfForceFactory(uof_uid='uof-uid1')
         UseOfForceFactory(uof_uid='uof-uid2')
         UseOfForceFactory(uof_uid='uof-uid3')
@@ -355,8 +355,11 @@ class UofImporterTestCase(TestCase):
         data = {
             'hash': '3950bd17edfd805972781ef9fe2c6449'
         }
-        repo_details_stream = BytesIO(json.dumps(data).encode('utf-8'))
-        urlopen_mock.side_effect = [repo_details_stream, self.csv_stream]
+        mock_json = Mock(return_value=data)
+        get_mock.return_value = Mock(
+            json=mock_json,
+            text=self.csv_text,
+        )
 
         UofImporter().process()
 
@@ -372,11 +375,11 @@ class UofImporterTestCase(TestCase):
 
         assert UseOfForce.objects.count() == 5
 
-        repo_details_request = urlopen_mock.call_args_list[0][0][0]
-        assert repo_details_request._full_url == 'https://www.wrgl.co/api/v1/users/wrgl_user/repos/uof_repo'
-        assert repo_details_request.headers == {
-            'Authorization': 'APIKEY wrgl-api-key'
-        }
+        assert get_mock.call_args_list[0] == call(
+            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/uof_repo',
+            headers={'Authorization': 'APIKEY wrgl-api-key'},
+        )
+
         expected_uof1_data = self.uof1_data.copy()
         expected_uof1_data['department_id'] = department_1.id
         expected_uof1_data['officer_id'] = officer_1.id
