@@ -6,6 +6,7 @@ from officers.models import Officer, Event
 
 class OfficerAdmin(ModelAdmin):
     list_display = ('id', 'uid', 'last_name', 'first_name', 'created_at', 'updated_at')
+    search_fields = ('id', 'uid', 'last_name', 'first_name')
 
 
 class EventAdmin(ModelAdmin):
@@ -13,6 +14,7 @@ class EventAdmin(ModelAdmin):
         'id', 'officer', 'department', 'kind',
         'year', 'month', 'day', 'time', 'raw_date'
     )
+    raw_id_fields = ('officer', )
 
 
 admin.site.register(Officer, OfficerAdmin)

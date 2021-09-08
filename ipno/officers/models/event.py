@@ -36,7 +36,9 @@ class Event(TimeStampsModel):
     award_comments = models.CharField(max_length=255, null=True, blank=True)
 
     officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True, related_name='events')
-    department = models.ForeignKey('departments.Department', on_delete=models.CASCADE, null=True, related_name='events')
+    department = models.ForeignKey(
+        'departments.Department', on_delete=models.CASCADE, null=True, blank=True, related_name='events'
+    )
     use_of_force = models.ForeignKey(
-        'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, related_name='events'
+        'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, blank=True, related_name='events'
     )
