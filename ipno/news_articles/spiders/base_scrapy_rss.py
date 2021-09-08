@@ -25,9 +25,7 @@ from news_articles.models import (
     NewsArticle,
 )
 from officers.models import Officer
-from utils.constants import FILE_TYPES
 from utils.google_cloud import GoogleCloudService
-from utils.image_generator import generate_from_blob
 from utils.nlp import NLP
 
 logger = logging.getLogger(__name__)
@@ -150,12 +148,6 @@ class ScrapyRssSpider(scrapy.Spider):
             return f"{settings.GC_PATH}{file_location}"
         except Exception as e:
             logger.error(e)
-
-    def generate_preview_image(self, pdf_blob, upload_location):
-        preview_image_blob = generate_from_blob(pdf_blob)
-
-        if preview_image_blob:
-            return self.upload_file_to_gcloud(preview_image_blob, upload_location, FILE_TYPES['IMG'])
 
     def parse_guid(self, guid):
         return guid.replace(self.guid_pre, '')
