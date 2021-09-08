@@ -42,6 +42,8 @@ class OfficerDatafileQuery(object):
             uid=F('officer__uid'),
             uof_uid=F('use_of_force__uof_uid'),
             officer_inactive=F('event_inactive')
+        ).exclude(
+            kind__in=OFFICER_CAREER_KINDS
         ).values(*OFFICER_INCIDENT_FIELDS)
 
         return pd.DataFrame(incidents)
@@ -82,6 +84,14 @@ class OfficerDatafileQuery(object):
 
         return pd.DataFrame(doc)
 
+    def _write_to_sheet(self, xlsx_writer, sheet_name, dataframe):
+        if not dataframe.empty:
+            dataframe.dropna(how='all', axis=1, inplace=True)
+            dataframe.to_excel(xlsx_writer, sheet_name, index=False)
+
+            worksheet = xlsx_writer.sheets[sheet_name]
+            worksheet.set_column('A:Z', 25)
+
     def generate_sheets_file(self):
         df_officer = self._generate_officer_sheet()
         df_incident = self._generate_officer_incident_sheet()
@@ -90,16 +100,21 @@ class OfficerDatafileQuery(object):
         df_career = self._generate_officer_career_sheet()
         df_doc = self._generate_officer_doc_sheet()
 
+        datasheet_mapping = {
+            OFFICER_PROFILE_SHEET: df_officer,
+            OFFICER_INCIDENT_SHEET: df_incident,
+            OFFICER_COMPLAINT_SHEET: df_complaint,
+            OFFICER_UOF_SHEET: df_uof,
+            OFFICER_CAREER_SHEET: df_career,
+            OFFICER_DOC_SHEET: df_doc
+        }
+
         excel_file = IO()
-        xlwriter = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+        xlsx_writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
 
-        df_officer.to_excel(xlwriter, OFFICER_PROFILE_SHEET, index=False)
-        df_incident.to_excel(xlwriter, OFFICER_INCIDENT_SHEET, index=False)
-        df_complaint.to_excel(xlwriter, OFFICER_COMPLAINT_SHEET, index=False)
-        df_uof.to_excel(xlwriter, OFFICER_UOF_SHEET, index=False)
-        df_career.to_excel(xlwriter, OFFICER_CAREER_SHEET, index=False)
-        df_doc.to_excel(xlwriter, OFFICER_DOC_SHEET, index=False)
+        for sheet_name, dataframe in datasheet_mapping.items():
+            self._write_to_sheet(xlsx_writer, sheet_name, dataframe)
 
-        xlwriter.save()
+        xlsx_writer.save()
 
         return excel_file
