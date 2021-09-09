@@ -6,6 +6,7 @@ from news_articles.models import (
     CrawlerError,
     CrawlerLog,
     NewsArticle,
+    NewsArticleSource,
 )
 
 
@@ -51,7 +52,19 @@ class CrawlerErrorAdmin(ModelAdmin):
         return False  # pragma: no cover
 
 
+class NewsArticleSourceAdmin(ModelAdmin):
+    list_display = ('source_name', 'custom_matching_name')
+    readonly_fields = ('source_name', )
+
+    def has_add_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+
 admin.site.register(NewsArticle, NewsArticleAdmin)
 admin.site.register(CrawledPost, CrawledPostAdmin)
 admin.site.register(CrawlerLog, CrawlerLogAdmin)
 admin.site.register(CrawlerError, CrawlerErrorAdmin)
+admin.site.register(NewsArticleSource, NewsArticleSourceAdmin)
