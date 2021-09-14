@@ -3,7 +3,6 @@ from datetime import date
 from django.test import TestCase
 
 from news_articles.factories import NewsArticleFactory
-from news_articles.models import NewsArticleSource
 from officers.serializers import (
     ComplaintTimelineSerializer,
     UseOfForceTimelineSerializer,
@@ -317,8 +316,7 @@ class UnitChangeTimelineSerializerTestCase(TestCase):
 
 class NewsArticleTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        source = NewsArticleSource()
-        news_article = NewsArticleFactory(source_name=source.source_name)
+        news_article = NewsArticleFactory()
 
         result = NewsArticleTimelineSerializer(news_article).data
 
@@ -329,7 +327,7 @@ class NewsArticleTimelineSerializerTestCase(TestCase):
             'id': news_article.id,
             'title': news_article.title,
             'url': news_article.url,
-            'source_name': source.custom_matching_name,
+            'source_name': news_article.source.custom_matching_name,
         }
 
 
@@ -337,4 +335,4 @@ class BaseTimelineSerializerTestCase(TestCase):
     def test_raise_exception(self):
         news_article = NewsArticleFactory()
         with self.assertRaises(NotImplementedError):
-            BaseTimelineSerializer(news_article).get_kind(news_article.source_name)
+            BaseTimelineSerializer(news_article).get_kind(news_article.source)

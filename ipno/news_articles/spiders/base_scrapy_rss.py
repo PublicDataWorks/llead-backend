@@ -23,6 +23,7 @@ from news_articles.models import (
     CrawlerError,
     CrawlerLog,
     NewsArticle,
+    NewsArticleSource,
 )
 from officers.models import Officer
 from utils.google_cloud import GoogleCloudService
@@ -41,7 +42,7 @@ class RSSItem(scrapy.Item):
 
 
 class ScrapyRssSpider(scrapy.Spider):
-    name = 'scrape-rss'
+    name = None
     allowed_domains = []
     urls = []
     post_guids = []
@@ -54,6 +55,8 @@ class ScrapyRssSpider(scrapy.Spider):
         self.officers = self.get_officer_data()
 
         self.guid_limit = BASE_CRAWLER_LIMIT * len(self.urls)
+        if self.name:
+            self.source = NewsArticleSource.objects.get(source_name=self.name)
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -64,10 +67,10 @@ class ScrapyRssSpider(scrapy.Spider):
         return spider
 
     def spider_closed(self, spider, reason):
-        crawler_log = CrawlerLog.objects.filter(source_name=spider.name).last()
+        crawler_log = CrawlerLog.objects.filter(source__source_name=spider.name).last()
 
         news_article_count = NewsArticle.objects.filter(
-            source_name=spider.name,
+            source__source_name=spider.name,
             created_at__gte=crawler_log.created_at
         ).count()
 
@@ -80,11 +83,11 @@ class ScrapyRssSpider(scrapy.Spider):
         crawler_log.save()
 
     def spider_opened(self, spider):
-        crawler_log = CrawlerLog(source_name=spider.name, status=CRAWL_STATUS_OPENED)
+        crawler_log = CrawlerLog(source=spider.source, status=CRAWL_STATUS_OPENED)
         crawler_log.save()
 
     def spider_error(self, failure, response, spider):
-        crawler_log = CrawlerLog.objects.filter(source_name=spider.name).last()
+        crawler_log = CrawlerLog.objects.filter(source__source_name=spider.name).last()
 
         crawler_log.status = CRAWL_STATUS_ERROR
         crawler_log.save()
@@ -129,7 +132,7 @@ class ScrapyRssSpider(scrapy.Spider):
 
     def get_crawled_post_guid(self):
         self.post_guids = CrawledPost.objects.filter(
-            source_name=self.name
+            source__source_name=self.name
         ).order_by(
             '-created_at'
         ).values_list(

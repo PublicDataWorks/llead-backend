@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from news_articles.models import NewsArticleSource
 from shared.serializers import DocumentSerializer
 
 from utils.parse_utils import parse_date
@@ -128,20 +127,11 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
 class NewsArticleTimelineSerializer(BaseTimelineSerializer):
     id = serializers.IntegerField()
-    source_name = serializers.SerializerMethodField()
+    source_name = serializers.CharField(source='source.custom_matching_name')
     title = serializers.CharField()
     url = serializers.CharField()
     date = serializers.DateField(source='published_date')
     year = serializers.SerializerMethodField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.news_article_source_name_mapping = {
-            item.source_name: item.custom_matching_name for item in NewsArticleSource.objects.all()
-        }
-
-    def get_source_name(self, obj):
-        return self.news_article_source_name_mapping.get(obj.source_name, obj.source_name)
 
     def get_kind(self, obj):
         return NEWS_ARTICLE_TIMELINE_KIND

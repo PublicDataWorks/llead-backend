@@ -1,14 +1,13 @@
 from django.test import TestCase
 
-from news_articles.models import NewsArticleSource
 from shared.serializers import NewsArticleSerializer
-from news_articles.factories import NewsArticleFactory
+from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 
 
 class NewsArticleSerializerTestCase(TestCase):
     def test_data(self):
-        source = NewsArticleSource()
-        news_article = NewsArticleFactory(source_name=source.source_name)
+        source = NewsArticleSourceFactory()
+        news_article = NewsArticleFactory(source=source)
 
         result = NewsArticleSerializer(news_article).data
 

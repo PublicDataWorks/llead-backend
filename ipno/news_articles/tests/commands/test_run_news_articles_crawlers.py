@@ -8,8 +8,7 @@ from django.test import TestCase
 from data.constants import NEWS_ARTICLE_MODEL_NAME, NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.factories import WrglRepoFactory
 from data.models import WrglRepo
-from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS, \
-    NEWS_ARTICLE_WRGL_COLUMNS
+from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS, NEWS_ARTICLE_WRGL_COLUMNS
 from news_articles.factories import CrawledPostFactory, NewsArticleFactory
 from news_articles.management.commands.run_news_articles_crawlers import Command
 from news_articles.models import NewsArticle
