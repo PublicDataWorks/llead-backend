@@ -7,6 +7,8 @@ from unittest.mock import patch, MagicMock, Mock, call
 
 from scrapy.http import XmlResponse, Request
 
+from news_articles.constants import NOLA_SOURCE
+from news_articles.factories import NewsArticleSourceFactory
 from news_articles.models import NewsArticle, CrawledPost
 from news_articles.spiders import NolaScrapyRssSpider
 from officers.factories import OfficerFactory
@@ -16,6 +18,7 @@ from utils.constants import FILE_TYPES
 class NolaScrapyRssSpiderTestCase(TestCase):
     @patch('news_articles.spiders.base_scrapy_rss.GoogleCloudService')
     def setUp(self, mock_gcloud_service):
+        NewsArticleSourceFactory(source_name=NOLA_SOURCE)
         self.spider = NolaScrapyRssSpider()
 
     def test_init_spider(self):
@@ -284,7 +287,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         self.spider.nlp.process.assert_called_with('header content body content', officers_data)
 
         new_article = NewsArticle.objects.first()
-        assert new_article.source_name == 'nola'
+        assert new_article.source.source_name == 'nola'
         assert new_article.link == 'response link'
         assert new_article.title == 'response title'
         assert new_article.content == 'header content body content'
@@ -300,7 +303,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         assert crawled_article.officers.count() == 1
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.source_name == 'nola'
+        assert crawled_post.source.source_name == 'nola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()
@@ -356,7 +359,7 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         assert count_news_article == 0
 
         crawled_post = CrawledPost.objects.first()
-        assert crawled_post.source_name == 'nola'
+        assert crawled_post.source.source_name == 'nola'
         assert crawled_post.post_guid == 'response guid'
 
         count_crawled_post = CrawledPost.objects.count()

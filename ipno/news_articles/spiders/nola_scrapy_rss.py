@@ -94,7 +94,7 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
                 matched_officers_obj = [Officer.objects.get(id=id) for id in matched_officers]
 
                 news_article_data = NewsArticle(
-                    source_name=self.name,
+                    source=self.source,
                     link=link,
                     title=title,
                     content=text_content,
@@ -110,5 +110,5 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
                 save_crawled_post = False
 
         if save_crawled_post:
-            crawled_post = CrawledPost(source_name=self.name, post_guid=guid)
+            crawled_post = CrawledPost(source=self.source, post_guid=guid)
             crawled_post.save()

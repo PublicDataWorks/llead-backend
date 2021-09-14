@@ -19,6 +19,7 @@ from news_articles.factories import (
     CrawlerErrorFactory,
     CrawlerLogFactory,
     NewsArticleFactory,
+    NewsArticleSourceFactory,
 )
 from news_articles.models import CrawlerError, CrawlerLog
 from news_articles.spiders import ScrapyRssSpider
@@ -28,7 +29,10 @@ from officers.factories import OfficerFactory
 class ScrapyRssSpiderTestCase(TestCase):
     @patch('news_articles.spiders.base_scrapy_rss.GoogleCloudService')
     def setUp(self, mock_gcloud_service):
+        self.source = NewsArticleSourceFactory(source_name='thelens')
         self.spider = ScrapyRssSpider()
+        self.spider.name = self.source.source_name
+        self.spider.source = self.source
 
     def test_parse_guid(self):
         self.spider.guid_pre = 'https://thelensnola.org/?p='
@@ -39,7 +43,7 @@ class ScrapyRssSpiderTestCase(TestCase):
         assert not self.spider.contains_keyword('lorem if sum')
 
     def test_get_crawled_post_guid(self):
-        CrawledPostFactory(source_name='thelens')
+        CrawledPostFactory(source=self.source)
         self.spider.name = 'thelens'
         self.spider.guid_limit = 100
         self.spider.get_crawled_post_guid()
@@ -207,37 +211,37 @@ class ScrapyRssSpiderTestCase(TestCase):
 
         log = CrawlerLog.objects.first()
         assert log
-        assert log.source_name == self.spider.name
+        assert log.source.source_name == self.spider.name
         assert log.status == CRAWL_STATUS_OPENED
 
     def test_spider_closed(self):
-        log = CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_OPENED)
+        log = CrawlerLogFactory(source=self.spider.source, status=CRAWL_STATUS_OPENED)
         CrawlerErrorFactory(log=log)
-        NewsArticleFactory(source_name=self.spider.name)
+        NewsArticleFactory(source=self.spider.source)
         self.spider.spider_closed(self.spider, 'reason')
 
         log = CrawlerLog.objects.first()
         assert log
-        assert log.source_name == self.spider.name
+        assert log.source.source_name == self.spider.name
         assert log.status == CRAWL_STATUS_FINISHED
         assert log.created_rows == 1
         assert log.error_rows == 1
 
     def test_spider_closed_with_error(self):
-        log = CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_ERROR)
+        log = CrawlerLogFactory(source=self.spider.source, status=CRAWL_STATUS_ERROR)
         CrawlerErrorFactory(log=log)
 
         self.spider.spider_closed(self.spider, 'reason')
 
         log = CrawlerLog.objects.first()
         assert log
-        assert log.source_name == self.spider.name
+        assert log.source.source_name == self.spider.name
         assert log.status == CRAWL_STATUS_ERROR
         assert log.created_rows == 0
         assert log.error_rows == 1
 
     def test_spider_error(self):
-        CrawlerLogFactory(source_name=self.spider.name, status=CRAWL_STATUS_OPENED)
+        CrawlerLogFactory(source=self.source, status=CRAWL_STATUS_OPENED)
 
         response = Mock(url='url', status='status')
 
@@ -247,7 +251,7 @@ class ScrapyRssSpiderTestCase(TestCase):
 
         log = CrawlerLog.objects.first()
         assert log
-        assert log.source_name == self.spider.name
+        assert log.source.source_name == self.spider.name
         assert log.status == CRAWL_STATUS_ERROR
 
         error = CrawlerError.objects.first()

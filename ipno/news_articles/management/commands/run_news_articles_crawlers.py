@@ -26,7 +26,9 @@ class Command(BaseCommand):
 
         self.wrgl_repos_mapping = [
             {
-                'data': NewsArticle.objects.all(),
+                'data': NewsArticle.objects.annotate(
+                    source_name=F('source__source_name')
+                ).all(),
                 'columns': NEWS_ARTICLE_WRGL_COLUMNS,
                 'wrgl_repo': settings.NEWS_ARTICLE_WRGL_REPO,
                 'wrgl_model_name': NEWS_ARTICLE_MODEL_NAME,
