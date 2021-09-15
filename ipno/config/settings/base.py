@@ -55,6 +55,7 @@ THIRD_PARTY_APPS = (
     'martor',
     'django_rest_passwordreset',
     'anymail',
+    'adminsortable',
 )
 
 LOCAL_APPS = (
@@ -99,6 +100,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',
             ],
         },
     },
@@ -194,3 +196,5 @@ SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 WRGL_USER = os.getenv('WRGL_USER', '')
 NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
+
+CSRF_COOKIE_HTTPONLY = True
