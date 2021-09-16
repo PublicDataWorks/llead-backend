@@ -56,6 +56,7 @@ THIRD_PARTY_APPS = (
     'django_rest_passwordreset',
     'anymail',
     'adminsortable',
+    'adminsortable2',
 )
 
 LOCAL_APPS = (
@@ -196,5 +197,3 @@ SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 WRGL_USER = os.getenv('WRGL_USER', '')
 NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
-
-CSRF_COOKIE_HTTPONLY = True

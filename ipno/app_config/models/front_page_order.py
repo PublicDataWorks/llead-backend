@@ -10,4 +10,4 @@ class FrontPageOrder(SortableMixin):
     order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
 
     def __str__(self):
-        return f'Section: {self.section} - Order: {self.order}'
+        return f'Section: {self.section}'
