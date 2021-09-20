@@ -116,13 +116,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         mock_parse_paragraphs.return_value = mocked_paragraphs
         self.spider.parse_paragraphs = mock_parse_paragraphs
 
-        def mock_contains_keyword_side_effect(content):
-            return 'body' in content
-        mock_contains_keyword = Mock(
-            side_effect=mock_contains_keyword_side_effect
-        )
-        self.spider.contains_keyword = mock_contains_keyword
-
         mocked_pdf_location = 'pdf_location.pdf'
         mock_get_upload_pdf_location = Mock(
             return_value=mocked_pdf_location
@@ -138,7 +131,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         officers_data[officer.name].append(officer.id)
 
         self.spider.officers = officers_data
-        self.spider.nlp.process = Mock(return_value=[officer.id])
 
         self.spider.parse_article(response)
 
@@ -146,7 +138,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
-        mock_contains_keyword.assert_called_with('header content body content')
 
         mock_article_pdf_creator.assert_called_with(
             title='response title',
@@ -160,8 +151,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
 
-        self.spider.nlp.process.assert_called_with('header content body content', officers_data)
-
         new_article = NewsArticle.objects.first()
         assert new_article.source.source_name == 'thelensnola'
         assert new_article.link == 'response link'
@@ -174,65 +163,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
 
         count_news_article = NewsArticle.objects.count()
         assert count_news_article == 1
-
-        crawled_article = NewsArticle.objects.first()
-        assert crawled_article.officers.count() == 1
-
-        crawled_post = CrawledPost.objects.first()
-        assert crawled_post.source.source_name == 'thelensnola'
-        assert crawled_post.post_guid == 'response guid'
-
-        count_crawled_post = CrawledPost.objects.count()
-        assert count_crawled_post == 1
-
-    def test_parse_article_not_matching_keywords(self):
-        mocked_content_paragraphs = ['content paragraphs']
-        mock_get_all = Mock(return_value=mocked_content_paragraphs)
-        mock_css_instance = Mock(getall=mock_get_all)
-        mock_css = Mock(return_value=mock_css_instance)
-        response = Mock(
-            css=mock_css
-        )
-        published_date = datetime.now().date()
-        response.meta = {
-            'title': 'response title',
-            'link': 'response link',
-            'guid': 'response guid',
-            'author': 'response author',
-            'published_date': published_date,
-        }
-
-        mock_parse_paragraphs = Mock()
-        mocked_paragraphs = [
-            {
-                'style': 'Heading1',
-                'content': 'header content',
-            },
-            {
-                'style': 'BodyText',
-                'content': 'body content',
-            }
-        ]
-        mock_parse_paragraphs.return_value = mocked_paragraphs
-        self.spider.parse_paragraphs = mock_parse_paragraphs
-
-        def mock_contains_keyword_side_effect(content):
-            return 'test' in content
-
-        mock_contains_keyword = Mock()
-        mock_contains_keyword.side_effect = mock_contains_keyword_side_effect
-        self.spider.contains_keyword = mock_contains_keyword
-
-        self.spider.parse_article(response)
-
-        mock_css.assert_called_with("article .entry-content>:not(aside):not(nav)")
-        mock_get_all.assert_called()
-
-        mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
-        mock_contains_keyword.assert_called_with('header content body content')
-
-        count_news_article = NewsArticle.objects.count()
-        assert count_news_article == 0
 
         crawled_post = CrawledPost.objects.first()
         assert crawled_post.source.source_name == 'thelensnola'
@@ -278,14 +208,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         mock_parse_paragraphs.return_value = mocked_paragraphs
         self.spider.parse_paragraphs = mock_parse_paragraphs
 
-        def mock_contains_keyword_side_effect(content):
-            return 'body' in content
-
-        mock_contains_keyword = Mock(
-            side_effect=mock_contains_keyword_side_effect
-        )
-        self.spider.contains_keyword = mock_contains_keyword
-
         mocked_pdf_location = 'pdf_location.pdf'
         mock_get_upload_pdf_location = Mock(
             return_value=mocked_pdf_location
@@ -303,7 +225,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
-        mock_contains_keyword.assert_called_with('header content body content')
 
         mock_article_pdf_creator.assert_called_with(
             title='response title',

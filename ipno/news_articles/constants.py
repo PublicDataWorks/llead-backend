@@ -13,20 +13,10 @@ UNPARSED_TAGS = [
     'nav'
 ]
 
-ARTICLE_MATCHING_KEYWORDS = [
-    'police',
-    'officer',
-    'NOPD',
-    'LSP'
-]
-
-
 NEWS_ARTICLE_WRGL_COLUMNS = [
     'id', 'source_name', 'guid', 'link', 'url',
     'published_date', 'author', 'title', 'content',
 ]
-
-NEWS_ARTICLE_OFFICER_WRGL_COLUMNS = ['uid', 'officer_id', 'newsarticle_id', 'id']
 
 CRAWL_STATUS_OPENED = 'started'
 CRAWL_STATUS_FINISHED = 'finished'
