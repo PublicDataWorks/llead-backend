@@ -4,7 +4,6 @@ from utils.models import TimeStampsModel
 
 
 class NewsArticle(TimeStampsModel):
-    source_name = models.CharField(max_length=255)
     guid = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=255)
@@ -13,4 +12,5 @@ class NewsArticle(TimeStampsModel):
     author = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=255, blank=True, null=True)
 
+    source = models.ForeignKey('news_articles.NewsArticleSource', null=True, blank=True, on_delete=models.CASCADE)
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='news_articles')

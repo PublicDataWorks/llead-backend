@@ -1,13 +1,20 @@
-from django.urls import reverse
+import datetime
 
+from django.urls import reverse
 from rest_framework import status
 
 from authentication.models import User
+from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
-from historical_data.constants import RECENT_DEPARTMENT_TYPE, RECENT_OFFICER_TYPE, RECENT_DOCUMENT_TYPE
+from historical_data.constants import (
+    RECENT_DEPARTMENT_TYPE,
+    RECENT_DOCUMENT_TYPE,
+    RECENT_NEWS_ARTICLE_TYPE,
+    RECENT_OFFICER_TYPE,
+)
 
 
 class HistoricalDataViewSetTestCase(AuthAPITestCase):
@@ -20,6 +27,12 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             officer=officer,
             department=department_2,
             badge_no='12435',
+        )
+
+        source = NewsArticleSourceFactory()
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
         )
 
         document = DocumentFactory()
@@ -53,6 +66,10 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             {
                 'type': RECENT_OFFICER_TYPE,
                 'id': '-1',
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
             }
         ]
         self.user.save()
@@ -103,6 +120,14 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 'parish': department_2.parish,
                 'location_map_url': department_2.location_map_url,
                 'type': RECENT_DEPARTMENT_TYPE
+            },
+            {
+                'id': news_article.id,
+                'source_name': source.custom_matching_name,
+                'title': news_article.title,
+                'url': news_article.url,
+                'date': '2021-09-07',
+                'type': 'NEWS_ARTICLE',
             }
         ]
 
