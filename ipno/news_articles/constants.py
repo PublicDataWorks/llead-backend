@@ -39,3 +39,17 @@ CRAWL_STATUSES = (
     (CRAWL_STATUS_FINISHED, 'Finished'),
     (CRAWL_STATUS_ERROR, 'Error')
 )
+
+NOLA_SOURCE = 'nola'
+THELENSNOLA_SOURCE = 'thelensnola'
+
+APP_NEWS_ARTICLE_NAMES = [
+    {
+        'source_name': THELENSNOLA_SOURCE,
+        'custom_matching_name': 'The Lens NOLA',
+    },
+    {
+        'source_name': NOLA_SOURCE,
+        'custom_matching_name': 'The Advocate',
+    },
+]

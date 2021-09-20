@@ -4,6 +4,8 @@ from io import BytesIO as IO
 from django.urls import reverse
 
 from rest_framework import status
+
+from news_articles.factories import NewsArticleFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from unittest.mock import patch
 import pandas as pd
@@ -21,7 +23,7 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
-    UOF_TIMELINE_KIND,
+    UOF_TIMELINE_KIND, NEWS_ARTICLE_TIMELINE_KIND,
 )
 from officers.constants import (
     OFFICER_DEPT,
@@ -309,6 +311,12 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         document_2.officers.add(officer)
         document_1.departments.add(department_1)
 
+        news_article_1 = NewsArticleFactory(published_date=date(2018, 6, 6))
+        news_article_2 = NewsArticleFactory(published_date=date(2021, 2, 2))
+
+        news_article_1.officers.add(officer)
+        news_article_2.officers.add(officer)
+
         use_of_force = UseOfForceFactory(officer=officer)
         EventFactory(
             kind=UOF_RECEIVE,
@@ -370,6 +378,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                         'name': department_1.name,
                     },
                 ],
+            },
+            {
+                'kind': NEWS_ARTICLE_TIMELINE_KIND,
+                'date': str(news_article_1.published_date),
+                'year': news_article_1.published_date.year,
+                'id': news_article_1.id,
+                'source_name': news_article_1.source_name,
+                'title': news_article_1.title,
+                'url': news_article_1.url,
             },
             {
                 'kind': UNIT_CHANGE_TIMELINE_KIND,
@@ -443,6 +460,15 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'incident_date': str(document_2.incident_date),
                 'pages_count': document_2.pages_count,
                 'departments': [],
+            },
+            {
+                'kind': NEWS_ARTICLE_TIMELINE_KIND,
+                'date': str(news_article_2.published_date),
+                'year': news_article_2.published_date.year,
+                'id': news_article_2.id,
+                'source_name': news_article_2.source_name,
+                'title': news_article_2.title,
+                'url': news_article_2.url,
             },
         ]
 

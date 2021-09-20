@@ -1,5 +1,6 @@
 from scrapy.loader import ItemLoader
 
+from news_articles.constants import THELENSNOLA_SOURCE
 from news_articles.models import NewsArticle, CrawledPost
 from news_articles.spiders.base_scrapy_rss import ScrapyRssSpider, RSSItem
 from officers.models import Officer
@@ -8,7 +9,7 @@ from utils.pdf_creator import ArticlePdfCreator
 
 
 class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
-    name = 'thelensnola'
+    name = THELENSNOLA_SOURCE
     allowed_domains = ['thelensnola.org']
     urls = ['https://thelensnola.org/feed/']
     guid_pre = 'https://thelensnola.org/?p='
