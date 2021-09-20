@@ -30,6 +30,7 @@ from departments.views import DepartmentsViewSet
 from documents.views import DocumentsViewSet
 from app_config.views import AppConfigViewSet
 from analytics.views import AnalyticsViewSet
+from news_articles.views import NewsArticlesViewSet
 from officers.views import OfficersViewSet
 from search.views import SearchViewSet
 from authentication.views import TokenRevokeView, UserView, CustomPasswordTokenVerificationView
@@ -45,6 +46,7 @@ api_router.register(r'analytics', AnalyticsViewSet, basename='analytics')
 api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')
 api_router.register(r'historical-data', HistoricalDataViewSet, basename='historical-data')
+api_router.register(r'news-articles', NewsArticlesViewSet, basename='news-articles')
 
 
 urlpatterns = [

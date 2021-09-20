@@ -53,3 +53,5 @@ APP_NEWS_ARTICLE_NAMES = [
         'custom_matching_name': 'The Advocate',
     },
 ]
+
+NEWS_ARTICLES_LIMIT = 20
