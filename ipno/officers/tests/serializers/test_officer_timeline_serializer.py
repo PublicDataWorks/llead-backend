@@ -2,6 +2,8 @@ from datetime import date
 
 from django.test import TestCase
 
+from news_articles.factories import NewsArticleFactory
+from news_articles.models import NewsArticleSource
 from officers.serializers import (
     ComplaintTimelineSerializer,
     UseOfForceTimelineSerializer,
@@ -21,9 +23,11 @@ from officers.constants import (
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
+    NEWS_ARTICLE_TIMELINE_KIND,
 )
 from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
+from officers.serializers.officer_timeline_serializers import NewsArticleTimelineSerializer, BaseTimelineSerializer
 from use_of_forces.factories import UseOfForceFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
@@ -309,3 +313,28 @@ class UnitChangeTimelineSerializerTestCase(TestCase):
             'date': str(date(2017, 7, 13)),
             'year': 2017,
         }
+
+
+class NewsArticleTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        source = NewsArticleSource()
+        news_article = NewsArticleFactory(source_name=source.source_name)
+
+        result = NewsArticleTimelineSerializer(news_article).data
+
+        assert result == {
+            'kind': NEWS_ARTICLE_TIMELINE_KIND,
+            'date': str(news_article.published_date),
+            'year': news_article.published_date.year,
+            'id': news_article.id,
+            'title': news_article.title,
+            'url': news_article.url,
+            'source_name': source.custom_matching_name,
+        }
+
+
+class BaseTimelineSerializerTestCase(TestCase):
+    def test_raise_exception(self):
+        news_article = NewsArticleFactory()
+        with self.assertRaises(NotImplementedError):
+            BaseTimelineSerializer(news_article).get_kind(news_article.source_name)

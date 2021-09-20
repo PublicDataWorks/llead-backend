@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
+from news_articles.factories import NewsArticleFactory
 from officers.queries import OfficerTimelineQuery
 from officers.factories import OfficerFactory, EventFactory
 from complaints.factories import ComplaintFactory
@@ -17,6 +18,7 @@ from officers.constants import (
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
+    NEWS_ARTICLE_TIMELINE_KIND,
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -122,6 +124,12 @@ class OfficerTimelineQueryTestCase(TestCase):
         document_2.officers.add(officer)
         document_1.departments.add(department_1)
 
+        news_article_1 = NewsArticleFactory(published_date=date(2018, 6, 6))
+        news_article_2 = NewsArticleFactory(published_date=date(2021, 2, 2))
+
+        news_article_1.officers.add(officer)
+        news_article_2.officers.add(officer)
+
         use_of_force = UseOfForceFactory(officer=officer)
         EventFactory(
             kind=UOF_RECEIVE,
@@ -183,6 +191,15 @@ class OfficerTimelineQueryTestCase(TestCase):
                         'name': department_1.name,
                     },
                 ],
+            },
+            {
+                'kind': NEWS_ARTICLE_TIMELINE_KIND,
+                'date': str(news_article_1.published_date),
+                'year': news_article_1.published_date.year,
+                'id': news_article_1.id,
+                'source_name': news_article_1.source_name,
+                'title': news_article_1.title,
+                'url': news_article_1.url,
             },
             {
                 'kind': UNIT_CHANGE_TIMELINE_KIND,
@@ -256,6 +273,15 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'incident_date': str(document_2.incident_date),
                 'pages_count': document_2.pages_count,
                 'departments': [],
+            },
+            {
+                'kind': NEWS_ARTICLE_TIMELINE_KIND,
+                'date': str(news_article_2.published_date),
+                'year': news_article_2.published_date.year,
+                'id': news_article_2.id,
+                'source_name': news_article_2.source_name,
+                'title': news_article_2.title,
+                'url': news_article_2.url,
             },
         ]
 

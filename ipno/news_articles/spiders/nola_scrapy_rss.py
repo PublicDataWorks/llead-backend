@@ -2,6 +2,7 @@ import re
 
 from scrapy.loader import ItemLoader
 
+from news_articles.constants import NOLA_SOURCE
 from news_articles.models import NewsArticle, CrawledPost
 from news_articles.spiders.base_scrapy_rss import ScrapyRssSpider, RSSItem
 from officers.models import Officer
@@ -10,7 +11,7 @@ from utils.pdf_creator import ArticlePdfCreator
 
 
 class NolaScrapyRssSpider(ScrapyRssSpider):
-    name = 'nola'
+    name = NOLA_SOURCE
     allowed_domains = ['nola.com', 'www.theadvocate.com']
     urls = [
         'https://www.theadvocate.com/search/?t=article&l=100&c%5b%5d=baton_rouge/news*,baton_rouge/opinion*,'
