@@ -4,17 +4,16 @@ from django.urls import reverse
 
 from rest_framework import status
 
-from news_articles.factories import NewsArticleFactory
-from news_articles.models import NewsArticleSource
+from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 
 
 class NewsArticlesViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        source = NewsArticleSource()
-        news_article_1 = NewsArticleFactory(source_name=source.source_name)
+        source = NewsArticleSourceFactory()
+        news_article_1 = NewsArticleFactory(source=source)
         news_article_2 = NewsArticleFactory(
-            source_name=source.source_name,
+            source=source,
             published_date=news_article_1.published_date + datetime.timedelta(days=1)
         )
 

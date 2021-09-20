@@ -11,12 +11,12 @@ from news_articles.models import (
 
 
 class NewsArticleAdmin(ModelAdmin):
-    list_display = ('id', 'source_name', 'author', 'title')
+    list_display = ('id', 'source', 'author', 'title')
     filter_horizontal = ('officers', )
 
 
 class CrawledPostAdmin(ModelAdmin):
-    list_display = ('source_name', 'post_guid')
+    list_display = ('source', 'post_guid')
 
 
 class CrawlerErrorInlineAdmin(admin.TabularInline):
@@ -29,7 +29,7 @@ class CrawlerErrorInlineAdmin(admin.TabularInline):
 
 class CrawlerLogAdmin(ModelAdmin):
     inlines = [CrawlerErrorInlineAdmin]
-    list_display = ('source_name', 'status', 'created_at', 'created_rows', 'error_rows', 'updated_at')
+    list_display = ('source', 'status', 'created_at', 'created_rows', 'error_rows', 'updated_at')
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover

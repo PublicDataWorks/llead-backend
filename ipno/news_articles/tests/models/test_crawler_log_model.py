@@ -7,4 +7,4 @@ from news_articles.factories import CrawlerLogFactory
 class CrawlerLogTestCase(TestCase):
     def test_str(selfs):
         log = CrawlerLogFactory(status=CRAWL_STATUS_FINISHED)
-        assert str(log) == f'{log.source_name.title()} log id {log.pk} on date {str(log.created_at.date())}'
+        assert str(log) == f'{log.source.source_name.title()} log id {log.pk} on date {str(log.created_at.date())}'

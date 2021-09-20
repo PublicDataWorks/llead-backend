@@ -103,7 +103,7 @@ class OfficerTimelineQuery(object):
 
     @property
     def _news_aticle_timeline(self):
-        news_article_timeline_queryset = self.officer.news_articles
+        news_article_timeline_queryset = self.officer.news_articles.prefetch_related('source')
 
         return NewsArticleTimelineSerializer(news_article_timeline_queryset, many=True).data
 
