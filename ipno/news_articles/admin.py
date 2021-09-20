@@ -10,7 +10,25 @@ from news_articles.models import (
 )
 
 
+class NewsArticleOfficersFilter(admin.SimpleListFilter):
+    title = 'Officers'
+    parameter_name = 'officers'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('exist', ('Has officers')),
+            ('not_exist', ('Does not have any officers')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'exist':
+            return queryset.filter(officers__isnull=False).distinct()
+        if self.value() == 'not_exist':
+            return queryset.filter(officers__isnull=True).distinct()
+
+
 class NewsArticleAdmin(ModelAdmin):
+    list_filter = (NewsArticleOfficersFilter, )
     list_display = ('id', 'source', 'author', 'title')
     filter_horizontal = ('officers', )
 
