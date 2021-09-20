@@ -28,7 +28,7 @@ from django_rest_passwordreset.views import reset_password_request_token
 
 from departments.views import DepartmentsViewSet
 from documents.views import DocumentsViewSet
-from app_config.views import AppConfigViewSet
+from app_config.views import AppConfigViewSet, FrontPageOrdersViewSet
 from analytics.views import AnalyticsViewSet
 from news_articles.views import NewsArticlesViewSet
 from officers.views import OfficersViewSet
@@ -47,6 +47,7 @@ api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')
 api_router.register(r'historical-data', HistoricalDataViewSet, basename='historical-data')
 api_router.register(r'news-articles', NewsArticlesViewSet, basename='news-articles')
+api_router.register(r'front-page-orders', FrontPageOrdersViewSet, basename='front-page-orders')
 
 
 urlpatterns = [
