@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from app_config.factories import AppConfigFactory, AppTextContentFactory
+from app_config.factories import AppConfigFactory, AppTextContentFactory, FrontPageOrderFactory
 
 
 class AppConfigTestCase(APITestCase):
@@ -25,3 +25,23 @@ class AppConfigTestCase(APITestCase):
                 'TEXT_CONTENT_2': 'TEXT 2',
             }
         })
+
+
+class FrontPageOrderTestCase(APITestCase):
+    def test_should_return_correct_front_page_order(self):
+        FrontPageOrderFactory(section='TEXT_CONTENT_1', order=1)
+        FrontPageOrderFactory(section='TEXT_CONTENT_2', order=2)
+
+        url = reverse('api:front-page-orders-list')
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == ([
+            {
+                'section': 'TEXT_CONTENT_1',
+                'order': 1,
+            },
+            {
+                'section': 'TEXT_CONTENT_2',
+                'order': 2,
+            }
+        ])
