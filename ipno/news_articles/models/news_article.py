@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from utils.models import TimeStampsModel
@@ -11,6 +12,7 @@ class NewsArticle(TimeStampsModel):
     published_date = models.DateField()
     author = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=255, blank=True, null=True)
+    extracted_keywords = ArrayField(models.CharField(max_length=50), null=True, blank=True)
 
     source = models.ForeignKey('news_articles.NewsArticleSource', null=True, blank=True, on_delete=models.CASCADE)
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='news_articles')

@@ -3,6 +3,7 @@ from .news_article_factory import NewsArticleFactory
 from .crawler_log_factory import CrawlerLogFactory
 from .crawler_error_factory import CrawlerErrorFactory
 from .news_article_source_factory import NewsArticleSourceFactory
+from .matching_keyword_factory import MatchingKeywordFactory
 
 __all__ = [
     'CrawledPostFactory',
@@ -10,4 +11,5 @@ __all__ = [
     'CrawlerLogFactory',
     'CrawlerErrorFactory',
     'NewsArticleSourceFactory',
+    'MatchingKeywordFactory',
 ]
