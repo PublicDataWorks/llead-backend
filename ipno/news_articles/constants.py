@@ -43,3 +43,5 @@ APP_NEWS_ARTICLE_NAMES = [
 ]
 
 NEWS_ARTICLES_LIMIT = 20
+
+NEWS_ARTICLE_OFFICER_WRGL_COLUMNS = ['uid', 'officer_id', 'newsarticle_id', 'id']

@@ -21,7 +21,7 @@ class AppsTestCase(TestCase):
 
         tasks = Task.objects.all()
 
-        assert tasks.count() == 2
+        assert tasks.count() == 3
 
         assert tasks.first().task_name == APP_TASKS[0].get('task_name')
         assert tasks.first().command == APP_TASKS[0].get('command')
@@ -47,7 +47,7 @@ class AppsTestCase(TestCase):
 
         tasks = Task.objects.all()
 
-        assert tasks.count() == 2
+        assert tasks.count() == 3
 
         assert tasks.first().task_name == 'existed_task'
         assert tasks.first().command == APP_TASKS[0].get('command')

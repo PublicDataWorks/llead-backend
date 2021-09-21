@@ -5,6 +5,7 @@ from news_articles.models import (
     CrawledPost,
     CrawlerError,
     CrawlerLog,
+    MatchingKeyword,
     NewsArticle,
     NewsArticleSource,
 )
@@ -29,7 +30,8 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
 
 class NewsArticleAdmin(ModelAdmin):
     list_filter = (NewsArticleOfficersFilter, )
-    list_display = ('id', 'source', 'author', 'title')
+    list_display = ('id', 'source', 'author', 'title', 'extracted_keywords')
+    readonly_fields = ('extracted_keywords',)
     filter_horizontal = ('officers', )
 
 
@@ -81,8 +83,26 @@ class NewsArticleSourceAdmin(ModelAdmin):
         return False  # pragma: no cover
 
 
+class MatchingKeywordAdmin(ModelAdmin):
+    list_display = ('keywords', 'ran_at', 'status')
+    readonly_fields = ('ran_at', )
+
+    def status(self, obj):
+        if obj == MatchingKeyword.objects.last():
+            return 'Up-to-date'
+        else:
+            return 'Out-of-date'
+
+    def has_change_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+
 admin.site.register(NewsArticle, NewsArticleAdmin)
 admin.site.register(CrawledPost, CrawledPostAdmin)
 admin.site.register(CrawlerLog, CrawlerLogAdmin)
 admin.site.register(CrawlerError, CrawlerErrorAdmin)
 admin.site.register(NewsArticleSource, NewsArticleSourceAdmin)
+admin.site.register(MatchingKeyword, MatchingKeywordAdmin)
