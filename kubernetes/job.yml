@@ -77,10 +77,11 @@ spec:
                 key: host
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: "gcloud-credentials.json"
-      - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.25.0-alpine
         name: cloudsql-proxy
         command: ["/cloud_sql_proxy", "--dir=/cloudsql",
                   "-instances=excellent-zoo-300106:us-east4:$CLOUD_SQL_DATABASE=tcp:5432",
+                  "-verbose=false",
                   "-credential_file=/secrets/cloudsql/credentials.json"]
         volumeMounts:
           - name: cloudsql-oauth-credentials

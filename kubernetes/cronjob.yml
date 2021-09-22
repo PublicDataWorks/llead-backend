@@ -4,6 +4,8 @@ metadata:
   name: ${CRONJOB_NAME}
 spec:
   schedule: "${CRONJOB_SCHEDULE}"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 0
   jobTemplate:
     spec:
       backoffLimit: 0
@@ -16,7 +18,11 @@ spec:
                 requests:
                   cpu: 1
                   memory: 2Gi
-              command: ["ipno/manage.py", "${CRONJOB_COMMAND}"]
+              command: [ "/bin/sh", "-c" ]
+              args:
+                - |
+                  trap "touch /tmp/pod/main-terminated" EXIT
+                  ipno/manage.py ${CRONJOB_COMMAND}
               env:
                 - name: POSTGRES_USER
                   valueFrom:
@@ -85,11 +91,25 @@ spec:
                       key: host
                 - name: GOOGLE_APPLICATION_CREDENTIALS
                   value: "gcloud-credentials.json"
-            - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+              volumeMounts:
+                - mountPath: /tmp/pod
+                  name: tmp-pod
+            - image: gcr.io/cloudsql-docker/gce-proxy:1.25.0-alpine
               name: cloudsql-proxy
-              command: ["/cloud_sql_proxy", "--dir=/cloudsql",
-                        "-instances=excellent-zoo-300106:us-east4:$CLOUD_SQL_DATABASE=tcp:5432",
-                        "-credential_file=/secrets/cloudsql/credentials.json"]
+              command: [ "/bin/sh", "-c" ]
+              args:
+                - |
+                  /cloud_sql_proxy --dir=/cloudsql -instances=excellent-zoo-300106:us-east4:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false -credential_file=/secrets/cloudsql/credentials.json &
+                  CHILD_PID=$!
+                  while true
+                    do
+                        if [[ -f "/tmp/pod/main-terminated" ]]
+                        then
+                            kill $PID 2>/dev/null
+                            exit 0
+                        fi
+                        sleep 1
+                    done
               volumeMounts:
                 - name: cloudsql-oauth-credentials
                   mountPath: /secrets/cloudsql
@@ -98,6 +118,9 @@ spec:
                   mountPath: /etc/ssl/certs
                 - name: cloudsql
                   mountPath: /cloudsql
+                - name: tmp-pod
+                  mountPath: /tmp/pod
+                  readOnly: true
           imagePullSecrets:
             - name: regcred
           volumes:
@@ -108,6 +131,8 @@ spec:
               hostPath:
                 path: /etc/ssl/certs
             - name: cloudsql
+              emptyDir: {}
+            - name: tmp-pod
               emptyDir: {}
           restartPolicy: "Never"
   concurrencyPolicy: Replace
