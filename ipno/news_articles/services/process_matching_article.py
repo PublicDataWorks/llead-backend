@@ -1,13 +1,13 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils import timezone
 
 from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.models import WrglRepo
 from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
-from news_articles.models import MatchingKeyword, NewsArticle
+from news_articles.models import MatchingKeyword, NewsArticle, ExcludeOfficer
 from officers.models import Officer
 from utils.nlp import NLP
 from utils.wrgl_generator import WrglGenerator
@@ -24,6 +24,12 @@ class ProcessMatchingArticle:
 
         self.latest_keywords = set(self.latest_keywords_obj.keywords) if self.latest_keywords_obj else set()
         self.last_run_keywords = set(self.last_run_keywords_obj.keywords) if self.last_run_keywords_obj else set()
+
+        latest_exclude_officers = ExcludeOfficer.objects.order_by('-created_at').first()
+        self.excluded_officers_ids = latest_exclude_officers.officers.values_list(
+            'id',
+            flat=True
+        ) if latest_exclude_officers else []
 
     def process(self):
         if self.latest_keywords != self.last_run_keywords:
@@ -63,6 +69,7 @@ class ProcessMatchingArticle:
 
             if not remained_keywords:
                 article.officers.clear()
+                article.excluded_officers.clear()
 
             article.save()
 
@@ -75,8 +82,12 @@ class ProcessMatchingArticle:
 
             if keywords and not old_keywords:
                 matched_officers = self.nlp.process(article.content, self.officers)
-                matched_officers_obj = Officer.objects.filter(id__in=matched_officers)
+
+                matched_officers_obj = Officer.objects.filter(Q(id__in=matched_officers) & ~Q(id__in=self.excluded_officers_ids))
+                exclude_matched_officers_obj = Officer.objects.filter(Q(id__in=matched_officers) & Q(id__in=self.excluded_officers_ids))
+
                 article.officers.add(*matched_officers_obj)
+                article.excluded_officers.add(*exclude_matched_officers_obj)
 
             article.extracted_keywords = keywords
             article.save()
