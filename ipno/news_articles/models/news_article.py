@@ -16,6 +16,7 @@ class NewsArticle(TimeStampsModel):
 
     source = models.ForeignKey('news_articles.NewsArticleSource', null=True, blank=True, on_delete=models.CASCADE)
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='news_articles')
+    excluded_officers = models.ManyToManyField('officers.Officer', blank=True, related_name='excluded_news_articles')
 
     def __str__(self):
         return f'{self.title[:50]}{"..." if len(self.title) > 50 else ""}'
