@@ -197,3 +197,5 @@ SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 WRGL_USER = os.getenv('WRGL_USER', '')
 NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
+
+FLUENT_LOGGING = env.bool('FLUENT_LOGGING', False)

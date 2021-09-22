@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-      - name: gunicorn
+      - name: ipno-job
         image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
         command: ["ipno/manage.py", "${COMMAND}"]
         env:

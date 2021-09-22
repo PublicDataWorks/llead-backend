@@ -46,6 +46,10 @@ class ScrapyRssSpider(scrapy.Spider):
     urls = []
     post_guids = []
     guid_pre = ''
+    custom_settings = {
+        'LOG_FILE': None if not settings.FLUENT_LOGGING else settings.FLUENT_PYTHON_LOG_FILE,
+        'LOG_LEVEL': 'INFO'
+    }
 
     def __init__(self):
         self.gcloud = GoogleCloudService()
