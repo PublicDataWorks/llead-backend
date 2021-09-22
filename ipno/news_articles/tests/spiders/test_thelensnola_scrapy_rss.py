@@ -21,9 +21,6 @@ class TheLensNolaScrapyRssSpiderTestCase(TestCase):
         NewsArticleSourceFactory(source_name=THELENSNOLA_SOURCE)
         self.spider = TheLensNolaScrapyRssSpider()
 
-    def test_init_spider(self):
-        assert self.spider.guid_limit == 100
-
     def test_parse_item_path(self):
         with open(join(dirname(__file__), 'files', 'thelensnola.xml'), 'r') as f:
             file_content = f.read()

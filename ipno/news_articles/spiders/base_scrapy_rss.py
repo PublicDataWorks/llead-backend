@@ -10,7 +10,6 @@ from scrapy import signals
 
 from news_articles.constants import (
     ARTICLE_MATCHING_KEYWORDS,
-    BASE_CRAWLER_LIMIT,
     CRAWL_STATUS_ERROR,
     CRAWL_STATUS_FINISHED,
     CRAWL_STATUS_OPENED,
@@ -47,14 +46,12 @@ class ScrapyRssSpider(scrapy.Spider):
     urls = []
     post_guids = []
     guid_pre = ''
-    guid_limit = BASE_CRAWLER_LIMIT
 
     def __init__(self):
         self.gcloud = GoogleCloudService()
         self.nlp = NLP()
         self.officers = self.get_officer_data()
 
-        self.guid_limit = BASE_CRAWLER_LIMIT * len(self.urls)
         if self.name:
             self.source = NewsArticleSource.objects.get(source_name=self.name)
 
@@ -138,7 +135,7 @@ class ScrapyRssSpider(scrapy.Spider):
         ).values_list(
             'post_guid',
             flat=True
-        )[:self.guid_limit]
+        )
 
     def get_upload_pdf_location(self, published_date, record_id):
         file_name = f'{published_date.strftime("%Y-%m-%d")}_{self.name}_{record_id}.pdf'
