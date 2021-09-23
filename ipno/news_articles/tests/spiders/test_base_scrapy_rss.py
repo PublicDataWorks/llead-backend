@@ -45,7 +45,6 @@ class ScrapyRssSpiderTestCase(TestCase):
     def test_get_crawled_post_guid(self):
         CrawledPostFactory(source=self.source)
         self.spider.name = 'thelens'
-        self.spider.guid_limit = 100
         self.spider.get_crawled_post_guid()
         assert self.spider.post_guids
 

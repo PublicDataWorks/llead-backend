@@ -21,9 +21,6 @@ class NolaScrapyRssSpiderTestCase(TestCase):
         NewsArticleSourceFactory(source_name=NOLA_SOURCE)
         self.spider = NolaScrapyRssSpider()
 
-    def test_init_spider(self):
-        assert self.spider.guid_limit == 300
-
     def test_parse_item_path(self):
         with open(join(dirname(__file__), 'files', 'nola.xml'), 'r') as f:
             file_content = f.read()
