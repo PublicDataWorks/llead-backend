@@ -94,12 +94,6 @@ data:
     [FILTER]
         Name                      modify
         Match                     kube.*
-        Condition                 Key_value_equals      code     200
-        Add                       loglevel              INFO
-
-    [FILTER]
-        Name                      modify
-        Match                     kube.*
         Condition                 Key_exists            cloudsql_msg
         Add                       loglevel              INFO
         Hard_rename               cloudsql_msg          message
