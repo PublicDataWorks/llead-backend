@@ -10,3 +10,4 @@ __pycache__
 docs
 venv
 Dockerfile
+!/.pytest_cache/
