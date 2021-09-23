@@ -11,8 +11,10 @@ class NewsArticlesViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        news_articles = NewsArticle.objects.order_by(
-            'published_date',
+        news_articles = NewsArticle.objects.filter(
+            officers__isnull=False
+        ).order_by(
+            '-published_date',
         )[:NEWS_ARTICLES_LIMIT]
 
         serializer = NewsArticleSerializer(news_articles, many=True)
