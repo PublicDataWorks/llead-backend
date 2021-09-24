@@ -28,7 +28,9 @@ services:
       driver: none
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     command: python ipno/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
