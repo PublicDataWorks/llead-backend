@@ -21,7 +21,7 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - "9200:9200"
     networks:
       - elasticsearch
     logging:
@@ -29,20 +29,37 @@ services:
 
   web:
     build: .
-    command: python ipno/manage.py runserver 0.0.0.0:8000
+    command: "gunicorn config.wsgi -c gunicorn-logging.conf.py --chdir /code/ipno"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      FLUENT_LOGGING: "True"
     volumes:
       - .:/code
+      - log-folder:/var/log
     ports:
       - "8000:8000"
     depends_on:
       - db
-      - elasticsearch
+      - fluent-bit
     networks:
       - elasticsearch
       - db
 
+  fluent-bit:
+    build:
+      context: .
+      dockerfile: fluent-bit/Dockerfile.fluent
+    command: "/fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf"
+    ports:
+        - "24224:24224/tcp"
+        - "24224:24224/udp"
+    volumes:
+      - ./fluent-bit:/fluent-bit/etc/
+      - log-folder:/var/log
+
 volumes:
   esdata:
+  log-folder:
 
 networks:
   elasticsearch:
