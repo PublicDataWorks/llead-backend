@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.test.testcases import TestCase
 
 from news_articles.factories import NewsArticleFactory
@@ -15,3 +16,8 @@ class NewsArticleTestCase(TestCase):
         title = "Lorem Ipsum is simply dummy text"
         new = NewsArticleFactory(title=title)
         assert str(new) == 'Lorem Ipsum is simply dummy text'
+
+    def test_duppicated_news_articles(self):
+        article_1 = NewsArticleFactory()
+        with self.assertRaises(IntegrityError):
+            NewsArticleFactory(link=article_1.link)
