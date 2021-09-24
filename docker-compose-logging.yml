@@ -28,7 +28,9 @@ services:
       driver: none
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     command: "gunicorn config.wsgi -c gunicorn-logging.conf.py --chdir /code/ipno"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
