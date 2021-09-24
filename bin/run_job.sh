@@ -76,7 +76,7 @@ do
 done
 
 NAME=$(kubectl get pods -l job-name=$JOB_NAME -n $NAMESPACE -o go-template --template="{{(index .items 0).metadata.name}}")
-kubectl logs $NAME -c gunicorn -f
+kubectl logs $NAME -c ipno-job -f
 
 FAILED=$(kubectl get jobs $JOB_NAME -n $NAMESPACE -o go-template --template={{.status.failed}})
 
