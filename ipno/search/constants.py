@@ -1,0 +1,5 @@
+DOC_TYPES = [
+    'DEPARTMENTS',
+    'OFFICERS',
+    'DOCUMENTS',
+]
