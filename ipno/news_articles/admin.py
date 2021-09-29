@@ -8,6 +8,7 @@ from news_articles.models import (
     MatchingKeyword,
     NewsArticle,
     NewsArticleSource,
+    ExcludeOfficer,
 )
 
 
@@ -18,12 +19,15 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return (
             ('exist', ('Has officers')),
+            ('exclude', ('Has excluded officers')),
             ('not_exist', ('Does not have any officers')),
         )
 
     def queryset(self, request, queryset):
         if self.value() == 'exist':
             return queryset.filter(officers__isnull=False).distinct()
+        if self.value() == 'exclude':
+            return queryset.filter(excluded_officers__isnull=False).distinct()
         if self.value() == 'not_exist':
             return queryset.filter(officers__isnull=True).distinct()
 
@@ -31,8 +35,8 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
 class NewsArticleAdmin(ModelAdmin):
     list_filter = (NewsArticleOfficersFilter, )
     list_display = ('id', 'source', 'author', 'title', 'extracted_keywords')
-    readonly_fields = ('extracted_keywords',)
-    filter_horizontal = ('officers', )
+    readonly_fields = ('extracted_keywords', 'excluded_officers',)
+    filter_horizontal = ('officers', 'excluded_officers',)
 
 
 class CrawledPostAdmin(ModelAdmin):
@@ -100,9 +104,38 @@ class MatchingKeywordAdmin(ModelAdmin):
         return False  # pragma: no cover
 
 
+class ExcludeOfficerAdmin(ModelAdmin):
+    list_display = ('officers_list', 'ran_at', 'status')
+    readonly_fields = ('ran_at', )
+    filter_horizontal = ('officers',)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        last_exclude_officers = ExcludeOfficer.objects.filter(ran_at__isnull=False).order_by('-created_at').first()
+        form.base_fields['officers'].initial = last_exclude_officers.officers.all() if last_exclude_officers else []
+        return form
+
+    def status(self, obj):
+        if obj == ExcludeOfficer.objects.last():
+            return 'Up-to-date'
+        else:
+            return 'Out-of-date'
+
+    def officers_list(self, obj):
+        officers_list = ', '.join([officer.name for officer in obj.officers.all()])
+        return f'{officers_list[:100]}{"..." if len(officers_list) > 100 else ""}'
+
+    def has_change_permission(self, request, obj=None):  # pragma: no cover
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+
 admin.site.register(NewsArticle, NewsArticleAdmin)
 admin.site.register(CrawledPost, CrawledPostAdmin)
 admin.site.register(CrawlerLog, CrawlerLogAdmin)
 admin.site.register(CrawlerError, CrawlerErrorAdmin)
 admin.site.register(NewsArticleSource, NewsArticleSourceAdmin)
 admin.site.register(MatchingKeyword, MatchingKeywordAdmin)
+admin.site.register(ExcludeOfficer, ExcludeOfficerAdmin)
