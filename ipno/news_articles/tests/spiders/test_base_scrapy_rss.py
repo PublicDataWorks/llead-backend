@@ -23,7 +23,6 @@ from news_articles.factories import (
 )
 from news_articles.models import CrawlerError, CrawlerLog
 from news_articles.spiders import ScrapyRssSpider
-from officers.factories import OfficerFactory
 
 
 class ScrapyRssSpiderTestCase(TestCase):
@@ -37,10 +36,6 @@ class ScrapyRssSpiderTestCase(TestCase):
     def test_parse_guid(self):
         self.spider.guid_pre = 'https://thelensnola.org/?p='
         assert self.spider.parse_guid('https://thelensnola.org/?p=566338') == '566338'
-
-    def test_contains_keywork(self):
-        assert self.spider.contains_keyword('officer NOPD')
-        assert not self.spider.contains_keyword('lorem if sum')
 
     def test_get_crawled_post_guid(self):
         CrawledPostFactory(source=self.source)
@@ -154,19 +149,6 @@ class ScrapyRssSpiderTestCase(TestCase):
         parsed_paragraphs = self.spider.parse_paragraphs(['paragraph 1', 'paragraph 2', None])
 
         assert parsed_paragraphs == ['paragraph 1', 'paragraph 2']
-
-    def test_get_officer_data(self):
-        officer1a = OfficerFactory(first_name='first_name1', last_name='last_name1')
-        officer1b = OfficerFactory(first_name='first_name1', last_name='last_name1')
-        officer2 = OfficerFactory(first_name='first_name2', last_name='last_name2')
-
-        officers_data = self.spider.get_officer_data()
-        expected_result = {
-            'first_name1 last_name1': [officer1a.id, officer1b.id],
-            'first_name2 last_name2': [officer2.id]
-        }
-
-        assert officers_data == expected_result
 
     def test_parse_item(self):
         with self.assertRaises(NotImplementedError):
