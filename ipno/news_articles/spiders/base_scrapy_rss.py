@@ -112,6 +112,7 @@ class ScrapyRssSpider(scrapy.Spider):
             published_date = parse(item['published_date']).date()
 
             if guid not in self.post_guids:
+                self.post_guids.append(guid)
                 yield scrapy.Request(
                     url=rss_item_link,
                     callback=self.parse_article,
@@ -125,13 +126,15 @@ class ScrapyRssSpider(scrapy.Spider):
                 )
 
     def get_crawled_post_guid(self):
-        self.post_guids = CrawledPost.objects.filter(
-            source__source_name=self.name
-        ).order_by(
-            '-created_at'
-        ).values_list(
-            'post_guid',
-            flat=True
+        self.post_guids = list(
+            CrawledPost.objects.filter(
+                source__source_name=self.name
+            ).order_by(
+                '-created_at'
+            ).values_list(
+                'post_guid',
+                flat=True
+            )
         )
 
     def get_upload_pdf_location(self, published_date, record_id):
