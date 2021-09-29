@@ -3,27 +3,45 @@ from search.queries.officers_search_query import OfficersSearchQuery
 from search.queries.documents_search_query import DocumentsSearchQuery
 from search.serializers.es_serializers import DepartmentsESSerializer, OfficersESSerializer
 from shared.serializers.es_serializers import DocumentsESSerializer
+from utils.es_pagination import ESPagination
 
 SEARCH_MAPPINGS = {
-    'DEPARTMENTS': {
+    'departments': {
         'search_query': DepartmentsSearchQuery,
-        'serializer': DepartmentsESSerializer
+        'serializer': DepartmentsESSerializer,
     },
-    'OFFICERS': {
+    'officers': {
         'search_query': OfficersSearchQuery,
-        'serializer': OfficersESSerializer
+        'serializer': OfficersESSerializer,
     },
-    'DOCUMENTS': {
+    'documents': {
         'search_query': DocumentsSearchQuery,
-        'serializer': DocumentsESSerializer
+        'serializer': DocumentsESSerializer,
     }
 }
 
 
 class SearchAllQuery(object):
-    def search(self, query):
+    def __init__(self, request):
+        self.request = request
+
+    def search(self, query, doc_type):
         results = {}
-        for search_key, search_mapping in SEARCH_MAPPINGS.items():
-            search_result = search_mapping['search_query'](query).search()
-            results[search_key] = search_mapping['serializer'](search_result).data
+
+        doc_section = SEARCH_MAPPINGS.get(doc_type)
+        sections = {doc_type: doc_section} if doc_section else SEARCH_MAPPINGS
+        paginator = ESPagination()
+
+        for search_key, search_mapping in sections.items():
+            search_query = search_mapping['search_query'](query)
+            search_result = paginator.paginate_es_query(search_query, self.request)
+
+            data = search_mapping['serializer'](search_result).data
+            results[search_key] = {
+                'count': paginator.count,
+                'next': paginator.get_next_link(),
+                'previous': paginator.get_previous_link(),
+                'results': data,
+            }
+
         return results

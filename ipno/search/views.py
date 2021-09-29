@@ -10,5 +10,6 @@ class SearchViewSet(viewsets.ViewSet):
 
     def list(self, request):
         query = self.request.query_params.get('q')
+        doc_type = self.request.query_params.get('doc_type')
 
-        return Response(SearchAllQuery().search(query))
+        return Response(SearchAllQuery(request).search(query, doc_type))

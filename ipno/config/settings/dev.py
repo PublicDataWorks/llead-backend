@@ -44,3 +44,25 @@ GC_PATH = f'https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 HOST = os.getenv('HOST', 'localhost:8080')
+
+FLUENT_PYTHON_LOG_FILE = '/var/log/python.log'
+
+if FLUENT_LOGGING: # NOQA
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': FLUENT_PYTHON_LOG_FILE,
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }

@@ -4,6 +4,7 @@ from .officer_serializer import OfficerSerializer
 from .document_with_text_content_serializer import DocumentWithTextContentSerializer
 from .document_search_serializer import DocumentSearchSerializer
 from .document_serializer import DocumentSerializer
+from .news_article_serializer import NewsArticleSerializer
 
 __all__ = [
     'SimpleDepartmentSerializer',
@@ -12,4 +13,5 @@ __all__ = [
     'DocumentSerializer',
     'DocumentWithTextContentSerializer',
     'DocumentSearchSerializer',
+    'NewsArticleSerializer',
 ]

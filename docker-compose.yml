@@ -7,6 +7,13 @@ services:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
+    ports:
+      - "5432:5432"
+    networks:
+      - db
+    logging:
+      driver: none
+
   elasticsearch:
     image: elasticsearch:7.10.1
     environment:
@@ -15,16 +22,15 @@ services:
       - esdata:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-  kibana:
-    image: kibana:7.10.1
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-    depends_on:
+    networks:
       - elasticsearch
+    logging:
+      driver: none
+
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     command: python ipno/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
@@ -33,6 +39,15 @@ services:
     depends_on:
       - db
       - elasticsearch
+    networks:
+      - elasticsearch
+      - db
 
 volumes:
   esdata:
+
+networks:
+  elasticsearch:
+    driver: bridge
+  db:
+    driver: bridge

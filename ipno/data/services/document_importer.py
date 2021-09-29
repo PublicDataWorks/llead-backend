@@ -1,7 +1,7 @@
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from tqdm import tqdm
-from urllib.request import urlopen
+import requests
 from dropbox.exceptions import ApiError
 
 from documents.models import Document
@@ -129,8 +129,8 @@ class DocumentImporter(BaseImporter):
     def get_ocr_text(self, ocr_text_id):
         try:
             download_url = self.ds.get_temporary_link_from_path(ocr_text_id)
-            print(download_url)
-            return urlopen(download_url).read().decode('utf-8')
+            text = requests.get(download_url).text
+            return text
         except Exception:
             return ''
 
@@ -200,7 +200,7 @@ class DocumentImporter(BaseImporter):
                         upload_url = pdf_db_path.replace('/PPACT/', '')
 
                         download_url = self.ds.get_temporary_link_from_path(pdf_db_path.replace('/PPACT/', '/LLEAD/'))
-                        image_blob = urlopen(download_url).read()
+                        image_blob = requests.get(download_url).content
 
                         document_url = self.upload_file(upload_url, image_blob, 'application/pdf')
 

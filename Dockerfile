@@ -7,9 +7,11 @@ COPY policy.xml /etc/ImageMagick-6/policy.xml
 
 WORKDIR /code
 ADD requirements /code/requirements
-RUN pip install -r requirements/dev.txt
-ADD . /code
 
-CMD ls -la
+RUN pip install -r requirements/dev.txt
+
+RUN python -m spacy download en_core_web_sm
+
+ADD . /code
 
 CMD gunicorn config.wsgi -c gunicorn.conf.py --chdir /code/ipno
