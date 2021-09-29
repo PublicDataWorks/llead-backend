@@ -3,6 +3,7 @@ from news_articles.models.crawler_log import CrawlerLog
 from news_articles.models.crawler_error import CrawlerError
 from news_articles.models.news_article import NewsArticle
 from news_articles.models.news_article_source import NewsArticleSource
+from news_articles.models.matching_keyword import MatchingKeyword
 
 __all__ = [
     'CrawledPost',
@@ -10,4 +11,5 @@ __all__ = [
     'CrawlerLog',
     'CrawlerError',
     'NewsArticleSource',
+    'MatchingKeyword',
 ]
