@@ -87,6 +87,33 @@ class ScrapyRssSpiderTestCase(TestCase):
             }
         )
 
+        assert self.spider.post_guids == ['GUID-GUID']
+
+    @patch('scrapy.Request')
+    @patch('news_articles.spiders.ScrapyRssSpider.parse_item')
+    def test_parse_rss_duplicated_link(self, mock_parse_item, mock_request):
+        mock_request_object = Mock()
+        mock_request.return_value = mock_request_object
+        mock_parse_object = [{
+            'title': 'Article Title',
+            'description': 'Lorem if sum',
+            'link': 'http://example.com',
+            'guid': 'GUID-GUID',
+            'author': 'Writer',
+            'published_date': 'Fri, 20 Aug 2021 19:08:47 +0000',
+        }]
+        mock_parse_item.return_value = mock_parse_object
+
+        self.spider.post_guids = ['GUID-GUID']
+
+        next(self.spider.parse_rss(XmlResponse(
+            url='http://example.com',
+            request=Request(url='http://example.com'),
+            body=str.encode('This is testing content!')
+        )))
+
+        mock_request.assert_not_called
+
     @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
     def test_parse_section(self, mock_beautiful_soup):
         mock_name = Mock()

@@ -5,17 +5,24 @@ from django.urls import reverse
 from rest_framework import status
 
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from officers.factories import OfficerFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 
 
 class NewsArticlesViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
         source = NewsArticleSourceFactory()
+        officer = OfficerFactory()
         news_article_1 = NewsArticleFactory(source=source)
         news_article_2 = NewsArticleFactory(
             source=source,
-            published_date=news_article_1.published_date + datetime.timedelta(days=1)
+            published_date=news_article_1.published_date - datetime.timedelta(days=1)
         )
+        NewsArticleFactory()
+        news_article_1.officers.add(officer)
+        news_article_1.save()
+        news_article_2.officers.add(officer)
+        news_article_2.save()
 
         response = self.auth_client.get(reverse('api:news-articles-list'))
         assert response.status_code == status.HTTP_200_OK
