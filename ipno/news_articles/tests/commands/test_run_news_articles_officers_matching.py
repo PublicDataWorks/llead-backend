@@ -10,7 +10,9 @@ class CommandTestCase(TestCase):
         self.command = Command()
 
     @patch('news_articles.management.commands.run_news_articles_officers_matching.ProcessMatchingArticle.process')
-    def test_handle(self, mock_matching_keywords_process):
+    @patch('news_articles.management.commands.run_news_articles_officers_matching.ProcessExcludeArticleOfficer.process')
+    def test_handle(self, mock_matching_keywords_process, mock_process_exclude_article_officer):
         self.command.handle()
 
         mock_matching_keywords_process.assert_called()
+        mock_process_exclude_article_officer.assert_called()
