@@ -15,4 +15,9 @@ APP_TASKS = [
         'command': 'run_news_articles_crawlers',
         'task_type': DAILY_TASK
     },
+    {
+        'task_name': 'Run news articles\' officers matching',
+        'command': 'run_news_articles_officers_matching',
+        'task_type': DAILY_TASK
+    },
 ]

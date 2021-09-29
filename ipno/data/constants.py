@@ -6,6 +6,7 @@ COMPLAINT_MODEL_NAME = 'Complaint'
 USE_OF_FORCE_MODEL_NAME = 'UseOfForce'
 DOCUMENT_MODEL_NAME = 'Document'
 NEWS_ARTICLE_MODEL_NAME = 'NewsArticle'
+NEWS_ARTICLE_OFFICER_MODEL_NAME = 'NewsArticleOfficer'
 WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'personnel',
