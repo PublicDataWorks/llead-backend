@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dateutil.parser import parse
 
 from django.conf import settings
@@ -9,7 +8,6 @@ import scrapy
 from scrapy import signals
 
 from news_articles.constants import (
-    ARTICLE_MATCHING_KEYWORDS,
     CRAWL_STATUS_ERROR,
     CRAWL_STATUS_FINISHED,
     CRAWL_STATUS_OPENED,
@@ -24,9 +22,7 @@ from news_articles.models import (
     NewsArticle,
     NewsArticleSource,
 )
-from officers.models import Officer
 from utils.google_cloud import GoogleCloudService
-from utils.nlp import NLP
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +49,6 @@ class ScrapyRssSpider(scrapy.Spider):
 
     def __init__(self):
         self.gcloud = GoogleCloudService()
-        self.nlp = NLP()
-        self.officers = self.get_officer_data()
-
         if self.name:
             self.source = NewsArticleSource.objects.get(source_name=self.name)
 
@@ -156,12 +149,6 @@ class ScrapyRssSpider(scrapy.Spider):
     def parse_guid(self, guid):
         return guid.replace(self.guid_pre, '')
 
-    def contains_keyword(self, content_str):
-        for keyword in ARTICLE_MATCHING_KEYWORDS:
-            if keyword in content_str:
-                return True
-        return False
-
     def parse_section(self, paragraph):
         parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
         tag_name = parsed_paragraph.currentTag()[0].name
@@ -180,15 +167,6 @@ class ScrapyRssSpider(scrapy.Spider):
         paragraphs = [paragraph for paragraph in raw_paragraphs if paragraph is not None]
 
         return paragraphs
-
-    def get_officer_data(self):
-        officers = Officer.objects.all()
-        officers_data = defaultdict(list)
-
-        for officer in officers:
-            officers_data[officer.name].append(officer.id)
-
-        return officers_data
 
     def parse_item(self, response):
         raise NotImplementedError

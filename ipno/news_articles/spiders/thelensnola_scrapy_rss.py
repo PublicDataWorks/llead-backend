@@ -3,7 +3,6 @@ from scrapy.loader import ItemLoader
 from news_articles.constants import THELENSNOLA_SOURCE
 from news_articles.models import NewsArticle, CrawledPost
 from news_articles.spiders.base_scrapy_rss import ScrapyRssSpider, RSSItem
-from officers.models import Officer
 from utils.constants import FILE_TYPES
 from utils.pdf_creator import ArticlePdfCreator
 
@@ -47,39 +46,32 @@ class TheLensNolaScrapyRssSpider(ScrapyRssSpider):
 
         text_content = ' '.join([paragraph['content'] for paragraph in paragraphs])
 
-        if self.contains_keyword(text_content):
-            pdf_buffer = ArticlePdfCreator(
+        pdf_buffer = ArticlePdfCreator(
+            title=title,
+            author=author,
+            date=published_date,
+            content=paragraphs,
+            link=link
+        ).build_pdf()
+
+        pdf_location = self.get_upload_pdf_location(published_date, guid)
+
+        uploaded_url = self.upload_file_to_gcloud(pdf_buffer, pdf_location, FILE_TYPES['PDF'])
+
+        if uploaded_url:
+            news_article_data = NewsArticle(
+                source=self.source,
+                link=link,
                 title=title,
+                content=text_content,
+                guid=guid,
                 author=author,
-                date=published_date,
-                content=paragraphs,
-                link=link
-            ).build_pdf()
-
-            pdf_location = self.get_upload_pdf_location(published_date, guid)
-
-            uploaded_url = self.upload_file_to_gcloud(pdf_buffer, pdf_location, FILE_TYPES['PDF'])
-
-            if uploaded_url:
-                matched_officers = self.nlp.process(text_content, self.officers)
-
-                matched_officers_obj = [Officer.objects.get(id=id) for id in matched_officers]
-
-                news_article_data = NewsArticle(
-                    source=self.source,
-                    link=link,
-                    title=title,
-                    content=text_content,
-                    guid=guid,
-                    author=author,
-                    published_date=published_date,
-                    url=uploaded_url,
-                )
-                news_article_data.save()
-                news_article_data.officers.add(*matched_officers_obj)
-                news_article_data.save()
-            else:
-                save_crawled_post = False
+                published_date=published_date,
+                url=uploaded_url,
+            )
+            news_article_data.save()
+        else:
+            save_crawled_post = False
 
         if save_crawled_post:
             crawled_post = CrawledPost(source=self.source, post_guid=guid)

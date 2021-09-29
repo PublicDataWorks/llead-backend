@@ -8,10 +8,9 @@ from scrapy.utils.project import get_project_settings
 
 from data.models import WrglRepo
 from news_articles.models import NewsArticle
-from data.constants import NEWS_ARTICLE_MODEL_NAME, NEWS_ARTICLE_OFFICER_MODEL_NAME
+from data.constants import NEWS_ARTICLE_MODEL_NAME
 from news_articles.constants import (
     NEWS_ARTICLE_WRGL_COLUMNS,
-    NEWS_ARTICLE_OFFICER_WRGL_COLUMNS,
 )
 from news_articles.spiders import TheLensNolaScrapyRssSpider
 from news_articles.spiders import NolaScrapyRssSpider
@@ -22,8 +21,6 @@ class Command(BaseCommand):
     def __init__(self):
         self.wrgl = WrglGenerator()
 
-        NewsArticleOfficer = NewsArticle.officers.through
-
         self.wrgl_repos_mapping = [
             {
                 'data': NewsArticle.objects.annotate(
@@ -32,15 +29,6 @@ class Command(BaseCommand):
                 'columns': NEWS_ARTICLE_WRGL_COLUMNS,
                 'wrgl_repo': settings.NEWS_ARTICLE_WRGL_REPO,
                 'wrgl_model_name': NEWS_ARTICLE_MODEL_NAME,
-            },
-            {
-                'data': NewsArticleOfficer.objects.annotate(
-                    uid=F('officer__uid'),
-                    created_at=F('newsarticle__created_at')
-                ).all(),
-                'columns': NEWS_ARTICLE_OFFICER_WRGL_COLUMNS,
-                'wrgl_repo': settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
-                'wrgl_model_name': NEWS_ARTICLE_OFFICER_MODEL_NAME,
             },
         ]
 
