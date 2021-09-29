@@ -1,0 +1,13 @@
+.cache
+.project
+.idea
+.pydevproject
+.idea/workspace.xml
+.DS_Store
+.git/
+.vagrant/
+__pycache__
+docs
+venv
+Dockerfile
+!/.pytest_cache/

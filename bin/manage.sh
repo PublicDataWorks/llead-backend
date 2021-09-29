@@ -15,6 +15,10 @@ elif [ "$1" == "--production" ]; then
     NAMESPACE=default
 elif [ "$1" == "--staging" ]; then
     NAMESPACE=ipno-staging
+elif [ "$1" == "--logging" ]; then
+    shift
+    docker-compose -f docker-compose-logging.yml run web ipno/manage.py $@
+    exit 0
 else
     if [ "$1" == "--dev" ]; then
         shift

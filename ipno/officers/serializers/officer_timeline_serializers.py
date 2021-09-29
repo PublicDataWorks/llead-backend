@@ -12,7 +12,8 @@ from officers.constants import (
     DOCUMENT_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND,
-    UNIT_CHANGE_TIMELINE_KIND
+    UNIT_CHANGE_TIMELINE_KIND,
+    NEWS_ARTICLE_TIMELINE_KIND,
 )
 
 
@@ -122,6 +123,21 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
     def get_year(self, obj):
         return obj.incident_date.year if obj.incident_date else None
+
+
+class NewsArticleTimelineSerializer(BaseTimelineSerializer):
+    id = serializers.IntegerField()
+    source_name = serializers.CharField(source='source.custom_matching_name')
+    title = serializers.CharField()
+    url = serializers.CharField()
+    date = serializers.DateField(source='published_date')
+    year = serializers.SerializerMethodField()
+
+    def get_kind(self, obj):
+        return NEWS_ARTICLE_TIMELINE_KIND
+
+    def get_year(self, obj):
+        return obj.published_date.year if obj.published_date else None
 
 
 class SalaryChangeTimelineSerializer(BaseTimelineSerializer):

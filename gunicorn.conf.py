@@ -29,7 +29,7 @@ logconfig_dict = {
         'console': {
             'class': 'logging.StreamHandler',
             'level': 'INFO',
-            'stream': sys.stderr
+            'stream': sys.stdout
         },
     },
     'loggers': {

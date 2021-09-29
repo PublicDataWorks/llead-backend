@@ -19,10 +19,12 @@ defaults:
         echo 'export DEPLOY_ENV=--production' >> $BASH_ENV
         echo 'export CLOUD_SQL_DATABASE=$CLOUD_SQL_PRODUCTION' >> $BASH_ENV
         echo 'export NAMESPACE_ENV=default' >> $BASH_ENV
+        echo 'export DAILY_TIME=$PROD_DAILY_TIME' >> $BASH_ENV
       else
         echo 'export DEPLOY_ENV=--staging' >> $BASH_ENV
         echo 'export CLOUD_SQL_DATABASE=$CLOUD_SQL_STAGING' >> $BASH_ENV
         echo 'export NAMESPACE_ENV=ipno-staging' >> $BASH_ENV
+        echo 'export DAILY_TIME=$STAGING_DAILY_TIME' >> $BASH_ENV
       fi
 
 version: 2.1
@@ -51,6 +53,10 @@ jobs:
           name: Install dependencies
           command: |
             pip install -r requirements/dev.txt
+      - run:
+          name: Install spacy dependencies for nlp
+          command: |
+            python -m spacy download en_core_web_sm
       - run:
           name: flake8
           command: flake8
@@ -157,7 +163,7 @@ jobs:
       - run:
           name: Setup cronjobs
           command: |
-            bin/run_cronjob.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) import_data "0 5 * * *"
+            bin/run_cronjob.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) run_daily_tasks "$DAILY_TIME"
 
 workflows:
   version: 2

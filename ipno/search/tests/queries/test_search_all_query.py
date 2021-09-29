@@ -1,5 +1,6 @@
 from operator import itemgetter
 from datetime import date
+from unittest.mock import Mock
 
 from django.test import TestCase
 
@@ -13,6 +14,10 @@ from officers.constants import OFFICER_HIRE, OFFICER_LEFT
 
 class OfficersSearchQueryTestCase(TestCase):
     def test_query(self):
+        request = Mock(query_params={
+            'limit': 2,
+            'offset': 0,
+        })
         DepartmentFactory(name='Baton Rouge PD')
         department_1 = DepartmentFactory(name='New Orleans keyword PD')
         department_2 = DepartmentFactory(name='Orleans keywo PD')
@@ -50,76 +55,163 @@ class OfficersSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        expected_result = {
-            'DEPARTMENTS': [
-                {
-                    'id': department_1.slug,
-                    'name': department_1.name,
-                    'city': department_1.city,
-                    'parish': department_1.parish,
-                    'location_map_url': department_1.location_map_url,
-                },
-                {
-                    'id': department_2.slug,
-                    'name': department_2.name,
-                    'city': department_2.city,
-                    'parish': department_2.parish,
-                    'location_map_url': department_2.location_map_url,
-                },
-            ],
-            'OFFICERS': [
-                {
-                    'id': officer_1.id,
-                    'name': officer_1.name,
-                    'badges': ['12435'],
-                    'department': {
+        expected_data = {
+            'departments': {
+                'results': [
+                    {
                         'id': department_1.slug,
                         'name': department_1.name,
+                        'city': department_1.city,
+                        'parish': department_1.parish,
+                        'location_map_url': department_1.location_map_url,
                     },
-                },
-                {
-                    'id': officer_2.id,
-                    'name': officer_2.name,
-                    'badges': [],
-                    'department': None,
-                },
-            ],
-            'DOCUMENTS': [
-                {
-                    'id': document_1.id,
-                    'document_type': document_1.document_type,
-                    'title': document_1.title,
-                    'url': document_1.url,
-                    'incident_date': str(document_1.incident_date),
-                    'preview_image_url': document_1.preview_image_url,
-                    'pages_count': document_1.pages_count,
-                    'text_content': document_1.text_content,
-                    'text_content_highlight': None,
-                    'departments': [
-                        {
+                    {
+                        'id': department_2.slug,
+                        'name': department_2.name,
+                        'city': department_2.city,
+                        'parish': department_2.parish,
+                        'location_map_url': department_2.location_map_url,
+                    }, ],
+                'count': 2,
+                'next': None,
+                'previous': None,
+            },
+            'officers': {
+                'results': [
+                    {
+                        'id': officer_1.id,
+                        'name': officer_1.name,
+                        'badges': ['12435'],
+                        'department': {
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
-                    ],
-                },
-                {
-                    'id': document_2.id,
-                    'document_type': document_2.document_type,
-                    'title': document_2.title,
-                    'url': document_2.url,
-                    'incident_date': str(document_2.incident_date),
-                    'preview_image_url': document_2.preview_image_url,
-                    'pages_count': document_2.pages_count,
-                    'text_content': document_2.text_content,
-                    'text_content_highlight': 'Text content <em>keywo</em>',
-                    'departments': [],
-                },
-            ],
+                    },
+                    {
+                        'id': officer_2.id,
+                        'name': officer_2.name,
+                        'badges': [],
+                        'department': None,
+                    },
+                ],
+                'count': 2,
+                'next': None,
+                'previous': None,
+            },
+            'documents': {
+                'results': [
+                    {
+                        'id': document_1.id,
+                        'document_type': document_1.document_type,
+                        'title': document_1.title,
+                        'url': document_1.url,
+                        'incident_date': str(document_1.incident_date),
+                        'preview_image_url': document_1.preview_image_url,
+                        'pages_count': document_1.pages_count,
+                        'text_content': document_1.text_content,
+                        'text_content_highlight': None,
+                        'departments': [
+                            {
+                                'id': department_1.slug,
+                                'name': department_1.name,
+                            },
+                        ],
+                    },
+                    {
+                        'id': document_2.id,
+                        'document_type': document_2.document_type,
+                        'title': document_2.title,
+                        'url': document_2.url,
+                        'incident_date': str(document_2.incident_date),
+                        'preview_image_url': document_2.preview_image_url,
+                        'pages_count': document_2.pages_count,
+                        'text_content': document_2.text_content,
+                        'text_content_highlight': 'Text content <em>keywo</em>',
+                        'departments': [],
+                    },
+                ],
+                'count': 2,
+                'next': None,
+                'previous': None,
+            }
         }
 
-        result = SearchAllQuery().search('keywo')
+        result = SearchAllQuery(request).search('keywo', None)
 
         for search_key, items in result.items():
-            result[search_key] = sorted(items, key=itemgetter('id'))
+            result[search_key]['results'] = sorted(items['results'], key=itemgetter('id'))
 
-        assert result == expected_result
+        assert result == expected_data
+
+    def test_query_with_doc_type_and_limit(self):
+        request = Mock(query_params={
+            'limit': 1,
+            'offset': 0,
+            },
+            build_absolute_uri=Mock(return_value='http://testserver/api/search/')
+        )
+        DepartmentFactory(name='Baton Rouge PD')
+        department_1 = DepartmentFactory(name='New Orleans keyword PD')
+        DepartmentFactory(name='Orleans keywo PD')
+
+        OfficerFactory(first_name='Kenneth', last_name='Anderson')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        OfficerFactory(first_name='Anthony', last_name='Davis keywords')
+
+        EventFactory(
+            officer=officer_1,
+            department=department_1,
+            kind=OFFICER_HIRE,
+            badge_no='12435',
+            year=2020,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer_1,
+            department=department_1,
+            kind=OFFICER_LEFT,
+            year=2020,
+            month=5,
+            day=4,
+        )
+
+        DocumentFactory(title='Document title', text_content='Text content')
+        document_1 = DocumentFactory(
+            title='Document keyword1',
+            text_content='Text content 1',
+            incident_date=date(2020, 5, 6)
+        )
+        document_2 = DocumentFactory(title='Document 2', text_content='Text content keywo')
+        document_1.departments.add(department_1)
+
+        rebuild_search_index()
+
+        expected_data = {
+            'documents': {
+                'results': [
+                    {
+                        'id': document_2.id,
+                        'document_type': document_2.document_type,
+                        'title': document_2.title,
+                        'url': document_2.url,
+                        'incident_date': str(document_2.incident_date),
+                        'preview_image_url': document_2.preview_image_url,
+                        'pages_count': document_2.pages_count,
+                        'text_content': document_2.text_content,
+                        'text_content_highlight': 'Text content <em>keywo</em>',
+                        'departments': [],
+                    },
+                ],
+                'count': 2,
+                'next': 'http://testserver/api/search/?limit=1&offset=1',
+                'previous': None,
+            }
+        }
+
+        result = SearchAllQuery(request).search('keywo', 'documents')
+
+        for search_key, items in result.items():
+            result[search_key]['results'] = sorted(items['results'], key=itemgetter('id'))
+
+        assert result == expected_data

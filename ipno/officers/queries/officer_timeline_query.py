@@ -8,7 +8,8 @@ from officers.serializers import (
     DocumentTimelineSerializer,
     SalaryChangeTimelineSerializer,
     RankChangeTimelineSerializer,
-    UnitChangeTimelineSerializer
+    UnitChangeTimelineSerializer,
+    NewsArticleTimelineSerializer,
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -101,6 +102,12 @@ class OfficerTimelineQuery(object):
         return DocumentTimelineSerializer(document_timeline_queryset, many=True).data
 
     @property
+    def _news_aticle_timeline(self):
+        news_article_timeline_queryset = self.officer.news_articles.prefetch_related('source')
+
+        return NewsArticleTimelineSerializer(news_article_timeline_queryset, many=True).data
+
+    @property
     def _salary_change_timeline(self):
         events = list(
             self.officer.events.filter(
@@ -151,7 +158,8 @@ class OfficerTimelineQuery(object):
         timeline = self._complaint_timeline + self._use_of_force_timeline \
                + self._join_timeline + self._left_timeline \
                + self._document_timeline + self._salary_change_timeline \
-               + self._rank_change_timeline + self._unit_change_timeline
+               + self._rank_change_timeline + self._unit_change_timeline \
+               + self._news_aticle_timeline
 
         timeline_period = data_period([i["year"] for i in timeline if i["year"]])
 
