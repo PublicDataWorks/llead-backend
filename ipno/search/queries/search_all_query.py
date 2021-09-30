@@ -1,8 +1,10 @@
+from search.queries.news_articles_search_query import NewsArticlesSearchQuery
 from search.queries.departments_search_query import DepartmentsSearchQuery
 from search.queries.officers_search_query import OfficersSearchQuery
 from search.queries.documents_search_query import DocumentsSearchQuery
 from search.serializers.es_serializers import DepartmentsESSerializer, OfficersESSerializer
 from shared.serializers.es_serializers import DocumentsESSerializer
+from shared.serializers.es_serializers import NewsArticlesESSerializer
 from utils.es_pagination import ESPagination
 
 SEARCH_MAPPINGS = {
@@ -17,6 +19,10 @@ SEARCH_MAPPINGS = {
     'documents': {
         'search_query': DocumentsSearchQuery,
         'serializer': DocumentsESSerializer,
+    },
+    'articles': {
+        'search_query': NewsArticlesSearchQuery,
+        'serializer': NewsArticlesESSerializer,
     }
 }
 
