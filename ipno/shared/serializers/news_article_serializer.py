@@ -7,3 +7,4 @@ class NewsArticleSerializer(serializers.Serializer):
     title = serializers.CharField()
     url = serializers.CharField()
     date = serializers.DateField(source='published_date')
+    author = serializers.CharField()
