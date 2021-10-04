@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 from django.test import TestCase
 
+from news_articles.factories import NewsArticleFactory
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
@@ -52,6 +53,10 @@ class OfficersSearchQueryTestCase(TestCase):
         )
         document_2 = DocumentFactory(title='Document 2', text_content='Text content keywo')
         document_1.departments.add(department_1)
+
+        news_article = NewsArticleFactory(title='Text content title', content='Text content keywo', author='test')
+        news_article.officers.add(officer_1)
+        news_article.save()
 
         rebuild_search_index()
 
@@ -133,7 +138,25 @@ class OfficersSearchQueryTestCase(TestCase):
                 'count': 2,
                 'next': None,
                 'previous': None,
-            }
+            },
+            'articles': {
+                'results': [
+                    {
+                        'id': news_article.id,
+                        'source_name': news_article.source.custom_matching_name,
+                        'title': news_article.title,
+                        'url': news_article.url,
+                        'date': str(news_article.published_date),
+                        'author': news_article.author,
+                        'content': news_article.content,
+                        'content_highlight': 'Text content <em>keywo</em>',
+                        'author_highlight': None
+                    },
+                ],
+                'count': 1,
+                'next': None,
+                'previous': None,
+            },
         }
 
         result = SearchAllQuery(request).search('keywo', None)

@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 from operator import itemgetter
 
@@ -6,6 +7,7 @@ from rest_framework import status
 
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
+from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from officers.factories import EventFactory, OfficerFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from utils.search_index import rebuild_search_index
@@ -35,6 +37,17 @@ class SearchViewSetTestCase(AuthAPITestCase):
         )
         document_2 = DocumentFactory(title='Document 2', text_content='Text content keywo')
         document_1.departments.add(department_1)
+
+        source = NewsArticleSourceFactory(custom_matching_name='Source')
+        news_article_1 = NewsArticleFactory(content='Text content keywo', author='Writer Staff', source=source)
+        news_article_2 = NewsArticleFactory(
+            title='Dummy title',
+            author='text keywo',
+            source=source,
+            published_date=news_article_1.published_date + datetime.timedelta(days=1)
+        )
+        news_article_1.officers.add(officer_1)
+        news_article_2.officers.add(officer_2)
 
         rebuild_search_index()
 
@@ -116,7 +129,37 @@ class SearchViewSetTestCase(AuthAPITestCase):
                 'count': 2,
                 'next': None,
                 'previous': None,
-            }
+            },
+            'articles': {
+                'results': [
+                    {
+                        'id': news_article_1.id,
+                        'source_name': 'Source',
+                        'title': news_article_1.title,
+                        'url': news_article_1.url,
+                        'date': str(news_article_1.published_date),
+                        'author': news_article_1.author,
+                        'content': news_article_1.content,
+                        'content_highlight': 'Text content <em>keywo</em>',
+                        'author_highlight': None
+                    },
+                    {
+                        'id': news_article_2.id,
+                        'source_name': 'Source',
+                        'title': news_article_2.title,
+                        'url': news_article_2.url,
+                        'date': str(news_article_2.published_date),
+                        'author': news_article_2.author,
+                        'content': news_article_2.content,
+                        'content_highlight': None,
+                        'author_highlight': 'text <em>keywo</em>'
+                    },
+                ],
+                'count': 2,
+                'next': None,
+                'previous': None,
+            },
+
         }
 
         response = self.auth_client.get(reverse('api:search-list'), {'q': 'keywo'})
@@ -296,7 +339,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                 'count': 2,
                 'next': None,
                 'previous': None,
-            }
+            },
+            'articles': {'count': 0, 'next': None, 'previous': None, 'results': []}
         }
 
         response = self.auth_client.get(reverse('api:search-list'), {'q': 'keywo', 'doc_type': 'document'})
