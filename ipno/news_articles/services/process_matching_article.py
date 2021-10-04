@@ -38,7 +38,7 @@ class ProcessMatchingArticle:
         self.match_unprocessed_articles()
 
         self.update_status()
-        self.commit_data_to_wrgl()
+        return self.commit_data_to_wrgl()
 
     def match_processed_articles(self):
         new_keywords = self.latest_keywords - self.last_run_keywords
@@ -132,3 +132,5 @@ class ProcessMatchingArticle:
             if commit_hash and wrgl_repo.commit_hash != commit_hash:
                 wrgl_repo.commit_hash = commit_hash
                 wrgl_repo.save()
+
+        return count_updated_objects > 0
