@@ -28,4 +28,4 @@ class FrontPageOrderFactory(DjangoModelFactory):
         model = FrontPageOrder
 
     section = factory.LazyFunction(fake.word)
-    order = factory.LazyFunction(fake.pyint())
+    order = factory.LazyFunction(fake.pyint)

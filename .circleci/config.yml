@@ -156,6 +156,10 @@ jobs:
           cluster: $GOOGLE_CLUSTER_NAME
           perform-login: true
       - run:
+          name: Create initial project config
+          command: |
+            bin/run_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) init_project_config
+      - run:
           name: Deploy
           command: |
             export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
