@@ -8,14 +8,17 @@
 ## Local run
 - Create .env file from .env.example template and update environment variables.
 - `bin/dev.sh` - build package inside Docker environment (and for your `venv` as well).
+- `bin/manage.sh migrate` migrate your database migrations.
+- `bin/manage.sh createsuperuser` create admin user.
+- `bin/manage.sh init_project_config` create initial project configuration.
 - `docker-compose up` - start Django development container. It should automatically reload when code change.
-- `bin/manage.sh` - run any and all of your Django command.
 
 ## Useful command
+- `bin/manage.sh` - run any and all of your Django command.
 - `bin/manage.sh createsuperuser` create admin user.
 - `bin/manage.sh migrate` migrate your database migrations.
-- `bin/manage.sh create_initial_app_config` create app configs.
-- `./bin/manage.sh create_initial_wrgl_repos` init wrgl repos.
+- `bin/manage.sh init_project_config` create initial project configuration.
+- `bin/manage.sh run_daily_tasks` run daily tasks.
 
 ## Package install
 - Put your packages & version inside [requirements/base.txt](requirements/base.txt) if they're dependencies or [requirements/dev.txt](requirements/dev.txt) if they're dev-dependencies.
@@ -29,7 +32,8 @@
     - ex: `bin/test.sh ipno/documents/tests/test_views.py::DocumentsViewSetTestCase::test_retrieve`
 
 ## Local running with Fluent bit logging:
-
+- Follow the step in local run with option `--logging`: `bin/manage.sh --logging`
+- Run `docker-compose -f docker-compose-logging.yml up `
 
 ## Docs
 - [Set up ingress tls](docs/setup-ingress-tls.md)
