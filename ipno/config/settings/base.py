@@ -62,6 +62,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'authentication',
     'app_config',
+    'core',
     'documents',
     'departments',
     'officers',
