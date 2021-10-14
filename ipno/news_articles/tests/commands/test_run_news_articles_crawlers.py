@@ -9,6 +9,7 @@ from data.factories import WrglRepoFactory
 from data.models import WrglRepo
 from news_articles.constants import NEWS_ARTICLE_WRGL_COLUMNS
 from news_articles.factories import CrawledPostFactory, NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from news_articles.management.commands.run_news_articles_crawlers import Command
 from news_articles.models import NewsArticle
 from news_articles.spiders import TheLensNolaScrapyRssSpider
@@ -46,7 +47,8 @@ class CommandTestCase(TestCase):
         date = timezone.now()
         news = NewsArticleFactory()
         officer = OfficerFactory()
-        news.officers.add(officer)
+        matched_sentence = MatchedSentenceFactory(article=news)
+        matched_sentence.officers.add(officer)
         CrawledPostFactory(post_guid=news.guid)
 
         WrglRepoFactory(
@@ -111,7 +113,8 @@ class CommandTestCase(TestCase):
         date = timezone.now()
         news = NewsArticleFactory()
         officer = OfficerFactory()
-        news.officers.add(officer)
+        matched_sentence = MatchedSentenceFactory(article=news)
+        matched_sentence.officers.add(officer)
         CrawledPostFactory(post_guid=news.guid)
 
         WrglRepoFactory(
