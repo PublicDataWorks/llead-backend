@@ -7,7 +7,7 @@ from django.utils import timezone
 from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.models import WrglRepo
 from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
-from news_articles.models import MatchingKeyword, NewsArticle, ExcludeOfficer
+from news_articles.models import MatchingKeyword, NewsArticle, ExcludeOfficer, MatchedSentence
 from officers.models import Officer
 from utils.nlp import NLP
 from utils.wrgl_generator import WrglGenerator
@@ -48,48 +48,120 @@ class ProcessMatchingArticle:
         self.check_deleted_keywords(deleted_keywords)
 
     def match_unprocessed_articles(self):
-        articles = NewsArticle.objects.filter(extracted_keywords__isnull=True)
-        for article in articles:
-            article.extracted_keywords = []
+        articles = NewsArticle.objects.filter(is_processed=False)
 
-        self.update_news_article_matching_data(articles, self.latest_keywords)
+        self.create_news_article_matching_data(articles, self.latest_keywords)
 
     def check_new_keywords(self, new_keywords):
-        articles = NewsArticle.objects.filter(extracted_keywords__isnull=False)
+        if not new_keywords:
+            return
 
+        articles = NewsArticle.objects.filter(is_processed=True)
         self.update_news_article_matching_data(articles, new_keywords)
 
     def check_deleted_keywords(self, deleted_keywords):
-        articles = NewsArticle.objects.filter(extracted_keywords__len__gt=0)
+        if not deleted_keywords:
+            return
 
-        for article in articles:
-            extracted_keywords = set(article.extracted_keywords)
+        matched_sentences = MatchedSentence.objects.filter(extracted_keywords__overlap=list(deleted_keywords))
+
+        for sentence in matched_sentences:
+            extracted_keywords = set(sentence.extracted_keywords)
             remained_keywords = extracted_keywords - deleted_keywords
-            article.extracted_keywords = list(remained_keywords)
+            sentence.extracted_keywords = list(remained_keywords)
 
             if not remained_keywords:
-                article.officers.clear()
-                article.excluded_officers.clear()
-
-            article.save()
+                sentence.delete()
+            else:
+                sentence.save()
 
     def update_news_article_matching_data(self, articles, new_keywords):
         for article in articles:
-            old_keywords = article.extracted_keywords
-            keywords = old_keywords.copy()
+            content = article.content
 
-            keywords.extend([keyword for keyword in new_keywords if keyword in article.content])
+            old_matched_sentence = {
+                sentence.text: sentence for sentence in article.matched_sentences.all()
+            }
 
-            if keywords and not old_keywords:
-                matched_officers = self.nlp.process(article.content, self.officers)
+            matched_sentences = {}
 
-                matched_officers_obj = Officer.objects.filter(Q(id__in=matched_officers) & ~Q(id__in=self.excluded_officers_ids))
-                exclude_matched_officers_obj = Officer.objects.filter(Q(id__in=matched_officers) & Q(id__in=self.excluded_officers_ids))
+            sentences = self.nlp.extract_lines(content)
+            for sentence in sentences:
+                keywords = []
+                for keyword in new_keywords:
+                    if keyword in sentence:
+                        keywords.append(keyword)
+                if keywords:
+                    matched_sentences[sentence] = keywords
 
-                article.officers.add(*matched_officers_obj)
-                article.excluded_officers.add(*exclude_matched_officers_obj)
+            update_sentences = set(old_matched_sentence.keys()) & set(matched_sentences.keys())
+            create_sentences = set(matched_sentences.keys()) - set(old_matched_sentence.keys())
 
-            article.extracted_keywords = keywords
+            for old_sentence in update_sentences:
+                matched_new_keywords = matched_sentences.get(old_sentence)
+
+                matched_sentence = old_matched_sentence.get(old_sentence)
+
+                old_keywords = matched_sentence.extracted_keywords.copy()
+                updated_keywords = set(old_keywords) | set(matched_new_keywords)
+
+                matched_sentence.extracted_keywords = list(updated_keywords)
+
+                matched_sentence.save()
+
+            for new_sentence in create_sentences:
+                matched_sentence = MatchedSentence.objects.create(
+                    text=new_sentence,
+                    article=article,
+                    extracted_keywords=matched_sentences.get(new_sentence),
+                )
+
+                matched_officers = self.nlp.process(new_sentence, self.officers)
+                matched_officers_obj = Officer.objects.filter(
+                    Q(id__in=matched_officers) & ~Q(id__in=self.excluded_officers_ids)
+                )
+                exclude_matched_officers_obj = Officer.objects.filter(
+                    Q(id__in=matched_officers) & Q(id__in=self.excluded_officers_ids)
+                )
+
+                matched_sentence.officers.add(*matched_officers_obj)
+                matched_sentence.excluded_officers.add(*exclude_matched_officers_obj)
+                matched_sentence.save()
+
+    def create_news_article_matching_data(self, articles, new_keywords):
+        for article in articles:
+            content = article.content
+
+            matched_sentences = {}
+            sentences = self.nlp.extract_lines(content)
+            for sentence in sentences:
+                keywords = []
+                for keyword in new_keywords:
+                    if keyword in sentence:
+                        keywords.append(keyword)
+                if keywords:
+                    matched_sentences[sentence] = keywords
+
+            for new_sentence in matched_sentences:
+                matched_sentence = MatchedSentence.objects.create(
+                    text=new_sentence,
+                    article=article,
+                    extracted_keywords=matched_sentences.get(new_sentence),
+                )
+
+                matched_officers = self.nlp.process(new_sentence, self.officers)
+                matched_officers_obj = Officer.objects.filter(
+                    Q(id__in=matched_officers) & ~Q(id__in=self.excluded_officers_ids)
+                )
+                exclude_matched_officers_obj = Officer.objects.filter(
+                    Q(id__in=matched_officers) & Q(id__in=self.excluded_officers_ids)
+                )
+
+                matched_sentence.officers.add(*matched_officers_obj)
+                matched_sentence.excluded_officers.add(*exclude_matched_officers_obj)
+                matched_sentence.save()
+
+            article.is_processed = True
             article.save()
 
     def get_officer_data(self):
@@ -107,13 +179,17 @@ class ProcessMatchingArticle:
             self.latest_keywords_obj.save()
 
     def commit_data_to_wrgl(self):
-        NewsArticleOfficer = NewsArticle.officers.through
-        data = NewsArticleOfficer.objects.annotate(
-                    uid=F('officer__uid'),
-                    created_at=F('newsarticle__created_at')
-                ).all()
+        MatchedSentenceOfficer = MatchedSentence.officers.through
+        data = MatchedSentenceOfficer.objects.order_by(
+            'officer_id',
+            'matchedsentence__article__id'
+        ).annotate(
+            uid=F('officer__uid'),
+            created_at=F('matchedsentence__created_at'),
+            newsarticle_id=F('matchedsentence__article__id'),
+        ).all()
 
-        count_updated_objects = data.filter(newsarticle__updated_at__gte=self.start_time).count()
+        count_updated_objects = data.filter(matchedsentence__updated_at__gte=self.start_time).count()
 
         if count_updated_objects:
             columns = NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
@@ -122,7 +198,7 @@ class ProcessMatchingArticle:
             response = self.wrgl.create_wrgl_commit(
                 settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
                 f'+ {len(self.latest_keywords)} keyword(s)',
-                'id',
+                'uid,newsarticle_id',
                 gzexcel
             )
 

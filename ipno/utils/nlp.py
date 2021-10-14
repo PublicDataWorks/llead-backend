@@ -10,6 +10,13 @@ class NLP:
     def __init__(self):
         self.spacy_parser = spacy.load('en_core_web_sm')
 
+    def extract_lines(self, text):
+        sententces = self.spacy_parser(text).sents
+        lst = []
+        for sent in sententces:
+            lst.append(sent.text)
+        return lst
+
     def find_best_match(self, name, officers):
         similarity_calc = [
             (officer_name, textdistance.jaro_winkler.similarity(name, officer_name))

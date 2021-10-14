@@ -9,6 +9,7 @@ from news_articles.models import (
     NewsArticle,
     NewsArticleSource,
     ExcludeOfficer,
+    MatchedSentence,
 )
 
 
@@ -18,9 +19,50 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return (
-            ('exist', ('Has officers')),
-            ('exclude', ('Has excluded officers')),
-            ('not_exist', ('Does not have any officers')),
+            ('exist', 'Has officers'),
+            ('exclude', 'Has excluded officers'),
+            ('not_exist', 'Does not have any officers'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'exist':
+            return queryset.filter(matched_sentences__officers__isnull=False).distinct()
+        if self.value() == 'exclude':
+            return queryset.filter(matched_sentences__excluded_officers__isnull=False).distinct()
+        if self.value() == 'not_exist':
+            return queryset.filter(matched_sentences__officers__isnull=True).distinct()
+
+
+class MatchedSentenceInlineAdmin(admin.TabularInline):
+    model = MatchedSentence
+    fields = ('text', 'extracted_keywords', 'officers')
+    show_change_link = True
+    can_delete = False
+    extra = 0
+    list_display = ('text', 'extracted_keywords')
+
+    def has_add_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+    def has_change_permission(self, request, obj=None):
+        return False  # pragma: no cover
+
+
+class NewsArticleAdmin(ModelAdmin):
+    list_filter = (NewsArticleOfficersFilter, )
+    list_display = ('id', 'source', 'author', 'title')
+    inlines = [MatchedSentenceInlineAdmin]
+
+
+class MatchedArticleOfficersFilter(admin.SimpleListFilter):
+    title = 'Officers'
+    parameter_name = 'officers'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('exist', 'Has officers'),
+            ('exclude', 'Has excluded officers'),
+            ('not_exist', 'Does not have any officers'),
         )
 
     def queryset(self, request, queryset):
@@ -32,11 +74,10 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
             return queryset.filter(officers__isnull=True).distinct()
 
 
-class NewsArticleAdmin(ModelAdmin):
-    list_filter = (NewsArticleOfficersFilter, )
-    list_display = ('id', 'source', 'author', 'title', 'extracted_keywords')
-    readonly_fields = ('extracted_keywords', 'excluded_officers',)
-    filter_horizontal = ('officers', 'excluded_officers',)
+class MatchedSentenceAdmin(ModelAdmin):
+    list_filter = (MatchedArticleOfficersFilter,)
+    list_display = ('id', 'article', 'extracted_keywords')
+    filter_horizontal = ('officers', 'excluded_officers')
 
 
 class CrawledPostAdmin(ModelAdmin):
@@ -133,6 +174,7 @@ class ExcludeOfficerAdmin(ModelAdmin):
 
 
 admin.site.register(NewsArticle, NewsArticleAdmin)
+admin.site.register(MatchedSentence, MatchedSentenceAdmin)
 admin.site.register(CrawledPost, CrawledPostAdmin)
 admin.site.register(CrawlerLog, CrawlerLogAdmin)
 admin.site.register(CrawlerError, CrawlerErrorAdmin)
