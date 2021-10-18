@@ -14,6 +14,7 @@ from news_articles.constants import (
 )
 from news_articles.spiders import TheLensNolaScrapyRssSpider
 from news_articles.spiders import NolaScrapyRssSpider
+from news_articles.spiders import VermillionTodayScrapyRssSpider
 from utils.wrgl_generator import WrglGenerator
 
 
@@ -38,6 +39,7 @@ class Command(BaseCommand):
         process = CrawlerProcess(get_project_settings())
         process.crawl(TheLensNolaScrapyRssSpider)
         process.crawl(NolaScrapyRssSpider)
+        process.crawl(VermillionTodayScrapyRssSpider)
 
         process.start()
 
