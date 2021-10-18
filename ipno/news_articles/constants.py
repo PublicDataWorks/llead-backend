@@ -30,6 +30,7 @@ CRAWL_STATUSES = (
 
 NOLA_SOURCE = 'nola'
 THELENSNOLA_SOURCE = 'thelensnola'
+VERMILIONTODAY_SOURCE = 'vermiliontoday'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -39,6 +40,10 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': NOLA_SOURCE,
         'custom_matching_name': 'The Advocate',
+    },
+    {
+        'source_name': VERMILIONTODAY_SOURCE,
+        'custom_matching_name': 'Vermillion Today',
     },
 ]
 

@@ -12,8 +12,11 @@ from news_articles.factories import CrawledPostFactory, NewsArticleFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from news_articles.management.commands.run_news_articles_crawlers import Command
 from news_articles.models import NewsArticle
-from news_articles.spiders import TheLensNolaScrapyRssSpider
-from news_articles.spiders import NolaScrapyRssSpider
+from news_articles.spiders import (
+    TheLensNolaScrapyRssSpider,
+    VermillionTodayScrapyRssSpider,
+    NolaScrapyRssSpider,
+)
 from officers.factories import OfficerFactory
 
 
@@ -37,7 +40,8 @@ class CommandTestCase(TestCase):
         mock_crawler_process.assert_called_with('settings')
         calls_similarity = [
             call(TheLensNolaScrapyRssSpider),
-            call(NolaScrapyRssSpider)
+            call(NolaScrapyRssSpider),
+            call(VermillionTodayScrapyRssSpider)
         ]
         mock_crawl.assert_has_calls(calls_similarity)
         mock_start.assert_called()
