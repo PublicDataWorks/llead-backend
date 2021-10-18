@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+>
+
+    <channel>
+        <title>Capital City News</title>
+        <atom:link href="http://capitalcitynews.us/?feed=rss2" rel="self" type="application/rss+xml"/>
+        <link>http://capitalcitynews.us</link>
+        <description>Serving Baton Rouge and City of Central</description>
+        <lastBuildDate>Fri, 22 Jan 2021 22:40:29 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>hourly</sy:updatePeriod>
+        <sy:updateFrequency>1</sy:updateFrequency>
+        <generator>https://wordpress.org/?v=4.4.25</generator>
+        <item>
+            <title>Pastor’s Legal Battles Look Promising After Landmark Supreme Court Decision in NYC</title>
+            <link>http://capitalcitynews.us/?p=3799</link>
+            <comments>http://capitalcitynews.us/?p=3799#respond</comments>
+            <pubDate>Fri, 22 Jan 2021 22:40:29 +0000</pubDate>
+            <dc:creator><![CDATA[admccn]]></dc:creator>
+            <category><![CDATA[News]]></category>
+
+            <guid isPermaLink="false">http://capitalcitynews.us/?p=3799</guid>
+            <description>
+                <![CDATA[Legal problems facing Rev. Tony Spell for holding church services at Life Tabernacle in defiance of Gov. John Bel Edwards’ orders seem less and less likely to land the Central pastor in prison.  On the contrary, it looks more and more like he will win the outstanding civil and criminal cases and could well be [&#8230;]]]></description>
+            <content:encoded><![CDATA[<p>Legal problems facing Rev. Tony Spell for holding church services at Life Tabernacle in defiance of Gov. John Bel Edwards’ orders seem less and less likely to land the Central pastor in prison.<span class="Apple-converted-space">  </span>On the contrary, it looks more and more like he will win the outstanding civil and criminal cases and could well be entitled to damages in a civil case pending in the federal courts.</p>
+<p>Rev. Spell’s legal arguments received a major boost from the U.S. Supreme Court in November based on their decision in the case of <b>Roman Catholic Diocese of Brooklyn v. Andrew M. Cuomo</b>. In that case, the court said the governor of New York could not prohibit a church from meeting, at least as long as commercial enterprises were drawing customers. The decision in the <b>Brooklyn</b> case reversed two cases from earlier in 2020 — <b>Calvary Chapel v. Sisolak</b> and <b>South Bay Pentecostal v. Newsome</b>.<span class="Apple-converted-space">  </span>Those cases, which had allowed Gov. Newsome to close churches in California, are no longer good law.<span class="Apple-converted-space"> </span></p>
+<p>If federal and state courts follow <b>Brooklyn</b> in Rev. Spell’s cases, the local pastor should have no problem in prevailing.</p>
+]]></content:encoded>
+            <wfw:commentRss>http://capitalcitynews.us/?feed=rss2&#038;p=3799</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+        </item>
+        <item>
+            <title>Timeline at Capitol Shows President’s Speech Could Not Have Caused Riot</title>
+            <link>http://capitalcitynews.us/?p=3797</link>
+            <comments>http://capitalcitynews.us/?p=3797#respond</comments>
+            <pubDate>Fri, 22 Jan 2021 22:36:53 +0000</pubDate>
+            <dc:creator><![CDATA[admccn]]></dc:creator>
+            <category><![CDATA[News]]></category>
+
+            <guid isPermaLink="false">http://capitalcitynews.us/?p=3797</guid>
+            <description>
+                <![CDATA[The timeline of events at the U.S. Capitol on Wednesday, Jan. 6, 2021, published by the Washington Post shows President Trump’s remarks that day could not have caused rioting at the U.S. Capitol.  The timeline shows Trump started speaking at 12 noon.  He ended at 1:10 p.m.  However, protesters gathered outside the Capitol at 12:30 [&#8230;]]]></description>
+            <content:encoded><![CDATA[<p>The timeline of events at the U.S. Capitol on Wednesday, Jan. 6, 2021, published by the <b>Washington Post </b>shows President Trump’s remarks that day could not have caused rioting at the U.S. Capitol.<span class="Apple-converted-space">  </span>The timeline shows Trump started speaking at 12 noon.<span class="Apple-converted-space">  </span>He ended at 1:10 p.m.<span class="Apple-converted-space">  </span>However, protesters gathered outside the Capitol at 12:30 p.m. and confronted Capitol Police. <span class="Apple-converted-space"> </span></p>
+<p>Protesters broke through Capitol Police barricades at 1 p.m. — 10 minutes <b>before</b> Trump finished his speech.<span class="Apple-converted-space">  </span>Anyone who attended Trump’s speech was a 45-minute walk away from the Capitol.<span class="Apple-converted-space">  </span>The area was closed to traffic. So walking was the only practical way to get to the Capitol. <span class="Apple-converted-space"> </span></p>
+<p>As the <b>Washington Post </b>said, Trump ended his speech by urging his followers to march down Pennsylvania Avenue. “We’re going to the Capitol,” he said. “We’re going to try and give them [Republicans] the kind of pride and boldness that they need to take back our country.” <span class="Apple-converted-space"> </span></p>
+<p>However, that was 10 minutes AFTER protestors had already broken through the barricades and at least an hour before anyone who heard Trump’s speech could have gotten there. <span class="Apple-converted-space"> </span></p>
+<p>C-SPAN reported rioters were in Statuary Hall in the center of the Capitol building at 1:33 p.m.<span class="Apple-converted-space">  </span>That’s well before anyone could have heard the end of Trump’s speech and then walked to the Capitol. Nevertheless, Trump is blamed for events before he spoke.</p>
+]]></content:encoded>
+            <wfw:commentRss>http://capitalcitynews.us/?feed=rss2&#038;p=3797</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+        </item>
+    </channel>
+</rss>

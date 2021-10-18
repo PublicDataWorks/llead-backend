@@ -12,9 +12,14 @@ from data.constants import NEWS_ARTICLE_MODEL_NAME
 from news_articles.constants import (
     NEWS_ARTICLE_WRGL_COLUMNS,
 )
-from news_articles.spiders import TheLensNolaScrapyRssSpider
-from news_articles.spiders import NolaScrapyRssSpider
-from news_articles.spiders import VermillionTodayScrapyRssSpider
+from news_articles.spiders import (
+    TheLensNolaScrapyRssSpider,
+    TtfMagazineScrapyRssSpider,
+    KlaxScrapyRssSpider,
+    NolaScrapyRssSpider,
+    VermillionTodayScrapyRssSpider,
+    CapitalCityNewsScrapyRssSpider,
+)
 from utils.wrgl_generator import WrglGenerator
 
 
@@ -40,6 +45,9 @@ class Command(BaseCommand):
         process.crawl(TheLensNolaScrapyRssSpider)
         process.crawl(NolaScrapyRssSpider)
         process.crawl(VermillionTodayScrapyRssSpider)
+        process.crawl(TtfMagazineScrapyRssSpider)
+        process.crawl(KlaxScrapyRssSpider)
+        process.crawl(CapitalCityNewsScrapyRssSpider)
 
         process.start()
 

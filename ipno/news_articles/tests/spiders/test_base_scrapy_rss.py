@@ -33,9 +33,13 @@ class ScrapyRssSpiderTestCase(TestCase):
         self.spider.name = self.source.source_name
         self.spider.source = self.source
 
-    def test_parse_guid(self):
+    def test_parse_guid_with_prefix(self):
         self.spider.guid_pre = 'https://thelensnola.org/?p='
         assert self.spider.parse_guid('https://thelensnola.org/?p=566338') == '566338'
+
+    def test_parse_guid_with_postfix(self):
+        self.spider.guid_post = ' at https://thelensnola.org'
+        assert self.spider.parse_guid('566338 at https://thelensnola.org') == '566338'
 
     def test_get_crawled_post_guid(self):
         CrawledPostFactory(source=self.source)
@@ -85,6 +89,48 @@ class ScrapyRssSpiderTestCase(TestCase):
                 'author': 'Writer',
                 'published_date': date.date(),
             }
+        )
+
+        assert self.spider.post_guids == ['GUID-GUID']
+
+    @patch('scrapy.Request')
+    @patch('news_articles.spiders.ScrapyRssSpider.parse_item')
+    def test_parse_rss_with_content(self, mock_parse_item, mock_request):
+        self.spider.create_article = Mock()
+
+        mock_request_object = Mock()
+        mock_request.return_value = mock_request_object
+        mock_parse_object = [{
+            'title': 'Article Title',
+            'description': 'Lorem if sum',
+            'link': 'http://example.com',
+            'guid': 'GUID-GUID',
+            'author': 'Writer',
+            'published_date': 'Fri, 20 Aug 2021 19:08:47 +0000',
+            'content': 'This is a dummy content.'
+        }]
+        mock_parse_item.return_value = mock_parse_object
+
+        self.spider.rss_has_content = True
+        next(self.spider.parse_rss(XmlResponse(
+            url='http://example.com',
+            request=Request(url='http://example.com'),
+            body=str.encode('This is testing content!')
+        )))
+
+        date = parse(mock_parse_object[0]['published_date'])
+
+        expected_article_data = {
+            'title': 'Article Title',
+            'link': 'http://example.com',
+            'guid': 'GUID-GUID',
+            'author': 'Writer',
+            'published_date': date.date(),
+            'content': 'This is a dummy content.'
+        }
+
+        self.spider.create_article.assert_called_with(
+            expected_article_data
         )
 
         assert self.spider.post_guids == ['GUID-GUID']
@@ -286,3 +332,7 @@ class ScrapyRssSpiderTestCase(TestCase):
         mock_connect.assert_has_calls(expected_calls)
 
         assert result == self.spider
+
+    def test_create_article(self):
+        with self.assertRaises(NotImplementedError):
+            self.spider.create_article('data')
