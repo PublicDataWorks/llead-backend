@@ -34,6 +34,7 @@ class RSSItem(scrapy.Item):
     guid = scrapy.Field(output_processor=TakeFirst())
     author = scrapy.Field(output_processor=TakeFirst())
     published_date = scrapy.Field(output_processor=TakeFirst())
+    content = scrapy.Field(output_processor=TakeFirst())
 
 
 class ScrapyRssSpider(scrapy.Spider):
@@ -42,9 +43,12 @@ class ScrapyRssSpider(scrapy.Spider):
     urls = []
     post_guids = []
     guid_pre = ''
+    guid_post = ''
+    rss_has_content = False
     custom_settings = {
         'LOG_FILE': None if not settings.FLUENT_LOGGING else settings.FLUENT_PYTHON_LOG_FILE,
-        'LOG_LEVEL': 'INFO'
+        'LOG_LEVEL': 'INFO',
+        'USER_AGENT': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36',
     }
 
     def __init__(self):
@@ -113,17 +117,27 @@ class ScrapyRssSpider(scrapy.Spider):
 
             if guid not in self.post_guids:
                 self.post_guids.append(guid)
-                yield scrapy.Request(
-                    url=rss_item_link,
-                    callback=self.parse_article,
-                    meta={
+                if not self.rss_has_content:
+                    yield scrapy.Request(
+                        url=rss_item_link,
+                        callback=self.parse_article,
+                        meta={
+                            'link': rss_item_link,
+                            'guid': guid,
+                            'title': item['title'],
+                            'author': item.get('author'),
+                            'published_date': published_date,
+                        }
+                    )
+                else:
+                    yield self.create_article({
+                        'title': item['title'],
                         'link': rss_item_link,
                         'guid': guid,
-                        'title': item['title'],
                         'author': item.get('author'),
                         'published_date': published_date,
-                    }
-                )
+                        'content': item.get('content'),
+                    })
 
     def get_crawled_post_guid(self):
         self.post_guids = list(
@@ -150,7 +164,7 @@ class ScrapyRssSpider(scrapy.Spider):
             logger.error(e)
 
     def parse_guid(self, guid):
-        return guid.replace(self.guid_pre, '')
+        return guid.replace(self.guid_pre, '').replace(self.guid_post, '')
 
     def parse_section(self, paragraph):
         parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
@@ -175,4 +189,7 @@ class ScrapyRssSpider(scrapy.Spider):
         raise NotImplementedError
 
     def parse_article(self, response):
+        raise NotImplementedError
+
+    def create_article(self, article_data):
         raise NotImplementedError

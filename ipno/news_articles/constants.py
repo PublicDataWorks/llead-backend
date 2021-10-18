@@ -31,6 +31,9 @@ CRAWL_STATUSES = (
 NOLA_SOURCE = 'nola'
 THELENSNOLA_SOURCE = 'thelensnola'
 VERMILIONTODAY_SOURCE = 'vermiliontoday'
+KLAX_SOURCE = 'klax'
+TTFMAGAZINE_SOURCE = 'ttfmagazine'
+CAPITALCITYNEWS_SOURCE = 'capitalcitynews'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -44,6 +47,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': VERMILIONTODAY_SOURCE,
         'custom_matching_name': 'Vermillion Today',
+    },
+    {
+        'source_name': KLAX_SOURCE,
+        'custom_matching_name': 'KLAX',
+    },
+    {
+        'source_name': TTFMAGAZINE_SOURCE,
+        'custom_matching_name': '225 Magazine',
+    },
+    {
+        'source_name': CAPITALCITYNEWS_SOURCE,
+        'custom_matching_name': 'Capital City News',
     },
 ]
 
