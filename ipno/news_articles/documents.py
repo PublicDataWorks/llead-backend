@@ -20,7 +20,7 @@ class NewsArticleESDoc(ESDoc):
 
     def get_queryset(self):
         return self.django.model.objects.filter(
-            officers__isnull=False
+            matched_sentences__officers__isnull=False
         ).order_by(
             '-published_date',
         ).distinct().select_related('source')

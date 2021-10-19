@@ -5,6 +5,7 @@ from unittest.mock import Mock
 from django.test import TestCase
 
 from news_articles.factories import NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
@@ -55,8 +56,9 @@ class OfficersSearchQueryTestCase(TestCase):
         document_1.departments.add(department_1)
 
         news_article = NewsArticleFactory(title='Text content title', content='Text content keywo', author='test')
-        news_article.officers.add(officer_1)
-        news_article.save()
+        matched_sentence = MatchedSentenceFactory(article=news_article)
+        matched_sentence.officers.add(officer_1)
+        matched_sentence.save()
 
         rebuild_search_index()
 
