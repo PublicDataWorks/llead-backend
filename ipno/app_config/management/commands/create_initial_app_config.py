@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from app_config.models import AppConfig, AppTextContent
-from app_config.constants import APP_CONFIG, APP_TEXT_CONTENTS
+from app_config.models import AppConfig, AppTextContent, FrontPageOrder
+from app_config.constants import APP_CONFIG, APP_TEXT_CONTENTS, APP_FRONT_PAGE_SECTIONS
 
 
 class Command(BaseCommand):
@@ -14,3 +14,8 @@ class Command(BaseCommand):
             app_text_content = AppTextContent.objects.filter(name=app_text_content_data['name']).first()
             if not app_text_content:
                 AppTextContent.objects.create(**app_text_content_data)
+
+        for app_section in APP_FRONT_PAGE_SECTIONS:
+            app_section_order = FrontPageOrder.objects.filter(section=app_section).first()
+            if not app_section_order:
+                FrontPageOrder.objects.create(section=app_section)
