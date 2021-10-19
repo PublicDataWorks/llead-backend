@@ -34,6 +34,9 @@ VERMILIONTODAY_SOURCE = 'vermiliontoday'
 KLAX_SOURCE = 'klax'
 TTFMAGAZINE_SOURCE = 'ttfmagazine'
 CAPITALCITYNEWS_SOURCE = 'capitalcitynews'
+BRPROUD_SOURCE = 'brproud'
+BOSSIERPRESS_SOURCE = 'bossierpress'
+HERALDGUIDE_SOURCE = 'heraldguide'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -59,6 +62,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': CAPITALCITYNEWS_SOURCE,
         'custom_matching_name': 'Capital City News',
+    },
+    {
+        'source_name': BRPROUD_SOURCE,
+        'custom_matching_name': 'BR Proud',
+    },
+    {
+        'source_name': BOSSIERPRESS_SOURCE,
+        'custom_matching_name': 'Bossier Press-Tribune',
+    },
+    {
+        'source_name': HERALDGUIDE_SOURCE,
+        'custom_matching_name': 'Herald Guide'
     },
 ]
 
