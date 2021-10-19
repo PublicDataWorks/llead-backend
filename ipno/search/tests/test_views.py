@@ -8,6 +8,7 @@ from rest_framework import status
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.factories import EventFactory, OfficerFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from utils.search_index import rebuild_search_index
@@ -46,8 +47,10 @@ class SearchViewSetTestCase(AuthAPITestCase):
             source=source,
             published_date=news_article_1.published_date + datetime.timedelta(days=1)
         )
-        news_article_1.officers.add(officer_1)
-        news_article_2.officers.add(officer_2)
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_1.officers.add(officer_1)
+        matched_sentence_2.officers.add(officer_2)
 
         rebuild_search_index()
 

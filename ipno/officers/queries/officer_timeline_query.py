@@ -1,5 +1,6 @@
 from django.db.models import Prefetch, Q
 
+from news_articles.models import NewsArticle
 from officers.serializers import (
     ComplaintTimelineSerializer,
     UseOfForceTimelineSerializer,
@@ -103,7 +104,10 @@ class OfficerTimelineQuery(object):
 
     @property
     def _news_aticle_timeline(self):
-        news_article_timeline_queryset = self.officer.news_articles.prefetch_related('source')
+        articles_ids = self.officer.matched_sentences.all().values_list('article__id', flat=True)
+        news_article_timeline_queryset = NewsArticle.objects.prefetch_related('source').filter(
+            id__in=articles_ids
+        ).distinct()
 
         return NewsArticleTimelineSerializer(news_article_timeline_queryset, many=True).data
 

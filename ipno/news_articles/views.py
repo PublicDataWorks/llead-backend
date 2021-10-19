@@ -12,7 +12,7 @@ class NewsArticlesViewSet(viewsets.ViewSet):
 
     def list(self, request):
         news_articles = NewsArticle.objects.select_related('source').filter(
-            officers__isnull=False
+            matched_sentences__officers__isnull=False
         ).order_by(
             '-published_date',
         ).distinct()[:NEWS_ARTICLES_LIMIT]

@@ -2,6 +2,7 @@ import datetime
 from django.test import TestCase
 
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.factories import OfficerFactory
 from search.queries import NewsArticlesSearchQuery
 from utils.search_index import rebuild_search_index
@@ -26,9 +27,12 @@ class NewsArticlesSearchQueryTestCase(TestCase):
             author='author keyword',
             published_date=news_article_1.published_date - datetime.timedelta(days=2)
         )
-        news_article_1.officers.add(officer)
-        news_article_2.officers.add(officer)
-        news_article_3.officers.add(officer)
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_3.officers.add(officer)
 
         rebuild_search_index()
 
