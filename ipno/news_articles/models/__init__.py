@@ -5,6 +5,7 @@ from news_articles.models.news_article import NewsArticle
 from news_articles.models.news_article_source import NewsArticleSource
 from news_articles.models.matching_keyword import MatchingKeyword
 from news_articles.models.exclude_officer import ExcludeOfficer
+from news_articles.models.matched_sentence import MatchedSentence
 
 __all__ = [
     'CrawledPost',
@@ -14,4 +15,5 @@ __all__ = [
     'NewsArticleSource',
     'MatchingKeyword',
     'ExcludeOfficer',
+    'MatchedSentence',
 ]

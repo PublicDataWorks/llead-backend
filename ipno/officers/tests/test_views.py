@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from news_articles.factories import NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from unittest.mock import patch
 import pandas as pd
@@ -314,8 +315,11 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         news_article_1 = NewsArticleFactory(published_date=date(2018, 6, 6))
         news_article_2 = NewsArticleFactory(published_date=date(2021, 2, 2))
 
-        news_article_1.officers.add(officer)
-        news_article_2.officers.add(officer)
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_2.officers.add(officer)
 
         use_of_force = UseOfForceFactory(officer=officer)
         EventFactory(

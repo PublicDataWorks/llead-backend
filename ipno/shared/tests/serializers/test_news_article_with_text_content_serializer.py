@@ -3,6 +3,7 @@ from django.test import TestCase
 from mock import patch
 
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.factories import OfficerFactory
 from shared.serializers import NewsArticleWithTextContentSerializer
 
@@ -11,7 +12,8 @@ class NewsArticleWithTextContentSerializerTestCase(TestCase):
     def test_data(self):
         source = NewsArticleSourceFactory(custom_matching_name='Source')
         news_article_1 = NewsArticleFactory(content='Text content keywo', author='Writer Staff', source=source)
-        news_article_1.officers.add(OfficerFactory())
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_1.officers.add(OfficerFactory())
 
         result = NewsArticleWithTextContentSerializer(news_article_1).data
 
