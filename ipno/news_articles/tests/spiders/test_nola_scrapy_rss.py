@@ -355,3 +355,38 @@ class NolaScrapyRssSpiderTestCase(TestCase):
 
         count_crawled_post = CrawledPost.objects.count()
         assert count_crawled_post == 0
+
+    def test_parse_article_without_content(self):
+        mocked_content_paragraphs = []
+        mock_get_all = Mock(return_value=mocked_content_paragraphs)
+        mock_css_instance = Mock(getall=mock_get_all)
+        mock_css = Mock(return_value=mock_css_instance)
+        response = Mock(
+            css=mock_css
+        )
+        published_date = datetime.now().date()
+        response.meta = {
+            'title': 'response title',
+            'link': 'response link',
+            'guid': 'response guid',
+            'author': 'response author',
+            'published_date': published_date,
+        }
+
+        mock_parse_paragraphs = Mock()
+        mocked_paragraphs = []
+        mock_parse_paragraphs.return_value = mocked_paragraphs
+        self.spider.parse_paragraphs = mock_parse_paragraphs
+
+        self.spider.parse_article(response)
+
+        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>:not(meta):not(div)")
+        mock_get_all.assert_called()
+
+        mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
+
+        count_news_article = NewsArticle.objects.count()
+        assert count_news_article == 0
+
+        count_crawled_post = CrawledPost.objects.count()
+        assert count_crawled_post == 0
