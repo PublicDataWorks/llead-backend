@@ -8,6 +8,9 @@ from .capitalcitynews_scrapy_rss import CapitalCityNewsScrapyRssSpider
 from .brproud_scrapy_rss import BRProudScrapyRssSpider
 from .heraldguide_scrapy_rss import HeraldGuideScrapyRssSpider
 from .bossierpress_scrapy_rss import BossierPressScrapyRssSpider
+from .myarklamiss_scrapy_rss import MyArkLamissScrapyRssSpider
+from .pressherald_scrapy_rss import MindenPressHeraldScrapyRssSpider
+from .ulmhawkeyeonline_scrapy_rss import TheHawkeyeScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -20,4 +23,7 @@ __all__ = [
     'BRProudScrapyRssSpider',
     'HeraldGuideScrapyRssSpider',
     'BossierPressScrapyRssSpider',
+    'MyArkLamissScrapyRssSpider',
+    'MindenPressHeraldScrapyRssSpider',
+    'TheHawkeyeScrapyRssSpider',
 ]

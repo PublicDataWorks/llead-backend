@@ -37,6 +37,9 @@ CAPITALCITYNEWS_SOURCE = 'capitalcitynews'
 BRPROUD_SOURCE = 'brproud'
 BOSSIERPRESS_SOURCE = 'bossierpress'
 HERALDGUIDE_SOURCE = 'heraldguide'
+PRESSHERALD_SOURCE = 'pressherald'
+ULMHAWKEYEONLINE_SOURCE = 'ulmhawkeyeonline'
+MYARKLAMISS_SOURCE = 'myarklamiss'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -74,6 +77,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': HERALDGUIDE_SOURCE,
         'custom_matching_name': 'Herald Guide'
+    },
+    {
+        'source_name': PRESSHERALD_SOURCE,
+        'custom_matching_name': 'Minden Press-Herald'
+    },
+    {
+        'source_name': ULMHAWKEYEONLINE_SOURCE,
+        'custom_matching_name': 'The Hawkeye'
+    },
+    {
+        'source_name': MYARKLAMISS_SOURCE,
+        'custom_matching_name': 'My ArkLAMISS'
     },
 ]
 
