@@ -180,6 +180,25 @@ class ScrapyRssSpiderTestCase(TestCase):
         }
 
     @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
+    def test_parse_section_with_regex_replace(self, mock_beautiful_soup):
+        mock_name = Mock()
+        mock_name.name = 'h1'
+        mock_current_tag = Mock(return_value=[mock_name])
+        mock_get_text = Mock(return_value='Test\xa0\n\n\xa0\n\n text')
+        mock_beautiful_soup_instance = Mock(
+            currentTag=mock_current_tag,
+            get_text=mock_get_text
+        )
+        mock_beautiful_soup.return_value = mock_beautiful_soup_instance
+
+        parsed_section = self.spider.parse_section('<h1></h1>')
+
+        assert parsed_section == {
+            'style': TAG_STYLE_MAPPINGS.get('h1'),
+            'content': 'Test\n text'
+        }
+
+    @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
     def test_unparse_section(self, mock_beautiful_soup):
         mock_name = Mock()
         mock_name.name = 'aside'
