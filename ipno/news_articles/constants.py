@@ -40,6 +40,9 @@ HERALDGUIDE_SOURCE = 'heraldguide'
 PRESSHERALD_SOURCE = 'pressherald'
 ULMHAWKEYEONLINE_SOURCE = 'ulmhawkeyeonline'
 MYARKLAMISS_SOURCE = 'myarklamiss'
+NATCHITOCHESTIMES_SOURCE = 'natchitochestimes'
+IBERIANET_SOURCE = 'iberianet'
+BIZNEWORLEANS_SOURCE = 'bizneworleans'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -89,6 +92,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': MYARKLAMISS_SOURCE,
         'custom_matching_name': 'My ArkLAMISS'
+    },
+    {
+        'source_name': NATCHITOCHESTIMES_SOURCE,
+        'custom_matching_name': 'Natchioches Times'
+    },
+    {
+        'source_name': IBERIANET_SOURCE,
+        'custom_matching_name': 'The Daily Iberian'
+    },
+    {
+        'source_name': BIZNEWORLEANS_SOURCE,
+        'custom_matching_name': 'Biz New Orleans'
     },
 ]
 

@@ -1,3 +1,4 @@
+import re
 from dateutil.parser import parse
 
 from django.conf import settings
@@ -169,7 +170,8 @@ class ScrapyRssSpider(scrapy.Spider):
     def parse_section(self, paragraph):
         parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
         tag_name = parsed_paragraph.currentTag()[0].name
-        text_content = parsed_paragraph.get_text()
+        text_content_raw = parsed_paragraph.get_text().replace('\xa0', '')
+        text_content = re.sub(r'\n\n+', '\n', text_content_raw)
 
         if tag_name in UNPARSED_TAGS:
             return None

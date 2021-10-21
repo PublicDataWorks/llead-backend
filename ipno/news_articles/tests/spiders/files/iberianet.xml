@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.iberianet.com - RSS Results of type article with keyword(s) of #topstory</title>
+        <link>https://www.iberianet.com/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc&amp;k%5B%5D=%23topstory</link>
+        <atom:link
+                href="https://www.iberianet.com/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc&amp;k%5B%5D=%23topstory"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.iberianet.com - RSS Results
+            only for asset type(s) of article
+            with keyword(s) of #topstory
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Missouri hospitals in expensive race to hire health care staff as COVID cases soar</title>
+            <description>The nationwide demand for health care workers has inflated hourly rates to sometimes double
+                pre-pandemic levels.
+            </description>
+            <pubDate>Tue, 17 Aug 2021 12:25:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.iberianet.com/tncms/asset/editorial/865ca8b9-692f-57fb-8fc8-1789c5cccda8
+            </guid>
+            <link>
+                https://www.iberianet.com/national/health/missouri-hospitals-in-expensive-race-to-hire-health-care-staff-as-covid-cases-soar/article_865ca8b9-692f-57fb-8fc8-1789c5cccda8.html
+            </link>
+            <dc:creator>By Annika Merrilees</dc:creator>
+        </item>
+
+        <item>
+            <title>Reed-Francois to earn at least $800,000 per year as Missouri AD</title>
+            <description>The UM System Board of Curators voted unanimously Tuesday to approve the contract offered to
+                incoming athletic director Desiree Reed-Francois. Reed-Francois will be introduced at a news conference
+                at 10 a.m. Wednesday. It will stream live on SEC Network+.
+            </description>
+            <pubDate>Tue, 10 Aug 2021 11:32:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.iberianet.com/tncms/asset/editorial/a6ff395a-fbb1-528e-bc3a-612a4746aaa5
+            </guid>
+            <link>
+                https://www.iberianet.com/national/sports/reed-francois-to-earn-at-least-800-000-per-year-as-missouri-ad/article_a6ff395a-fbb1-528e-bc3a-612a4746aaa5.html
+            </link>
+            <dc:creator>By Anthony Kristensen</dc:creator>
+            <enclosure
+                    url="https://bloximages.chicago2.vip.townnews.com/iberianet.com/content/tncms/assets/v3/editorial/9/ad/9adda421-4b08-511b-8e98-904df471919f/6112c6768f404.image.jpg?resize=300%2C223"
+                    length="219107" type="image/jpeg"/>
+        </item>
+    </channel>
+</rss>
