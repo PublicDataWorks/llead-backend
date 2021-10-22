@@ -75,9 +75,6 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
         text_content = ' '.join([paragraph['content'] for paragraph in paragraphs])
         text_content = text_content.strip()
 
-        if not text_content:
-            return
-
         pdf_buffer = ArticlePdfCreator(
             title=title,
             author=author,
