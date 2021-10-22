@@ -43,6 +43,9 @@ MYARKLAMISS_SOURCE = 'myarklamiss'
 NATCHITOCHESTIMES_SOURCE = 'natchitochestimes'
 IBERIANET_SOURCE = 'iberianet'
 BIZNEWORLEANS_SOURCE = 'bizneworleans'
+JAMBALAYANEWS_SOURCE = 'jambalayanews'
+LOUISIANAWEEKLY_SOURCE = 'louisianaweekly'
+LOYOLAMAROON_SOURCE = 'loyolamaroon'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -104,6 +107,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': BIZNEWORLEANS_SOURCE,
         'custom_matching_name': 'Biz New Orleans'
+    },
+    {
+        'source_name': JAMBALAYANEWS_SOURCE,
+        'custom_matching_name': 'Jambalaya News'
+    },
+    {
+        'source_name': LOUISIANAWEEKLY_SOURCE,
+        'custom_matching_name': 'The Louisiana Weekly'
+    },
+    {
+        'source_name': LOYOLAMAROON_SOURCE,
+        'custom_matching_name': 'The Maroon'
     },
 ]
 

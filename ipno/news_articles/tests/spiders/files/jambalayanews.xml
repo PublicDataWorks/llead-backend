@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.jambalayanews.com - RSS Results of type article</title>
+        <link>https://www.jambalayanews.com/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc</link>
+        <atom:link
+                href="https://www.jambalayanews.com/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.jambalayanews.com - RSS Results
+            only for asset type(s) of article
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Kate Beckinsale: I have a very high IQ</title>
+            <description>Kate Beckinsale has a “very high” IQ, but doesn't think being smart has helped her much in
+                life, as people always tell her she would be "happier" without her high intelligence.
+            </description>
+            <pubDate>Thu, 21 Oct 2021 20:00:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.jambalayanews.com/tncms/asset/editorial/d42d4c32-7743-5c3d-94a4-4086ddf43dc5
+            </guid>
+            <link>
+                https://www.jambalayanews.com/lifestyles/entertainment/kate-beckinsale-i-have-a-very-high-iq/article_d42d4c32-7743-5c3d-94a4-4086ddf43dc5.html
+            </link>
+            <dc:creator>By Celebretainment</dc:creator>
+            <enclosure
+                    url="https://bloximages.newyork1.vip.townnews.com/jambalayanews.com/content/tncms/assets/v3/editorial/f/83/f83c4f41-dc6b-5097-b76e-b675f6200692/617217a3bf4a4.image.jpg?resize=300%2C195"
+                    length="100550" type="image/jpeg"/>
+        </item>
+
+        <item>
+            <title>Adele will take her boyfriend to meet her family when she returns to the UK next month</title>
+            <description>Adele is reportedly set to introduce Rich Paul to her family and tour her hometown next month
+                when she brings him back to the UK with her.
+            </description>
+            <pubDate>Thu, 21 Oct 2021 20:00:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.jambalayanews.com/tncms/asset/editorial/3cb76916-2630-5fa8-9dc4-a2c29f8cddea
+            </guid>
+            <link>
+                https://www.jambalayanews.com/lifestyles/entertainment/adele-will-take-her-boyfriend-to-meet-her-family-when-she-returns-to-the-uk/article_3cb76916-2630-5fa8-9dc4-a2c29f8cddea.html
+            </link>
+            <dc:creator>By Celebretainment</dc:creator>
+            <enclosure
+                    url="https://bloximages.newyork1.vip.townnews.com/jambalayanews.com/content/tncms/assets/v3/editorial/5/67/567d866f-6863-5dd9-b71a-699076ba7309/617217a415c58.image.jpg?resize=300%2C195"
+                    length="93262" type="image/jpeg"/>
+        </item>
+
+    </channel>
+</rss>
