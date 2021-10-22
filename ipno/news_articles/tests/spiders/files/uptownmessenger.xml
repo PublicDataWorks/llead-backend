@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+>
+
+    <channel>
+        <title>Uptown Messenger</title>
+        <atom:link href="https://uptownmessenger.com/feed/" rel="self" type="application/rss+xml"/>
+        <link>https://uptownmessenger.com</link>
+        <description>News, crime, politics and events for Uptown New Orleans</description>
+        <lastBuildDate>Thu, 21 Oct 2021 17:56:33 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>
+            hourly
+        </sy:updatePeriod>
+        <sy:updateFrequency>
+            1
+        </sy:updateFrequency>
+        <generator>https://wordpress.org/?v=5.7.3</generator>
+
+        <image>
+            <url>https://uptownmessenger.com/wp-content/uploads/2018/05/favicon-60x60.jpg</url>
+            <title>Uptown Messenger</title>
+            <link>https://uptownmessenger.com</link>
+            <width>32</width>
+            <height>32</height>
+        </image>
+        <item>
+            <title>A Letter from LaToya Cantrell (sponsored)</title>
+            <link>https://uptownmessenger.com/2021/10/a-letter-from-latoya-cantrell-sponsored/</link>
+
+            <dc:creator><![CDATA[Messenger Marketing]]></dc:creator>
+            <pubDate>Thu, 21 Oct 2021 16:45:23 +0000</pubDate>
+            <category><![CDATA[Advertiser specials]]></category>
+            <category><![CDATA[elections]]></category>
+            <guid isPermaLink="false">https://uptownmessenger.com/?p=626533</guid>
+
+            <description>
+                <![CDATA[<a href="https://uptownmessenger.com/2021/10/a-letter-from-latoya-cantrell-sponsored/" title="A Letter from LaToya Cantrell (sponsored)" rel="nofollow"><img width="336" height="280" src="https://d23xispzx43ico.cloudfront.net/wp-content/uploads/2021/10/LaToyaCantrell_GambitAdDIGITAL_Aug2021-336x280.jpg" class="webfeedsFeaturedVisual wp-post-image" alt="" loading="lazy" style="display: block; margin: auto; margin-bottom: 5px;max-width: 100%;" link_thumbnail="1" srcset="https://d23xispzx43ico.cloudfront.net/wp-content/uploads/2021/10/LaToyaCantrell_GambitAdDIGITAL_Aug2021-336x280.jpg 336w, https://d23xispzx43ico.cloudfront.net/wp-content/uploads/2021/10/LaToyaCantrell_GambitAdDIGITAL_Aug2021.jpg 600w" sizes="(max-width: 336px) 100vw, 336px" /></a>Friends, It has been the honor of my life to serve as your mayor and I’m writing to ask for your vote on November 13 so that we can build on the progress we have made the past three years. In that time, we have been presented with challenges we could never have imagined, but we [&#8230;]]]></description>
+
+
+        </item>
+        <item>
+            <title>Viewpoint: Sheriff Marlin Gusman on the special needs facility, compliance order and his tenure as
+                sheriff
+            </title>
+            <link>
+                https://uptownmessenger.com/2021/10/viewpoint-sheriff-marlin-gusman-on-the-special-needs-facility-compliance-order-and-his-tenure-as-sheriff/
+            </link>
+            <comments>
+                https://uptownmessenger.com/2021/10/viewpoint-sheriff-marlin-gusman-on-the-special-needs-facility-compliance-order-and-his-tenure-as-sheriff/#respond
+            </comments>
+
+            <dc:creator><![CDATA[UptownMessenger.com]]></dc:creator>
+            <pubDate>Thu, 21 Oct 2021 15:59:20 +0000</pubDate>
+            <category><![CDATA[elections]]></category>
+            <category><![CDATA[opinion]]></category>
+            <category><![CDATA[politics]]></category>
+            <guid isPermaLink="false">https://uptownmessenger.com/?p=627508</guid>
+
+            <description>
+                <![CDATA[<a href="https://uptownmessenger.com/2021/10/viewpoint-sheriff-marlin-gusman-on-the-special-needs-facility-compliance-order-and-his-tenure-as-sheriff/" title="Viewpoint: Sheriff Marlin Gusman on the special needs facility, compliance order and his tenure as sheriff" rel="nofollow"><img width="100" height="150" src="https://d23xispzx43ico.cloudfront.net/wp-content/uploads/2014/03/marlin-gusman-by-Della-Hasselle.jpg" class="webfeedsFeaturedVisual wp-post-image" alt="" loading="lazy" style="display: block; margin: auto; margin-bottom: 5px;max-width: 100%;" link_thumbnail="1" /></a>Orleans Parish Sheriff Marlin Gusman spoke with the Uptown Messenger about the changes that have occurred in his office and in the criminal justice system during his more than 15 years as sheriff as well as the challenges ahead. Gusman is currently a candidate for re-election and has four challengers: Quentin Brown Jr., Janet Hayes, [&#8230;]]]></description>
+
+            <wfw:commentRss>
+                https://uptownmessenger.com/2021/10/viewpoint-sheriff-marlin-gusman-on-the-special-needs-facility-compliance-order-and-his-tenure-as-sheriff/feed/
+            </wfw:commentRss>
+            <slash:comments>0</slash:comments>
+
+
+        </item>
+    </channel>
+</rss>
+
+        <!--
+        Performance optimized by W3 Total Cache. Learn more: https://www.boldgrid.com/w3-total-cache/
+
+        Page Caching using disk (SSL caching disabled)
+        Content Delivery Network via d23xispzx43ico.cloudfront.net
+
+        Served from: uptownmessenger.com @ 2021-10-22 03:44:38 by W3 Total Cache
+        -->

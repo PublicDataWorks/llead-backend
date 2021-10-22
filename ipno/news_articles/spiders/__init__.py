@@ -17,6 +17,9 @@ from .bizneworleans_scrapy_rss import BizNewOrleansScrapyRssSpider
 from .jambalayanews_scrapy_rss import JambalayaNewsScrapyRssSpider
 from .louisianaweekly_scrapy_rss import LouisianaWeeklyScrapyRssSpider
 from .loyolamaroon_scrapy_rss import LoyolaMaroonScrapyRssSpider
+from .rustonleader_scrapy_rss import RustonDailyLeaderScrapyRssSpider
+from .uptownmessenger_scrapy_rss import UptownMessengerScrapyRssSpider
+from .wgno_scrapy_rss import WGNOScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -38,4 +41,7 @@ __all__ = [
     'JambalayaNewsScrapyRssSpider',
     'LouisianaWeeklyScrapyRssSpider',
     'LoyolaMaroonScrapyRssSpider',
+    'RustonDailyLeaderScrapyRssSpider',
+    'UptownMessengerScrapyRssSpider',
+    'WGNOScrapyRssSpider',
 ]

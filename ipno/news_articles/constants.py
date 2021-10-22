@@ -46,6 +46,9 @@ BIZNEWORLEANS_SOURCE = 'bizneworleans'
 JAMBALAYANEWS_SOURCE = 'jambalayanews'
 LOUISIANAWEEKLY_SOURCE = 'louisianaweekly'
 LOYOLAMAROON_SOURCE = 'loyolamaroon'
+WGNO_SOURCE = 'wgno'
+UPTOWNMESSENGER_SOURCE = 'uptownmessenger'
+RUSTONLEADER_SOURCE = 'rustonleader'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -119,6 +122,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': LOYOLAMAROON_SOURCE,
         'custom_matching_name': 'The Maroon'
+    },
+    {
+        'source_name': WGNO_SOURCE,
+        'custom_matching_name': 'WGNO'
+    },
+    {
+        'source_name': UPTOWNMESSENGER_SOURCE,
+        'custom_matching_name': 'Uptown Messenger'
+    },
+    {
+        'source_name': RUSTONLEADER_SOURCE,
+        'custom_matching_name': 'Ruston Daily Leader'
     },
 ]
 
