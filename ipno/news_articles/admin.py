@@ -33,6 +33,23 @@ class NewsArticleOfficersFilter(admin.SimpleListFilter):
             return queryset.filter(matched_sentences__officers__isnull=True).distinct()
 
 
+class NewsArticleContentFilter(admin.SimpleListFilter):
+    title = 'Content'
+    parameter_name = 'empty'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('exist', 'Has content'),
+            ('not_exist', 'Does not have content'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'exist':
+            return queryset.exclude(content='').distinct()
+        if self.value() == 'not_exist':
+            return queryset.filter(content='').distinct()
+
+
 class MatchedSentenceInlineAdmin(admin.TabularInline):
     model = MatchedSentence
     fields = ('text', 'extracted_keywords', 'officers')
@@ -49,7 +66,7 @@ class MatchedSentenceInlineAdmin(admin.TabularInline):
 
 
 class NewsArticleAdmin(ModelAdmin):
-    list_filter = (NewsArticleOfficersFilter, )
+    list_filter = (NewsArticleOfficersFilter, NewsArticleContentFilter, )
     list_display = ('id', 'source', 'author', 'title')
     inlines = [MatchedSentenceInlineAdmin]
 
