@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.theadvocate.com - RSS Results in acadiana of type article</title>
+        <link>https://www.theadvocate.com/search/?f=rss&amp;t=article&amp;c=acadiana&amp;l=50&amp;s=start_time&amp;sd=desc</link>
+        <atom:link
+                href="https://www.theadvocate.com/search/?f=rss&amp;t=article&amp;c=acadiana&amp;l=50&amp;s=start_time&amp;sd=desc"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.theadvocate.com - RSS Results
+            in section(s) acadiana
+            only for asset type(s) of article
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Erath memorial evokes memories of 8 storm victims, and one man's promise to honor them</title>
+            <description>ERATH – It’s not the type of tragedy a small town can forget. When Hurricane Hilda swept
+                through this town on Oct. 3, 1964, a water tower 125 feet up collapsed onto City Hall, killing eight men
+                inside who were&#8230;
+            </description>
+            <pubDate>Mon, 18 Oct 2021 14:40:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.theadvocate.com/tncms/asset/editorial/a06ad9fa-2e3b-11ec-9f4b-6714f5d20634
+            </guid>
+            <link>https://www.theadvocate.com/acadiana/article_a06ad9fa-2e3b-11ec-9f4b-6714f5d20634.html</link>
+            <dc:creator>By KEN STICKNEY | Staff writer</dc:creator>
+            <enclosure
+                    url="http://bloximages.newyork1.vip.townnews.com/theadvocate.com/content/tncms/assets/v3/editorial/b/0b/b0b269f5-1db3-5100-8279-ceb181047ca1/6169e730e115c.image.jpg?resize=300%2C204"
+                    length="330356" type="image/jpeg"/>
+        </item>
+
+        <item>
+            <title>Oh, my gourd! Pumpkins make the best decorations. Here's how to help them last longer</title>
+            <description>Short and tall. Fat and round. Bright orange, pale pink, even green.</description>
+            <pubDate>Mon, 18 Oct 2021 09:00:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.theadvocate.com/tncms/asset/editorial/9de9eb62-2ada-11ec-946c-b7b290c5f2d0
+            </guid>
+            <link>
+                https://www.theadvocate.com/baton_rouge/entertainment_life/home_garden/article_9de9eb62-2ada-11ec-946c-b7b290c5f2d0.html
+            </link>
+            <dc:creator>BY KAREN MARTIN | Staff writer</dc:creator>
+            <enclosure
+                    url="http://bloximages.newyork1.vip.townnews.com/theadvocate.com/content/tncms/assets/v3/editorial/2/c5/2c577c14-fdda-5906-9b55-850557f0a4cd/61670f74d9acd.image.jpg?resize=300%2C200"
+                    length="378625" type="image/jpeg"/>
+        </item>
+
+    </channel>
+</rss>
