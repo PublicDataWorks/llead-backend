@@ -52,6 +52,9 @@ RUSTONLEADER_SOURCE = 'rustonleader'
 SLIDELLINDEPENDENT_SOURCE = 'slidellindependent'
 TECHETODAY_SOURCE = 'techetoday'
 THENICHOLLSWORTH_SOURCE = 'thenichollsworth'
+THEACADIANAADVOCATE_SOURCE = 'theacadianaadvocate'
+LSUREVEILLE_SOURCE = 'lsureveille'
+CONCORDIASENTINELHANNAPUB_SOURCE = 'concordiasentinelhannapub'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -149,6 +152,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': THENICHOLLSWORTH_SOURCE,
         'custom_matching_name': 'Nicholls Worth'
+    },
+    {
+        'source_name': THEACADIANAADVOCATE_SOURCE,
+        'custom_matching_name': 'The Acadiana Advocate'
+    },
+    {
+        'source_name': LSUREVEILLE_SOURCE,
+        'custom_matching_name': 'Reveille'
+    },
+    {
+        'source_name': CONCORDIASENTINELHANNAPUB_SOURCE,
+        'custom_matching_name': 'Concordia Sentinel'
     },
 ]
 

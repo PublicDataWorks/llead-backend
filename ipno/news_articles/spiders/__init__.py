@@ -23,6 +23,9 @@ from .wgno_scrapy_rss import WGNOScrapyRssSpider
 from .slidellindependent_scrapy_rss import SlidellIndependentScrapyRssSpider
 from .techetoday_scrapy_rss import TecheTodayScrapyRssSpider
 from .thenichollsworth_scrapy_rss import NichollsWorthScrapyRssSpider
+from .theacadianaadvocate_scrapy_rss import TheAcadianaAdvocateScrapyRssSpider
+from .concordiasentinelhannapub_scrapy_rss import ConcordiaSentinelScrapyRssSpider
+from .lsureveille_scrapy_rss import ReveilleScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -50,4 +53,7 @@ __all__ = [
     'SlidellIndependentScrapyRssSpider',
     'TecheTodayScrapyRssSpider',
     'NichollsWorthScrapyRssSpider',
+    'TheAcadianaAdvocateScrapyRssSpider',
+    'ConcordiaSentinelScrapyRssSpider',
+    'ReveilleScrapyRssSpider'
 ]
