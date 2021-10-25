@@ -34,6 +34,9 @@ from news_articles.spiders import (
     WGNOScrapyRssSpider,
     UptownMessengerScrapyRssSpider,
     RustonDailyLeaderScrapyRssSpider,
+    SlidellIndependentScrapyRssSpider,
+    TecheTodayScrapyRssSpider,
+    NichollsWorthScrapyRssSpider,
 )
 from utils.wrgl_generator import WrglGenerator
 
@@ -78,6 +81,9 @@ class Command(BaseCommand):
         process.crawl(WGNOScrapyRssSpider)
         process.crawl(UptownMessengerScrapyRssSpider)
         process.crawl(RustonDailyLeaderScrapyRssSpider)
+        process.crawl(SlidellIndependentScrapyRssSpider)
+        process.crawl(TecheTodayScrapyRssSpider)
+        process.crawl(NichollsWorthScrapyRssSpider)
 
         process.start()
 

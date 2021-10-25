@@ -20,6 +20,9 @@ from .loyolamaroon_scrapy_rss import LoyolaMaroonScrapyRssSpider
 from .rustonleader_scrapy_rss import RustonDailyLeaderScrapyRssSpider
 from .uptownmessenger_scrapy_rss import UptownMessengerScrapyRssSpider
 from .wgno_scrapy_rss import WGNOScrapyRssSpider
+from .slidellindependent_scrapy_rss import SlidellIndependentScrapyRssSpider
+from .techetoday_scrapy_rss import TecheTodayScrapyRssSpider
+from .thenichollsworth_scrapy_rss import NichollsWorthScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -44,4 +47,7 @@ __all__ = [
     'RustonDailyLeaderScrapyRssSpider',
     'UptownMessengerScrapyRssSpider',
     'WGNOScrapyRssSpider',
+    'SlidellIndependentScrapyRssSpider',
+    'TecheTodayScrapyRssSpider',
+    'NichollsWorthScrapyRssSpider',
 ]
