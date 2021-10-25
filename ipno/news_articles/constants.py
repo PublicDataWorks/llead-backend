@@ -49,6 +49,9 @@ LOYOLAMAROON_SOURCE = 'loyolamaroon'
 WGNO_SOURCE = 'wgno'
 UPTOWNMESSENGER_SOURCE = 'uptownmessenger'
 RUSTONLEADER_SOURCE = 'rustonleader'
+SLIDELLINDEPENDENT_SOURCE = 'slidellindependent'
+TECHETODAY_SOURCE = 'techetoday'
+THENICHOLLSWORTH_SOURCE = 'thenichollsworth'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -134,6 +137,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': RUSTONLEADER_SOURCE,
         'custom_matching_name': 'Ruston Daily Leader'
+    },
+    {
+        'source_name': SLIDELLINDEPENDENT_SOURCE,
+        'custom_matching_name': 'Slidell Independent'
+    },
+    {
+        'source_name': TECHETODAY_SOURCE,
+        'custom_matching_name': 'Teche Today'
+    },
+    {
+        'source_name': THENICHOLLSWORTH_SOURCE,
+        'custom_matching_name': 'Nicholls Worth'
     },
 ]
 
