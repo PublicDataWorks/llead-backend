@@ -26,6 +26,8 @@ from .thenichollsworth_scrapy_rss import NichollsWorthScrapyRssSpider
 from .theacadianaadvocate_scrapy_rss import TheAcadianaAdvocateScrapyRssSpider
 from .concordiasentinelhannapub_scrapy_rss import ConcordiaSentinelScrapyRssSpider
 from .lsureveille_scrapy_rss import ReveilleScrapyRssSpider
+from .franklinsunhannapub_scrapy_rss import TheFranklinSunScrapyRssSpider
+from .ouachitacitizenhannapub_scrapy_rss import TheOouachitaCitizenScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -55,5 +57,7 @@ __all__ = [
     'NichollsWorthScrapyRssSpider',
     'TheAcadianaAdvocateScrapyRssSpider',
     'ConcordiaSentinelScrapyRssSpider',
-    'ReveilleScrapyRssSpider'
+    'ReveilleScrapyRssSpider',
+    'TheFranklinSunScrapyRssSpider',
+    'TheOouachitaCitizenScrapyRssSpider',
 ]

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.hannapub.com - RSS Results in ouachitacitizen of type article</title>
+        <link>https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=ouachitacitizen&amp;l=50&amp;s=start_time&amp;sd=desc</link>
+        <atom:link
+                href="https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=ouachitacitizen&amp;l=50&amp;s=start_time&amp;sd=desc"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.hannapub.com - RSS Results
+            in section(s) ouachitacitizen
+            only for asset type(s) of article
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Coaches preview stacked Bayou Jamb event</title>
+            <description>The friendly barbs flew around the annual Bayou Jamb presser once again, as coaches took the
+                opportunity to promote their programs and players while also acknowledging the difficulties of
+                navigating a football season while dealing with COVID-19.
+            </description>
+            <pubDate>Mon, 23 Aug 2021 12:46:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/ff134658-0439-11ec-9652-b7caffe97ad6
+            </guid>
+            <link>
+                https://www.hannapub.com/ouachitacitizen/sports/coaches-preview-stacked-bayou-jamb-event/article_ff134658-0439-11ec-9652-b7caffe97ad6.html
+            </link>
+            <dc:creator>By Jake Martin | sports@ouachitacitizen.com</dc:creator>
+            <enclosure
+                    url="https://bloximages.newyork1.vip.townnews.com/hannapub.com/content/tncms/assets/v3/editorial/3/88/388e10f2-043a-11ec-9747-076451c6acff/6123df5dbaa3e.image.jpg?resize=300%2C200"
+                    length="304707" type="image/jpeg"/>
+        </item>
+
+        <item>
+            <title>Neville’s Cagle named Class 4A Defensive POY</title>
+            <description>Neville’s Andrew Cagle was named the Class 4A Defensive MVP.</description>
+            <pubDate>Sat, 11 Jan 2020 12:37:00 -0600</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/5077e1d0-34a1-11ea-a377-5b47a605dad5
+            </guid>
+            <link>
+                https://www.hannapub.com/ouachitacitizen/neville-s-cagle-named-class-4a-defensive-poy/article_5077e1d0-34a1-11ea-a377-5b47a605dad5.html
+            </link>
+            <author>jakemartinsec@gmail.com (Jake Martin )</author>
+        </item>
+
+    </channel>
+</rss>

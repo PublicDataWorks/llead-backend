@@ -55,6 +55,8 @@ THENICHOLLSWORTH_SOURCE = 'thenichollsworth'
 THEACADIANAADVOCATE_SOURCE = 'theacadianaadvocate'
 LSUREVEILLE_SOURCE = 'lsureveille'
 CONCORDIASENTINELHANNAPUB_SOURCE = 'concordiasentinelhannapub'
+FRANKLINSUNHANNAPUB_SOURCE = 'franklinsunhannapub'
+OUACHITACITIZENHANNAPUB_SOURCE = 'ouachitacitizenhannapub'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -164,6 +166,14 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': CONCORDIASENTINELHANNAPUB_SOURCE,
         'custom_matching_name': 'Concordia Sentinel'
+    },
+    {
+        'source_name': FRANKLINSUNHANNAPUB_SOURCE,
+        'custom_matching_name': 'The Franklin Sun'
+    },
+    {
+        'source_name': OUACHITACITIZENHANNAPUB_SOURCE,
+        'custom_matching_name': 'The Oouachita Citizen'
     },
 ]
 
