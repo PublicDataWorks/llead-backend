@@ -39,6 +39,8 @@ from news_articles.spiders import (
     TheAcadianaAdvocateScrapyRssSpider,
     ConcordiaSentinelScrapyRssSpider,
     ReveilleScrapyRssSpider,
+    TheFranklinSunScrapyRssSpider,
+    TheOouachitaCitizenScrapyRssSpider,
 )
 from news_articles.spiders import CapitalCityNewsScrapyRssSpider
 from officers.factories import OfficerFactory
@@ -90,6 +92,8 @@ class CommandTestCase(TestCase):
             call(TheAcadianaAdvocateScrapyRssSpider),
             call(ConcordiaSentinelScrapyRssSpider),
             call(ReveilleScrapyRssSpider),
+            call(TheFranklinSunScrapyRssSpider),
+            call(TheOouachitaCitizenScrapyRssSpider),
         ]
         mock_crawl.assert_has_calls(calls_similarity)
         mock_start.assert_called()
