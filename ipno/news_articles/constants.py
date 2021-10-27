@@ -57,6 +57,9 @@ LSUREVEILLE_SOURCE = 'lsureveille'
 CONCORDIASENTINELHANNAPUB_SOURCE = 'concordiasentinelhannapub'
 FRANKLINSUNHANNAPUB_SOURCE = 'franklinsunhannapub'
 OUACHITACITIZENHANNAPUB_SOURCE = 'ouachitacitizenhannapub'
+WBRZ_SOURCE = 'wbrz'
+THETOWNTALK_SOURCE = 'thetowntalk'
+SHREVEPORTTIMES_SOURCE = 'shreveporttimes'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -174,6 +177,18 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': OUACHITACITIZENHANNAPUB_SOURCE,
         'custom_matching_name': 'The Oouachita Citizen'
+    },
+    {
+        'source_name': WBRZ_SOURCE,
+        'custom_matching_name': 'WBRZ'
+    },
+    {
+        'source_name': THETOWNTALK_SOURCE,
+        'custom_matching_name': 'Town Talk'
+    },
+    {
+        'source_name': SHREVEPORTTIMES_SOURCE,
+        'custom_matching_name': 'Shreveport Times'
     },
 ]
 
