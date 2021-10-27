@@ -60,6 +60,8 @@ OUACHITACITIZENHANNAPUB_SOURCE = 'ouachitacitizenhannapub'
 WBRZ_SOURCE = 'wbrz'
 THETOWNTALK_SOURCE = 'thetowntalk'
 SHREVEPORTTIMES_SOURCE = 'shreveporttimes'
+THEADVERTISER_SOURCE = 'theadvertiser'
+AVOYELLESTODAY_SOURCE = 'avoyellestoday'
 
 APP_NEWS_ARTICLE_NAMES = [
     {
@@ -189,6 +191,14 @@ APP_NEWS_ARTICLE_NAMES = [
     {
         'source_name': SHREVEPORTTIMES_SOURCE,
         'custom_matching_name': 'Shreveport Times'
+    },
+    {
+        'source_name': THEADVERTISER_SOURCE,
+        'custom_matching_name': 'Daily Advertiser'
+    },
+    {
+        'source_name': AVOYELLESTODAY_SOURCE,
+        'custom_matching_name': 'Avoyelles Today'
     },
 ]
 

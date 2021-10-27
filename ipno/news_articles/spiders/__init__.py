@@ -31,6 +31,8 @@ from .ouachitacitizenhannapub_scrapy_rss import TheOouachitaCitizenScrapyRssSpid
 from .wbrz_scrapy_rss import WBRZScrapyRssSpider
 from .thetowntalk_scrapy_rss import TownTalkScrapyRssSpider
 from .shreveporttimes_scrapy_rss import ShreveportTimesScrapyRssSpider
+from .theadvertiser_scrapy_rss import DailyAdvertiserScrapyRssSpider
+from .avoyellestoday_scrapy_rss import AvoyellesTodayScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -66,4 +68,6 @@ __all__ = [
     'WBRZScrapyRssSpider',
     'TownTalkScrapyRssSpider',
     'ShreveportTimesScrapyRssSpider',
+    'DailyAdvertiserScrapyRssSpider',
+    'AvoyellesTodayScrapyRssSpider',
 ]
