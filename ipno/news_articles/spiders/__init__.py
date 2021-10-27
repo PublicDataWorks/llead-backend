@@ -28,6 +28,9 @@ from .concordiasentinelhannapub_scrapy_rss import ConcordiaSentinelScrapyRssSpid
 from .lsureveille_scrapy_rss import ReveilleScrapyRssSpider
 from .franklinsunhannapub_scrapy_rss import TheFranklinSunScrapyRssSpider
 from .ouachitacitizenhannapub_scrapy_rss import TheOouachitaCitizenScrapyRssSpider
+from .wbrz_scrapy_rss import WBRZScrapyRssSpider
+from .thetowntalk_scrapy_rss import TownTalkScrapyRssSpider
+from .shreveporttimes_scrapy_rss import ShreveportTimesScrapyRssSpider
 
 __all__ = [
     'ScrapyRssSpider',
@@ -60,4 +63,7 @@ __all__ = [
     'ReveilleScrapyRssSpider',
     'TheFranklinSunScrapyRssSpider',
     'TheOouachitaCitizenScrapyRssSpider',
+    'WBRZScrapyRssSpider',
+    'TownTalkScrapyRssSpider',
+    'ShreveportTimesScrapyRssSpider',
 ]
