@@ -135,7 +135,107 @@ class IberianetScrapyRssSpiderTestCase(TestCase):
 
         self.spider.parse_article(response)
 
-        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>div>p")
+        mock_css.assert_called_with(
+            "div[itemprop=\"articleBody\"]>div>p, div[itemprop=\"articleBody\"] div[dir=\"auto\"], "
+            "div[itemprop=\"articleBody\"]>div>div>p, .RichTextArticleBody-body"
+        )
+        mock_get_all.assert_called()
+
+        mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
+
+        mock_article_pdf_creator.assert_called_with(
+            title='response title',
+            author='response author',
+            date=published_date,
+            content=mocked_paragraphs,
+            link='response link',
+        )
+
+        mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
+
+        mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
+
+        new_article = NewsArticle.objects.first()
+        assert new_article.source.source_name == 'iberianet'
+        assert new_article.link == 'response link'
+        assert new_article.title == 'response title'
+        assert new_article.content == 'header content body content'
+        assert new_article.guid == 'response guid'
+        assert new_article.author == 'response author'
+        assert new_article.published_date == published_date
+        assert new_article.url == 'pdf_url.pdf'
+
+        count_news_article = NewsArticle.objects.count()
+        assert count_news_article == 1
+
+        crawled_post = CrawledPost.objects.first()
+        assert crawled_post.source.source_name == 'iberianet'
+        assert crawled_post.post_guid == 'response guid'
+
+        count_crawled_post = CrawledPost.objects.count()
+        assert count_crawled_post == 1
+
+    @patch('news_articles.spiders.iberianet_scrapy_rss.ArticlePdfCreator')
+    def test_parse_article_with_annoy_author_format(self, mock_article_pdf_creator):
+        officer = OfficerFactory()
+
+        mock_adc_instance = MagicMock()
+        mocked_pdf_built = 'pdf-buffer'
+        mock_adc_instance.build_pdf.return_value = mocked_pdf_built
+        mock_article_pdf_creator.return_value = mock_adc_instance
+
+        mocked_content_paragraphs = ['content paragraphs']
+        mock_get_all = Mock(return_value=mocked_content_paragraphs)
+        mock_css_instance = Mock(getall=mock_get_all)
+        mock_css = Mock(return_value=mock_css_instance)
+        response = Mock(
+            css=mock_css
+        )
+        published_date = datetime.now().date()
+        response.meta = {
+            'title': 'response title',
+            'link': 'response link',
+            'guid': 'response guid',
+            'author': 'By: response author',
+            'published_date': published_date,
+        }
+
+        mock_parse_paragraphs = Mock()
+        mocked_paragraphs = [
+            {
+                'style': 'Heading1',
+                'content': 'header content',
+            },
+            {
+                'style': 'BodyText',
+                'content': 'body content',
+            }
+        ]
+        mock_parse_paragraphs.return_value = mocked_paragraphs
+        self.spider.parse_paragraphs = mock_parse_paragraphs
+
+        mocked_pdf_location = 'pdf_location.pdf'
+        mock_get_upload_pdf_location = Mock(
+            return_value=mocked_pdf_location
+        )
+        self.spider.get_upload_pdf_location = mock_get_upload_pdf_location
+
+        mock_upload_file_to_gcloud = Mock(
+            return_value='pdf_url.pdf'
+        )
+        self.spider.upload_file_to_gcloud = mock_upload_file_to_gcloud
+
+        officers_data = defaultdict(list)
+        officers_data[officer.name].append(officer.id)
+
+        self.spider.officers = officers_data
+
+        self.spider.parse_article(response)
+
+        mock_css.assert_called_with(
+            "div[itemprop=\"articleBody\"]>div>p, div[itemprop=\"articleBody\"] div[dir=\"auto\"], "
+            "div[itemprop=\"articleBody\"]>div>div>p, .RichTextArticleBody-body"
+        )
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
@@ -222,7 +322,10 @@ class IberianetScrapyRssSpiderTestCase(TestCase):
 
         self.spider.parse_article(response)
 
-        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>div>p")
+        mock_css.assert_called_with(
+            "div[itemprop=\"articleBody\"]>div>p, div[itemprop=\"articleBody\"] div[dir=\"auto\"], "
+            "div[itemprop=\"articleBody\"]>div>div>p, .RichTextArticleBody-body"
+        )
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)

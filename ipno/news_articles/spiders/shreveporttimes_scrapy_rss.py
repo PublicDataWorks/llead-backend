@@ -68,17 +68,18 @@ class ShreveportTimesScrapyRssSpider(ScrapyRssSpider):
         uploaded_url = self.upload_file_to_gcloud(pdf_buffer, pdf_location, FILE_TYPES['PDF'])
 
         if uploaded_url:
-            news_article_data = NewsArticle(
-                source=self.source,
+            NewsArticle.objects.get_or_create(
                 link=link,
-                title=title,
-                content=text_content,
-                guid=guid,
-                author=author,
-                published_date=published_date,
-                url=uploaded_url,
+                defaults={
+                    'source': self.source,
+                    'title': title,
+                    'content': text_content,
+                    'guid': guid,
+                    'author': author,
+                    'published_date': published_date,
+                    'url': uploaded_url,
+                }
             )
-            news_article_data.save()
         else:
             save_crawled_post = False
 

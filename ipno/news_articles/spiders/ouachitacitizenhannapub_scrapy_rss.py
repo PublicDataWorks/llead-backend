@@ -36,11 +36,10 @@ class TheOouachitaCitizenScrapyRssSpider(ScrapyRssSpider):
         title = response.meta.get('title')
         link = response.meta.get('link')
         guid = response.meta.get('guid')
-        author = response.meta.get('author')
+        raw_author = response.meta.get('author')
         published_date = response.meta.get('published_date')
 
-        if author:
-            author = author.replace('By ', '')
+        author = self.clean_author(raw_author)
 
         content_paragraphs = response.css("div[itemprop=\"articleBody\"]>div>p").getall()
         paragraphs = self.parse_paragraphs(content_paragraphs)

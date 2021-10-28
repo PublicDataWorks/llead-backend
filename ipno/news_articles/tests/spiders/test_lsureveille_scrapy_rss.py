@@ -137,7 +137,7 @@ class ReveilleScrapyRssSpiderTestCase(TestCase):
 
         self.spider.parse_article(response)
 
-        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>p")
+        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>p, div[itemprop=\"articleBody\"]>div:not([class])")
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
@@ -224,7 +224,7 @@ class ReveilleScrapyRssSpiderTestCase(TestCase):
 
         self.spider.parse_article(response)
 
-        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>p")
+        mock_css.assert_called_with("div[itemprop=\"articleBody\"]>p, div[itemprop=\"articleBody\"]>div:not([class])")
         mock_get_all.assert_called()
 
         mock_parse_paragraphs.assert_called_with(mocked_content_paragraphs)
