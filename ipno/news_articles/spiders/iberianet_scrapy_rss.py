@@ -38,10 +38,15 @@ class IberianetScrapyRssSpider(ScrapyRssSpider):
         title = response.meta.get('title')
         link = response.meta.get('link')
         guid = response.meta.get('guid')
-        author = response.meta.get('author')
+        raw_author = response.meta.get('author')
         published_date = response.meta.get('published_date')
 
-        content_paragraphs = response.css("div[itemprop=\"articleBody\"]>div>p").getall()
+        author = self.clean_author(raw_author)
+
+        content_paragraphs = response.css(
+            "div[itemprop=\"articleBody\"]>div>p, div[itemprop=\"articleBody\"] div[dir=\"auto\"], "
+            "div[itemprop=\"articleBody\"]>div>div>p, .RichTextArticleBody-body"
+        ).getall()
 
         paragraphs = self.parse_paragraphs(content_paragraphs)
 

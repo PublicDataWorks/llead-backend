@@ -162,6 +162,83 @@ class LouisianaWeeklyScrapyRssSpiderTestCase(TestCase):
         assert count_crawled_post == 1
 
     @patch('news_articles.spiders.louisianaweekly_scrapy_rss.ArticlePdfCreator')
+    def test_create_article_with_author_name_in_content(self, mock_article_pdf_creator):
+        html_content = '<p><strong>By Stacy M. Brown</strong><br />\n<em>Contributing Writer</em></p><p>The uniformed ' \
+                       'crime reporting statistics revealed that .. </p> '
+        expected_author = 'Stacy M. Brown'
+        officer = OfficerFactory()
+
+        mock_adc_instance = MagicMock()
+        mocked_pdf_built = 'pdf-buffer'
+        mock_adc_instance.build_pdf.return_value = mocked_pdf_built
+        mock_article_pdf_creator.return_value = mock_adc_instance
+
+        published_date = datetime.now().date()
+        article_data = {
+            'title': 'response title',
+            'link': 'response link',
+            'guid': 'response guid',
+            'author': 'response author',
+            'published_date': published_date,
+            'content': html_content
+        }
+
+        mocked_pdf_location = 'pdf_location.pdf'
+        mock_get_upload_pdf_location = Mock(
+            return_value=mocked_pdf_location
+        )
+        self.spider.get_upload_pdf_location = mock_get_upload_pdf_location
+
+        mock_upload_file_to_gcloud = Mock(
+            return_value='pdf_url.pdf'
+        )
+        self.spider.upload_file_to_gcloud = mock_upload_file_to_gcloud
+
+        officers_data = defaultdict(list)
+        officers_data[officer.name].append(officer.id)
+
+        self.spider.officers = officers_data
+
+        self.spider.create_article(article_data)
+
+        expected_content = {
+            'style': 'BodyText',
+            'content': 'The uniformed crime reporting statistics revealed that ..  '
+        }
+
+        mock_article_pdf_creator.assert_called_with(
+            title='response title',
+            author=expected_author,
+            date=published_date,
+            content=[expected_content],
+            link='response link',
+        )
+
+        mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
+
+        mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
+
+        new_article = NewsArticle.objects.first()
+        assert new_article.source.source_name == 'louisianaweekly'
+        assert new_article.link == 'response link'
+        assert new_article.title == 'response title'
+        assert new_article.content == expected_content.get('content')
+        assert new_article.guid == 'response guid'
+        assert new_article.author == expected_author
+        assert new_article.published_date == published_date
+        assert new_article.url == 'pdf_url.pdf'
+
+        count_news_article = NewsArticle.objects.count()
+        assert count_news_article == 1
+
+        crawled_post = CrawledPost.objects.first()
+        assert crawled_post.source.source_name == 'louisianaweekly'
+        assert crawled_post.post_guid == 'response guid'
+
+        count_crawled_post = CrawledPost.objects.count()
+        assert count_crawled_post == 1
+
+    @patch('news_articles.spiders.louisianaweekly_scrapy_rss.ArticlePdfCreator')
     def test_create_article_not_upload_file(self, mock_article_pdf_creator):
         officer = OfficerFactory()
 

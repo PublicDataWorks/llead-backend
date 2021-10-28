@@ -1,4 +1,6 @@
 import re
+from html import escape
+
 from dateutil.parser import parse
 
 from django.conf import settings
@@ -168,9 +170,11 @@ class ScrapyRssSpider(scrapy.Spider):
         return guid.replace(self.guid_pre, '').replace(self.guid_post, '')
 
     def parse_section(self, paragraph):
-        parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
-        tag_name = parsed_paragraph.currentTag()[0].name
-        text_content_raw = parsed_paragraph.get_text().replace('\xa0', '')
+
+        raw_parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
+        parsed_paragraph = re.sub(r'&lt;(.+?)&gt;', '', escape(raw_parsed_paragraph.get_text()))
+        tag_name = raw_parsed_paragraph.currentTag()[0].name
+        text_content_raw = parsed_paragraph.replace('\xa0', '')
         text_content = re.sub(r'\n\n+', '\n', text_content_raw)
 
         if tag_name in UNPARSED_TAGS:
@@ -186,6 +190,28 @@ class ScrapyRssSpider(scrapy.Spider):
         paragraphs = [paragraph for paragraph in raw_paragraphs if paragraph is not None]
 
         return paragraphs
+
+    def remove_by_in_author(self, raw_author):
+        return re.sub(r'^[Bb][Yy]:? ', '', raw_author).strip()
+
+    def remove_author_redundant_text(self, raw_author):
+        return re.sub(r'(\|+)(.+)', '', raw_author).strip() if raw_author.count('|') == 1 else raw_author
+
+    def remove_author_email(self, raw_author):
+        return re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '', raw_author).strip()
+
+    def remove_multi_nicks(self, raw_author):
+        raw_parsed_author_lst = re.split(r' (\|+) @\S*', raw_author)
+        author_lst = [name.strip() for name in raw_parsed_author_lst if len(name) > 1]
+        return ', '.join(author_lst)
+
+    def clean_author(self, raw_author):
+        if raw_author:
+            removed_by_author = self.remove_by_in_author(raw_author)
+            removed_redundant_text = self.remove_author_redundant_text(removed_by_author)
+            removed_author_email = self.remove_author_email(removed_redundant_text)
+            return self.remove_multi_nicks(removed_author_email)
+        return raw_author
 
     def parse_item(self, response):
         raise NotImplementedError

@@ -1,3 +1,6 @@
+import re
+
+from bs4 import BeautifulSoup
 from scrapy.loader import ItemLoader
 
 from news_articles.constants import LOUISIANAWEEKLY_SOURCE
@@ -44,11 +47,23 @@ class LouisianaWeeklyScrapyRssSpider(ScrapyRssSpider):
         published_date = article_data.get('published_date')
         content = article_data.get('content')
 
+        parsed_first_paragraph = BeautifulSoup(content, "html.parser").find('p')
+        first_paragraph = parsed_first_paragraph.text if parsed_first_paragraph else None
+
         paragraphs = [self.parse_section(content)]
 
         save_crawled_post = True
 
         text_content = ' '.join([paragraph['content'] for paragraph in paragraphs])
+
+        if first_paragraph and first_paragraph.startswith('By '):
+            parsed_author = re.search(r"By (.*)\n", first_paragraph)
+            author = parsed_author.group(1) if parsed_author else author
+            text_content = text_content.replace(first_paragraph, '')
+            paragraphs = [{
+                'style': paragraphs[0].get('style'),
+                'content': text_content
+            }]
 
         pdf_buffer = ArticlePdfCreator(
             title=title,
