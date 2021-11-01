@@ -45,21 +45,28 @@ class KlaxRssSpiderTestCase(TestCase):
 
     @patch('news_articles.spiders.klax_scrapy_rss.ItemLoader')
     @patch('news_articles.spiders.klax_scrapy_rss.RSSItem')
-    def test_call_parse_items_call_params(self, mock_rss_item, mock_item_loader):
+    @patch('news_articles.spiders.klax_scrapy_rss.Selector')
+    def test_call_parse_items_call_params(self, mock_selector, mock_rss_item, mock_item_loader):
         mock_rss_item_instance = Mock()
         mock_rss_item.return_value = mock_rss_item_instance
 
         mock_response = Mock()
         mock_xpath = Mock()
+        mock_remove_namespaces = Mock()
         mock_xpath.return_value = ['item1']
-        mock_response.xpath = mock_xpath
+        mock_selector.return_value = Mock(
+            xpath=mock_xpath,
+            remove_namespaces=mock_remove_namespaces
+        )
+        mock_response.text = 'text'
 
         mock_item_loader_instance = MagicMock()
         mock_item_loader.return_value = mock_item_loader_instance
 
         self.spider.parse_item(mock_response)
 
-        mock_response.xpath.assert_called_with("//channel/item")
+        mock_xpath.assert_called_with("//channel/item")
+        mock_remove_namespaces.assert_called()
 
         mock_item_loader.assert_called_with(
             item=mock_rss_item_instance,

@@ -1,4 +1,5 @@
 from scrapy.loader import ItemLoader
+from parsel import Selector
 
 from news_articles.constants import KLAX_SOURCE
 from news_articles.models import NewsArticle, CrawledPost
@@ -19,7 +20,9 @@ class KlaxScrapyRssSpider(ScrapyRssSpider):
         super().__init__()
 
     def parse_item(self,  response):
-        channel_items = response.xpath("//channel/item")
+        selector = Selector(response.text, type='xml')
+        selector.remove_namespaces()
+        channel_items = selector.xpath("//channel/item")
         items = []
         for item in channel_items:
             loader = ItemLoader(item=RSSItem(), selector=item)
