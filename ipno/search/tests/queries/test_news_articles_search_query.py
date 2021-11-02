@@ -11,7 +11,7 @@ from utils.search_index import rebuild_search_index
 class NewsArticlesSearchQueryTestCase(TestCase):
     def test_query(self):
         officer = OfficerFactory()
-        source = NewsArticleSourceFactory(custom_matching_name='dummy')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
         NewsArticleFactory(title='Document title', content='Text content', source=source, author='dummy')
         news_article_1 = NewsArticleFactory(title='News article keyword1', content='Text content 1', source=source)
         news_article_2 = NewsArticleFactory(
