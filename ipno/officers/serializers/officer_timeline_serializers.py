@@ -127,7 +127,7 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
 class NewsArticleTimelineSerializer(BaseTimelineSerializer):
     id = serializers.IntegerField()
-    source_name = serializers.CharField(source='source.custom_matching_name')
+    source_name = serializers.CharField(source='source.source_display_name')
     title = serializers.CharField()
     url = serializers.CharField()
     date = serializers.DateField(source='published_date')

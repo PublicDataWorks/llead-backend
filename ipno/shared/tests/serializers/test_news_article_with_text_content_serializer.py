@@ -10,7 +10,7 @@ from shared.serializers import NewsArticleWithTextContentSerializer
 
 class NewsArticleWithTextContentSerializerTestCase(TestCase):
     def test_data(self):
-        source = NewsArticleSourceFactory(custom_matching_name='Source')
+        source = NewsArticleSourceFactory(source_display_name='Source')
         news_article_1 = NewsArticleFactory(content='Text content keywo', author='Writer Staff', source=source)
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_1.officers.add(OfficerFactory())

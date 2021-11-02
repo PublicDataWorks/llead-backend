@@ -50,6 +50,17 @@ class NewsArticleContentFilter(admin.SimpleListFilter):
             return queryset.filter(content='').distinct()
 
 
+class CustomNameFilter(admin.SimpleListFilter):
+    title = 'Source'
+    parameter_name = 'source_display_name'
+
+    def lookups(self, request, model_admin):
+        return super().lookups(request, model_admin)
+
+    def queryset(self, request, queryset):
+        return super().queryset(self, request, queryset)
+
+
 class MatchedSentenceInlineAdmin(admin.TabularInline):
     model = MatchedSentence
     fields = ('text', 'extracted_keywords', 'officers')
@@ -66,7 +77,7 @@ class MatchedSentenceInlineAdmin(admin.TabularInline):
 
 
 class NewsArticleAdmin(ModelAdmin):
-    list_filter = (NewsArticleOfficersFilter, NewsArticleContentFilter, )
+    list_filter = (NewsArticleOfficersFilter, NewsArticleContentFilter, 'source__source_display_name')
     list_display = ('id', 'source', 'author', 'title')
     inlines = [MatchedSentenceInlineAdmin]
 
@@ -135,7 +146,7 @@ class CrawlerErrorAdmin(ModelAdmin):
 
 
 class NewsArticleSourceAdmin(ModelAdmin):
-    list_display = ('source_name', 'custom_matching_name')
+    list_display = ('source_name', 'source_display_name')
     readonly_fields = ('source_name', )
 
     def has_add_permission(self, request, obj=None):
