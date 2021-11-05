@@ -7,6 +7,7 @@ from rest_framework import status
 
 from news_articles.factories import NewsArticleFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
+from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from unittest.mock import patch
 import pandas as pd
@@ -40,8 +41,21 @@ from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
 class OfficersViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
         officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        person_1 = PersonFactory(
+            canonical_officer=officer_1,
+            all_complaints_count=4,
+         )
+        person_1.officers.add(officer_1)
+        officer_1.person = person_1
         officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        person_2 = PersonFactory(
+            canonical_officer=officer_2,
+            all_complaints_count=7,
+        )
+        person_2.officers.add(officer_2)
+        officer_2.person = person_2
         department = DepartmentFactory()
+        OfficerFactory()
 
         EventFactory(
             officer=officer_1,

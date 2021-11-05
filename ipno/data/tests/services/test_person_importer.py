@@ -111,18 +111,21 @@ class PersonImporterTestCase(TestCase):
         expected_person1_data = self.person1_data.copy()
         assert results.first().person_id == expected_person1_data['person_id']
         assert results.first().canonical_officer.uid == expected_person1_data['canonical_uid']
+        assert not results.first().all_complaints_count
         assert expected_person1_data['uids'] in results.first().officers.values_list('uid', flat=True)
 
         expected_person2_data = self.person2_data.copy()
         expected_uids_list = results[0].officers.values_list('uid', flat=True)
         assert expected_uids_list.count() == 2
         assert results[0].person_id == expected_person2_data['person_id']
+        assert not results[0].all_complaints_count
         assert expected_person2_data['uids'].split(',')[0] in expected_uids_list
         assert expected_person2_data['uids'].split(',')[1] in expected_uids_list
 
         expected_person3_data = self.person3_data.copy()
         assert results.last().person_id == expected_person3_data['person_id']
         assert results.last().canonical_officer.uid == expected_person3_data['canonical_uid']
+        assert not results.last().all_complaints_count
         expected_uids_list = results.last().officers.values_list('uid', flat=True)
         assert expected_uids_list.count() == 1
         assert expected_person3_data['uids'].split(',')[0] in expected_uids_list

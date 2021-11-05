@@ -9,6 +9,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
+    @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
@@ -25,6 +26,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
+            count_complaints_mock,
     ):
         person_process_mock.return_value = True
         document_process_mock.return_value = True
@@ -41,7 +43,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_called()
+        count_complaints_mock.assert_called()
 
+    @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
@@ -58,6 +62,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
+            count_complaints_mock,
     ):
         person_process_mock.return_value = False
         document_process_mock.return_value = False
@@ -74,3 +79,4 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_not_called()
+        count_complaints_mock.assert_not_called()
