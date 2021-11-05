@@ -17,6 +17,7 @@ class PersonImporter(BaseImporter):
     UPDATE_ATTRIBUTES = [
         'canonical_officer_id',
         'person_id',
+        'all_complaints_count',
     ]
 
     def person_mappings(self):

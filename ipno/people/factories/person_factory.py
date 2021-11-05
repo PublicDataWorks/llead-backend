@@ -13,3 +13,4 @@ class PersonFactory(factory.django.DjangoModelFactory):
 
     person_id = factory.LazyFunction(lambda: fake.pyint())
     canonical_officer = factory.SubFactory(OfficerFactory)
+    all_complaints_count = factory.LazyFunction(lambda: fake.pyint())

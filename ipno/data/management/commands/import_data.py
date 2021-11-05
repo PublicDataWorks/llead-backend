@@ -8,6 +8,7 @@ from data.services import (
     DocumentImporter,
     PersonImporter,
 )
+from utils.count_complaints import count_complaints
 from utils.search_index import rebuild_search_index
 
 
@@ -19,6 +20,9 @@ class Command(BaseCommand):
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
         person_imported = PersonImporter().process()
+
+        if any([officer_imported, complaint_imported, event_imported, person_imported]):
+            count_complaints()
 
         if any([officer_imported, uof_imported, complaint_imported, event_imported, document_imported, person_imported]):
             rebuild_search_index()
