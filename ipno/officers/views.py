@@ -27,8 +27,8 @@ class OfficersViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk):
-        officer = get_object_or_404(Officer, id=pk)
-        serializer = OfficerDetailsSerializer(officer)
+        officer = get_object_or_404(Officer.objects.prefetch_related('person__canonical_officer'), id=pk)
+        serializer = OfficerDetailsSerializer(officer.person.canonical_officer)
 
         return Response(serializer.data)
 
