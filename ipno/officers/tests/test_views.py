@@ -124,13 +124,19 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
+        person = PersonFactory()
+        related_officer = OfficerFactory()
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
             gender='male',
+            person=person
         )
+        person.officers.add(related_officer)
+        person.canonical_officer = officer
+        person.save()
         department = DepartmentFactory()
         EventFactory(
             officer=officer,
@@ -236,7 +242,10 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_timeline_success(self):
-        officer = OfficerFactory()
+        person = PersonFactory()
+        officer = OfficerFactory(person=person)
+        person.canonical_officer = officer
+        person.save()
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
         complaint_1 = ComplaintFactory()
@@ -530,7 +539,10 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
     @patch('officers.queries.officer_data_file_query.OfficerDatafileQuery.generate_sheets_file')
     def test_download_xlsx_success(self, generate_sheets_file_mock):
-        officer = OfficerFactory()
+        person = PersonFactory()
+        officer = OfficerFactory(person=person)
+        person.canonical_officer = officer
+        person.save()
 
         data = pd.DataFrame([{'a': 1, 'b': 2}])
 
