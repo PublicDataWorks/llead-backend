@@ -47,6 +47,7 @@ class ScrapyRssSpider(scrapy.Spider):
     post_guids = []
     guid_pre = ''
     guid_post = ''
+    guid_special_cases = []
     rss_has_content = False
     custom_settings = {
         'LOG_FILE': None if not settings.FLUENT_LOGGING else settings.FLUENT_PYTHON_LOG_FILE,
@@ -167,7 +168,12 @@ class ScrapyRssSpider(scrapy.Spider):
             logger.error(e)
 
     def parse_guid(self, guid):
-        return guid.replace(self.guid_pre, '').replace(self.guid_post, '')
+        parsed_guid = guid.replace(self.guid_pre, '').replace(self.guid_post, '')
+
+        for guid_special_cases in self.guid_special_cases:
+            parsed_guid = parsed_guid.replace(guid_special_cases, '')
+
+        return parsed_guid
 
     def parse_section(self, paragraph):
 
