@@ -41,6 +41,10 @@ class ScrapyRssSpiderTestCase(TestCase):
         self.spider.guid_post = ' at https://thelensnola.org'
         assert self.spider.parse_guid('566338 at https://thelensnola.org') == '566338'
 
+    def test_parse_guid_with_special_cases(self):
+        self.spider.guid_special_cases = ['https://www.brproud.com/?post_type=feed_post&p=']
+        assert self.spider.parse_guid('https://www.brproud.com/?post_type=feed_post&p=566338') == '566338'
+
     def test_get_crawled_post_guid(self):
         CrawledPostFactory(source=self.source)
         self.spider.name = 'thelens'
