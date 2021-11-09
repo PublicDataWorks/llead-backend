@@ -14,6 +14,7 @@ class BRProudScrapyRssSpider(ScrapyRssSpider):
         'https://www.brproud.com/feed/'
     ]
     guid_pre = 'https://www.brproud.com/?p='
+    guid_special_cases = ['https://www.brproud.com/?post_type=feed_post&p=']
     rss_has_content = True
 
     def __init__(self):
