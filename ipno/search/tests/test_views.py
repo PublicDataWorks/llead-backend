@@ -39,7 +39,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         document_2 = DocumentFactory(title='Document 2', text_content='Text content keywo')
         document_1.departments.add(department_1)
 
-        source = NewsArticleSourceFactory(custom_matching_name='Source')
+        source = NewsArticleSourceFactory(source_display_name='Source')
         news_article_1 = NewsArticleFactory(content='Text content keywo', author='Writer Staff', source=source)
         news_article_2 = NewsArticleFactory(
             title='Dummy title',

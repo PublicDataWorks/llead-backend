@@ -33,9 +33,13 @@ class ScrapyRssSpiderTestCase(TestCase):
         self.spider.name = self.source.source_name
         self.spider.source = self.source
 
-    def test_parse_guid(self):
+    def test_parse_guid_with_prefix(self):
         self.spider.guid_pre = 'https://thelensnola.org/?p='
         assert self.spider.parse_guid('https://thelensnola.org/?p=566338') == '566338'
+
+    def test_parse_guid_with_postfix(self):
+        self.spider.guid_post = ' at https://thelensnola.org'
+        assert self.spider.parse_guid('566338 at https://thelensnola.org') == '566338'
 
     def test_get_crawled_post_guid(self):
         CrawledPostFactory(source=self.source)
@@ -91,6 +95,48 @@ class ScrapyRssSpiderTestCase(TestCase):
 
     @patch('scrapy.Request')
     @patch('news_articles.spiders.ScrapyRssSpider.parse_item')
+    def test_parse_rss_with_content(self, mock_parse_item, mock_request):
+        self.spider.create_article = Mock()
+
+        mock_request_object = Mock()
+        mock_request.return_value = mock_request_object
+        mock_parse_object = [{
+            'title': 'Article Title',
+            'description': 'Lorem if sum',
+            'link': 'http://example.com',
+            'guid': 'GUID-GUID',
+            'author': 'Writer',
+            'published_date': 'Fri, 20 Aug 2021 19:08:47 +0000',
+            'content': 'This is a dummy content.'
+        }]
+        mock_parse_item.return_value = mock_parse_object
+
+        self.spider.rss_has_content = True
+        next(self.spider.parse_rss(XmlResponse(
+            url='http://example.com',
+            request=Request(url='http://example.com'),
+            body=str.encode('This is testing content!')
+        )))
+
+        date = parse(mock_parse_object[0]['published_date'])
+
+        expected_article_data = {
+            'title': 'Article Title',
+            'link': 'http://example.com',
+            'guid': 'GUID-GUID',
+            'author': 'Writer',
+            'published_date': date.date(),
+            'content': 'This is a dummy content.'
+        }
+
+        self.spider.create_article.assert_called_with(
+            expected_article_data
+        )
+
+        assert self.spider.post_guids == ['GUID-GUID']
+
+    @patch('scrapy.Request')
+    @patch('news_articles.spiders.ScrapyRssSpider.parse_item')
     def test_parse_rss_duplicated_link(self, mock_parse_item, mock_request):
         mock_request_object = Mock()
         mock_request.return_value = mock_request_object
@@ -131,6 +177,47 @@ class ScrapyRssSpiderTestCase(TestCase):
         assert parsed_section == {
             'style': TAG_STYLE_MAPPINGS.get('h1'),
             'content': 'Test text'
+        }
+
+    @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
+    @patch('news_articles.spiders.base_scrapy_rss.escape')
+    def test_parse_section_with_html_chars(self, mock_escape, mock_beautiful_soup):
+        mock_escape.return_value = '&lt;em&gt;Test text'
+        mock_name = Mock()
+        mock_name.name = 'h1'
+        mock_current_tag = Mock(return_value=[mock_name])
+        mock_get_text = Mock(return_value='Test text')
+        mock_beautiful_soup_instance = Mock(
+            currentTag=mock_current_tag,
+            get_text=mock_get_text
+        )
+        mock_beautiful_soup.return_value = mock_beautiful_soup_instance
+
+        parsed_section = self.spider.parse_section('<h1><em>Test text</em></h1>')
+
+        mock_escape.assert_called_with('Test text')
+        assert parsed_section == {
+            'style': TAG_STYLE_MAPPINGS.get('h1'),
+            'content': 'Test text'
+        }
+
+    @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
+    def test_parse_section_with_regex_replace(self, mock_beautiful_soup):
+        mock_name = Mock()
+        mock_name.name = 'h1'
+        mock_current_tag = Mock(return_value=[mock_name])
+        mock_get_text = Mock(return_value='Test\xa0\n\n\xa0\n\n text')
+        mock_beautiful_soup_instance = Mock(
+            currentTag=mock_current_tag,
+            get_text=mock_get_text
+        )
+        mock_beautiful_soup.return_value = mock_beautiful_soup_instance
+
+        parsed_section = self.spider.parse_section('<h1></h1>')
+
+        assert parsed_section == {
+            'style': TAG_STYLE_MAPPINGS.get('h1'),
+            'content': 'Test\n text'
         }
 
     @patch('news_articles.spiders.base_scrapy_rss.BeautifulSoup')
@@ -286,3 +373,63 @@ class ScrapyRssSpiderTestCase(TestCase):
         mock_connect.assert_has_calls(expected_calls)
 
         assert result == self.spider
+
+    def test_create_article(self):
+        with self.assertRaises(NotImplementedError):
+            self.spider.create_article('data')
+
+    def test_remove_by_in_author(self):
+        result_1 = self.spider.remove_by_in_author('By tester')
+        result_2 = self.spider.remove_by_in_author('Not by tester')
+        assert result_1 == 'tester'
+        assert result_2 == 'Not by tester'
+
+    def test_remove_author_redundant_text(self):
+        result = self.spider.remove_author_redundant_text(
+            'Anna Jones | The Advocate'
+        )
+        assert result == 'Anna Jones'
+
+    def test_remove_author_redundant_text_multi_splitters(self):
+        result = self.spider.remove_author_redundant_text(
+            'Anna Jones | The Advocate | Test'
+        )
+        assert result == 'Anna Jones | The Advocate | Test'
+
+    def test_remove_author_email(self):
+        result = self.spider.remove_author_email(
+            'Anna Jones anna@gmail.com'
+        )
+        assert result == 'Anna Jones'
+
+    def test_remove_multi_nicks(self):
+        result = self.spider.remove_multi_nicks(
+            'Anna Jones | @annajoneses Brooke Smith | @brooke_smith52'
+        )
+        assert result == 'Anna Jones, Brooke Smith'
+
+    def test_refactor_author(self):
+        result = self.spider.clean_author(
+            'By: Anna Jones | @annajoneses Brooke Smith | @brooke_smith52'
+        )
+        assert result == 'Anna Jones, Brooke Smith'
+
+    def test_refactor_null_author(self):
+        result = self.spider.clean_author(None)
+        assert not result
+
+    def test_refactor_author_calls(self):
+        raw_author = 'Anna Jones, Brooke Smith'
+        self.spider.remove_by_in_author = Mock(return_value=raw_author)
+        self.spider.remove_author_redundant_text = Mock(return_value=raw_author)
+        self.spider.remove_author_email = Mock(return_value=raw_author)
+        self.spider.remove_multi_nicks = Mock(return_value=raw_author)
+
+        result = self.spider.clean_author(raw_author)
+
+        self.spider.remove_by_in_author.assert_called_with(raw_author)
+        self.spider.remove_author_redundant_text.assert_called_with(raw_author)
+        self.spider.remove_author_email.assert_called_with(raw_author)
+        self.spider.remove_multi_nicks.assert_called_with(raw_author)
+
+        assert result == raw_author

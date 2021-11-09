@@ -145,7 +145,7 @@ class OfficersSearchQueryTestCase(TestCase):
                 'results': [
                     {
                         'id': news_article.id,
-                        'source_name': news_article.source.custom_matching_name,
+                        'source_name': news_article.source.source_display_name,
                         'title': news_article.title,
                         'url': news_article.url,
                         'date': str(news_article.published_date),
