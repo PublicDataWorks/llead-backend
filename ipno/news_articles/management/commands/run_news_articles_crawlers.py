@@ -12,8 +12,42 @@ from data.constants import NEWS_ARTICLE_MODEL_NAME
 from news_articles.constants import (
     NEWS_ARTICLE_WRGL_COLUMNS,
 )
-from news_articles.spiders import TheLensNolaScrapyRssSpider
-from news_articles.spiders import NolaScrapyRssSpider
+from news_articles.spiders import (
+    TheLensNolaScrapyRssSpider,
+    TtfMagazineScrapyRssSpider,
+    KlaxScrapyRssSpider,
+    NolaScrapyRssSpider,
+    VermillionTodayScrapyRssSpider,
+    CapitalCityNewsScrapyRssSpider,
+    BRProudScrapyRssSpider,
+    HeraldGuideScrapyRssSpider,
+    BossierPressScrapyRssSpider,
+    MindenPressHeraldScrapyRssSpider,
+    TheHawkeyeScrapyRssSpider,
+    MyArkLamissScrapyRssSpider,
+    NatchiochesTimesScrapyRssSpider,
+    IberianetScrapyRssSpider,
+    BizNewOrleansScrapyRssSpider,
+    JambalayaNewsScrapyRssSpider,
+    LouisianaWeeklyScrapyRssSpider,
+    LoyolaMaroonScrapyRssSpider,
+    WGNOScrapyRssSpider,
+    UptownMessengerScrapyRssSpider,
+    RustonDailyLeaderScrapyRssSpider,
+    SlidellIndependentScrapyRssSpider,
+    TecheTodayScrapyRssSpider,
+    NichollsWorthScrapyRssSpider,
+    TheAcadianaAdvocateScrapyRssSpider,
+    ConcordiaSentinelScrapyRssSpider,
+    ReveilleScrapyRssSpider,
+    TheFranklinSunScrapyRssSpider,
+    TheOouachitaCitizenScrapyRssSpider,
+    WBRZScrapyRssSpider,
+    TownTalkScrapyRssSpider,
+    ShreveportTimesScrapyRssSpider,
+    DailyAdvertiserScrapyRssSpider,
+    AvoyellesTodayScrapyRssSpider,
+)
 from utils.wrgl_generator import WrglGenerator
 
 
@@ -38,6 +72,38 @@ class Command(BaseCommand):
         process = CrawlerProcess(get_project_settings())
         process.crawl(TheLensNolaScrapyRssSpider)
         process.crawl(NolaScrapyRssSpider)
+        process.crawl(VermillionTodayScrapyRssSpider)
+        process.crawl(TtfMagazineScrapyRssSpider)
+        process.crawl(KlaxScrapyRssSpider)
+        process.crawl(CapitalCityNewsScrapyRssSpider)
+        process.crawl(BRProudScrapyRssSpider)
+        process.crawl(HeraldGuideScrapyRssSpider)
+        process.crawl(BossierPressScrapyRssSpider)
+        process.crawl(MindenPressHeraldScrapyRssSpider)
+        process.crawl(TheHawkeyeScrapyRssSpider)
+        process.crawl(MyArkLamissScrapyRssSpider)
+        process.crawl(NatchiochesTimesScrapyRssSpider)
+        process.crawl(IberianetScrapyRssSpider)
+        process.crawl(BizNewOrleansScrapyRssSpider)
+        process.crawl(JambalayaNewsScrapyRssSpider)
+        process.crawl(LouisianaWeeklyScrapyRssSpider)
+        process.crawl(LoyolaMaroonScrapyRssSpider)
+        process.crawl(WGNOScrapyRssSpider)
+        process.crawl(UptownMessengerScrapyRssSpider)
+        process.crawl(RustonDailyLeaderScrapyRssSpider)
+        process.crawl(SlidellIndependentScrapyRssSpider)
+        process.crawl(TecheTodayScrapyRssSpider)
+        process.crawl(NichollsWorthScrapyRssSpider)
+        process.crawl(TheAcadianaAdvocateScrapyRssSpider)
+        process.crawl(ConcordiaSentinelScrapyRssSpider)
+        process.crawl(ReveilleScrapyRssSpider)
+        process.crawl(TheFranklinSunScrapyRssSpider)
+        process.crawl(TheOouachitaCitizenScrapyRssSpider)
+        process.crawl(WBRZScrapyRssSpider)
+        process.crawl(TownTalkScrapyRssSpider)
+        process.crawl(ShreveportTimesScrapyRssSpider)
+        process.crawl(DailyAdvertiserScrapyRssSpider)
+        process.crawl(AvoyellesTodayScrapyRssSpider)
 
         process.start()
 
