@@ -25,3 +25,4 @@ class OfficerFactory(factory.django.DjangoModelFactory):
     birth_day = factory.LazyFunction(lambda: fake.day_of_month())
     race = factory.LazyFunction(lambda: random.choice(RACES))
     gender = factory.LazyFunction(lambda: random.choice(GENDERS))
+    is_name_changed = factory.LazyFunction(lambda: fake.boolean())
