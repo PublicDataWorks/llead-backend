@@ -238,6 +238,30 @@ class BaseImporterTestCase(TestCase):
         assert department_2
         assert mappings == expected_mappings
 
+    def test_department_mappings_change_department_name(self):
+        department_1 = DepartmentFactory(name='New Orleans PD')
+        department_2 = DepartmentFactory(name='Baton Rouge PD')
+        agencies = ['St. Tammany Sheriff', 'Baton Rouge CSD', 'New Orleans PD']
+
+        mappings = BaseImporter().department_mappings(agencies)
+
+        department_1.name = 'New Orleans Police Department'
+        department_1.save()
+        department_2.name = 'Baton Rouge Police Department'
+        department_2.save()
+
+        new_mappings = BaseImporter().department_mappings(agencies)
+
+        department_3 = Department.objects.filter(name='St. Tammany Sheriff').first()
+        expected_mappings = {
+            slugify('New Orleans PD'): department_1.id,
+            slugify('Baton Rouge PD'): department_2.id,
+            slugify('St. Tammany Sheriff'): department_3.id
+        }
+        assert department_3
+        assert mappings == expected_mappings
+        assert mappings == new_mappings
+
     def test_officer_mappings(self):
         officer_1 = OfficerFactory()
         officer_2 = OfficerFactory()
