@@ -47,8 +47,8 @@ class BaseImporter(object):
         return row_data
 
     def department_mappings(self, agencies):
-        slugify_mappings = {slugify(department.name): department.id
-                            for department in Department.objects.only('id', 'name')}
+        slugify_mappings = {department.slug: department.id
+                            for department in Department.objects.only('id', 'slug')}
 
         for agency in agencies:
             formatted_agency = self.format_agency(agency)
