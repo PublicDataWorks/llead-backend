@@ -73,6 +73,7 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
         save_crawled_post = True
 
         text_content = ' '.join([paragraph['content'] for paragraph in paragraphs])
+        text_content = text_content.strip()
 
         pdf_buffer = ArticlePdfCreator(
             title=title,

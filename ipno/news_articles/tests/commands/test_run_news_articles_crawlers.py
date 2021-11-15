@@ -12,8 +12,42 @@ from news_articles.factories import CrawledPostFactory, NewsArticleFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from news_articles.management.commands.run_news_articles_crawlers import Command
 from news_articles.models import NewsArticle
-from news_articles.spiders import TheLensNolaScrapyRssSpider
-from news_articles.spiders import NolaScrapyRssSpider
+from news_articles.spiders import (
+    TheLensNolaScrapyRssSpider,
+    VermillionTodayScrapyRssSpider,
+    NolaScrapyRssSpider,
+    TtfMagazineScrapyRssSpider,
+    KlaxScrapyRssSpider,
+    BRProudScrapyRssSpider,
+    HeraldGuideScrapyRssSpider,
+    BossierPressScrapyRssSpider,
+    TheHawkeyeScrapyRssSpider,
+    MyArkLamissScrapyRssSpider,
+    MindenPressHeraldScrapyRssSpider,
+    NatchiochesTimesScrapyRssSpider,
+    IberianetScrapyRssSpider,
+    BizNewOrleansScrapyRssSpider,
+    JambalayaNewsScrapyRssSpider,
+    LouisianaWeeklyScrapyRssSpider,
+    LoyolaMaroonScrapyRssSpider,
+    WGNOScrapyRssSpider,
+    UptownMessengerScrapyRssSpider,
+    RustonDailyLeaderScrapyRssSpider,
+    SlidellIndependentScrapyRssSpider,
+    TecheTodayScrapyRssSpider,
+    NichollsWorthScrapyRssSpider,
+    TheAcadianaAdvocateScrapyRssSpider,
+    ConcordiaSentinelScrapyRssSpider,
+    ReveilleScrapyRssSpider,
+    TheFranklinSunScrapyRssSpider,
+    TheOouachitaCitizenScrapyRssSpider,
+    WBRZScrapyRssSpider,
+    ShreveportTimesScrapyRssSpider,
+    TownTalkScrapyRssSpider,
+    DailyAdvertiserScrapyRssSpider,
+    AvoyellesTodayScrapyRssSpider,
+)
+from news_articles.spiders import CapitalCityNewsScrapyRssSpider
 from officers.factories import OfficerFactory
 
 
@@ -37,7 +71,39 @@ class CommandTestCase(TestCase):
         mock_crawler_process.assert_called_with('settings')
         calls_similarity = [
             call(TheLensNolaScrapyRssSpider),
-            call(NolaScrapyRssSpider)
+            call(NolaScrapyRssSpider),
+            call(VermillionTodayScrapyRssSpider),
+            call(TtfMagazineScrapyRssSpider),
+            call(KlaxScrapyRssSpider),
+            call(CapitalCityNewsScrapyRssSpider),
+            call(BRProudScrapyRssSpider),
+            call(HeraldGuideScrapyRssSpider),
+            call(BossierPressScrapyRssSpider),
+            call(MindenPressHeraldScrapyRssSpider),
+            call(TheHawkeyeScrapyRssSpider),
+            call(MyArkLamissScrapyRssSpider),
+            call(NatchiochesTimesScrapyRssSpider),
+            call(IberianetScrapyRssSpider),
+            call(BizNewOrleansScrapyRssSpider),
+            call(JambalayaNewsScrapyRssSpider),
+            call(LouisianaWeeklyScrapyRssSpider),
+            call(LoyolaMaroonScrapyRssSpider),
+            call(WGNOScrapyRssSpider),
+            call(UptownMessengerScrapyRssSpider),
+            call(RustonDailyLeaderScrapyRssSpider),
+            call(SlidellIndependentScrapyRssSpider),
+            call(TecheTodayScrapyRssSpider),
+            call(NichollsWorthScrapyRssSpider),
+            call(TheAcadianaAdvocateScrapyRssSpider),
+            call(ConcordiaSentinelScrapyRssSpider),
+            call(ReveilleScrapyRssSpider),
+            call(TheFranklinSunScrapyRssSpider),
+            call(TheOouachitaCitizenScrapyRssSpider),
+            call(WBRZScrapyRssSpider),
+            call(TownTalkScrapyRssSpider),
+            call(ShreveportTimesScrapyRssSpider),
+            call(DailyAdvertiserScrapyRssSpider),
+            call(AvoyellesTodayScrapyRssSpider)
         ]
         mock_crawl.assert_has_calls(calls_similarity)
         mock_start.assert_called()

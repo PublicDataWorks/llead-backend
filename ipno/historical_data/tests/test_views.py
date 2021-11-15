@@ -29,7 +29,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             badge_no='12435',
         )
 
-        source = NewsArticleSourceFactory(custom_matching_name='dummy')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
         news_article = NewsArticleFactory(
             published_date=datetime.datetime(2021, 9, 7).date(),
             source=source
@@ -123,7 +123,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             },
             {
                 'id': news_article.id,
-                'source_name': source.custom_matching_name,
+                'source_name': source.source_display_name,
                 'title': news_article.title,
                 'url': news_article.url,
                 'date': '2021-09-07',

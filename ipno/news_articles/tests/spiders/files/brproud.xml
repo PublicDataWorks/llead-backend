@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+
+     xmlns:georss="http://www.georss.org/georss"
+     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+     xmlns:dcterms="http://purl.org/dc/terms/"
+>
+
+    <channel>
+        <title>BRProud.com</title>
+        <atom:link href="https://www.brproud.com/feed/" rel="self" type="application/rss+xml"/>
+        <link>https://www.brproud.com</link>
+        <description>BRProud.com partners with WGMB FOX 44 and WVLA NBC Local 33 to bring you the latest in Baton Rouge
+            news, sports, weather, and more.
+        </description>
+        <lastBuildDate>Tue, 19 Oct 2021 03:59:02 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>
+            hourly
+        </sy:updatePeriod>
+        <sy:updateFrequency>
+            1
+        </sy:updateFrequency>
+        <generator>https://wordpress.org/?v=5.7.3</generator>
+
+        <image>
+            <url>https://www.brproud.com/wp-content/uploads/sites/80/2021/04/cropped-brproudfav-1.png?w=32</url>
+            <title>BRProud.com</title>
+            <link>https://www.brproud.com</link>
+            <width>32</width>
+            <height>32</height>
+        </image>
+        <site xmlns="com-wordpress:feed-additions:1">162794792</site>
+        <item>
+            <title>Teen still on the run after escaping juvenile detention center; Will face adult charges when caught
+            </title>
+            <link>
+                https://www.brproud.com/news/local-news/teen-still-on-the-run-after-escaping-juvenile-detention-center-will-face-adult-charges-when-caught/
+            </link>
+
+            <dc:creator><![CDATA[Jonah Gilmore]]></dc:creator>
+            <pubDate>Tue, 19 Oct 2021 03:52:58 +0000</pubDate>
+            <category><![CDATA[5 Top Stories Homepage Section]]></category>
+            <category><![CDATA[Local News]]></category>
+            <category><![CDATA[News]]></category>
+            <category><![CDATA[East Baton Rouge Juvenile Detention Center]]></category>
+            <category><![CDATA[Escaped Inmate]]></category>
+            <guid isPermaLink="false">https://www.brproud.com/?p=1094247</guid>
+
+            <description>
+                <![CDATA[One man is still on the run after escaping from the East Baton Rouge Parish Juvenile Detention Center. Police said, once he is caught he will face charges as an adult.]]></description>
+            <content:encoded><![CDATA[
+<p>BATON ROUGE, La. (BRPROUD) - 18-year-old Malik Williams is still on the run after <a href="https://www.brproud.com/news/local-news/search-underway-for-juvenile-detention-center-escapees/" target="_blank" rel="noreferrer noopener">escaping from the East Baton Rouge Parish Juvenile Detention Center on Oct. 14</a>. Police said once he is caught he will face charges as an adult.</p>
+<p>Baton Rouge Police said Williams is still considered "armed and dangerous."</p>
+<p>Last week, <a href="https://www.brproud.com/news/local-news/juvenile-escapees-used-shank-to-overpower-guards-affidavit-says/" target="_blank" rel="noreferrer noopener">five juveniles attacked a pair of guards at the facility</a> before breaking out and stealing a vehicle.</p>
+<p>"They developed a plan in order to escape from the Juvenile Detention Center and they had a weapon in hand when they did," said BRPD spokesperson L'Jean McKneely.</p>
+<p>As for the motive, McKneely said "They just wanted to get away from what we can tell."</p>
+<p>Williams is no longer considered a juvenile and once he is captured, he will face adult charges.</p>
+<p>"He will be booked in East Baton Rouge Parish prison because he is now considered an adult," said McKneely.</p>
+<p>He said it's disheartening to see a group of teens already facing charges take another risk.</p>
+<p>Police are now relying on tips from the community for Williams' location, they are hoping to find him soon with the information they have been receiving.</p>
+]]></content:encoded>
+
+
+            <post-id xmlns="com-wordpress:feed-additions:1">1094247</post-id>
+            <enclosure url="https://www.brproud.com/wp-content/uploads/sites/80/2021/10/snapshot-72.jpg?w=900"
+                       type="image/jpeg" length="170147"/>
+            <dcterms:modified>2021-10-19T03:56:34+00:00</dcterms:modified>
+        </item>
+        <item>
+            <title>East Ascension Drainage meeting becomes heated, board member walked out by police</title>
+            <link>
+                https://www.brproud.com/news/east-ascension-drainage-meeting-becomes-heated-board-member-walked-out-by-police/
+            </link>
+
+            <dc:creator><![CDATA[Michael Scheidt]]></dc:creator>
+            <pubDate>Tue, 19 Oct 2021 02:42:30 +0000</pubDate>
+            <category><![CDATA[5 Top Stories Homepage Section]]></category>
+            <category><![CDATA[Local News]]></category>
+            <category><![CDATA[Louisiana News]]></category>
+            <category><![CDATA[News]]></category>
+            <category><![CDATA[Newsletter Big Story]]></category>
+            <guid isPermaLink="false">https://www.brproud.com/?p=1094209</guid>
+
+            <description>
+                <![CDATA[GONZALES, La. (BRPROUD) - Tempers flared at the East Ascension Drainage Board meeting on Monday night. A constituent named Catrina Bonomolo approached the podium and gave her opinion on the topic at hand. That topic was the potential hiring of William Roux as a liaison to the East Ascension Drainage Board. Bonomolo made her feelings [...]]]></description>
+            <content:encoded><![CDATA[
+<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper">
+<iframe class='youtube-player' width='900' height='507' src='https://www.youtube.com/embed/sBMiMYrZlaM?version=3&#038;rel=1&#038;showsearch=0&#038;showinfo=1&#038;iv_load_policy=1&#038;fs=1&#038;hl=en-US&#038;autohide=2&#038;wmode=transparent' allowfullscreen='true' style='border:0;' sandbox='allow-scripts allow-same-origin allow-popups allow-presentation'></iframe>
+</div></figure>
+<p>GONZALES, La. (BRPROUD) - Tempers flared at the East Ascension Drainage Board meeting on Monday night.</p>
+<p>A constituent named Catrina Bonomolo approached the podium and gave her opinion on the topic at hand.</p>
+<p>That topic was the potential hiring of William Roux as a liaison to the East Ascension Drainage Board. </p>
+<p>Bonomolo made her feelings known by saying that it "sounds like a very expensive babysitter to me."</p>
+<p>The constituent finished by asking, "where are our answers from that meeting that you said we were going to have answers for?"</p>
+<p>After Catrina finished, Corey Orgeron, the District 4 Councilman from Prairieville took the floor. </p>
+<p>For the next few minutes, Orgeron went into why he supports the hiring of William Roux.</p>
+<p>The District 4 Councilman then said that "if you guys think that your actions of holding up colorful signs and calling people names on Facebook and making all kinds of stupid pictures about people on Facebook, if you think that's what affected the people up here, you are highly mistaken."</p>
+<p>Orgeron continued by saying, "your egos are writing checks that your butts can't cash."</p>
+<p>The councilman then spoke with someone in the audience telling them to sit down. </p>
+<p>From there, East Ascension Drainage meeting devolved into shouting matches.</p>
+<p>Corey Orgeron and a member of the East Ascension Drainage Board then got into a heated exchange.</p>
+<p>That exchange ended with Orgeron being escorted out of the room by law enforcement. </p>
+<p>After a brief recess, the East Ascension Drainage Board voted 8-0 to discuss the matter again at the next drainage meeting which is scheduled for November 8.</p>
+]]></content:encoded>
+            <post-id xmlns="com-wordpress:feed-additions:1">1094209</post-id>
+            <enclosure url="https://www.brproud.com/wp-content/uploads/sites/80/2021/10/Corey-Orgeron-1.jpg?w=900"
+                       type="image/jpeg" length="37219"/>
+            <dcterms:modified>2021-10-19T02:55:56+00:00</dcterms:modified>
+        </item>
+    </channel>
+</rss>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+>
+
+    <channel>
+        <title>KLAX-TV</title>
+        <atom:link href="http://klax-tv.com/feed/" rel="self" type="application/rss+xml"/>
+        <link>http://klax-tv.com</link>
+        <description></description>
+        <lastBuildDate>Sun, 17 Oct 2021 14:12:16 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>
+            hourly
+        </sy:updatePeriod>
+        <sy:updateFrequency>
+            1
+        </sy:updateFrequency>
+        <generator>https://wordpress.org/?v=5.5.6</generator>
+
+        <image>
+            <url>http://klax-tv.com/wp-content/uploads/2016/05/cropped-SiteIcon-32x32.jpg</url>
+            <title>KLAX-TV</title>
+            <link>http://klax-tv.com</link>
+            <width>32</width>
+            <height>32</height>
+        </image>
+        <item>
+            <title>Jena man arrested for second degree murder</title>
+            <link>http://klax-tv.com/jena-man-arrested-for-second-degree-murder/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=jena-man-arrested-for-second-degree-murder</link>
+            <comments>http://klax-tv.com/jena-man-arrested-for-second-degree-murder/#respond</comments>
+
+            <dc:creator><![CDATA[Jacque Murphy]]></dc:creator>
+            <pubDate>Sun, 17 Oct 2021 14:12:16 +0000</pubDate>
+            <category><![CDATA[Local Headlines]]></category>
+            <guid isPermaLink="false">http://klax-tv.com/?p=76513</guid>
+
+            <description>
+                <![CDATA[Creola, LA – On Friday, October 15th, 2021 at about 9:20 pm, Creola Police observed a vehicle traveling South on]]></description>
+
+            <wfw:commentRss>http://klax-tv.com/jena-man-arrested-for-second-degree-murder/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+
+
+        </item>
+        <item>
+            <title>ASH vs Pineville, Red River Rivalry</title>
+            <link>http://klax-tv.com/ash-vs-pineville-red-river-rivalry/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=ash-vs-pineville-red-river-rivalry</link>
+            <comments>http://klax-tv.com/ash-vs-pineville-red-river-rivalry/#respond</comments>
+
+            <dc:creator><![CDATA[Jacque Murphy]]></dc:creator>
+            <pubDate>Fri, 15 Oct 2021 14:21:13 +0000</pubDate>
+            <category><![CDATA[Sports News]]></category>
+            <guid isPermaLink="false">http://klax-tv.com/?p=76505</guid>
+
+            <description>
+                <![CDATA[The ASH Trojans hosted the Pineville Rebels last night in the Butch Stoker Memorial Stadium for the Red River Rivalry,]]></description>
+
+            <wfw:commentRss>http://klax-tv.com/ash-vs-pineville-red-river-rivalry/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+
+
+        </item>
+    </channel>
+</rss>

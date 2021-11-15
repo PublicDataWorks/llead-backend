@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.lsureveille.com - RSS Results of type article with keyword(s) of #topstory</title>
+        <link>https://www.lsureveille.com/search/?f=rss&amp;t=article&amp;l=100&amp;s=start_time&amp;sd=desc&amp;k%5B%5D=%23topstory</link>
+        <atom:link
+                href="https://www.lsureveille.com/search/?f=rss&amp;t=article&amp;l=100&amp;s=start_time&amp;sd=desc&amp;k%5B%5D=%23topstory"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.lsureveille.com - RSS Results
+            only for asset type(s) of article
+            with keyword(s) of #topstory
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>LSU to disclose COVID-19 cases to public, reports 22 positive cases in four days</title>
+            <description>The University announced Wednesday in a tweet that all cases of COVID-19 reported to the school
+                will be posted online for the public to view.
+            </description>
+            <pubDate>Wed, 19 Aug 2020 18:34:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.lsureveille.com/tncms/asset/editorial/76dd2638-e274-11ea-b1ac-7f51ef46b62d
+            </guid>
+            <link>
+                https://www.lsureveille.com/coronavirus/lsu-to-disclose-covid-19-cases-to-public-reports-22-positive-cases-in-four-days/article_76dd2638-e274-11ea-b1ac-7f51ef46b62d.html
+            </link>
+            <dc:creator>Reveille Staff Report</dc:creator>
+            <enclosure
+                    url="https://bloximages.newyork1.vip.townnews.com/lsureveille.com/content/tncms/assets/v3/editorial/3/e0/3e008d3e-e0b0-11ea-9890-4b2f8397530d/5f3ac036b4fc9.image.jpg?resize=300%2C200"
+                    length="265765" type="image/jpeg"/>
+        </item>
+
+        <item>
+            <title>Sarah Finnegan nominated by LSU for NCAA Woman of the Year</title>
+            <description>LSU nominated former gymnast and two-time NCAA champion Sarah Finnegan (2016-2019) for the NCAA
+                Woman of the Year, which is based on achievements in academics, athletics, service and leadership.
+            </description>
+            <pubDate>Sun, 23 Jun 2019 11:59:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.lsureveille.com/tncms/asset/editorial/5229fe72-95d8-11e9-a98d-732b18185246
+            </guid>
+            <link>
+                https://www.lsureveille.com/daily/sarah-finnegan-nominated-by-lsu-for-ncaa-woman-of-the-year/article_5229fe72-95d8-11e9-a98d-732b18185246.html
+            </link>
+            <dc:creator>Brandon Adam | @badam___</dc:creator>
+            <enclosure
+                    url="https://bloximages.newyork1.vip.townnews.com/lsureveille.com/content/tncms/assets/v3/editorial/6/20/620610ac-63e6-11e9-822c-4788f7870c68/5cbbe4cb0081f.image.jpg?resize=300%2C200"
+                    length="248289" type="image/jpeg"/>
+        </item>
+
+    </channel>
+</rss>

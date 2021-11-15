@@ -26,7 +26,7 @@ class OfficerESDoc(ESDoc):
                 'departments',
                 queryset=Department.objects.distinct()
             ),
-        )
+        ).filter(canonical_person__isnull=False)
 
     id = fields.IntegerField()
     name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
