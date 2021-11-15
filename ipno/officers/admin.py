@@ -41,6 +41,7 @@ class OfficerAdmin(ModelAdmin):
     search_fields = ('id', 'uid', 'last_name', 'first_name')
     list_filter = (OfficerNewsArticleFilter,)
     inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin,)
+    raw_id_fields = ('person', )
 
     def count_articles(self, obj):
         articles_ids = obj.matched_sentences.all().values_list('article__id', flat=True)  # pragma: no cover
