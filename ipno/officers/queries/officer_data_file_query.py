@@ -27,17 +27,18 @@ from officers.constants import (
 class OfficerDatafileQuery(object):
     def __init__(self, officer):
         self.officer = officer
+        self.all_officers = officer.person.officers.all()
 
     def _generate_officer_sheet(self):
         officer_profile_fields = OFFICER_PROFILE_FIELDS
-        officer_sheet = {
-            field: getattr(self.officer, field) for field in officer_profile_fields
-        }
+        officer_sheet = [{
+            field: getattr(related_officer, field) for field in officer_profile_fields
+        } for related_officer in self.all_officers]
 
-        return pd.DataFrame([officer_sheet])
+        return pd.DataFrame(officer_sheet)
 
     def _generate_officer_incident_sheet(self):
-        incidents = Event.objects.filter(officer=self.officer).annotate(
+        incidents = Event.objects.filter(officer__in=self.all_officers).annotate(
             agency=F('department__name'),
             uid=F('officer__uid'),
             uof_uid=F('use_of_force__uof_uid'),
@@ -49,7 +50,7 @@ class OfficerDatafileQuery(object):
         return pd.DataFrame(incidents)
 
     def _generate_officer_complaint_sheet(self):
-        complaints = Complaint.objects.filter(officers__in=[self.officer]).annotate(
+        complaints = Complaint.objects.filter(officers__in=self.all_officers).annotate(
             agency=F('departments__name'),
             uid=F('officers__uid'),
         ).values(*OFFICER_COMPLAINT_FIELDS)
@@ -57,7 +58,7 @@ class OfficerDatafileQuery(object):
         return pd.DataFrame(complaints)
 
     def _generate_officer_uof_sheet(self):
-        uof = UseOfForce.objects.filter(officer=self.officer).annotate(
+        uof = UseOfForce.objects.filter(officer__in=self.all_officers).annotate(
             agency=F('department__name'),
             uid=F('officer__uid'),
         ).values(*OFFICER_UOF_FIELDS)
@@ -66,7 +67,7 @@ class OfficerDatafileQuery(object):
 
     def _generate_officer_career_sheet(self):
         career = Event.objects.filter(
-            officer=self.officer,
+            officer__in=self.all_officers,
             kind__in=OFFICER_CAREER_KINDS
         ).annotate(
             agency=F('department__name'),
@@ -79,7 +80,7 @@ class OfficerDatafileQuery(object):
 
     def _generate_officer_doc_sheet(self):
         doc = Document.objects.filter(
-            officers__in=[self.officer]
+            officers__in=self.all_officers
         ).values(*OFFICER_DOC_FIELDS)
 
         return pd.DataFrame(doc)
