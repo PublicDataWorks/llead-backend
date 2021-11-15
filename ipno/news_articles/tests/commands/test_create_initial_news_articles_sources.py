@@ -17,13 +17,13 @@ class CreateInitialNewsArticlesSourceTestCase(TestCase):
             source_object = sources.filter(source_name=source_data['source_name']).first()
             assert source_object
             assert source_object.source_name == source_data['source_name']
-            assert source_object.custom_matching_name == source_data['custom_matching_name']
+            assert source_object.source_display_name == source_data['source_display_name']
 
     def test_call_command_with_partial_created_data(self):
         create_source = APP_NEWS_ARTICLE_NAMES[0]
         NewsArticleSourceFactory(
             source_name=create_source['source_name'],
-            custom_matching_name=create_source['custom_matching_name']
+            source_display_name=create_source['source_display_name']
         )
         assert NewsArticleSource.objects.all().count() == 1
 
@@ -36,4 +36,4 @@ class CreateInitialNewsArticlesSourceTestCase(TestCase):
             source_object = sources.filter(source_name=source_data['source_name']).first()
             assert source_object
             assert source_object.source_name == source_data['source_name']
-            assert source_object.custom_matching_name == source_data['custom_matching_name']
+            assert source_object.source_display_name == source_data['source_display_name']
