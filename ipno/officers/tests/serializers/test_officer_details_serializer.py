@@ -8,6 +8,7 @@ from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
+from people.factories import PersonFactory
 
 
 class OfficerDetailsSerializerTestCase(TestCase):
@@ -19,6 +20,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
             race='white',
             gender='male',
         )
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
         department = DepartmentFactory()
         EventFactory(
             officer=officer,
@@ -54,6 +58,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             year=2015,
             month=7,
             day=20,
+            department=None
         )
 
         document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
@@ -77,6 +82,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             year=2019,
             month=5,
             day=4,
+            department=None
         )
         EventFactory(
             officer=officer,
@@ -85,6 +91,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             year=2020,
             month=5,
             day=4,
+            department=None
         )
 
         result = OfficerDetailsSerializer(officer).data
@@ -95,10 +102,10 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
-            'department': {
+            'departments': [{
                 'id': department.slug,
                 'name': department.name,
-            },
+            }],
             'salary': '57000.14',
             'salary_freq': 'yearly',
             'documents_count': 3,
@@ -107,6 +114,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
 
     def test_salary_fields(self):
         officer = OfficerFactory()
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
 
         EventFactory(
             officer=officer,
@@ -139,6 +149,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
 
     def test_salary_fields_with_empty_salary_freq(self):
         officer = OfficerFactory()
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
 
         EventFactory(
             officer=officer,
@@ -171,6 +184,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
 
     def test_salary_fields_with_empty_salary(self):
         officer = OfficerFactory()
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
 
         EventFactory(
             officer=officer,
@@ -209,6 +225,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
             race='white',
             gender='male',
         )
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
 
         document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
         document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
@@ -232,9 +251,126 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
-            'department': None,
+            'departments': [],
             'salary': None,
             'salary_freq': None,
+            'documents_count': 3,
+            'complaints_count': 2,
+        }
+
+    def test_data_with_related_officer_departments_and_badges(self):
+        officer = OfficerFactory(
+            first_name='David',
+            last_name='Jonesworth',
+            birth_year=1962,
+            race='white',
+            gender='male',
+        )
+        person = PersonFactory(canonical_officer=officer)
+        related_officer = OfficerFactory()
+        person.officers.add(officer)
+        person.officers.add(related_officer)
+        person.save()
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='12435',
+            salary='57000.145',
+            salary_freq='yearly',
+            year=2020,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='67893',
+            salary='20.23',
+            salary_freq='hourly',
+            year=2017,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no='12435',
+            year=2015,
+            month=7,
+            day=20,
+            department=None
+        )
+        EventFactory(
+            officer=related_officer,
+            badge_no='13579',
+            year=2021,
+            month=7,
+            day=20,
+            department=related_department
+        )
+
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+
+        document_1.officers.add(officer)
+        document_2.officers.add(officer)
+        document_3.officers.add(officer)
+
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+
+        EventFactory(
+            officer=officer,
+            kind=COMPLAINT_RECEIVE,
+            badge_no=None,
+            year=2019,
+            month=5,
+            day=4,
+            department=None
+        )
+        EventFactory(
+            officer=officer,
+            kind=ALLEGATION_CREATE,
+            badge_no=None,
+            year=2020,
+            month=5,
+            day=4,
+            department=None
+        )
+
+        result = OfficerDetailsSerializer(officer).data
+        assert result == {
+            'id': officer.id,
+            'name': 'David Jonesworth',
+            'badges': ['13579', '12435', '67893', '5432'],
+            'birth_year': 1962,
+            'race': 'white',
+            'gender': 'male',
+            'departments': [
+                {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                {
+                    'id': related_department.slug,
+                    'name': related_department.name,
+                }
+            ],
+            'salary': '57000.14',
+            'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
         }
