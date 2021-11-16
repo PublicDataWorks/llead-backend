@@ -31,6 +31,7 @@ class DocumentESDoc(ESDoc):
     officer_badges = fields.TextField()
     department_ids = fields.IntegerField()
     department_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    department_slugs = fields.TextField()
 
     def prepare_officer_names(self, instance):
         return [officer.name for officer in instance.officers.all()]
@@ -43,3 +44,6 @@ class DocumentESDoc(ESDoc):
 
     def prepare_department_ids(self, instance):
         return [department.id for department in instance.departments.all()]
+
+    def prepare_department_slugs(self, instance):
+        return [department.slug for department in instance.departments.all()]
