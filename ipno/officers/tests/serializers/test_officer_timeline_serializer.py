@@ -327,7 +327,7 @@ class NewsArticleTimelineSerializerTestCase(TestCase):
             'id': news_article.id,
             'title': news_article.title,
             'url': news_article.url,
-            'source_name': news_article.source.custom_matching_name,
+            'source_name': news_article.source.source_display_name,
         }
 
 

@@ -27,7 +27,7 @@ class ArticlePdfCreator:
         canvas.restoreState()
 
     def build_body(self):
-        body = [Paragraph(paragraph['content'], self.get_style(paragraph['style']))
+        body = [Paragraph(paragraph['content'].replace('\n', '<br/>'), self.get_style(paragraph['style']))
                 for paragraph in self.content]
 
         return body
