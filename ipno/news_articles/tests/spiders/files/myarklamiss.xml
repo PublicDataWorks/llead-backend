@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+
+     xmlns:georss="http://www.georss.org/georss"
+     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+     xmlns:dcterms="http://purl.org/dc/terms/"
+>
+
+    <channel>
+        <title>KTVE - myarklamiss.com</title>
+        <atom:link href="https://www.myarklamiss.com/feed/" rel="self" type="application/rss+xml"/>
+        <link>https://www.myarklamiss.com</link>
+        <description>Your Local News Leader</description>
+        <lastBuildDate>Thu, 21 Oct 2021 03:40:55 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>
+            hourly
+        </sy:updatePeriod>
+        <sy:updateFrequency>
+            1
+        </sy:updateFrequency>
+        <generator>https://wordpress.org/?v=5.7.3</generator>
+
+        <image>
+            <url>
+                https://www.myarklamiss.com/wp-content/uploads/sites/15/2019/05/cropped-NBC-10-KTVE-Logo-1-19-15.png?w=32
+            </url>
+            <title>KTVE - myarklamiss.com</title>
+            <link>https://www.myarklamiss.com</link>
+            <width>32</width>
+            <height>32</height>
+        </image>
+        <site xmlns="com-wordpress:feed-additions:1">162739405</site>
+        <item>
+            <title>Four men arrested for weapon and drug charges on Grambling campus</title>
+            <link>
+                https://www.myarklamiss.com/news/top-stories/four-men-arrested-for-weapon-and-drug-charges-on-grambling-campus/
+            </link>
+
+            <dc:creator><![CDATA[Kevin Dudley, Jr.]]></dc:creator>
+            <pubDate>Wed, 20 Oct 2021 15:48:32 +0000</pubDate>
+            <category><![CDATA[Crime]]></category>
+            <category><![CDATA[Local News]]></category>
+            <category><![CDATA[News]]></category>
+            <category><![CDATA[Top Stories]]></category>
+            <category><![CDATA[Deontae D Franklin]]></category>
+            <category><![CDATA[Grambling Louisiana]]></category>
+            <category><![CDATA[Grambling State University]]></category>
+            <category><![CDATA[Grambling State University Police Department]]></category>
+            <category><![CDATA[Isiah Ward]]></category>
+            <category><![CDATA[Louisiana news]]></category>
+            <category><![CDATA[Ringgold Police Department]]></category>
+            <category><![CDATA[Sherman Sylvester]]></category>
+            <category><![CDATA[Xavien K. Smith]]></category>
+            <guid isPermaLink="false">https://www.myarklamiss.com/?p=951357</guid>
+
+            <description>
+                <![CDATA[GRAMBLING, La. (KTVE/KARD) -- On Tuesday, October 19, 2021, the Grambling State University Police Department were dispatched to room 210 in Pinchback Hall in reference to a possible gun on campus. Upon arrival, officers made contact with 18-year-old Xavien K. Smith and 20-year-old Deontae D. Franklin. After gaining consent to search the room, officers discovered [...]]]></description>
+
+
+            <post-id xmlns="com-wordpress:feed-additions:1">951357</post-id>
+            <enclosure
+                    url="https://www.myarklamiss.com/wp-content/uploads/sites/15/2021/10/police-lights-background-–-wny-news-now-1-1.jpg?w=900"
+                    type="image/jpeg" length="219342"/>
+            <dcterms:modified>2021-10-20T22:58:39+00:00</dcterms:modified>
+        </item>
+        <item>
+            <title>UPDATE: Redistricting Roadshow is underway, Louisiana sees population spike of 2.36%</title>
+            <link>
+                https://www.myarklamiss.com/news/louisiana-politics/lawmakers-to-start-redistricting-roadshow-in-monroe/
+            </link>
+
+            <dc:creator><![CDATA[Jenn Hensley]]></dc:creator>
+            <pubDate>Thu, 21 Oct 2021 03:33:00 +0000</pubDate>
+            <category><![CDATA[LA Politics]]></category>
+            <category><![CDATA[Local Politics]]></category>
+            <category><![CDATA[Louisiana News]]></category>
+            <category><![CDATA[Louisiana Politics]]></category>
+            <category><![CDATA[News]]></category>
+            <category><![CDATA[Politics]]></category>
+            <category><![CDATA[Regional News]]></category>
+            <category><![CDATA[Top News]]></category>
+            <category><![CDATA[Top Stories]]></category>
+            <category><![CDATA[Louisiana news]]></category>
+            <category><![CDATA[Redistricting Roadshow]]></category>
+            <category><![CDATA[Redistricting Tour]]></category>
+            <guid isPermaLink="false">https://www.myarklamiss.com/?p=951069</guid>
+
+            <description>
+                <![CDATA[MONROE, La. (KTVE/KARD) -- Politics redistricting is something that happens every 10 years and allows civic engagement to take place among legislators and the communities they serve. Historically, Louisiana communities have had little or no say in the way their communities are mapped out. Data from the 2010 and 2020 censuses says there has been [...]]]></description>
+
+
+            <dc:creator><![CDATA[Nick Sommer]]></dc:creator>
+            <post-id xmlns="com-wordpress:feed-additions:1">951069</post-id>
+            <enclosure
+                    url="https://www.myarklamiss.com/wp-content/uploads/sites/15/2021/08/MGN_1280x720_70208P00-MHIDS-1-2.jpg?w=900"
+                    type="image/jpeg" length="192758"/>
+            <dcterms:modified>2021-10-21T03:40:55+00:00</dcterms:modified>
+        </item>
+    </channel>
+</rss>

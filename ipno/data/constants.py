@@ -7,6 +7,7 @@ USE_OF_FORCE_MODEL_NAME = 'UseOfForce'
 DOCUMENT_MODEL_NAME = 'Document'
 NEWS_ARTICLE_MODEL_NAME = 'NewsArticle'
 NEWS_ARTICLE_OFFICER_MODEL_NAME = 'NewsArticleOfficer'
+PERSON_MODEL_NAME = 'Person'
 WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'personnel',
@@ -35,6 +36,10 @@ WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'news_articles_officers',
         'data_model': NEWS_ARTICLE_OFFICER_MODEL_NAME,
+    },
+    {
+        'repo_name': 'person',
+        'data_model': PERSON_MODEL_NAME,
     },
 ]
 

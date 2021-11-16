@@ -32,7 +32,16 @@ class Officer(TimeStampsModel):
     race = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=255, null=True, blank=True)
 
+    is_name_changed = models.BooleanField(default=False)
+
     departments = models.ManyToManyField('departments.Department', through='officers.Event')
+    person = models.ForeignKey(
+        'people.Person',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='officers'
+    )
     objects = OfficerManager()
 
     def __str__(self):

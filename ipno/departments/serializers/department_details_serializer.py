@@ -27,7 +27,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
     data_period = serializers.SerializerMethodField()
 
     def get_officers_count(self, obj):
-        return obj.officers.distinct().count()
+        return obj.officers.filter(canonical_person__isnull=False).distinct().count()
 
     def get_complaints_count(self, obj):
         return obj.complaints.count()
