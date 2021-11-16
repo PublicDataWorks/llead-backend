@@ -1,6 +1,8 @@
 from django.db.models import Prefetch, Q
 
-from news_articles.models import NewsArticle
+from complaints.models import Complaint
+from documents.models import Document
+from news_articles.models import NewsArticle, MatchedSentence
 from officers.serializers import (
     ComplaintTimelineSerializer,
     UseOfForceTimelineSerializer,
@@ -21,13 +23,14 @@ from officers.constants import (
     OFFICER_DEPT
 )
 from officers.models import Event
+from use_of_forces.models import UseOfForce
 from utils.data_utils import sort_items
 from utils.data_utils import data_period
 
 
 class OfficerTimelineQuery(object):
     def __init__(self, officer):
-        self.officer = officer
+        self.all_officers = officer.person.officers.all()
 
     @staticmethod
     def _filter_event_changes(events, compared_fields):
@@ -64,47 +67,50 @@ class OfficerTimelineQuery(object):
 
     @property
     def _complaint_timeline(self):
-        complaint_timeline_queryset = self.officer.complaints.prefetch_related(
+        complaint_timeline_queryset = Complaint.objects.prefetch_related(
             Prefetch(
                 'events',
                 queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
                 to_attr='prefetched_receive_events'
             ),
-        )
+        ).filter(officers__in=self.all_officers)
 
         return ComplaintTimelineSerializer(complaint_timeline_queryset, many=True).data
 
     @property
     def _use_of_force_timeline(self):
-        use_of_force_timeline_queryset = self.officer.use_of_forces.prefetch_related('events')
+        use_of_force_timeline_queryset = UseOfForce.objects.prefetch_related('events').filter(officer__in=self.all_officers)
 
         return UseOfForceTimelineSerializer(use_of_force_timeline_queryset, many=True).data
 
     @property
     def _join_timeline(self):
-        joined_timeline_query = self.officer.events.filter(
-            kind=OFFICER_HIRE
-        )
+        joined_timeline_query = Event.objects.filter(
+                kind=OFFICER_HIRE
+            ).filter(officer__in=self.all_officers)
 
         return JoinedTimelineSerializer(joined_timeline_query, many=True).data
 
     @property
     def _left_timeline(self):
-        left_timeline_query = self.officer.events.filter(
-            kind=OFFICER_LEFT
-        )
+        left_timeline_query = Event.objects.filter(
+                kind=OFFICER_LEFT
+            ).filter(officer__in=self.all_officers)
 
         return LeftTimelineSerializer(left_timeline_query, many=True).data
 
     @property
     def _document_timeline(self):
-        document_timeline_queryset = self.officer.documents.prefetch_departments()
+        document_timeline_queryset = Document.objects.prefetch_departments().filter(officers__in=self.all_officers)
 
         return DocumentTimelineSerializer(document_timeline_queryset, many=True).data
 
     @property
     def _news_aticle_timeline(self):
-        articles_ids = self.officer.matched_sentences.all().values_list('article__id', flat=True)
+        articles_ids = MatchedSentence.objects.all().filter(
+            officers__in=self.all_officers
+        ).values_list('article__id', flat=True)
+
         news_article_timeline_queryset = NewsArticle.objects.prefetch_related('source').filter(
             id__in=articles_ids
         ).distinct()
@@ -113,11 +119,9 @@ class OfficerTimelineQuery(object):
 
     @property
     def _salary_change_timeline(self):
-        events = list(
-            self.officer.events.filter(
+        events = Event.objects.filter(
                 kind=OFFICER_PAY_EFFECTIVE,
-            ).filter(salary__isnull=False, salary_freq__isnull=False)
-        )
+            ).filter(salary__isnull=False, salary_freq__isnull=False, officer__in=self.all_officers)
 
         salary_changes = self._filter_event_changes(
             events,
@@ -128,13 +132,12 @@ class OfficerTimelineQuery(object):
 
     @property
     def _rank_change_timeline(self):
-        events = list(
-            self.officer.events.filter(
+        events = Event.objects.filter(
                 kind=OFFICER_RANK,
             ).filter(
-                Q(rank_code__isnull=False) | Q(rank_desc__isnull=False),
+                Q(officer__in=self.all_officers) &
+                (Q(rank_code__isnull=False) | Q(rank_desc__isnull=False)),
             )
-        )
 
         rank_changes = self._filter_event_changes(
             events,
@@ -145,10 +148,11 @@ class OfficerTimelineQuery(object):
 
     @property
     def _unit_change_timeline(self):
-        events = self.officer.events.filter(
+        events = Event.objects.filter(
                 kind=OFFICER_DEPT
             ).filter(
-                Q(department_code__isnull=False) | Q(department_desc__isnull=False),
+                Q(officer__in=self.all_officers) &
+                (Q(department_code__isnull=False) | Q(department_desc__isnull=False)),
             )
 
         unit_changes = self._filter_event_changes(

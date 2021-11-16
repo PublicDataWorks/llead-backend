@@ -9,21 +9,26 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
+    @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
     @patch('data.services.uof_importer.UofImporter.process')
     @patch('data.services.officer_importer.OfficerImporter.process')
     @patch('data.services.document_importer.DocumentImporter.process')
+    @patch('data.services.person_importer.PersonImporter.process')
     def test_call_command(
             self,
+            person_process_mock,
             document_process_mock,
             officer_process_mock,
             uof_process_mock,
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
+            count_complaints_mock,
     ):
+        person_process_mock.return_value = True
         document_process_mock.return_value = True
         officer_process_mock.return_value = True
         uof_process_mock.return_value = False
@@ -31,28 +36,35 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         event_process_mock.return_value = False
         call_command('import_data')
 
+        person_process_mock.assert_called()
         document_process_mock.assert_called()
         officer_process_mock.assert_called()
         uof_process_mock.assert_called()
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_called()
+        count_complaints_mock.assert_called()
 
+    @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
     @patch('data.services.uof_importer.UofImporter.process')
     @patch('data.services.officer_importer.OfficerImporter.process')
     @patch('data.services.document_importer.DocumentImporter.process')
+    @patch('data.services.person_importer.PersonImporter.process')
     def test_call_command_with_no_new_data(
             self,
+            person_process_mock,
             document_process_mock,
             officer_process_mock,
             uof_process_mock,
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
+            count_complaints_mock,
     ):
+        person_process_mock.return_value = False
         document_process_mock.return_value = False
         officer_process_mock.return_value = False
         uof_process_mock.return_value = False
@@ -60,9 +72,11 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         event_process_mock.return_value = False
         call_command('import_data')
 
+        person_process_mock.assert_called()
         document_process_mock.assert_called()
         officer_process_mock.assert_called()
         uof_process_mock.assert_called()
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_not_called()
+        count_complaints_mock.assert_not_called()

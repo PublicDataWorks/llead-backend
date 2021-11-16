@@ -36,4 +36,4 @@ class NewsArticleESDoc(ESDoc):
     source_name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
 
     def prepare_source_name(self, instance):
-        return instance.source.custom_matching_name if instance.source else ''
+        return instance.source.source_display_name if instance.source else ''

@@ -6,7 +6,7 @@ from utils.models import TimeStampsModel
 class NewsArticle(TimeStampsModel):
     guid = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
-    link = models.CharField(max_length=255, unique=True)
+    link = models.TextField(unique=True)
     content = models.TextField()
     published_date = models.DateField()
     author = models.CharField(max_length=255, blank=True, null=True)
