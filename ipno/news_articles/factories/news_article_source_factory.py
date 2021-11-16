@@ -11,4 +11,4 @@ class NewsArticleSourceFactory(factory.django.DjangoModelFactory):
         model = NewsArticleSource
 
     source_name = factory.LazyFunction(lambda: fake.word())
-    custom_matching_name = factory.LazyFunction(lambda: fake.word())
+    source_display_name = factory.LazyFunction(lambda: fake.word())

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.hannapub.com - RSS Results in concordiasentinel of type article</title>
+        <link>https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=concordiasentinel&amp;l=100&amp;s=start_time&amp;sd=desc</link>
+        <atom:link
+                href="https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=concordiasentinel&amp;l=100&amp;s=start_time&amp;sd=desc"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.hannapub.com - RSS Results
+            in section(s) concordiasentinel
+            only for asset type(s) of article
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Obituaries - Oct. 20, 2021</title>
+            <description>Connie Green McDonough</description>
+            <pubDate>Wed, 20 Oct 2021 14:15:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/9e19ae48-31cd-11ec-8321-77ec86cfa148
+            </guid>
+            <link>
+                https://www.hannapub.com/concordiasentinel/obituaries---oct-20-2021/article_9e19ae48-31cd-11ec-8321-77ec86cfa148.html
+            </link>
+        </item>
+
+        <item>
+            <title>Obituaries - October 13, 2021</title>
+            <description>William Thomas Barham Moss</description>
+            <pubDate>Wed, 13 Oct 2021 12:28:00 -0500</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/f4b3a6d8-2c4a-11ec-942a-4fe1289ca065
+            </guid>
+            <link>
+                https://www.hannapub.com/concordiasentinel/obituaries---october-13-2021/article_f4b3a6d8-2c4a-11ec-942a-4fe1289ca065.html
+            </link>
+        </item>
+
+    </channel>
+</rss>

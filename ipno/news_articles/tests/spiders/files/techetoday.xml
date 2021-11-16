@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0" xml:base="https://www.techetoday.com/rss-feed" xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom" xmlns:fb="http://www.facebook.com/2008/fbml" xmlns:og="http://ogp.me/ns#"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:sioc="http://rdfs.org/sioc/ns#"
+     xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <channel>
+        <title>RSS Feed</title>
+        <link>https://www.techetoday.com/rss-feed</link>
+        <description></description>
+        <language>en</language>
+        <atom:link href="https://www.techetoday.com/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Prevention and assistance tips as health care fraud grows nationwide</title>
+            <link>https://www.techetoday.com/news/prevention-and-assistance-tips-health-care-fraud-grows-nationwide
+            </link>
+            <description>&lt;div class=&quot;field field-name-field-dateline field-type-text field-label-hidden&quot;&gt;&lt;div
+                class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;By Amanda McElfresh&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div
+                class=&quot;field field-name-field-image field-type-image field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div
+                class=&quot;field-item even&quot; rel=&quot;og:image rdfs:seeAlso&quot; resource=&quot;https://www.techetoday.com/sites/techetoday.etypegoogle8.com/files/styles/large/public/field/image/bcbs_member_story_stills_4.png?itok=5sj0PRpU&quot;&gt;&lt;img
+                typeof=&quot;foaf:Image&quot; src=&quot;https://www.techetoday.com/sites/techetoday.etypegoogle8.com/files/styles/large/public/field/image/bcbs_member_story_stills_4.png?itok=5sj0PRpU&quot;
+                width=&quot;618&quot; height=&quot;348&quot; alt=&quot;Article Image Alt Text&quot; /&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div
+                class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div
+                class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot; property=&quot;content:encoded&quot;&gt;&lt;p&gt;When
+                Jimmy Davis presented his Blue Cross and Blue Shield of Louisiana card at a health care facility ahead
+                of a medical procedure, he was stunned at the response. Unbeknownst to him, he no longer had Blue Cross
+                coverage.&lt;/p&gt;
+                &lt;p&gt;With a bit of research, Davis, a Blue Cross Medicare plan member, learned that his identity had
+                been stolen. He is not alone. Approximately 2.5 million senior citizens in the United States are victims
+                of such crimes each year, said Mike Bertaut, a health care economist with Blue Cross.&lt;/p&gt;
+                &lt;p&gt;Davis reached out to his Blue Cross agent, who immediately started working with him and others
+                with the insurer to resolve the problem. She made multiple in-person visits to Davis and navigated the
+                paperwork process to ensure his Blue Cross coverage was fully restored and he could receive the medical
+                treatment he needed in a timely fashion.&lt;/p&gt;
+                &lt;p&gt;“I was very proud of how we handled it,” Bertaut said. “His agent was incredibly caring and
+                empathetic and smart, as are all of our agents here. But it has certainly made me realize that there are
+                a lot of people who end up in the same situation.”&lt;/p&gt;
+                &lt;p&gt;At Blue Cross, a dedicated fraud department is focused entirely on helping people like Davis
+                get the medical coverage they pay for and need. Kandyce Cowart, manager of special investigations for
+                Blue Cross, said there are some common tactics that scam artists use to try to take advantage of people.&lt;/p&gt;
+                &lt;p&gt;“A sense of urgency is something we see a lot,” Cowart said. “They’re telling people that they
+                have to take action now or they will lose out. Many times, they are asking for financial information or
+                money. They say they need money right now. It’s all about making people feel they have to do something
+                right away.”&lt;/p&gt;
+                &lt;p&gt;Alice Sibley, an intelligence analyst with the FBI New Orleans office, said some scammers may
+                ask for a person’s Medicare or health insurance information, which can create a false sense of security
+                since they are not asking for direct financial information. However, Sibley noted the consequences could
+                be just as significant even if the person does not give out their banking details.&lt;/p&gt;
+                &lt;p&gt;“If someone calls and asks for your Medicare or insurance number, they are looking to make
+                money off of it,” Sibley said. “If you are paying for that, you want to be able to receive those
+                benefits. You don’t want someone else to bill that account for testing now and it’s not available to you
+                when you need it.”&lt;/p&gt;
+                &lt;p&gt;Cowart said many fraudsters will say they are calling from a doctor’s office or health insurer
+                in order to create a sense of trust and familiarity. If someone receives such a call unsolicited, Cowart
+                said they should feel free to hang up and verify the person’s identity before sharing any information.&lt;/p&gt;
+                &lt;p&gt;“Don’t be afraid to be rude,” she said. “If you don’t know the person and they are trying to
+                engage in a conversation about your health care or your finances, it’s okay to hang up or walk away
+                without sharing anything.”&lt;/p&gt;
+                &lt;p&gt;Chad Jarrell, an intelligence analyst with the FBI New Orleans office, said some schemes also
+                involve offering medical tests or screenings that may be unwarranted.&lt;/p&gt;
+                &lt;p&gt;“People want to remain healthy, especially when they are elderly, so it’s all about making them
+                feel their health is at risk and they need to do something if they want to live longer,” Jarrell said.
+                “Fear is something we see a lot – a fear of missing out if they don’t have this test.”&lt;/p&gt;
+                &lt;p&gt;At Blue Cross, protecting members is the top priority. The insurer has a dedicated team to
+                address fraud, waste and abuse, and they will step in to help members who report these issues. If a Blue
+                Cross member feels they have fallen victim to a scam, Cowart said they should immediately call the fraud
+                help line at 1-800-392-9249.&lt;/p&gt;
+                &lt;p&gt;“The first thing we try to do is learn everything we can about the conversation, including what
+                the caller asked for and what was provided,” Cowart said. “There are phone calls we can make right away
+                on the line together to put blocks in place. Once we have that information, our next steps depend on
+                what happened. We normally will look for claims and see where we were billed and the referring
+                physician, then work through the paperwork to get the full story.”&lt;/p&gt;
+                &lt;p&gt;Davis worked with Blue Cross to make a video about his story to let others know how they can
+                get help. It can be seen on the Blue Cross and Blue Shield of Louisiana YouTube channel, &lt;a href=&quot;http://www.youtube.com/BCBSLA&quot;&gt;www.youtube.com/BCBSLA&lt;/a&gt;.&lt;/p&gt;
+                &lt;p&gt;Jarrell said fraud can also be reported to the FBI at 1-800-CALL-FBI. The hotline is staffed 24
+                hours a day, seven days a week, and all complaints are documented and addressed accordingly. They are
+                then assigned to an FBI agent or analyst for review and a fact-finding process.&lt;/p&gt;
+                &lt;p&gt;“Someone will answer and speak to them,” Jarrell said. “If they have given bank information,
+                they should reach out to their bank to put a hold on their accounts. There are things people can do to
+                limit their exposure, but they have to report it to the appropriate authorities for that to occur.” &lt;/p&gt;
+                &lt;p&gt;Sibley noted that Medicare members can also report fraud by calling 1-800-MEDICARE or going
+                online to fraud.ftc.gov, which connects to the Federal Trade Commission. &lt;/p&gt;
+                &lt;p&gt;Although some people may be embarrassed or scared to report fraud, Bertaut said it is vital to
+                do so to ensure a person continues to receive the health treatment he or she needs.&lt;/p&gt;
+                &lt;p&gt;“Nobody is going to think less of you,” Bertaut said. “If you want to see Blue Cross jump into
+                action, let us know your identity was stolen or somebody switched your plan without your knowledge. Our
+                agents are on those reports immediately and they do not stop until it is resolved.”&lt;/p&gt;
+                &lt;p&gt;If you’re interested in becoming a Blue Cross member or learning more about protecting yourself
+                with Blue Cross Medicare plans, please call 1-800-568-1417 (TTY 711) or visit &lt;a href=&quot;&quot;
+                target=&quot;_blank&quot;&gt;bcbslaplan.com/Medicare&lt;/a&gt;.&lt;/p&gt;
+                &lt;p&gt;&lt;img src=&quot;https://www.louisianastatenewspapers.com/ads/BSBCInfographic.png&quot; /&gt;&lt;/p&gt;
+                &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-section
+                field-type-taxonomy-term-reference field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div
+                class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/news&quot; typeof=&quot;skos:Concept&quot;
+                property=&quot;rdfs:label skos:prefLabel&quot; datatype=&quot;&quot;&gt;&lt;span&gt;News&lt;/span&gt;&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div
+                class=&quot;field field-name-field-upload field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Upload
+                a file:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item
+                even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;PDF icon&quot;
+                title=&quot;application/pdf&quot; src=&quot;/modules/file/icons/application-pdf.png&quot; /&gt; &lt;a
+                href=&quot;https://www.techetoday.com/sites/techetoday.etypegoogle8.com/files/infographic-v2.pdf&quot;
+                type=&quot;application/pdf; length=167117&quot;&gt;&lt;span&gt;infographic-v2.pdf&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+            </description>
+            <pubDate>Wed, 20 Oct 2021 06:00:00 +0000</pubDate>
+            <dc:creator>Teche News</dc:creator>
+            <guid isPermaLink="false">197919 at https://www.techetoday.com</guid>
+        </item>
+        <item>
+            <title>Haywood Lewis</title>
+            <link>https://www.techetoday.com/obituaries/haywood-lewis</link>
+            <description>&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div
+                class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot; property=&quot;content:encoded&quot;&gt;&lt;p&gt;&lt;b&gt;Breaux
+                Bridge &lt;/b&gt;&amp;ndash;&lt;b&gt; &lt;/b&gt;A funeral service was held on Oct. 15 at St. Francis of
+                Assisi Catholic Church for Haywood &amp;ldquo;Black&amp;rdquo; Lewis, 89, who died on Oct. 10, 2021.&lt;/p&gt;
+                &lt;p&gt;He is survived by his sisters, Estella L. Henry and Theresa Broussard; brothers, Walter Jr.,
+                Irving and Joseph Lewis; and stepchildren, Mrs. Frank (Velicia) LeBlanc and Mrs. Jonathan (Jackie)
+                Smith.&lt;/p&gt;
+                &lt;p&gt;He was preceded in death by his wife, Gloria Lewis.&amp;nbsp;&lt;/p&gt;
+                &lt;p&gt;Pellerin Funeral Home was in charge of arrangements.&lt;/p&gt;
+                &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-section
+                field-type-taxonomy-term-reference field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div
+                class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/obituaries&quot; typeof=&quot;skos:Concept&quot;
+                property=&quot;rdfs:label skos:prefLabel&quot; datatype=&quot;&quot;&gt;&lt;span&gt;Obituaries&lt;/span&gt;&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+            </description>
+            <pubDate>Tue, 19 Oct 2021 14:22:04 +0000</pubDate>
+            <dc:creator>Mary Terry</dc:creator>
+            <guid isPermaLink="false">197918 at https://www.techetoday.com</guid>
+        </item>
+    </channel>
+</rss>

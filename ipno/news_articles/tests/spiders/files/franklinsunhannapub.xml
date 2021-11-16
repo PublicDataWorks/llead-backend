@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>www.hannapub.com - RSS Results in franklinsun of type article</title>
+        <link>https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=franklinsun&amp;l=100&amp;s=start_time&amp;sd=desc</link>
+        <atom:link
+                href="https://www.hannapub.com/search/?f=rss&amp;t=article&amp;c=franklinsun&amp;l=100&amp;s=start_time&amp;sd=desc"
+                rel="self" type="application/rss+xml"/>
+        <description>
+            www.hannapub.com - RSS Results
+            in section(s) franklinsun
+            only for asset type(s) of article
+        </description>
+        <generator>TNCMS 1.59.4</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>
+        <ttl>30</ttl>
+
+        <item>
+            <title>Patriots last home game of season dedicated to Veterans</title>
+            <description>The Franklin Parish High School Patriette Dance team will be having a Veteran’s Day program at
+                the Nov. 6 game, Chasity Southern, Patriette coach said.
+            </description>
+            <pubDate>Wed, 04 Nov 2020 06:00:00 -0600</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/fa62c974-1e09-11eb-88a5-eb76bcd86308
+            </guid>
+            <link>
+                https://www.hannapub.com/franklinsun/patriots-last-home-game-of-season-dedicated-to-veterans/article_fa62c974-1e09-11eb-88a5-eb76bcd86308.html
+            </link>
+        </item>
+
+        <item>
+            <title>Mangham blasts Trass, faces Class 2A champs Friday</title>
+            <description>Mangham High outscored General Trass 20-0 in the second half to cruise past General Trass 55-32
+                in Mangham Friday.
+            </description>
+            <pubDate>Wed, 04 Nov 2020 06:00:00 -0600</pubDate>
+            <guid isPermaLink="false">
+                http://www.hannapub.com/tncms/asset/editorial/55705034-1e0a-11eb-9175-672c7c9d2a3d
+            </guid>
+            <link>
+                https://www.hannapub.com/franklinsun/mangham-blasts-trass-faces-class-2a-champs-friday/article_55705034-1e0a-11eb-9175-672c7c9d2a3d.html
+            </link>
+        </item>
+
+    </channel>
+</rss>

@@ -12,7 +12,7 @@ from test_utils.auth_api_test_case import AuthAPITestCase
 
 class NewsArticlesViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        source = NewsArticleSourceFactory(custom_matching_name='dummy')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
         officer = OfficerFactory()
         news_article_1 = NewsArticleFactory(source=source)
         news_article_2 = NewsArticleFactory(
@@ -36,7 +36,7 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 'date': str(news_article_1.published_date),
                 'title': news_article_1.title,
                 'url': news_article_1.url,
-                'source_name': source.custom_matching_name,
+                'source_name': source.source_display_name,
                 'author': news_article_1.author,
             },
             {
@@ -44,7 +44,7 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 'date': str(news_article_2.published_date),
                 'title': news_article_2.title,
                 'url': news_article_2.url,
-                'source_name': source.custom_matching_name,
+                'source_name': source.source_display_name,
                 'author': news_article_2.author,
             },
         ]

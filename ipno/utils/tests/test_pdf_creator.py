@@ -14,7 +14,7 @@ class ArticlePdfCreatorTestCase(TestCase):
         self.date = datetime.now().date()
         self.content = [{
                 'style': 'BodyText',
-                'content': "This is first paragraph. You can see it."
+                'content': "This is first paragraph.\nYou can see it."
             },
             {
                 'style': 'Heading4',
@@ -73,7 +73,7 @@ class ArticlePdfCreatorTestCase(TestCase):
 
         assert body == [
             {
-                'text': "This is first paragraph. You can see it.",
+                'text': "This is first paragraph.<br/>You can see it.",
                 'style': "BodyText"
             },
             {
