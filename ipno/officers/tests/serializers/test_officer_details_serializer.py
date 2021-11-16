@@ -200,3 +200,41 @@ class OfficerDetailsSerializerTestCase(TestCase):
         result = OfficerDetailsSerializer(officer).data
         assert result['salary'] is None
         assert result['salary_freq'] is None
+
+    def test_officer_data_without_event(self):
+        officer = OfficerFactory(
+            first_name='David',
+            last_name='Jonesworth',
+            birth_year=1962,
+            race='white',
+            gender='male',
+        )
+
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+
+        document_1.officers.add(officer)
+        document_2.officers.add(officer)
+        document_3.officers.add(officer)
+
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+
+        result = OfficerDetailsSerializer(officer).data
+        assert result == {
+            'id': officer.id,
+            'name': 'David Jonesworth',
+            'badges': [],
+            'birth_year': 1962,
+            'race': 'white',
+            'gender': 'male',
+            'department': None,
+            'salary': None,
+            'salary_freq': None,
+            'documents_count': 3,
+            'complaints_count': 2,
+        }
