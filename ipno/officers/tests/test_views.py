@@ -387,6 +387,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': JOINED_TIMELINE_KIND,
                 'date': str(date(2018, 4, 8)),
                 'year': 2018,
+                'department': department_1.name,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
@@ -469,11 +470,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': LEFT_TIMELINE_KIND,
                 'date': str(date(2020, 4, 8)),
                 'year': 2020,
+                'department': department_1.name,
             },
             {
                 'kind': JOINED_TIMELINE_KIND,
                 'date': str(date(2020, 5, 9)),
                 'year': 2020,
+                'department': department_2.name,
             },
             {
                 'kind': DOCUMENT_TIMELINE_KIND,
