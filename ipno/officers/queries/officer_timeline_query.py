@@ -85,17 +85,23 @@ class OfficerTimelineQuery(object):
 
     @property
     def _join_timeline(self):
-        joined_timeline_query = Event.objects.filter(
-                kind=OFFICER_HIRE
-            ).filter(officer__in=self.all_officers)
+        joined_timeline_query = Event.objects.select_related(
+            'department'
+        ).filter(
+            kind=OFFICER_HIRE,
+            officer__in=self.all_officers,
+        )
 
         return JoinedTimelineSerializer(joined_timeline_query, many=True).data
 
     @property
     def _left_timeline(self):
-        left_timeline_query = Event.objects.filter(
-                kind=OFFICER_LEFT
-            ).filter(officer__in=self.all_officers)
+        left_timeline_query = Event.objects.select_related(
+            'department'
+        ).filter(
+            kind=OFFICER_LEFT,
+            officer__in=self.all_officers,
+        )
 
         return LeftTimelineSerializer(left_timeline_query, many=True).data
 
