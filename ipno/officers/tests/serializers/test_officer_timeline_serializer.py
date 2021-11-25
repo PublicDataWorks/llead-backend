@@ -55,6 +55,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             'kind': JOINED_TIMELINE_KIND,
             'date': str(date(2018, 4, 8)),
             'year': 2018,
+            'department': event.department.name,
         }
 
     def test_data_with_only_year(self):
@@ -71,6 +72,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             'kind': JOINED_TIMELINE_KIND,
             'date': None,
             'year': 2018,
+            'department': event.department.name,
         }
 
     def test_data_with_empty_date(self):
@@ -87,6 +89,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             'kind': JOINED_TIMELINE_KIND,
             'date': None,
             'year': None,
+            'department': event.department.name,
         }
 
 
@@ -105,6 +108,7 @@ class LeftTimelineSerializerTestCase(TestCase):
             'kind': LEFT_TIMELINE_KIND,
             'date': str(date(2018, 4, 8)),
             'year': 2018,
+            'department': event.department.name,
         }
 
 
