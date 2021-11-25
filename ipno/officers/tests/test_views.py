@@ -172,6 +172,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             year=2015,
             month=7,
             day=20,
+            department=None,
         )
 
         document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
@@ -195,6 +196,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             year=2019,
             month=5,
             day=4,
+            department=None,
         )
         EventFactory(
             officer=officer,
@@ -203,6 +205,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             year=2020,
             month=5,
             day=4,
+            department=None,
         )
 
         expected_result = {
@@ -212,10 +215,10 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
-            'department': {
+            'departments': [{
                 'id': department.slug,
                 'name': department.name,
-            },
+            }],
             'salary': '57000.00',
             'salary_freq': 'yearly',
             'documents_count': 3,
@@ -570,3 +573,127 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response['Content-Disposition'] == expected_content_disposition
         pd.testing.assert_frame_equal(xlsx_data, data)
+
+    def test_retrieve_success_with_related_officer_departments_and_badges(self):
+        person = PersonFactory()
+        related_officer = OfficerFactory()
+        officer = OfficerFactory(
+            first_name='David',
+            last_name='Jonesworth',
+            birth_year=1962,
+            race='white',
+            gender='male',
+            person=person
+        )
+        person.officers.add(related_officer)
+        person.canonical_officer = officer
+        person.save()
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='12435',
+            salary='57000',
+            salary_freq='yearly',
+            year=2020,
+            month=5,
+            day=4,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='67893',
+            salary='20000',
+            salary_freq='yearly',
+            year=2017,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            department=department,
+            badge_no='5432',
+            year=None,
+            month=None,
+            day=None,
+        )
+        EventFactory(
+            officer=officer,
+            badge_no='12435',
+            year=2015,
+            month=7,
+            day=20,
+            department=None,
+        )
+        EventFactory(
+            officer=related_officer,
+            badge_no='13579',
+            year=2021,
+            month=7,
+            day=20,
+            department=related_department,
+        )
+
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+
+        document_1.officers.add(officer)
+        document_2.officers.add(officer)
+        document_3.officers.add(officer)
+
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+
+        EventFactory(
+            officer=officer,
+            kind=COMPLAINT_RECEIVE,
+            badge_no=None,
+            year=2019,
+            month=5,
+            day=4,
+            department=None,
+        )
+        EventFactory(
+            officer=officer,
+            kind=ALLEGATION_CREATE,
+            badge_no=None,
+            year=2020,
+            month=5,
+            day=4,
+            department=None,
+        )
+
+        expected_result = {
+            'id': officer.id,
+            'name': 'David Jonesworth',
+            'badges': ['13579', '12435', '67893', '5432'],
+            'birth_year': 1962,
+            'race': 'white',
+            'gender': 'male',
+            'departments': [
+                {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                {
+                    'id': related_department.slug,
+                    'name': related_department.name,
+                }
+            ],
+            'salary': '57000.00',
+            'salary_freq': 'yearly',
+            'documents_count': 3,
+            'complaints_count': 2,
+        }
+
+        response = self.auth_client.get(
+            reverse('api:officers-detail', kwargs={'pk': officer.id})
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data == expected_result
