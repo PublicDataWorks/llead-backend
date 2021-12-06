@@ -6,6 +6,7 @@ import traceback
 from django.conf import settings
 from django.utils.text import slugify
 from wrgl import Repository
+from tqdm import tqdm
 
 from departments.models import Department
 from officers.models import Officer
@@ -92,29 +93,35 @@ class BaseImporter(object):
                 if r.off1 is not None and r.off2 is not None
             ]
 
-        for i in range(0, len(added_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-            added_rows.extend(list(
-                self.repo.get_table_rows(
-                    self.new_commit.table.sum,
-                    added_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
-                )
-            ))
+        with tqdm(total=len(added_rows_offsets), desc='Downloading created data') as pbar:
+            for i in range(0, len(added_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                added_rows.extend(list(
+                    self.repo.get_table_rows(
+                        self.new_commit.table.sum,
+                        added_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
 
-        for i in range(0, len(removed_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-            deleted_rows.extend(list(
-                self.repo.get_table_rows(
-                    old_commit.table.sum,
-                    removed_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
-                )
-            ))
+        with tqdm(total=len(removed_rows_offsets), desc='Downloading deleted data') as pbar:
+            for i in range(0, len(removed_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                deleted_rows.extend(list(
+                    self.repo.get_table_rows(
+                        old_commit.table.sum,
+                        removed_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
 
-        for i in range(0, len(modified_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-            modified_rows_old.extend(list(
-                self.repo.get_table_rows(
-                    self.new_commit.table.sum,
-                    modified_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
-                )
-            ))
+        with tqdm(total=len(modified_rows_offsets), desc='Downloading modified data') as pbar:
+            for i in range(0, len(modified_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                modified_rows_old.extend(list(
+                    self.repo.get_table_rows(
+                        self.new_commit.table.sum,
+                        modified_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
 
         return {
             'added_rows': added_rows,

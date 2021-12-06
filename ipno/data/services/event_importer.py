@@ -9,7 +9,7 @@ from data.constants import EVENT_MODEL_NAME
 
 class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
-    WRGL_OFFSET_BATCH_SIZE = 300
+    WRGL_OFFSET_BATCH_SIZE = 750
 
     ATTRIBUTES = [
         'event_uid',
