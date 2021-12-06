@@ -47,7 +47,14 @@ class DocumentImporter(BaseImporter):
         self.gs = GoogleCloudService()
         self.ds = DropboxService()
 
-    def document_mappings(self):
+        self.new_documents = []
+        self.update_documents = []
+        self.new_docids = []
+        self.delete_documents_ids = []
+        self.document_mappings = {}
+        self.uploaded_files = {}
+
+    def get_document_mappings(self):
         documents_attrs = [
             'id', 'docid', 'hrg_no', 'matched_uid', 'pdf_db_content_hash', 'url', 'preview_image_url',
             'txt_db_content_hash'
@@ -57,31 +64,37 @@ class DocumentImporter(BaseImporter):
             (document['docid'], document['hrg_no'], document['matched_uid']): document for document in documents
         }
 
-    def update_relations(self, data):
+    def update_relations(self, raw_data):
         DepartmentRelation = Document.departments.through
         OfficerRelation = Document.officers.through
         department_relation_ids = {}
         officer_relation_ids = {}
+        modified_documents_ids = []
 
-        officer_mappings = self.officer_mappings()
-        agencies = {row['agency'] for row in data if row['agency']}
-        department_mappings = self.department_mappings(agencies)
+        data = self.get_all_diff_rows(raw_data)
 
-        document_mappings = self.document_mappings()
+        officer_mappings = self.get_officer_mappings()
+        agencies = {row[self.column_mappings['agency']] for row in data if row[self.column_mappings['agency']]}
+        department_mappings = self.get_department_mappings(agencies)
 
-        for row in tqdm(data):
-            officer_uid = row['matched_uid'] if row['matched_uid'] else None
-            agency = row['agency']
+        document_mappings = self.get_document_mappings()
+
+        for row in tqdm(data, desc="Update documents' relations"):
+            document_data = self.parse_row_data(row)
+            officer_uid = document_data.get('matched_uid')
+            agency = row[self.column_mappings['agency']]
 
             if officer_uid or agency:
-                docid = row['docid']
-                hrg_no = row['hrg_no']
+                docid = document_data['docid']
+                hrg_no = document_data['hrg_no']
                 matched_uid = officer_uid
 
                 document = document_mappings.get((docid, hrg_no, matched_uid))
                 document_id = document.get('id') if document else None
 
                 if document_id:
+                    modified_documents_ids.append(document_id)
+
                     if officer_uid:
                         officer_id = officer_mappings.get(officer_uid)
                         if officer_id:
@@ -103,10 +116,10 @@ class DocumentImporter(BaseImporter):
             for document_id, officer_id in officer_relation_ids.items()
         ]
 
-        DepartmentRelation.objects.all().delete()
+        DepartmentRelation.objects.filter(document_id__in=modified_documents_ids).delete()
         DepartmentRelation.objects.bulk_create(department_relations, batch_size=self.BATCH_SIZE)
 
-        OfficerRelation.objects.all().delete()
+        OfficerRelation.objects.filter(document_id__in=modified_documents_ids).delete()
         OfficerRelation.objects.bulk_create(officer_relations, batch_size=BATCH_SIZE)
 
     def generate_preview_image(self, image_blob, upload_url):
@@ -154,89 +167,112 @@ class DocumentImporter(BaseImporter):
         for document in documents:
             self.clean_up_document(document)
 
-    def import_data(self, data):
-        new_documents = []
-        update_documents = []
-        new_docids = []
+    def handle_record_data(self, row):
+        document_data = self.parse_row_data(row)
+        document_data['document_type'] = 'pdf'
+        document_data['pages_count'] = row[self.column_mappings['page_count']] if row[
+            self.column_mappings['page_count']] else None
+        document_data['incident_date'] = parse_date(
+            document_data['year'],
+            document_data['month'],
+            document_data['day']
+        )
+        pdf_db_path = document_data['pdf_db_path']
 
-        document_mappings = self.document_mappings()
+        should_upload_file = False
 
-        uploaded_files = {}
+        docid = document_data.get('docid')
+        hrg_no = document_data.get('hrg_no')
+        matched_uid = document_data.get('matched_uid')
 
-        for row in tqdm(data):
-            document_data = self.parse_row_data(row)
-            document_data['document_type'] = 'pdf'
-            document_data['pages_count'] = row['page_count'] if row['page_count'] else None
-            document_data['incident_date'] = parse_date(row['year'], row['month'], row['day'])
-            pdf_db_path = row['pdf_db_path']
+        old_document = self.document_mappings.get((docid, hrg_no, matched_uid))
 
-            should_upload_file = False
+        document = {
+            **(old_document or {}),
+            **document_data
+        }
 
-            docid = row['docid']if row['docid'] else None
-            hrg_no = row['hrg_no'] if row['hrg_no'] else None
-            matched_uid = row['matched_uid'] if row['matched_uid'] else None
-
-            old_document = document_mappings.get((docid, hrg_no, matched_uid))
-
-            document = {
-                **(old_document or {}),
-                **document_data
-            }
-
-            if old_document:
-                if row['pdf_db_content_hash'] != old_document.get('pdf_db_content_hash'):
-                    should_upload_file = True
-                    self.clean_up_document(old_document)
-            elif (docid, hrg_no, matched_uid) not in new_docids:
+        if old_document:
+            if document_data['pdf_db_content_hash'] != old_document.get('pdf_db_content_hash'):
                 should_upload_file = True
+                self.clean_up_document(old_document)
+        elif (docid, hrg_no, matched_uid) not in self.new_docids:
+            should_upload_file = True
 
-            if should_upload_file:
-                try:
-                    if pdf_db_path in uploaded_files:
-                        uploaded_file = uploaded_files[pdf_db_path]
-                        document['url'] = uploaded_file['document_url']
-                        document['preview_image_url'] = uploaded_file['document_preview_url']
-                    else:
-                        upload_url = pdf_db_path.replace('/PPACT/', '')
+        if should_upload_file:
+            try:
+                if pdf_db_path in self.uploaded_files:
+                    uploaded_file = self.uploaded_files[pdf_db_path]
+                    document['url'] = uploaded_file['document_url']
+                    document['preview_image_url'] = uploaded_file['document_preview_url']
+                else:
+                    upload_url = pdf_db_path.replace('/PPACT/', '')
 
-                        download_url = self.ds.get_temporary_link_from_path(pdf_db_path.replace('/PPACT/', '/LLEAD/'))
-                        image_blob = requests.get(download_url).content
+                    download_url = self.ds.get_temporary_link_from_path(pdf_db_path.replace('/PPACT/', '/LLEAD/'))
+                    image_blob = requests.get(download_url).content
 
-                        document_url = self.upload_file(upload_url, image_blob, 'application/pdf')
+                    document_url = self.upload_file(upload_url, image_blob, 'application/pdf')
 
-                        if not document_url:
-                            continue
-                        document['url'] = document_url
+                    if not document_url:
+                        return
+                    document['url'] = document_url
 
-                        document_preview_url = self.generate_preview_image(image_blob, upload_url)
-                        if document_preview_url:
-                            document['preview_image_url'] = document_preview_url
+                    document_preview_url = self.generate_preview_image(image_blob, upload_url)
+                    if document_preview_url:
+                        document['preview_image_url'] = document_preview_url
 
-                        uploaded_url = {
-                            'document_url': document_url,
-                            'document_preview_url': document_preview_url
-                        }
+                    uploaded_url = {
+                        'document_url': document_url,
+                        'document_preview_url': document_preview_url
+                    }
 
-                        uploaded_files[pdf_db_path] = uploaded_url
-                except ApiError:
-                    raise ValueError(f'Error downloading dropbox file from path: {pdf_db_path}')
+                    self.uploaded_files[pdf_db_path] = uploaded_url
+            except ApiError:
+                raise ValueError(f'Error downloading dropbox file from path: {pdf_db_path}')
 
-            hrg_text = row['hrg_text']
-            if hrg_text:
-                document['text_content'] = hrg_text
-            else:
-                old_txt_db_content_hash = old_document.get('txt_db_content_hash') if old_document else None
-                if row['txt_db_content_hash'] != old_txt_db_content_hash:
-                    ocr_text = self.get_ocr_text(row['txt_db_id'].replace('/PPACT/', '/LLEAD/'))
-                    document['text_content'] = ocr_text
+        hrg_text = row[self.column_mappings['hrg_text']]
+        if hrg_text:
+            document['text_content'] = hrg_text
+        else:
+            old_txt_db_content_hash = old_document.get('txt_db_content_hash') if old_document else None
+            if document_data['txt_db_content_hash'] != old_txt_db_content_hash:
+                ocr_text = self.get_ocr_text(document_data['txt_db_id'].replace('/PPACT/', '/LLEAD/'))
+                document['text_content'] = ocr_text
+
+        if document:
+            if old_document:
+                self.update_documents.append(document)
+            elif (docid, hrg_no, matched_uid) not in self.new_docids:
+                self.new_docids.append((docid, hrg_no, matched_uid))
+                self.new_documents.append(document)
+
+    def import_data(self, data):
+        self.document_mappings = self.get_document_mappings()
+
+        for row in tqdm(data.get('added_rows'), desc='Create new documents'):
+            self.handle_record_data(row)
+
+        for row in tqdm(data.get('deleted_rows'), desc='Delete removed documents'):
+            document_data = self.parse_row_data(row)
+            docid = document_data.get('docid')
+            hrg_no = document_data.get('hrg_no')
+            matched_uid = document_data.get('matched_uid')
+
+            old_document = self.document_mappings.get((docid, hrg_no, matched_uid))
 
             if old_document:
-                update_documents.append(document)
-            elif (docid, hrg_no, matched_uid) not in new_docids:
-                new_docids.append((docid, hrg_no, matched_uid))
-                new_documents.append(document)
+                self.delete_documents_ids.append(old_document.get('id'))
 
-        import_result = self.bulk_import(Document, new_documents, update_documents, self.clean_up_documents)
+        for row in tqdm(data.get('updated_rows'), desc='Update modified documents'):
+            self.handle_record_data(row)
+
+        import_result = self.bulk_import(
+            Document,
+            self.new_documents,
+            self.update_documents,
+            self.delete_documents_ids,
+            self.clean_up_documents
+        )
 
         self.update_relations(data)
 

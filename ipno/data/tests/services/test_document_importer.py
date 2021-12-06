@@ -1,6 +1,4 @@
 from inspect import cleandoc
-from io import StringIO, BytesIO
-from csv import DictWriter
 
 from unittest.mock import call, ANY
 from django.test.testcases import TestCase, override_settings
@@ -24,150 +22,81 @@ class DocumentImporterTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
-        csv_content = StringIO()
-        writer = DictWriter(
-            csv_content,
-            fieldnames=[
-                'docid',
-                'page_count',
-                'fileid',
-                'pdf_db_path',
-                'pdf_db_content_hash',
-                'txt_db_id',
-                'txt_db_content_hash',
-                'year',
-                'month',
-                'day',
-                'dt_source',
-                'hrg_no',
-                'accused',
-                'matched_uid',
-                'hrg_text',
-                'agency',
-                'title'
-            ]
-        )
+        self.header = ['docid', 'page_count', 'fileid', 'title', 'pdf_db_path', 'pdf_db_content_hash', 'txt_db_id',
+                       'txt_db_content_hash', 'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused', 'matched_uid',
+                       'agency', 'hrg_text']
+        self.document1_data = [
+            '00fa809e', '4', 'f0fcc0d', 'document 1 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
+            'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
+            'id:8ceKnrnmgi0AAAAAAAAqmQ',
+            'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff', '2018', '6', '14',
+            'scraped', '1', 'Joseph Jones, Docket No. 17-', 'officer-uid-1', 'New Orleans PD',
+            cleandoc("""
+                   3. Discussion of Subpoenas Requested in the Appeal of Joseph Jones, Docket No. 17-
+                   237-S
+                   Lenore Feeney, State Police Commission Referee, advised that the hearing has been
+                   set for August 9, 2018, and noted that the majority of subpoenas issued for this
+                   hearing are to persons residing in the Monroe area.
+                   On motion duly made by Mr. Riecke, seconded, and unanimously passed, the
+                   Commission voted to move the Commission hearing as well as the regular public
+                   meeting to a suitable location in Monroe on August 9, 2018.
+                   In Favor: All
+                   Opposed: None
+                   SPC Minutes, 6/14/2018, pg. 3
+           """)]
+        self.document2_data = [
+            '0236e725', '1', 'd4fb65b', 'document 2 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
+            '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
+            'id:8ceKnrnmgi0AAAAAAAAqmw',
+            '2c668256378a491fd2f2812fcd4fc0f22af292b66f3f63ce6070321c57497f5a', '2018', '12', '18',
+            'scraped', '1', 'Officer Terry Guillory, Docket 17-201', 'officer-uid-2', '', '']
+        self.document3_data = [
+            '0dd28391', '3', '77d489c', 'document 3 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'id:8ceKnrnmgi0AAAAAAAAqng',
+            'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
+            'scraped', '1', 'WILLIAM C. BROWN', 'officer-uid-3', 'Baton Rouge PD',
+            cleandoc("""
+               APPEAL HEARING FOR WILLIAM C. BROWN
+               Mr. William C. Brown submitted a request to withdraw his appeal. A motion was made by
+               Henry Clark to accept this request for withdrawal and seconded by Lyle Johnson. Motion
+               approved unanimously.
+           """)]
+        self.document4_data = [
+            '0dd28391', '3', '77d489c', 'document 4 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'id:8ceKnrnmgi0AAAAAAAAqng',
+            'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
+            'scraped', '2', 'JIM VERLANDER', 'officer-uid-invalid', 'New Orleans PD',
+            cleandoc("""
+               APPEAL HEARING FOR JIM VERLANDER
+               Mr. Verlander has submitted a letter stating that an agreement has been reached between
+               himself and Chief Phares. Board asks that Ms. Johnson make sure that a Personnel Action
+               form is received from Chief Phares regarding the agreement.
+               Cynthia Wilkinson made a motion to accept the letter tentatively until a Personnel Action
+               form is received from Chief Phares regarding the agreement. This motion was seconded by
+               Lyle Johnson. Motion approved unanimously.
+           """)]
+        self.document5_data = [
+            '0dd28391', '3', '77d489c', 'document 5 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'id:8ceKnrnmgi0AAAAAAAAqng',
+            'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
+            'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', '']
 
-        self.document1_data = {
-            'docid': '00fa809e',
-            'page_count': '4',
-            'fileid': 'f0fcc0d',
-            'title': 'document 1 title',
-            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
-            'pdf_db_content_hash': 'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
-            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmQ',
-            'txt_db_content_hash': 'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff',
-            'year': '2018',
-            'month': '6',
-            'day': '14',
-            'dt_source': 'scraped',
-            'hrg_no': '1',
-            'accused': 'Joseph Jones, Docket No. 17-',
-            'matched_uid': 'officer-uid-1',
-            'agency': 'New Orleans PD',
-            'hrg_text': cleandoc("""
-                3. Discussion of Subpoenas Requested in the Appeal of Joseph Jones, Docket No. 17-
-                237-S
-                Lenore Feeney, State Police Commission Referee, advised that the hearing has been
-                set for August 9, 2018, and noted that the majority of subpoenas issued for this
-                hearing are to persons residing in the Monroe area.
-                On motion duly made by Mr. Riecke, seconded, and unanimously passed, the
-                Commission voted to move the Commission hearing as well as the regular public
-                meeting to a suitable location in Monroe on August 9, 2018.
-                In Favor: All
-                Opposed: None
-                SPC Minutes, 6/14/2018, pg. 3
-            """)
-        }
-        self.document2_data = {
-            'docid': '0236e725',
-            'page_count': '1',
-            'fileid': 'd4fb65b',
-            'title': 'document 2 title',
-            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
-            'pdf_db_content_hash': '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
-            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqmw',
-            'txt_db_content_hash': '2c668256378a491fd2f2812fcd4fc0f22af292b66f3f63ce6070321c57497f5a',
-            'year': '2018',
-            'month': '12',
-            'day': '18',
-            'dt_source': 'scraped',
-            'hrg_no': '1',
-            'accused': 'Officer Terry Guillory, Docket 17-201',
-            'matched_uid': 'officer-uid-2',
-            'agency': '',
-            'hrg_text': ''
-        }
-        self.document3_data = {
-            'docid': '0dd28391',
-            'page_count': '3',
-            'fileid': '77d489c',
-            'title': 'document 3 title',
-            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
-            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
-            'year': '1999',
-            'month': '9',
-            'day': '30',
-            'dt_source': 'scraped',
-            'hrg_no': '1',
-            'accused': 'WILLIAM C. BROWN',
-            'matched_uid': 'officer-uid-3',
-            'agency': 'Baton Rouge PD',
-            'hrg_text': cleandoc("""
-                APPEAL HEARING FOR WILLIAM C. BROWN
-                Mr. William C. Brown submitted a request to withdraw his appeal. A motion was made by
-                Henry Clark to accept this request for withdrawal and seconded by Lyle Johnson. Motion
-                approved unanimously.
-            """),
-        }
-        self.document4_data = {
-            'docid': '0dd28391',
-            'page_count': '3',
-            'fileid': '77d489c',
-            'title': 'document 4 title',
-            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
-            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
-            'year': '1999',
-            'month': '9',
-            'day': '30',
-            'dt_source': 'scraped',
-            'hrg_no': '2',
-            'accused': 'JIM VERLANDER',
-            'matched_uid': 'officer-uid-invalid',
-            'agency': 'New Orleans PD',
-            'hrg_text': cleandoc("""
-                APPEAL HEARING FOR JIM VERLANDER
-                Mr. Verlander has submitted a letter stating that an agreement has been reached between
-                himself and Chief Phares. Board asks that Ms. Johnson make sure that a Personnel Action
-                form is received from Chief Phares regarding the agreement.
-                Cynthia Wilkinson made a motion to accept the letter tentatively until a Personnel Action
-                form is received from Chief Phares regarding the agreement. This motion was seconded by
-                Lyle Johnson. Motion approved unanimously.
-            """)
-        }
-        self.document5_data = {
-            'docid': '0dd28391',
-            'page_count': '3',
-            'fileid': '77d489c',
-            'title': 'document 5 title',
-            'pdf_db_path': '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
-            'pdf_db_content_hash': 'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
-            'txt_db_id': 'id:8ceKnrnmgi0AAAAAAAAqng',
-            'txt_db_content_hash': 'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7',
-            'year': '1999',
-            'month': '9',
-            'day': '30',
-            'dt_source': 'scraped',
-            'hrg_no': '3',
-            'accused': 'OFFICER KEVIN LAPEYROUSE',
-            'matched_uid': '',
-            'agency': '',
-            'hrg_text': ''
-        }
+        self.document6_data = [
+            '0dd82391', '3', '77d489c', 'document 5 title',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
+            'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            'id:8ceKnrnmgi0AAAAAAAAqng',
+            'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
+            'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', '']
+
         self.documents_data = [
             self.document1_data,
             self.document2_data,
@@ -176,18 +105,13 @@ class DocumentImporterTestCase(TestCase):
             self.document5_data,
             self.document5_data,
         ]
-        writer.writeheader()
-        writer.writerows(self.documents_data)
-        self.csv_text = csv_content.getvalue()
-        self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    @patch('data.services.base_importer.requests.get')
-    def test_process_successfully(self, get_mock, generate_from_blob_mock):
+    def test_process_successfully(self, generate_from_blob_mock):
         DocumentFactory(docid='00fa809e', hrg_no='1', matched_uid='officer-uid-1')
-        DocumentFactory(docid='00fa809e', hrg_no='10', matched_uid=None)
+        DocumentFactory(docid='0dd28391', hrg_no='1', matched_uid='officer-uid-3')
         DocumentFactory(
             docid='0dd28391',
             hrg_no='3',
@@ -212,16 +136,37 @@ class DocumentImporterTestCase(TestCase):
             commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
         )
 
-        data = {
-            'hash': '87d27e0616d9ef342e1728f5533162a3'
-        }
-        mock_json = Mock(return_value=data)
-        get_mock.return_value = Mock(
-            json=mock_json,
-            text=self.csv_text,
-            content='file_blob'
-        )
+        commit_hash = '87d27e0616d9ef342e1728f5533162a3'
+
         document_importer = DocumentImporter()
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = self.header
+        mock_commit.sum = commit_hash
+
+        document_importer.repo = Mock()
+        document_importer.new_commit = mock_commit
+
+        document_importer.retrieve_wrgl_data = Mock()
+
+        document_importer.column_mappings = {column: self.header.index(column) for column in self.header}
+
+        processed_data = {
+            'added_rows': [
+                self.document2_data,
+                self.document4_data,
+            ],
+            'deleted_rows': [
+                self.document3_data,
+                self.document6_data,
+            ],
+            'updated_rows': [
+                self.document1_data,
+                self.document5_data,
+            ],
+        }
+
+        document_importer.process_wrgl_data = Mock(return_value=processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
@@ -238,51 +183,49 @@ class DocumentImporterTestCase(TestCase):
         mock_get_ocr_text = Mock(side_effect=get_ocr_text_side_effect)
         document_importer.get_ocr_text = mock_get_ocr_text
 
-        document_importer.process()
+        result = document_importer.process()
+
+        assert result
 
         import_log = ImportLog.objects.order_by('-created_at').last()
-        # import pdb
-        # pdb.set_trace()
+
         assert import_log.data_model == DocumentImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
         assert import_log.commit_hash == '87d27e0616d9ef342e1728f5533162a3'
-        assert import_log.created_rows == 3
-        assert import_log.updated_rows == 3
+        assert import_log.created_rows == 2
+        assert import_log.updated_rows == 2
         assert import_log.deleted_rows == 1
         assert not import_log.error_message
         assert import_log.finished_at
 
-        assert Document.objects.count() == 5
+        assert Document.objects.count() == 4
 
-        assert get_mock.call_args_list[0] == call(
-            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/document_repo',
-            headers={'Authorization': 'APIKEY wrgl-api-key'},
-        )
+        check_columns = self.header + ['department_ids', 'officer_ids']
+        check_columns_mappings = {column: check_columns.index(column) for column in check_columns}
 
         expected_document1_data = self.document1_data.copy()
-        expected_document1_data['department_ids'] = [department_1.id]
-        expected_document1_data['officer_ids'] = [officer_1.id]
+        expected_document1_data.append([department_1.id])
+        expected_document1_data.append([officer_1.id])
 
         expected_document2_data = self.document2_data.copy()
-        expected_document2_data['department_ids'] = []
-        expected_document2_data['officer_ids'] = [officer_2.id]
+        expected_document2_data.append([])
+        expected_document2_data.append([officer_2.id])
 
         expected_document3_data = self.document3_data.copy()
-        expected_document3_data['department_ids'] = [department_2.id]
-        expected_document3_data['officer_ids'] = [officer_3.id]
+        expected_document3_data.append([department_2.id])
+        expected_document3_data.append([officer_3.id])
 
         expected_document4_data = self.document4_data.copy()
-        expected_document4_data['department_ids'] = [department_1.id]
-        expected_document4_data['officer_ids'] = []
+        expected_document4_data.append([department_1.id])
+        expected_document4_data.append([])
 
         expected_document5_data = self.document5_data.copy()
-        expected_document5_data['department_ids'] = []
-        expected_document5_data['officer_ids'] = []
+        expected_document5_data.append([])
+        expected_document5_data.append([])
 
         expected_documents_data = [
             expected_document1_data,
             expected_document2_data,
-            expected_document3_data,
             expected_document4_data,
             expected_document5_data,
         ]
@@ -291,9 +234,9 @@ class DocumentImporterTestCase(TestCase):
 
         for document_data in expected_documents_data:
             document = Document.objects.filter(
-                docid=document_data['docid'] if document_data['docid'] else None,
-                hrg_no=document_data['hrg_no'] if document_data['hrg_no'] else None,
-                matched_uid=document_data['matched_uid'] if document_data['matched_uid'] else None,
+                docid=document_data[check_columns_mappings['docid']] if document_data[check_columns_mappings['docid']] else None,
+                hrg_no=document_data[check_columns_mappings['hrg_no']] if document_data[check_columns_mappings['hrg_no']] else None,
+                matched_uid=document_data[check_columns_mappings['matched_uid']] if document_data[check_columns_mappings['matched_uid']] else None,
             ).first()
             assert document
             field_attrs = [
@@ -314,12 +257,12 @@ class DocumentImporterTestCase(TestCase):
             ]
 
             for attr in field_attrs:
-                assert getattr(document, attr) == (document_data[attr] if document_data[attr] else None)
+                assert getattr(document, attr) == (document_data[check_columns_mappings[attr]] if document_data[check_columns_mappings[attr]] else None)
 
             for attr in integer_field_attrs:
-                assert getattr(document, attr) == (int(document_data[attr]) if document_data[attr] else None)
+                assert getattr(document, attr) == (int(document_data[check_columns_mappings[attr]]) if document_data[check_columns_mappings[attr]] else None)
 
-            base_url = document_data['pdf_db_path'].replace('/PPACT/', '')
+            base_url = document_data[check_columns_mappings['pdf_db_path']].replace('/PPACT/', '')
             document_url = f"{settings.GC_PATH}{base_url}".replace(' ', '%20').replace("'", '%27')
 
             upload_document_call = call(base_url, ANY, 'application/pdf')
@@ -328,41 +271,59 @@ class DocumentImporterTestCase(TestCase):
             gs_upload_file_calls.append(upload_document_call)
             gs_upload_file_calls.append(upload_document_preview_call)
 
-            ocr_text = f'ocr text for {document_data["txt_db_id"]}'
-            document_text_content = document_data['hrg_text'] if document_data['hrg_text'] else ocr_text
+            ocr_text = f'ocr text for {document_data[check_columns_mappings["txt_db_id"]]}'
+            document_text_content = document_data[check_columns_mappings['hrg_text']] if document_data[check_columns_mappings['hrg_text']] else ocr_text
 
             assert document.text_content == document_text_content
 
             assert document.url == document_url
             assert document.preview_image_url == document_url.replace('.pdf', '-preview.jpeg').replace('.PDF', '-preview.jpeg')
 
-            assert list(document.departments.values_list('id', flat=True)) == document_data['department_ids']
-            assert list(document.officers.values_list('id', flat=True)) == document_data['officer_ids']
+            assert list(document.departments.values_list('id', flat=True)) == document_data[check_columns_mappings['department_ids']]
+            assert list(document.officers.values_list('id', flat=True)) == document_data[check_columns_mappings['officer_ids']]
 
         assert mock_upload_file.call_count == 6
         assert mock_clean_up_document.call_count == 2
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('data.services.base_importer.requests.get')
-    def test_process_fail_dueto_dropbox_get_file_error(self, get_mock):
+    def test_process_fail_dueto_dropbox_get_file_error(self):
         WrglRepoFactory(
             data_model=DocumentImporter.data_model,
             repo_name='document_repo',
             commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
         )
 
-        data = {
-            'hash': '87d27e0616d9ef342e1728f5533162a3'
-        }
-        mock_json = Mock(return_value=data)
-        get_mock.return_value = Mock(
-            json=mock_json,
-            text=self.csv_text,
-            content='file_blob'
-        )
+        commit_hash = '87d27e0616d9ef342e1728f5533162a3'
 
         document_importer = DocumentImporter()
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = self.header
+        mock_commit.sum = commit_hash
+
+        document_importer.repo = Mock()
+        document_importer.new_commit = mock_commit
+
+        document_importer.retrieve_wrgl_data = Mock()
+
+        document_importer.column_mappings = {column: self.header.index(column) for column in self.header}
+
+        processed_data = {
+            'added_rows': [
+                self.document2_data,
+                self.document4_data,
+            ],
+            'deleted_rows': [
+                self.document3_data,
+            ],
+            'updated_rows': [
+                self.document1_data,
+                self.document5_data,
+            ],
+        }
+
+        document_importer.process_wrgl_data = Mock(return_value=processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
