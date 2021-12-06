@@ -31,7 +31,7 @@ class SearchAllQuery(object):
     def __init__(self, request):
         self.request = request
 
-    def search(self, query, doc_type):
+    def search(self, query, doc_type, department=None):
         results = {}
 
         doc_section = SEARCH_MAPPINGS.get(doc_type)
@@ -39,7 +39,7 @@ class SearchAllQuery(object):
         paginator = ESPagination()
 
         for search_key, search_mapping in sections.items():
-            search_query = search_mapping['search_query'](query)
+            search_query = search_mapping['search_query'](query, department)
             search_result = paginator.paginate_es_query(search_query, self.request)
 
             data = search_mapping['serializer'](search_result).data

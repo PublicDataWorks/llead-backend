@@ -543,3 +543,116 @@ class SearchViewSetTestCase(AuthAPITestCase):
             data[search_key]['results'] = sorted(items['results'], key=itemgetter('id'))
 
         assert data == expected_data
+
+    def test_list_success_with_specified_department(self):
+        DepartmentFactory(name='Baton Rouge PD')
+        department_1 = DepartmentFactory(name='New Orleans keyword PD')
+
+        OfficerFactory(first_name='Kenneth', last_name='Anderson')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis keywords')
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        EventFactory(
+            officer=officer_1,
+            department=department_1,
+            badge_no='12435',
+        )
+
+        DocumentFactory(title='Document title', text_content='Text content')
+        document_1 = DocumentFactory(
+            title='Document keyword1',
+            text_content='Text content 1',
+            incident_date=date(2020, 5, 6)
+        )
+        DocumentFactory(title='Document 2', text_content='Text content keywo')
+        document_1.departments.add(department_1)
+
+        source = NewsArticleSourceFactory(source_display_name='Source')
+        news_article_1 = NewsArticleFactory(content='Text content keywo', author='Writer Staff', source=source)
+        news_article_2 = NewsArticleFactory(
+            title='Dummy title',
+            author='text keywo',
+            source=source,
+            published_date=news_article_1.published_date + datetime.timedelta(days=1)
+        )
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_1.officers.add(officer_1)
+        matched_sentence_2.officers.add(officer_2)
+
+        rebuild_search_index()
+
+        expected_data = {
+            'departments': {
+                'results': [],
+                'count': 0,
+                'next': None,
+                'previous': None,
+            },
+            'officers': {
+                'results': [
+                    {
+                        'id': officer_1.id,
+                        'name': officer_1.name,
+                        'badges': ['12435'],
+                        'department': {
+                            'id': department_1.slug,
+                            'name': department_1.name,
+                        },
+                    },
+                ],
+                'count': 1,
+                'next': None,
+                'previous': None,
+            },
+            'documents': {
+                'results': [
+                    {
+                        'id': document_1.id,
+                        'document_type': document_1.document_type,
+                        'title': document_1.title,
+                        'url': document_1.url,
+                        'incident_date': str(document_1.incident_date),
+                        'preview_image_url': document_1.preview_image_url,
+                        'pages_count': document_1.pages_count,
+                        'text_content': document_1.text_content,
+                        'text_content_highlight': None,
+                        'departments': [
+                            {
+                                'id': department_1.slug,
+                                'name': department_1.name,
+                            },
+                        ],
+                    },
+                ],
+                'count': 1,
+                'next': None,
+                'previous': None,
+            },
+            'articles': {
+                'results': [],
+                'count': 0,
+                'next': None,
+                'previous': None,
+            },
+
+        }
+
+        response = self.auth_client.get(reverse('api:search-list'), {
+            'q': 'keywo',
+            'department': department_1.slug,
+        })
+        assert response.status_code == status.HTTP_200_OK
+
+        data = response.data
+
+        for search_key, items in data.items():
+            data[search_key]['results'] = sorted(items['results'], key=itemgetter('id'))
+
+        assert data == expected_data
