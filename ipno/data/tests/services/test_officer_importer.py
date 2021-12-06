@@ -1,9 +1,8 @@
-from io import StringIO, BytesIO
-from csv import DictWriter
+from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import patch, Mock, call
+from mock import patch, Mock
 
 from data.services import OfficerImporter
 from data.models import ImportLog
@@ -15,105 +14,18 @@ from officers.factories import OfficerFactory
 
 class OfficerImporterTestCase(TestCase):
     def setUp(self):
-        csv_content = StringIO()
-        writer = DictWriter(
-            csv_content,
-            fieldnames=[
-                'uid',
-                'last_name',
-                'middle_name',
-                'middle_initial',
-                'first_name',
-                'birth_year',
-                'birth_month',
-                'birth_day',
-                'race',
-                'gender',
-            ]
-        )
-        self.officers_data = [
-            {
-                'uid': 'uid1',
-                'last_name': 'Sanchez',
-                'middle_name': 'C',
-                'middle_initial': 'C',
-                'first_name': 'Emile',
-                'birth_year': '1938',
-                'birth_month': '',
-                'birth_day': '',
-                'race': 'white',
-                'gender': 'male',
-            },
-            {
-                'uid': 'uid2',
-                'last_name': 'Monaco',
-                'middle_name': 'P',
-                'middle_initial': 'P',
-                'first_name': 'Anthony',
-                'birth_year': '1964',
-                'birth_month': '12',
-                'birth_day': '4',
-                'race': 'black / african american',
-                'gender': 'female',
-            },
-            {
-                'uid': 'uid3',
-                'last_name': 'Maier',
-                'middle_name': '',
-                'middle_initial': '',
-                'first_name': 'Joel',
-                'birth_year': '',
-                'birth_month': '',
-                'birth_day': '',
-                'race': '',
-                'gender': '',
-            },
-            {
-                'uid': 'uid4',
-                'last_name': 'Poindexter',
-                'middle_name': 'A',
-                'middle_initial': 'A',
-                'first_name': 'Sylvia',
-                'birth_year': '1973',
-                'birth_month': '',
-                'birth_day': '',
-                'race': '',
-                'gender': 'male',
-            },
-            {
-                'uid': 'uid5',
-                'last_name': 'Bull',
-                'middle_name': '',
-                'middle_initial': '',
-                'first_name': 'Edward',
-                'birth_year': '',
-                'birth_month': '',
-                'birth_day': '',
-                'race': '',
-                'gender': 'male',
-            },
-            {
-                'uid': 'uid5',
-                'last_name': 'Bull',
-                'middle_name': '',
-                'middle_initial': '',
-                'first_name': 'Edward',
-                'birth_year': '',
-                'birth_month': '',
-                'birth_day': '',
-                'race': '',
-                'gender': 'male',
-            },
-        ]
-        writer.writeheader()
-        writer.writerows(self.officers_data)
-        self.csv_stream = BytesIO(csv_content.getvalue().encode('utf-8'))
-        self.csv_text = csv_content.getvalue()
+        self.header = ['uid', 'last_name', 'middle_name', 'middle_initial', 'first_name', 'birth_year', 'birth_month', 'birth_day', 'race', 'gender']
+        self.officer1_data = ['uid1', 'Sanchez', 'C', 'C', 'Emile', '1938', '', '', 'white', 'male']
+        self.officer2_data = ['uid2', 'Monaco', 'P', 'P', 'Anthony', '1964', '12', '4', 'black / african american', 'female']
+        self.officer3_data = ['uid3', 'Maier', '', '', 'Joel', '', '', '', '', '']
+        self.officer4_data = ['uid4', 'Poindexter', 'A', 'A', 'Sylvia', '1973', '', '', '', 'male']
+        self.officer5_data = ['uid5', 'Bull', '', '', 'Edward', '', '', '', '', 'male']
+        self.officer5_dup_data = ['uid5', 'Bull', '', '', 'Edward', '', '', '', '', 'male']
+        self.officer6_data = ['uid6', 'Officer', '', '', 'Deleted', '', '', '', '', 'male']
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('data.services.base_importer.requests.get')
-    def test_process_successfully(self, get_mock):
+    def test_process_successfully(self):
         OfficerFactory(
             uid='uid1',
             first_name='Emile',
@@ -139,16 +51,42 @@ class OfficerImporterTestCase(TestCase):
             commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
         )
 
-        data = {
-            'hash': '3950bd17edfd805972781ef9fe2c6449'
-        }
-        mock_json = Mock(return_value=data)
-        get_mock.return_value = Mock(
-            json=mock_json,
-            text=self.csv_text,
-        )
+        commit_hash = '3950bd17edfd805972781ef9fe2c6449'
 
-        result = OfficerImporter().process()
+        officer_importer = OfficerImporter()
+
+        officer_importer.branch = 'main'
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = self.header
+        mock_commit.sum = commit_hash
+
+        officer_importer.repo = Mock()
+        officer_importer.new_commit = mock_commit
+
+        officer_importer.retrieve_wrgl_data = Mock()
+
+        officer_importer.column_mappings = {column: self.header.index(column) for column in self.header}
+
+        processed_data = {
+            'added_rows': [
+                self.officer4_data,
+                self.officer5_data,
+                self.officer5_dup_data,
+            ],
+            'deleted_rows': [
+                self.officer6_data,
+            ],
+            'updated_rows': [
+                self.officer1_data,
+                self.officer2_data,
+                self.officer3_data,
+            ],
+        }
+
+        officer_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        result = officer_importer.process()
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == OfficerImporter.data_model
@@ -162,15 +100,22 @@ class OfficerImporterTestCase(TestCase):
 
         assert Officer.objects.count() == 5
 
-        assert get_mock.call_args_list[0] == call(
-            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/officer_repo',
-            headers={'Authorization': 'APIKEY wrgl-api-key'},
-        )
+        officer_importer.retrieve_wrgl_data.assert_called_with('officer_repo')
 
         assert result
 
-        for officer_data in self.officers_data:
-            officer = Officer.objects.filter(uid=officer_data['uid']).first()
+        check_columns = officer_importer.column_mappings.copy()
+
+        officers_data = [
+            self.officer1_data,
+            self.officer2_data,
+            self.officer3_data,
+            self.officer4_data,
+            self.officer5_data,
+        ]
+
+        for officer_data in officers_data:
+            officer = Officer.objects.filter(uid=officer_data[check_columns['uid']]).first()
             assert officer
             field_attrs = [
                 'last_name',
@@ -187,16 +132,17 @@ class OfficerImporterTestCase(TestCase):
             ]
 
             for attr in field_attrs:
-                assert getattr(officer, attr) == (officer_data[attr] if officer_data[attr] else None)
+                assert getattr(officer, attr) == (officer_data[check_columns[attr]] if officer_data[check_columns[attr]] else None)
 
             for attr in integer_field_attrs:
-                assert getattr(officer, attr) == (int(officer_data[attr]) if officer_data[attr] else None)
+                assert getattr(officer, attr) == (int(officer_data[check_columns[attr]]) if officer_data[check_columns[attr]] else None)
 
-    def test_officer_name_mappings(self):
+    def test_get_officer_name_mappings(self):
         officer_1 = OfficerFactory()
         officer_2 = OfficerFactory()
 
-        result = OfficerImporter().officer_name_mappings()
+        officer_importer = OfficerImporter()
+        result = officer_importer.get_officer_name_mappings()
 
         expected_result = {
             officer_1.uid: (officer_1.first_name, officer_1.last_name),
@@ -207,8 +153,7 @@ class OfficerImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
-    @patch('data.services.base_importer.requests.get')
-    def test_process_update_officer_name_successfully(self, get_mock):
+    def test_process_update_officer_name_successfully(self):
         OfficerFactory(
             uid='uid1',
             first_name='Emile',
@@ -237,16 +182,43 @@ class OfficerImporterTestCase(TestCase):
             commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
         )
 
-        data = {
-            'hash': '3950bd17edfd805972781ef9fe2c6449'
-        }
-        mock_json = Mock(return_value=data)
-        get_mock.return_value = Mock(
-            json=mock_json,
-            text=self.csv_text,
-        )
+        commit_hash = '3950bd17edfd805972781ef9fe2c6449'
 
-        result = OfficerImporter().process()
+        officer_importer = OfficerImporter()
+        officer_importer.branch = 'main'
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = self.header
+        mock_commit.sum = commit_hash
+
+        officer_importer.repo = Mock()
+        officer_importer.new_commit = mock_commit
+
+        officer_importer.retrieve_wrgl_data = Mock()
+
+        officer_importer.column_mappings = {column: self.header.index(column) for column in self.header}
+
+        processed_data = {
+            'added_rows': [
+                self.officer4_data,
+                self.officer5_data,
+                self.officer5_dup_data,
+            ],
+            'deleted_rows': [
+                self.officer6_data,
+            ],
+            'updated_rows': [
+                self.officer1_data,
+                self.officer2_data,
+                self.officer3_data,
+            ],
+        }
+
+        officer_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        result = officer_importer.process()
+
+        assert result
 
         import_log = ImportLog.objects.order_by('-created_at').last()
         assert import_log.data_model == OfficerImporter.data_model
@@ -260,13 +232,18 @@ class OfficerImporterTestCase(TestCase):
 
         assert Officer.objects.count() == 5
 
-        assert get_mock.call_args_list[0] == call(
-            'https://www.wrgl.co/api/v1/users/wrgl_user/repos/officer_repo',
-            headers={'Authorization': 'APIKEY wrgl-api-key'},
-        )
+        check_columns = officer_importer.column_mappings.copy()
 
-        for officer_data in self.officers_data:
-            officer = Officer.objects.filter(uid=officer_data['uid']).first()
+        officers_data = [
+            self.officer1_data,
+            self.officer2_data,
+            self.officer3_data,
+            self.officer4_data,
+            self.officer5_data,
+        ]
+
+        for officer_data in officers_data:
+            officer = Officer.objects.filter(uid=officer_data[check_columns['uid']]).first()
             assert officer
             field_attrs = [
                 'last_name',
@@ -283,12 +260,59 @@ class OfficerImporterTestCase(TestCase):
             ]
 
             for attr in field_attrs:
-                assert getattr(officer, attr) == (officer_data[attr] if officer_data[attr] else None)
+                assert getattr(officer, attr) == (officer_data[check_columns[attr]] if officer_data[check_columns[attr]] else None)
 
             for attr in integer_field_attrs:
-                assert getattr(officer, attr) == (int(officer_data[attr]) if officer_data[attr] else None)
+                assert getattr(officer, attr) == (int(officer_data[check_columns[attr]]) if officer_data[check_columns[attr]] else None)
 
         assert result
-        updated_officers = list(Officer.objects.filter(is_name_changed=True).values_list('uid', flat=True))
+        updated_officers = set(Officer.objects.filter(is_name_changed=True).values_list('uid', flat=True))
         expected_uids = ['uid2', 'uid3']
-        assert updated_officers.sort() == expected_uids.sort()
+        assert updated_officers == set(expected_uids)
+
+    def test_delete_not_exist_officer(self):
+        WrglRepoFactory(
+            data_model=OfficerImporter.data_model,
+            repo_name='officer_repo',
+            commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
+        )
+
+        commit_hash = '3950bd17edfd805972781ef9fe2c6449'
+
+        officer_importer = OfficerImporter()
+        officer_importer.branch = 'main'
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = self.header
+        mock_commit.sum = commit_hash
+
+        officer_importer.repo = Mock()
+        officer_importer.new_commit = mock_commit
+
+        officer_importer.retrieve_wrgl_data = Mock()
+
+        officer_importer.column_mappings = {column: self.header.index(column) for column in self.header}
+
+        processed_data = {
+            'added_rows': [],
+            'deleted_rows': [
+                self.officer6_data,
+            ],
+            'updated_rows': [],
+        }
+
+        officer_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        result = officer_importer.process()
+
+        assert result
+
+        import_log = ImportLog.objects.order_by('-created_at').last()
+        assert import_log.data_model == OfficerImporter.data_model
+        assert import_log.status == IMPORT_LOG_STATUS_FINISHED
+        assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
+        assert import_log.created_rows == 0
+        assert import_log.updated_rows == 0
+        assert import_log.deleted_rows == 0
+        assert not import_log.error_message
+        assert import_log.finished_at

@@ -9,6 +9,7 @@ from data.constants import EVENT_MODEL_NAME
 
 class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
+    WRGL_OFFSET_BATCH_SIZE = 300
 
     ATTRIBUTES = [
         'event_uid',
@@ -51,7 +52,17 @@ class EventImporter(BaseImporter):
         'use_of_force_id'
     ]
 
-    def event_mappings(self):
+    def __init__(self):
+        self.new_events_attrs = []
+        self.update_events_attrs = []
+        self.new_event_uids = []
+        self.delete_events_ids = []
+        self.department_mappings = {}
+        self.officer_mappings = {}
+        self.event_mappings = {}
+        self.uof_mappings = {}
+
+    def get_event_mappings(self):
         return {event.event_uid: event.id for event in Event.objects.only('id', 'event_uid')}
 
     def update_relations(self):
@@ -60,7 +71,7 @@ class EventImporter(BaseImporter):
 
         events = Event.objects.filter(complaint_uid__isnull=False).only('id', 'complaint_uid')
 
-        for event in tqdm(events):
+        for event in tqdm(events, desc='Update events\' relations'):
             complaint_ids = Complaint.objects.filter(
                 complaint_uid=event.complaint_uid,
             ).values_list('id', flat=True)
@@ -73,45 +84,55 @@ class EventImporter(BaseImporter):
         ComplaintRelation.objects.all().delete()
         ComplaintRelation.objects.bulk_create(complaint_relations, batch_size=self.BATCH_SIZE)
 
+    def handle_record_data(self, row):
+        agency = row[self.column_mappings['agency']]
+        event_uid = row[self.column_mappings['event_uid']]
+        officer_uid = row[self.column_mappings['uid']]
+        uof_uid = row[self.column_mappings['uof_uid']]
+
+        officer_id = self.officer_mappings.get(officer_uid)
+        uof_id = self.uof_mappings.get(uof_uid)
+
+        event_data = self.parse_row_data(row)
+        formatted_agency = self.format_agency(agency)
+        department_id = self.department_mappings.get(slugify(formatted_agency))
+        event_data['department_id'] = department_id
+
+        event_data['use_of_force_id'] = uof_id
+        event_data['officer_id'] = officer_id
+
+        event_id = self.event_mappings.get(event_uid)
+
+        if event_id:
+            event_data['id'] = event_id
+            self.update_events_attrs.append(event_data)
+        elif event_uid not in self.new_event_uids:
+            self.new_event_uids.append(event_uid)
+            self.new_events_attrs.append(event_data)
+
     def import_data(self, data):
-        new_events_attrs = []
-        update_events_attrs = []
-        new_event_uids = []
+        rows = self.get_all_diff_rows(data)
 
-        agencies = {row['agency'] for row in data if row['agency']}
-        department_mappings = self.department_mappings(agencies)
+        agencies = {row[self.column_mappings['agency']] for row in rows if row[self.column_mappings['agency']]}
+        self.department_mappings = self.get_department_mappings(agencies)
 
-        officer_mappings = self.officer_mappings()
-        event_mappings = self.event_mappings()
-        uof_mappings = self.uof_mappings()
+        self.officer_mappings = self.get_officer_mappings()
+        self.event_mappings = self.get_event_mappings()
+        self.uof_mappings = self.get_uof_mappings()
 
-        for row in tqdm(data):
-            agency = row['agency']
-            event_uid = row['event_uid']
-            officer_uid = row['uid']
-            uof_uid = row['uof_uid']
+        for row in tqdm(data.get('added_rows'), desc='Create new events'):
+            self.handle_record_data(row)
 
-            officer_id = officer_mappings.get(officer_uid)
-            uof_id = uof_mappings.get(uof_uid)
-
-            event_data = self.parse_row_data(row)
-            formatted_agency = self.format_agency(agency)
-            department_id = department_mappings.get(slugify(formatted_agency))
-            event_data['department_id'] = department_id
-
-            event_data['use_of_force_id'] = uof_id
-            event_data['officer_id'] = officer_id
-
-            event_id = event_mappings.get(event_uid)
-
+        for row in tqdm(data.get('deleted_rows'), desc='Delete removed events'):
+            event_uid = row[self.column_mappings['event_uid']]
+            event_id = self.event_mappings.get(event_uid)
             if event_id:
-                event_data['id'] = event_id
-                update_events_attrs.append(event_data)
-            elif event_uid not in new_event_uids:
-                new_event_uids.append(event_uid)
-                new_events_attrs.append(event_data)
+                self.delete_events_ids.append(event_id)
 
-        import_result = self.bulk_import(Event, new_events_attrs, update_events_attrs)
+        for row in tqdm(data.get('updated_rows'), desc='Update modified events'):
+            self.handle_record_data(row)
+
+        import_result = self.bulk_import(Event, self.new_events_attrs, self.update_events_attrs, self.delete_events_ids)
 
         self.update_relations()
 

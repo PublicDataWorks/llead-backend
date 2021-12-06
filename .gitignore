@@ -8,3 +8,4 @@ ipno/static
 !*.secret
 secrets-*.yml
 venv/
+htmlcov/
