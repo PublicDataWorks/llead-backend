@@ -44,6 +44,7 @@ class ComplaintImporter(BaseImporter):
         'rank_desc',
         'employment_status',
         'traffic_stop',
+        'allegation_desc',
     ]
 
     UPDATE_ATTRIBUTES = ATTRIBUTES
