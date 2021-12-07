@@ -130,12 +130,7 @@ class CommandTestCase(TestCase):
         mock_generate_csv_file.side_effect = mock_generate_csv_file_side_effect
         mock_create_wrgl_commit = Mock()
 
-        mock_json = Mock()
-        mock_json.return_value = {
-            "hash": "hash",
-            "contentHash": "contentHash"
-        }
-        mock_response_object = Mock(json=mock_json)
+        mock_response_object = Mock(sum="hash")
         mock_create_wrgl_commit.return_value = mock_response_object
 
         mock_wrgl_generator_object = Mock(
@@ -163,10 +158,9 @@ class CommandTestCase(TestCase):
             call(
                 settings.NEWS_ARTICLE_WRGL_REPO,
                 '+ 1 object(s)',
-                'id',
+                ['id'],
                 news
             ),
-            call().json(),
         ]
 
         self.command.wrgl.create_wrgl_commit.assert_has_calls(called_create_wrgl_similarity)
@@ -196,12 +190,7 @@ class CommandTestCase(TestCase):
         mock_generate_csv_file.side_effect = mock_generate_csv_file_side_effect
         mock_create_wrgl_commit = Mock()
 
-        mock_json = Mock()
-        mock_json.return_value = {
-            "hash": "hash",
-            "contentHash": "contentHash"
-        }
-        mock_response_object = Mock(json=mock_json)
+        mock_response_object = Mock(sum="hash")
         mock_create_wrgl_commit.return_value = mock_response_object
 
         mock_wrgl_generator_object = Mock(
@@ -229,10 +218,9 @@ class CommandTestCase(TestCase):
             call(
                 settings.NEWS_ARTICLE_WRGL_REPO,
                 '+ 1 object(s)',
-                'id',
+                ['id'],
                 news
             ),
-            call().json(),
         ]
 
         self.command.wrgl.create_wrgl_commit.assert_has_calls(called_create_wrgl_similarity)

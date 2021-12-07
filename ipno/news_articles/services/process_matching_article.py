@@ -195,14 +195,14 @@ class ProcessMatchingArticle:
             columns = NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
-            response = self.wrgl.create_wrgl_commit(
+            result = self.wrgl.create_wrgl_commit(
                 settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
                 f'+ {len(self.latest_keywords)} keyword(s)',
-                'uid,newsarticle_id',
+                ['uid', 'newsarticle_id'],
                 gzexcel
             )
 
-            commit_hash = response.json()['hash']
+            commit_hash = result.sum if result else ''
             wrgl_repo = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
             if commit_hash and wrgl_repo.commit_hash != commit_hash:

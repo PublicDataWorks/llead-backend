@@ -197,12 +197,7 @@ class ProcessMatchingKeywordsTestCase(TestCase):
         mock_generate_csv_file.side_effect = mock_generate_csv_file_side_effect
         mock_create_wrgl_commit = Mock()
 
-        mock_json = Mock()
-        mock_json.return_value = {
-            "hash": "hash",
-            "contentHash": "contentHash"
-        }
-        mock_response_object = Mock(json=mock_json)
+        mock_response_object = Mock(sum="hash")
         mock_create_wrgl_commit.return_value = mock_response_object
 
         mock_wrgl_generator_object = Mock(
@@ -229,7 +224,7 @@ class ProcessMatchingKeywordsTestCase(TestCase):
 
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][0] == 'news_article_officer'
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 keyword(s)'
-        assert self.pmk.wrgl.create_wrgl_commit.call_args[0][2] == 'uid,newsarticle_id'
+        assert self.pmk.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
@@ -255,12 +250,7 @@ class ProcessMatchingKeywordsTestCase(TestCase):
         mock_generate_csv_file.side_effect = mock_generate_csv_file_side_effect
         mock_create_wrgl_commit = Mock()
 
-        mock_json = Mock()
-        mock_json.return_value = {
-            "hash": "hash",
-            "contentHash": "contentHash"
-        }
-        mock_response_object = Mock(json=mock_json)
+        mock_response_object = Mock(sum="hash")
         mock_create_wrgl_commit.return_value = mock_response_object
 
         mock_wrgl_generator_object = Mock(
@@ -287,7 +277,7 @@ class ProcessMatchingKeywordsTestCase(TestCase):
 
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][0] == 'news_article_officer'
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 keyword(s)'
-        assert self.pmk.wrgl.create_wrgl_commit.call_args[0][2] == 'uid,newsarticle_id'
+        assert self.pmk.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
         assert self.pmk.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
