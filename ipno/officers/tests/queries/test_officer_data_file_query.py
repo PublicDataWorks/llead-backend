@@ -171,7 +171,7 @@ class OfficerDatafileQueryTestCase(TestCase):
         expected_career_sheet_sorted = expected_career_sheet.sort_values(by=['event_uid']).reset_index(drop=True)
         expected_career_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_complaint_sheet = pd.DataFrame(expected_complaints)
-        expected_complaint_sheet_sorted = expected_complaint_sheet.sort_values(by=['complaint_uid']).reset_index(drop=True)
+        expected_complaint_sheet_sorted = expected_complaint_sheet.sort_values(by=['allegation_uid']).reset_index(drop=True)
         expected_complaint_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_doc_sheet = pd.DataFrame([expected_document])
         expected_doc_sheet.dropna(how='all', axis=1, inplace=True)
@@ -185,7 +185,7 @@ class OfficerDatafileQueryTestCase(TestCase):
         xlsx_career_data = pd.read_excel(data_file, sheet_name=OFFICER_CAREER_SHEET)
         xlsx_career_data_sorted = xlsx_career_data.sort_values(by=['event_uid']).reset_index(drop=True)
         xlsx_complaint_data = pd.read_excel(data_file, sheet_name=OFFICER_COMPLAINT_SHEET)
-        xlsx_complaint_data_sorted = xlsx_complaint_data.sort_values(by=['complaint_uid']).reset_index(drop=True)
+        xlsx_complaint_data_sorted = xlsx_complaint_data.sort_values(by=['allegation_uid']).reset_index(drop=True)
         xlsx_doc_data = pd.read_excel(data_file, sheet_name=OFFICER_DOC_SHEET, dtype=str)
 
         def lstrip0(row):
@@ -383,7 +383,7 @@ class OfficerDatafileQueryTestCase(TestCase):
         expected_career_sheet_sorted = expected_career_sheet.sort_values(by=['event_uid']).reset_index(drop=True)
         expected_career_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_complaint_sheet = pd.DataFrame(expected_complaints)
-        expected_complaint_sheet_sorted = expected_complaint_sheet.sort_values(by=['complaint_uid']).reset_index(drop=True)
+        expected_complaint_sheet_sorted = expected_complaint_sheet.sort_values(by=['allegation_uid']).reset_index(drop=True)
         expected_complaint_sheet_sorted.dropna(how='all', axis=1, inplace=True)
         expected_doc_sheet = pd.DataFrame([expected_document])
         expected_doc_sheet.dropna(how='all', axis=1, inplace=True)
@@ -397,7 +397,7 @@ class OfficerDatafileQueryTestCase(TestCase):
         xlsx_career_data = pd.read_excel(data_file, sheet_name=OFFICER_CAREER_SHEET)
         xlsx_career_data_sorted = xlsx_career_data.sort_values(by=['event_uid']).reset_index(drop=True)
         xlsx_complaint_data = pd.read_excel(data_file, sheet_name=OFFICER_COMPLAINT_SHEET)
-        xlsx_complaint_data_sorted = xlsx_complaint_data.sort_values(by=['complaint_uid']).reset_index(drop=True)
+        xlsx_complaint_data_sorted = xlsx_complaint_data.sort_values(by=['allegation_uid']).reset_index(drop=True)
         xlsx_doc_data = pd.read_excel(data_file, sheet_name=OFFICER_DOC_SHEET, dtype=str)
 
         def lstrip0(row):

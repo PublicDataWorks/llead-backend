@@ -18,7 +18,7 @@ from use_of_forces.factories import UseOfForceFactory
 
 class EventImporterTestCase(TestCase):
     def setUp(self):
-        self.header = ['event_uid', 'kind', 'year', 'month', 'day', 'time', 'raw_date', 'uid', 'complaint_uid',
+        self.header = ['event_uid', 'kind', 'year', 'month', 'day', 'time', 'raw_date', 'uid', 'allegation_uid',
                        'appeal_uid', 'uof_uid', 'agency', 'badge_no', 'employee_id', 'department_code',
                        'department_desc', 'division_desc', 'sub_division_a_desc', 'sub_division_b_desc',
                        'current_supervisor', 'employee_class', 'rank_code', 'rank_desc', 'employment_status', 'sworn',
@@ -62,9 +62,8 @@ class EventImporterTestCase(TestCase):
         uof_1 = UseOfForceFactory(uof_uid='uof-uid1')
         uof_2 = UseOfForceFactory(uof_uid='uof-uid2')
 
-        complaint_1 = ComplaintFactory(complaint_uid='complaint-uid1')
-        complaint_2 = ComplaintFactory(complaint_uid='complaint-uid1')
-        complaint_3 = ComplaintFactory(complaint_uid='complaint-uid2')
+        complaint_1 = ComplaintFactory(allegation_uid='complaint-uid1')
+        complaint_3 = ComplaintFactory(allegation_uid='complaint-uid2')
 
         assert Event.objects.count() == 4
 
@@ -131,7 +130,7 @@ class EventImporterTestCase(TestCase):
         expected_event1_data.append(department_1.id)
         expected_event1_data.append(officer_1.id)
         expected_event1_data.append(None)
-        expected_event1_data.append({complaint_1.id, complaint_2.id})
+        expected_event1_data.append({complaint_1.id})
 
         expected_event2_data = self.event2_data.copy()
         expected_event2_data.append(None)
@@ -174,7 +173,7 @@ class EventImporterTestCase(TestCase):
                 'kind',
                 'time',
                 'raw_date',
-                'complaint_uid',
+                'allegation_uid',
                 'appeal_uid',
                 'badge_no',
                 'employee_id',
