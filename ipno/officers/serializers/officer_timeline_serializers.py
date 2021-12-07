@@ -31,11 +31,15 @@ class BaseTimelineSerializer(serializers.Serializer):
 
 
 class JoinedTimelineSerializer(BaseTimelineSerializer):
+    department = serializers.CharField(source='department.name')
+
     def get_kind(self, obj):
         return JOINED_TIMELINE_KIND
 
 
 class LeftTimelineSerializer(BaseTimelineSerializer):
+    department = serializers.CharField(source='department.name')
+
     def get_kind(self, obj):
         return LEFT_TIMELINE_KIND
 

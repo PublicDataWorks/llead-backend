@@ -111,19 +111,19 @@ class Command(BaseCommand):
 
     def commit_data_to_wrgl(self, start_time):
         for item in self.wrgl_repos_mapping:
-            gzexcel = self.wrgl.generate_csv_file(item['data'], item['columns'])
+            csv_file = self.wrgl.generate_csv_file(item['data'], item['columns'])
 
             count_updated_objects = item['data'].filter(created_at__gte=start_time).count()
 
             if count_updated_objects:
-                response = self.wrgl.create_wrgl_commit(
+                result = self.wrgl.create_wrgl_commit(
                     item['wrgl_repo'],
                     f'+ {count_updated_objects} object(s)',
-                    'id',
-                    gzexcel
+                    ['id'],
+                    csv_file
                 )
 
-                commit_hash = response.json()['hash']
+                commit_hash = result.sum if result else ''
                 wrgl_repo = WrglRepo.objects.get(data_model=item['wrgl_model_name'])
 
                 if commit_hash and wrgl_repo.commit_hash != commit_hash:

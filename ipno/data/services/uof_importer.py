@@ -57,42 +57,62 @@ class UofImporter(BaseImporter):
         'citizen_age',
         'officer_years_exp',
         'officer_years_with_unit',
-        'data_production_year',
     ]
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + ['officer_id', 'department_id']
 
+    def __init__(self):
+        self.new_uofs_attrs = []
+        self.update_uofs_attrs = []
+        self.new_uof_uids = []
+        self.delete_uofs_ids = []
+        self.officer_mappings = {}
+        self.department_mappings = {}
+        self.uof_mappings = {}
+
+    def handle_record_data(self, row):
+        agency = row[self.column_mappings['agency']]
+        officer_uid = row[self.column_mappings['uid']]
+        uof_data = self.parse_row_data(row)
+
+        uof_uid = uof_data['uof_uid']
+
+        uof_data = self.parse_row_data(row)
+        formatted_agency = self.format_agency(agency)
+        department_id = self.department_mappings.get(slugify(formatted_agency))
+        uof_data['department_id'] = department_id
+
+        officer_id = self.officer_mappings.get(officer_uid)
+        uof_data['officer_id'] = officer_id
+
+        uof_id = self.uof_mappings.get(uof_uid)
+
+        if uof_id:
+            uof_data['id'] = uof_id
+            self.update_uofs_attrs.append(uof_data)
+        elif uof_uid not in self.new_uof_uids:
+            self.new_uof_uids.append(uof_uid)
+            self.new_uofs_attrs.append(uof_data)
+
     def import_data(self, data):
-        new_uofs_attrs = []
-        update_uofs_attrs = []
-        new_uof_uids = []
+        rows = self.get_all_diff_rows(data)
 
-        officer_mappings = self.officer_mappings()
-        agencies = {row['agency'] for row in data if row['agency']}
-        department_mappings = self.department_mappings(agencies)
+        self.officer_mappings = self.get_officer_mappings()
+        agencies = {row[self.column_mappings['agency']] for row in rows if row[self.column_mappings['agency']]}
+        self.department_mappings = self.get_department_mappings(agencies)
 
-        uof_mappings = self.uof_mappings()
+        self.uof_mappings = self.get_uof_mappings()
 
-        for row in tqdm(data):
-            agency = row['agency']
-            uof_uid = row['uof_uid']
-            officer_uid = row['uid']
+        for row in tqdm(data.get('added_rows'), desc='Create new uofs'):
+            self.handle_record_data(row)
 
-            uof_data = self.parse_row_data(row)
-            formatted_agency = self.format_agency(agency)
-            department_id = department_mappings.get(slugify(formatted_agency))
-            uof_data['department_id'] = department_id
-
-            officer_id = officer_mappings.get(officer_uid)
-            uof_data['officer_id'] = officer_id
-
-            uof_id = uof_mappings.get(uof_uid)
-
+        for row in tqdm(data.get('deleted_rows'), desc='Delete removed uofs'):
+            uof_uid = row[self.column_mappings['uof_uid']]
+            uof_id = self.uof_mappings.get(uof_uid)
             if uof_id:
-                uof_data['id'] = uof_id
-                update_uofs_attrs.append(uof_data)
-            elif uof_uid not in new_uof_uids:
-                new_uof_uids.append(uof_uid)
-                new_uofs_attrs.append(uof_data)
+                self.delete_uofs_ids.append(uof_id)
 
-        return self.bulk_import(UseOfForce, new_uofs_attrs, update_uofs_attrs)
+        for row in tqdm(data.get('updated_rows'), desc='Update modified uofs'):
+            self.handle_record_data(row)
+
+        return self.bulk_import(UseOfForce, self.new_uofs_attrs, self.update_uofs_attrs, self.delete_uofs_ids)
