@@ -18,6 +18,7 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     paragraph_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     disposition = factory.LazyFunction(lambda: fake.word())
     action = factory.LazyFunction(lambda: fake.word())
+    allegation_desc = factory.LazyFunction(lambda: fake.word())
     tracking_number = factory.LazyFunction(
         lambda: f'{random.randint(1000, 9999)}-{random.randint(100, 999)}'
     )

@@ -24,7 +24,7 @@ class ComplaintImporterTestCase(TestCase):
                        'complainant_type', 'complainant_sex', 'complainant_race', 'recommended_action', 'action',
                        'data_production_year', 'agency', 'incident_type', 'supervisor_uid', 'supervisor_rank',
                        'badge_no', 'department_code', 'department_desc', 'rank_desc', 'employment_status',
-                       'traffic_stop']
+                       'traffic_stop', 'allegation_desc']
 
         self.complaint1_data = ['complaint-uid1-allegation-uid1-charge-uid1', 'officer-uid1', '2018-018',
                                 'investigation type', 'administrative review', 'unit', 'department', 'division',
@@ -34,32 +34,32 @@ class ComplaintImporterTestCase(TestCase):
                                 '3:22 violation of known laws - 56 violations', 'Chief Najolia ', 'internal', 'female',
                                 'black', 'none', 'hold in abeyance', '2016', '', 'discourtesy', 'supervisor-uid1',
                                 'assistant chief', 'HP-50', 'P10382', 'patrol 1st district', 'sergeant',
-                                'employment-status', 'yes']
+                                'employment-status', 'yes', '']
         self.complaint2_data = ['complaint-uid1-allegation-uid1-charge-uid2', 'officer-uid-invalid', '',
                                 'administrative investigation', '', '', '', '', '', '', '', '', '', '', '', '',
                                 'sustained', '', '', '', '', 'dereliction of duty - paragraph u', '', 'civillian ',
                                 'female', 'black', '', '1 day suspension without pay', '2020', '', '', '', '', '', '',
-                                '', 'officer', '', 'no']
+                                '', 'officer', '', 'no', '']
         self.complaint3_data = ['complaint-uid1', 'officer-uid2', '2015-2', '', 'complete', '', '', '', '', '',
                                 '', '', '', '', '', '', 'not sustained', '2.0', '', '3', '', '', '', '', 'female',
                                 'hispanic', 'none', '', '2020', 'Baton Rouge PD', 'discourtesy', '', '', 'HP-50', '',
-                                'off-duty detail', 'police officer 2-a', '', '']
+                                'off-duty detail', 'police officer 2-a', '', '', '']
         self.complaint4_data = ['complaint-uid2-allegation-uid3', '', '2018-006', '', 'administrative review',
                                 '', '', '', '', '', '', '', '', '', '', '', 'not sustained', '', '', '', '',
                                 '3:20 use of force - 53 hard empty hand', '', '', '', '', '', 'not sustained', '2018',
-                                'New Orleans PD', '', '', '', '', 'P10252', 'patrol 2nd district', '', '', '']
+                                'New Orleans PD', '', '', '', '', 'P10252', 'patrol 2nd district', '', '', '', '']
         self.complaint5_data = ['complaint-uid3-charge-uid2', 'officer-uid3', '2006-0639-D', '', '', '', '', '',
                                 'RESERVE DIVISION', '', '', '', 'counseling',
                                 'paragraph 02 - instructions from authoritative source', 'rule 4: perf of duty', '',
                                 'counseling', '', '', '', '',
                                 'rule 4: perf of duty; paragraph 02 - instructions from authoritative source', '', '',
                                 '', '', '', '', '2020', 'Baton Rouge PD', 'rank initiated', '', '', '', '', '', '', '',
-                                'yes']
+                                'yes', '']
         self.complaint6_data = ['complaint-uid6-allegation-uid6-charge-uid2', '', '',
                                 'administrative investigation', '', '', '', '', '', '', '', '', '', '', '', '',
                                 'sustained', '', '', '', '', 'dereliction of duty - paragraph u', '', 'civillian ',
                                 'female', 'black', '', '1 day suspension without pay', '2020', '', '', '', '', '', '',
-                                '', 'officer', '', 'no']
+                                '', 'officer', '', 'no', '']
 
         self.complaint_importer = ComplaintImporter()
 
@@ -204,6 +204,7 @@ class ComplaintImporterTestCase(TestCase):
                 'department_desc',
                 'rank_desc',
                 'traffic_stop',
+                'allegation_desc',
             ]
 
             for attr in field_attrs:

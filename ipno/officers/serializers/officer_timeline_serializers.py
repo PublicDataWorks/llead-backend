@@ -54,6 +54,7 @@ class ComplaintTimelineSerializer(BaseTimelineSerializer):
     disposition = serializers.CharField()
     action = serializers.CharField()
     tracking_number = serializers.CharField()
+    allegation_desc = serializers.CharField()
 
     def _get_receive_event(self, obj):
         if not hasattr(obj, 'receive_event'):
