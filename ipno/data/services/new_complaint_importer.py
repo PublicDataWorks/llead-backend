@@ -6,7 +6,7 @@ from data.services.base_importer import BaseImporter
 from data.constants import COMPLAINT_MODEL_NAME
 
 
-class ComplaintImporter(BaseImporter):
+class NewComplaintImporter(BaseImporter):
     data_model = COMPLAINT_MODEL_NAME
     ATTRIBUTES = [
         'allegation_uid',
@@ -86,19 +86,18 @@ class ComplaintImporter(BaseImporter):
 
                 complaint_id = complaint_mappings.get(allegation_uid)
 
-                if complaint_id:
-                    modified_complaints_ids.append(complaint_id)
+                modified_complaints_ids.append(complaint_id)
 
-                    if officer_uid:
-                        officer_id = officer_mappings.get(officer_uid)
-                        if officer_id:
-                            officer_relation_ids[complaint_id] = officer_id
+                if officer_uid:
+                    officer_id = officer_mappings.get(officer_uid)
+                    if officer_id:
+                        officer_relation_ids[complaint_id] = officer_id
 
-                    if agency:
-                        formatted_agency = self.format_agency(agency)
-                        department_id = department_mappings.get(slugify(formatted_agency))
+                if agency:
+                    formatted_agency = self.format_agency(agency)
+                    department_id = department_mappings.get(slugify(formatted_agency))
 
-                        department_relation_ids[complaint_id] = department_id
+                    department_relation_ids[complaint_id] = department_id
 
         department_relations = [
             DepartmentRelation(complaint_id=complaint_id, department_id=department_id)
@@ -135,15 +134,8 @@ class ComplaintImporter(BaseImporter):
         for row in tqdm(data.get('added_rows'), desc='Create new complaints'):
             self.handle_record_data(row)
 
-        for row in tqdm(data.get('deleted_rows'), desc='Delete removed complaints'):
-            complaint_data = self.parse_row_data(row)
-            allegation_uid = complaint_data.get('allegation_uid')
-
-            complaint_id = self.complaint_mappings.get(allegation_uid)
-            self.delete_complaints_ids.append(complaint_id)
-
-        for row in tqdm(data.get('updated_rows'), desc='Update modified complaints'):
-            self.handle_record_data(row)
+        update_item_ids = [attrs['id'] for attrs in self.update_complaints_attrs]
+        self.delete_complaints_ids = Complaint.objects.exclude(id__in=update_item_ids)
 
         import_result = self.bulk_import(Complaint, self.new_complaints_attrs, self.update_complaints_attrs, self.delete_complaints_ids)
         self.update_relations(data)

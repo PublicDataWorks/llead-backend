@@ -59,7 +59,7 @@ OFFICER_DOC_FIELDS = [
 
 OFFICER_INCIDENT_FIELDS = [
     'event_uid', 'kind', 'year', 'month', 'agency', 'uid', 'uof_uid',
-    'day', 'time', 'raw_date', 'complaint_uid', 'appeal_uid',
+    'day', 'time', 'raw_date', 'allegation_uid', 'appeal_uid',
     'badge_no', 'employee_id', 'department_code', 'department_desc',
     'division_desc', 'sub_division_a_desc', 'sub_division_b_desc',
     'current_supervisor', 'employee_class', 'rank_code', 'rank_desc',
@@ -68,16 +68,16 @@ OFFICER_INCIDENT_FIELDS = [
 ]
 
 OFFICER_COMPLAINT_FIELDS = [
-    'complaint_uid', 'allegation_uid', 'charge_uid', 'tracking_number',
+    'allegation_uid', 'tracking_number',
     'investigation_status', 'assigned_unit', 'assigned_department',
     'assigned_division', 'assigned_sub_division_a', 'body_worn_camera_available',
     'app_used', 'citizen_arrested', 'allegation_finding', 'allegation',
     'allegation_class', 'citizen', 'disposition', 'rule_code', 'rule_violation',
-    'paragraph_code', 'paragraph_violation', 'charges', 'complainant_name',
+    'paragraph_code', 'paragraph_violation', 'complainant_name',
     'complainant_type', 'complainant_sex', 'complainant_race', 'recommended_action',
-    'action', 'data_production_year', 'incident_type', 'supervisor_uid',
+    'action', 'incident_type', 'supervisor_uid',
     'supervisor_rank', 'badge_no', 'department_code', 'department_desc',
-    'rank_desc', 'employment_status', 'uid', 'agency',
+    'rank_desc', 'employment_status', 'uid', 'agency', 'traffic_stop',
 ]
 
 OFFICER_UOF_FIELDS = [

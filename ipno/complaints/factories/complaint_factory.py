@@ -12,9 +12,7 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Complaint
 
-    complaint_uid = factory.LazyFunction(lambda: fake.uuid4())
     allegation_uid = factory.LazyFunction(lambda: fake.uuid4())
-    charge_uid = factory.LazyFunction(lambda: fake.uuid4())
     rule_code = factory.LazyFunction(lambda: fake.word())
     rule_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     paragraph_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))

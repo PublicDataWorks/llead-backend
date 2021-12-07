@@ -4,9 +4,7 @@ from utils.models import TimeStampsModel
 
 
 class Complaint(TimeStampsModel):
-    complaint_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     allegation_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
-    charge_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     tracking_number = models.CharField(max_length=255, null=True, blank=True)
     investigation_type = models.CharField(max_length=255, null=True, blank=True)
     investigation_status = models.CharField(max_length=255, null=True, blank=True)
@@ -26,14 +24,12 @@ class Complaint(TimeStampsModel):
     rule_violation = models.CharField(max_length=255, null=True, blank=True)
     paragraph_code = models.CharField(max_length=255, null=True, blank=True)
     paragraph_violation = models.CharField(max_length=255, null=True, blank=True)
-    charges = models.TextField(null=True, blank=True)
     complainant_name = models.CharField(max_length=255, null=True, blank=True)
     complainant_type = models.CharField(max_length=255, null=True, blank=True)
     complainant_sex = models.CharField(max_length=255, null=True, blank=True)
     complainant_race = models.CharField(max_length=255, null=True, blank=True)
     recommended_action = models.CharField(max_length=255, null=True, blank=True)
     action = models.CharField(max_length=255, null=True, blank=True)
-    data_production_year = models.IntegerField(null=True, blank=True)
     incident_type = models.CharField(max_length=255, null=True, blank=True)
     supervisor_uid = models.CharField(max_length=255, null=True, blank=True)
     supervisor_rank = models.CharField(max_length=255, null=True, blank=True)
@@ -42,10 +38,11 @@ class Complaint(TimeStampsModel):
     department_desc = models.CharField(max_length=255, null=True, blank=True)
     rank_desc = models.CharField(max_length=255, null=True, blank=True)
     employment_status = models.CharField(max_length=255, null=True, blank=True)
+    traffic_stop = models.CharField(max_length=255, null=True, blank=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='complaints')
     departments = models.ManyToManyField('departments.Department', blank=True, related_name='complaints')
     events = models.ManyToManyField('officers.Event', blank=True, related_name='complaints')
 
     class Meta:
-        unique_together = ('complaint_uid', 'allegation_uid', 'charge_uid')
+        unique_together = ('allegation_uid',)

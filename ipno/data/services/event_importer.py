@@ -17,7 +17,7 @@ class EventImporter(BaseImporter):
 
         'time',
         'raw_date',
-        'complaint_uid',
+        'allegation_uid',
         'appeal_uid',
         'badge_no',
         'employee_id',
@@ -69,11 +69,11 @@ class EventImporter(BaseImporter):
         ComplaintRelation = Event.complaints.through
         complaint_relations = []
 
-        events = Event.objects.filter(complaint_uid__isnull=False).only('id', 'complaint_uid')
+        events = Event.objects.filter(allegation_uid__isnull=False).only('id', 'allegation_uid')
 
         for event in tqdm(events, desc='Update events\' relations'):
             complaint_ids = Complaint.objects.filter(
-                complaint_uid=event.complaint_uid,
+                allegation_uid=event.allegation_uid,
             ).values_list('id', flat=True)
 
             complaint_relations += [
