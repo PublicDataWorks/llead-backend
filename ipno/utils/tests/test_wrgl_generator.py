@@ -1,7 +1,7 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from news_articles.constants import NEWS_ARTICLE_WRGL_COLUMNS
 from news_articles.factories import NewsArticleFactory
@@ -36,27 +36,27 @@ class WrglGeneratorTestCase(TestCase):
 
         mock_io.assert_called()
         mock_pd_dataframe.assert_called_with('data')
-        mock_to_csv.assert_called_with(mock_io_object, index=False, compression="gzip")
+        mock_to_csv.assert_called_with(mock_io_object, index=False)
         mock_getvalue.assert_called()
         mock_close.assert_called()
         assert result == 'buffer'
 
-    @patch('utils.wrgl_generator.requests.post')
-    def test_create_wrgl_commit(self, mock_requests_post):
-        mock_requests_post.return_value = 'response'
+    @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('utils.wrgl_generator.Repository')
+    def test_create_wrgl_commit(self, mock_Repository):
+        mock_repo = MagicMock()
+        mock_repo.commit.return_value = 'response'
+        mock_Repository.return_value = mock_repo
 
-        url = f'https://www.wrgl.co/api/v1/users/{settings.WRGL_USER}/repos'
+        repo_name = 'test'
 
-        data = {
-            'repoName': 'test',
-            'message': 'message',
-            'csv.primaryKey': ['id'],
-        }
+        result = self.wrgl_generator.create_wrgl_commit('test', 'message', ['id'], b'buffer')
 
-        header = {
-            'Authorization': f'APIKEY {settings.WRGL_API_KEY}',
-        }
-
-        result = self.wrgl_generator.create_wrgl_commit('test', 'message', ['id'], 'buffer')
-        mock_requests_post.assert_called_with(url, data=data, headers=header, files={'csv.dataFile': 'buffer'})
+        mock_Repository.assert_called_with(
+            f'https://hub.wrgl.co/api/users/{settings.WRGL_USER}/repos/{repo_name}/',
+            'wrgl-api-key'
+        )
+        assert mock_repo.commit.call_args[1].get('branch') == 'main'
+        assert mock_repo.commit.call_args[1].get('message') == 'message'
+        assert mock_repo.commit.call_args[1].get('primary_key') == ['id']
         assert result == 'response'

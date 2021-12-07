@@ -54,37 +54,50 @@ class ComplaintImporter(BaseImporter):
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES
 
-    def complaint_mappings(self):
+    def __init__(self):
+        self.new_complaints_attrs = []
+        self.update_complaints_attrs = []
+        self.new_complaint_uids = []
+        self.delete_complaints_ids = []
+        self.complaint_mappings = {}
+
+    def get_complaint_mappings(self):
         return {
             f'{complaint.complaint_uid}-{complaint.allegation_uid}-{complaint.charge_uid}': complaint.id
             for complaint in Complaint.objects.only('id', 'complaint_uid', 'allegation_uid', 'charge_uid')
         }
 
-    def update_relations(self, data):
+    def update_relations(self, raw_data):
+        data = self.get_all_diff_rows(raw_data)
+        modified_complaints_ids = []
+
         DepartmentRelation = Complaint.departments.through
         OfficerRelation = Complaint.officers.through
         department_relation_ids = {}
         officer_relation_ids = {}
 
-        officer_mappings = self.officer_mappings()
-        agencies = {row['agency'] for row in data if row['agency']}
-        department_mappings = self.department_mappings(agencies)
+        officer_mappings = self.get_officer_mappings()
+        agencies = {row[self.column_mappings['agency']] for row in data if row[self.column_mappings['agency']]}
+        department_mappings = self.get_department_mappings(agencies)
 
-        complaint_mappings = self.complaint_mappings()
+        complaint_mappings = self.get_complaint_mappings()
 
-        for row in tqdm(data):
-            officer_uid = row['uid']
-            agency = row['agency']
+        for row in tqdm(data, desc="Update complaints' relations"):
+            officer_uid = row[self.column_mappings['uid']]
+            agency = row[self.column_mappings['agency']]
+            complaint_data = self.parse_row_data(row)
 
             if officer_uid or agency:
-                complaint_uid = row['complaint_uid'] if row['complaint_uid'] else None
-                allegation_uid = row['allegation_uid'] if row['allegation_uid'] else None
-                charge_uid = row['charge_uid'] if row['charge_uid'] else None
+                complaint_uid = complaint_data.get('complaint_uid')
+                allegation_uid = complaint_data.get('allegation_uid')
+                charge_uid = complaint_data.get('charge_uid')
 
                 uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
                 complaint_id = complaint_mappings.get(uniq_key)
 
                 if complaint_id:
+                    modified_complaints_ids.append(complaint_id)
+
                     if officer_uid:
                         officer_id = officer_mappings.get(officer_uid)
                         if officer_id:
@@ -106,35 +119,47 @@ class ComplaintImporter(BaseImporter):
             for complaint_id, officer_id in officer_relation_ids.items()
         ]
 
-        DepartmentRelation.objects.all().delete()
+        DepartmentRelation.objects.filter(complaint_id__in=modified_complaints_ids).delete()
         DepartmentRelation.objects.bulk_create(department_relations, batch_size=self.BATCH_SIZE)
 
-        OfficerRelation.objects.all().delete()
+        OfficerRelation.objects.filter(complaint_id__in=modified_complaints_ids).delete()
         OfficerRelation.objects.bulk_create(officer_relations, batch_size=self.BATCH_SIZE)
 
+    def handle_record_data(self, row):
+        complaint_data = self.parse_row_data(row)
+        complaint_uid = complaint_data['complaint_uid']
+        allegation_uid = complaint_data['allegation_uid']
+        charge_uid = complaint_data['charge_uid']
+
+        uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
+        complaint_id = self.complaint_mappings.get(uniq_key)
+
+        if complaint_id:
+            complaint_data['id'] = complaint_id
+            self.update_complaints_attrs.append(complaint_data)
+        elif uniq_key not in self.new_complaint_uids:
+            self.new_complaints_attrs.append(complaint_data)
+            self.new_complaint_uids.append(uniq_key)
+
     def import_data(self, data):
-        new_complaints_attrs = []
-        update_complaints_attrs = []
-        new_complaint_uids = []
+        self.complaint_mappings = self.get_complaint_mappings()
 
-        complaint_mappings = self.complaint_mappings()
+        for row in tqdm(data.get('added_rows'), desc='Create new complaints'):
+            self.handle_record_data(row)
 
-        for row in tqdm(data):
+        for row in tqdm(data.get('deleted_rows'), desc='Delete removed complaints'):
             complaint_data = self.parse_row_data(row)
-            complaint_uid = complaint_data['complaint_uid']
-            allegation_uid = complaint_data['allegation_uid']
-            charge_uid = complaint_data['charge_uid']
+            complaint_uid = complaint_data.get('complaint_uid')
+            allegation_uid = complaint_data.get('allegation_uid')
+            charge_uid = complaint_data.get('charge_uid')
 
             uniq_key = f'{complaint_uid}-{allegation_uid}-{charge_uid}'
-            complaint_id = complaint_mappings.get(uniq_key)
+            complaint_id = self.complaint_mappings.get(uniq_key)
+            self.delete_complaints_ids.append(complaint_id)
 
-            if complaint_id:
-                complaint_data['id'] = complaint_id
-                update_complaints_attrs.append(complaint_data)
-            elif uniq_key not in new_complaint_uids:
-                new_complaints_attrs.append(complaint_data)
-                new_complaint_uids.append(uniq_key)
+        for row in tqdm(data.get('updated_rows'), desc='Update modified complaints'):
+            self.handle_record_data(row)
 
-        import_result = self.bulk_import(Complaint, new_complaints_attrs, update_complaints_attrs)
+        import_result = self.bulk_import(Complaint, self.new_complaints_attrs, self.update_complaints_attrs, self.delete_complaints_ids)
         self.update_relations(data)
         return import_result
