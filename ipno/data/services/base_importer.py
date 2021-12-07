@@ -1,19 +1,17 @@
-import csv
-from io import StringIO
 from datetime import datetime
 import pytz
 import re
 import traceback
 
-import requests
 from django.conf import settings
 from django.utils.text import slugify
+from wrgl import Repository
+from tqdm import tqdm
 
 from departments.models import Department
 from officers.models import Officer
 from use_of_forces.models import UseOfForce
 from data.models import WrglRepo, ImportLog
-from utils.parse_utils import parse_int
 from data.constants import (
     WRGL_USER,
     IMPORT_LOG_STATUS_STARTED,
@@ -22,6 +20,7 @@ from data.constants import (
     IMPORT_LOG_STATUS_FINISHED,
     IMPORT_LOG_STATUS_ERROR
 )
+from utils.parse_utils import parse_int
 
 
 class BaseImporter(object):
@@ -29,24 +28,31 @@ class BaseImporter(object):
     ATTRIBUTES = []
     NA_ATTRIBUTES = []
     INT_ATTRIBUTES = []
-    BATCH_SIZE = 1000
+    BATCH_SIZE = 500
+    WRGL_OFFSET_BATCH_SIZE = 1000
+    branch = 'main'
+    new_commit = None
+    column_mappings = {}
 
     def format_agency(self, agency):
         agency = re.sub('CSD$', 'PD', agency)
         return re.sub('SO$', 'Sheriff', agency)
 
     def parse_row_data(self, row):
-        row_data = {attr: row[attr] if row[attr] else None for attr in self.ATTRIBUTES if attr in row}
+        row_data = {
+            attr: row[self.column_mappings[attr]] if row[self.column_mappings[attr]] else None
+            for attr in self.ATTRIBUTES if attr in self.column_mappings
+        }
 
         for attr in self.NA_ATTRIBUTES:
-            row_data[attr] = row[attr] if row[attr] != 'NA' else None
+            row_data[attr] = row[self.column_mappings[attr]] if row[self.column_mappings[attr]] != 'NA' else None
 
         for attr in self.INT_ATTRIBUTES:
-            row_data[attr] = parse_int(row[attr]) if row[attr] else None
+            row_data[attr] = parse_int(row[self.column_mappings[attr]]) if row[self.column_mappings[attr]] else None
 
         return row_data
 
-    def department_mappings(self, agencies):
+    def get_department_mappings(self, agencies):
         slugify_mappings = {department.slug: department.id
                             for department in Department.objects.only('id', 'slug')}
 
@@ -60,31 +66,82 @@ class BaseImporter(object):
 
         return slugify_mappings
 
-    def officer_mappings(self):
+    def get_officer_mappings(self):
         return {officer.uid: officer.id for officer in Officer.objects.only('id', 'uid')}
 
-    def uof_mappings(self):
+    def get_uof_mappings(self):
         return {use_of_force.uof_uid: use_of_force.id for use_of_force in UseOfForce.objects.only('id', 'uof_uid')}
 
-    def read_wrgl_csv(self, repo_name, commit_hash):
-        url = f'https://www.wrgl.co/api/v1/users/{WRGL_USER}/repos/{repo_name}/commits/{commit_hash}/csv'
-        text = requests.get(url).text
-        csv_file = csv.DictReader(StringIO(text), delimiter=',')
-        return list(csv_file)
+    def process_wrgl_data(self, old_commit_hash):
+        diff_result = self.repo.diff(self.new_commit.sum, old_commit_hash)
+        old_commit = self.repo.get_commit(old_commit_hash)
 
-    def latest_commit_hash(self, repo_name):
-        url = f'https://www.wrgl.co/api/v1/users/{WRGL_USER}/repos/{repo_name}'
-        headers = {'Authorization': f'APIKEY {settings.WRGL_API_KEY}'}
+        added_rows = []
+        deleted_rows = []
+        modified_rows_old = []
 
-        json_data = requests.get(url, headers=headers).json()
-        return json_data.get('hash')
+        added_rows_offsets = [
+               r.off1 for r in diff_result.row_diff
+               if r.off2 is None
+           ]
+        removed_rows_offsets = [
+                r.off2 for r in diff_result.row_diff
+                if r.off1 is None
+            ]
+        modified_rows_offsets = [
+                r.off1 for r in diff_result.row_diff
+                if r.off1 is not None and r.off2 is not None
+            ]
 
-    def bulk_import(self, klass, new_items_attrs, update_items_attrs, cleanup_action=None):
-        update_item_ids = [attrs['id'] for attrs in update_items_attrs]
-        delete_items = klass.objects.exclude(id__in=update_item_ids)
+        with tqdm(total=len(added_rows_offsets), desc='Downloading created data') as pbar:
+            for i in range(0, len(added_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                added_rows.extend(list(
+                    self.repo.get_table_rows(
+                        self.new_commit.table.sum,
+                        added_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
+
+        with tqdm(total=len(removed_rows_offsets), desc='Downloading deleted data') as pbar:
+            for i in range(0, len(removed_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                deleted_rows.extend(list(
+                    self.repo.get_table_rows(
+                        old_commit.table.sum,
+                        removed_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
+
+        with tqdm(total=len(modified_rows_offsets), desc='Downloading modified data') as pbar:
+            for i in range(0, len(modified_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
+                modified_rows_old.extend(list(
+                    self.repo.get_table_rows(
+                        self.new_commit.table.sum,
+                        modified_rows_offsets[i:i + self.WRGL_OFFSET_BATCH_SIZE]
+                    )
+                ))
+                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
+
+        return {
+            'added_rows': added_rows,
+            'deleted_rows': deleted_rows,
+            'updated_rows': modified_rows_old,
+        }
+
+    def get_all_diff_rows(self, raw_data):
+        rows = []
+
+        for value in raw_data.values():
+            rows.extend(value)
+
+        return rows
+
+    def bulk_import(self, klass, new_items_attrs, update_items_attrs, delete_items_ids, cleanup_action=None):
+        delete_items = klass.objects.filter(id__in=delete_items_ids)
 
         if cleanup_action:
-            cleanup_action(delete_items.values())
+            cleanup_action(list(delete_items.values()))
 
         delete_items_count = delete_items.count()
         delete_items.delete()
@@ -111,6 +168,17 @@ class BaseImporter(object):
             setattr(import_log, key, value)
         import_log.save()
 
+    def retrieve_wrgl_data(self, repo_name):
+        self.repo = Repository(
+            f'https://hub.wrgl.co/api/users/{WRGL_USER}/repos/{repo_name}/',
+            settings.WRGL_API_KEY
+        )
+
+        self.new_commit = self.repo.get_branch(self.branch)
+
+        columns = self.new_commit.table.columns
+        self.column_mappings = {column: columns.index(column) for column in columns}
+
     def process(self):
         import_log = ImportLog.objects.create(
             data_model=self.data_model,
@@ -127,9 +195,13 @@ class BaseImporter(object):
                 }
             )
 
-            commit_hash = self.latest_commit_hash(wrgl_repo.repo_name)
+            self.retrieve_wrgl_data(wrgl_repo.repo_name)
+
+            commit_hash = self.new_commit.sum
+
             if commit_hash:
-                if wrgl_repo.commit_hash != commit_hash:
+                current_hash = wrgl_repo.commit_hash
+                if current_hash != commit_hash:
                     self.update_import_log(
                         import_log,
                         {
@@ -138,7 +210,18 @@ class BaseImporter(object):
                         }
                     )
                     try:
-                        data = self.read_wrgl_csv(wrgl_repo.repo_name, commit_hash)
+                        if current_hash:
+                            data = self.process_wrgl_data(current_hash)
+                        else:
+                            all_rows = list(self.repo.get_blocks(
+                                    f'heads/{self.branch}',
+                                    with_column_names=False
+                                ))
+                            data = {
+                                'added_rows': all_rows,
+                                'deleted_rows': [],
+                                'updated_rows': [],
+                            }
                         import_results = self.import_data(data)
                         wrgl_repo.commit_hash = commit_hash
                         wrgl_repo.save()
