@@ -516,8 +516,20 @@ class OfficersSearchQueryTestCase(TestCase):
                 'previous': None,
             },
             'articles': {
-                'results': [],
-                'count': 0,
+                'results': [
+                    {
+                        'id': news_article.id,
+                        'source_name': news_article.source.source_display_name,
+                        'title': news_article.title,
+                        'url': news_article.url,
+                        'date': str(news_article.published_date),
+                        'author': news_article.author,
+                        'content': news_article.content,
+                        'content_highlight': 'Text content <em>keywo</em>',
+                        'author_highlight': None
+                    }
+                ],
+                'count': 1,
                 'next': None,
                 'previous': None,
             },
