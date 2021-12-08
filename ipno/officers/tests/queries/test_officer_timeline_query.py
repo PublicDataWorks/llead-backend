@@ -1033,3 +1033,62 @@ class OfficerTimelineQueryTestCase(TestCase):
 
         assert timeline == expected_result
         assert officer_timeline_data['timeline_period'] == timeline_period
+
+    def test_get_timeline_period(self):
+        department1 = DepartmentFactory()
+        department2 = DepartmentFactory()
+
+        officer1 = OfficerFactory()
+        officer2 = OfficerFactory()
+
+        person = PersonFactory(canonical_officer=officer1)
+        person.officers.add(officer1)
+        person.officers.add(officer2)
+        person.save()
+
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer1,
+            department=department1,
+            department_code='610',
+            department_desc='Detective Area - Central',
+            year=2008,
+            month=8,
+            day=10,
+        )
+
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer2,
+            department=department2,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2017,
+            month=7,
+            day=14,
+        )
+
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer1,
+            department=department1,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2013,
+            month=7,
+            day=14,
+        )
+
+        EventFactory(
+            kind=OFFICER_DEPT,
+            officer=officer2,
+            department=department2,
+            department_code='193',
+            department_desc='Gang Investigation Division',
+            year=2014,
+            month=7,
+            day=14,
+        )
+
+        result = OfficerTimelineQuery(officer1).query()
+        assert result.get('timeline_period') == ["2008", "2013-2014", "2017"]

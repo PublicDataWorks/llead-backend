@@ -1,6 +1,7 @@
 from django.db.models import Prefetch, Q
 
 from complaints.models import Complaint
+from departments.models import Department
 from documents.models import Document
 from news_articles.models import NewsArticle, MatchedSentence
 from officers.serializers import (
@@ -175,6 +176,21 @@ class OfficerTimelineQuery(object):
                + self._rank_change_timeline + self._unit_change_timeline \
                + self._news_aticle_timeline
 
-        timeline_period = data_period([i["year"] for i in timeline if i["year"]])
+        timeline_period = self.get_timeline_period(timeline)
 
         return {'timeline': timeline, 'timeline_period': timeline_period}
+
+    def get_timeline_period(self, timeline):
+        departments = Department.objects.filter(officers__in=self.all_officers).prefetch_related('documents')
+        event_years = list(Event.objects.filter(
+            year__isnull=False, department__in=departments
+        ).values_list('year', flat=True))
+        document_years = list(Document.objects.filter(
+            incident_date__isnull=False, departments__in=departments
+        ).values_list('incident_date__year', flat=True))
+
+        officer_timeline_period = [i["year"] for i in timeline if i["year"]]
+
+        years = event_years + document_years + officer_timeline_period
+
+        return data_period(years)
