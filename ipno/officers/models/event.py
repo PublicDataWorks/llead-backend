@@ -12,7 +12,7 @@ class Event(TimeStampsModel):
     day = models.IntegerField(null=True, blank=True, db_index=True)
     time = models.CharField(max_length=255, null=True, blank=True)
     raw_date = models.CharField(max_length=255, null=True, blank=True)
-    complaint_uid = models.CharField(max_length=255, null=True, blank=True)
+    allegation_uid = models.CharField(max_length=255, null=True, blank=True)
     appeal_uid = models.CharField(max_length=255, null=True, blank=True)
     badge_no = models.CharField(max_length=255, null=True, blank=True)
     employee_id = models.CharField(max_length=255, null=True, blank=True)

@@ -369,6 +369,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'disposition': complaint_2.disposition,
                 'action': complaint_2.action,
                 'tracking_number': complaint_2.tracking_number,
+                'allegation_desc': complaint_2.allegation_desc,
             },
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
@@ -440,6 +441,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'disposition': complaint_1.disposition,
                 'action': complaint_1.action,
                 'tracking_number': complaint_1.tracking_number,
+                'allegation_desc': complaint_1.allegation_desc,
             },
             {
                 'id': use_of_force.id,

@@ -18,7 +18,7 @@ WRGL_REPOS_DEFAULT = [
         'data_model': EVENT_MODEL_NAME,
     },
     {
-        'repo_name': 'complaint',
+        'repo_name': 'allegation',
         'data_model': COMPLAINT_MODEL_NAME,
     },
     {
