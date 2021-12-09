@@ -6,7 +6,8 @@ from complaints.models import Complaint
 
 class ComplaintAdmin(ModelAdmin):
     list_display = ('id', 'allegation_uid', 'created_at', 'updated_at')
-    filter_horizontal = ('officers', 'departments', 'events')
+    filter_horizontal = ('officers', 'departments')
+    raw_id_fields = ('events',)
 
 
 admin.site.register(Complaint, ComplaintAdmin)
