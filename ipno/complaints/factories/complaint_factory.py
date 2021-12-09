@@ -12,14 +12,13 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Complaint
 
-    complaint_uid = factory.LazyFunction(lambda: fake.uuid4())
     allegation_uid = factory.LazyFunction(lambda: fake.uuid4())
-    charge_uid = factory.LazyFunction(lambda: fake.uuid4())
     rule_code = factory.LazyFunction(lambda: fake.word())
     rule_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     paragraph_violation = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
     disposition = factory.LazyFunction(lambda: fake.word())
     action = factory.LazyFunction(lambda: fake.word())
+    allegation_desc = factory.LazyFunction(lambda: fake.word())
     tracking_number = factory.LazyFunction(
         lambda: f'{random.randint(1000, 9999)}-{random.randint(100, 999)}'
     )

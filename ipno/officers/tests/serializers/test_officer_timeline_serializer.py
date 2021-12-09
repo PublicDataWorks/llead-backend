@@ -137,6 +137,7 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'disposition': complaint.disposition,
             'action': complaint.action,
             'tracking_number': complaint.tracking_number,
+            'allegation_desc': complaint.allegation_desc,
         }
 
     def test_data_with_empty_date(self):
@@ -157,6 +158,7 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'disposition': complaint.disposition,
             'action': complaint.action,
             'tracking_number': complaint.tracking_number,
+            'allegation_desc': complaint.allegation_desc,
         }
 
 
