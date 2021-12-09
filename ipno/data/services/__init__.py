@@ -5,6 +5,7 @@ from .complaint_importer import ComplaintImporter
 from .uof_importer import UofImporter
 from .document_importer import DocumentImporter
 from .person_importer import PersonImporter
+from .new_complaint_importer import NewComplaintImporter
 
 __all__ = [
     'BaseImporter',
@@ -14,4 +15,5 @@ __all__ = [
     'UofImporter',
     'DocumentImporter',
     'PersonImporter',
+    'NewComplaintImporter',
 ]
