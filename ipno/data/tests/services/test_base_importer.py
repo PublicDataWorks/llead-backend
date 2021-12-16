@@ -13,7 +13,7 @@ from data.models import ImportLog
 from data.constants import (
     IMPORT_LOG_STATUS_NO_NEW_COMMIT,
     IMPORT_LOG_STATUS_FINISHED,
-    IMPORT_LOG_STATUS_ERROR
+    IMPORT_LOG_STATUS_ERROR, IMPORT_LOG_STATUS_NO_NEW_DATA
 )
 from data.factories import WrglRepoFactory
 from departments.factories import DepartmentFactory
@@ -160,6 +160,54 @@ class BaseImporterTestCase(TestCase):
         assert import_log.status == IMPORT_LOG_STATUS_ERROR
         assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
         assert 'Error occurs while importing data!' in import_log.error_message
+        assert import_log.finished_at
+
+    @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
+    def test_process_no_new_data(self):
+        WrglRepoFactory(
+            data_model=TEST_MODEL_NAME,
+            repo_name='test_repo_name',
+            commit_hash='bf56dded0b1c4b57f425acb75d48e68c'
+        )
+
+        import_data_result = {
+            'created_rows': 2,
+            'updated_rows': 0,
+            'deleted_rows': 1,
+        }
+
+        hash = '3950bd17edfd805972781ef9fe2c6449'
+
+        self.tbi.branch = 'main'
+
+        mock_commit = MagicMock()
+        mock_commit.table.columns = ['id', 'name']
+        mock_commit.sum = hash
+
+        self.tbi.repo = Mock()
+        self.tbi.new_commit = mock_commit
+
+        self.tbi.retrieve_wrgl_data = Mock()
+
+        self.tbi.import_data = Mock(return_value=import_data_result)
+
+        self.tbi.process_wrgl_data = Mock(return_value=None)
+
+        assert not self.tbi.process()
+
+        assert self.tbi.retrieve_wrgl_data('test_repo_name')
+
+        self.tbi.import_data.assert_not_called()
+
+        import_log = ImportLog.objects.order_by('-created_at').last()
+        assert import_log.data_model == TEST_MODEL_NAME
+        assert import_log.status == IMPORT_LOG_STATUS_NO_NEW_DATA
+        assert import_log.commit_hash == '3950bd17edfd805972781ef9fe2c6449'
+        assert not import_log.created_rows
+        assert not import_log.updated_rows
+        assert not import_log.deleted_rows
+        assert not import_log.error_message
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
@@ -472,6 +520,21 @@ class BaseImporterTestCase(TestCase):
         }
 
         assert result == expected_result
+
+    def test_process_wrgl_data_no_row_diff_result(self):
+        mock_diff = Mock(return_value=Mock(row_diff=None))
+
+        self.tbi.repo = Mock(
+            diff=mock_diff,
+        )
+        self.tbi.new_commit = Mock(sum='new_commit_hash')
+
+        old_commit_hash = 'dummy-old-commit-hash'
+        result = self.tbi.process_wrgl_data(old_commit_hash)
+
+        mock_diff.assert_called_with('new_commit_hash', 'dummy-old-commit-hash')
+
+        assert result is None
 
     def test_bulk_import(self):
         OfficerFactory()
