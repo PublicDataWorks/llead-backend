@@ -519,7 +519,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert timeline_data == expected_result
-        assert timeline_period_data == ['2017-2021']
+        assert timeline_period_data == ['2019']
 
     def test_timelime_not_found(self):
         response = self.auth_client.get(

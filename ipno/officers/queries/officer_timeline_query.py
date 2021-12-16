@@ -26,7 +26,7 @@ from officers.constants import (
 from officers.models import Event
 from use_of_forces.models import UseOfForce
 from utils.data_utils import sort_items
-from utils.data_utils import data_period
+from utils.data_utils import format_data_period
 
 
 class OfficerTimelineQuery(object):
@@ -169,28 +169,28 @@ class OfficerTimelineQuery(object):
 
         return UnitChangeTimelineSerializer(unit_changes, many=True).data
 
-    def query(self):
-        timeline = self._complaint_timeline + self._use_of_force_timeline \
-               + self._join_timeline + self._left_timeline \
-               + self._document_timeline + self._salary_change_timeline \
-               + self._rank_change_timeline + self._unit_change_timeline \
-               + self._news_aticle_timeline
+    def _get_timeline_period(self, timeline):
+        officer_timeline_period = sorted(list(set([i["year"] for i in timeline if i["year"]])))
 
-        timeline_period = self.get_timeline_period(timeline)
+        if len(officer_timeline_period) > 1:
+            start_year = officer_timeline_period[0]
+            end_year = officer_timeline_period[-1]
+
+            event_years = []
+            departments = Department.objects.filter(officers__in=self.all_officers).only('data_period').all()
+            for department in departments:
+                department_period = department.data_period
+                event_years.extend(year for year in department_period if start_year <= year <= end_year)
+
+            officer_timeline_period.extend(list(event_years))
+
+        return format_data_period(officer_timeline_period)
+
+    def query(self):
+        timeline = self._complaint_timeline + self._use_of_force_timeline + self._join_timeline + self._left_timeline \
+                   + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
+                   + self._unit_change_timeline + self._news_aticle_timeline
+
+        timeline_period = self._get_timeline_period(self._complaint_timeline + self._use_of_force_timeline)
 
         return {'timeline': timeline, 'timeline_period': timeline_period}
-
-    def get_timeline_period(self, timeline):
-        departments = Department.objects.filter(officers__in=self.all_officers).prefetch_related('documents')
-        event_years = list(Event.objects.filter(
-            year__isnull=False, department__in=departments
-        ).values_list('year', flat=True))
-        document_years = list(Document.objects.filter(
-            incident_date__isnull=False, departments__in=departments
-        ).values_list('incident_date__year', flat=True))
-
-        officer_timeline_period = [i["year"] for i in timeline if i["year"]]
-
-        years = event_years + document_years + officer_timeline_period
-
-        return data_period(years)
