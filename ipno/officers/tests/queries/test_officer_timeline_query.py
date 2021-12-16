@@ -21,6 +21,16 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
+    UOF_INCIDENT,
+    UOF_ASSIGNED,
+    UOF_COMPLETED,
+    UOF_CREATED,
+    UOF_DUE,
+    COMPLAINT_INCIDENT,
+    ALLEGATION_CREATE,
+    INVESTIGATION_COMPLETE,
+    SUSPENSION_START,
+    SUSPENSION_END,
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -31,7 +41,6 @@ from officers.constants import (
     OFFICER_DEPT,
     UOF_RECEIVE,
 )
-from utils.data_utils import data_period
 
 
 class OfficerTimelineQueryTestCase(TestCase):
@@ -306,10 +315,8 @@ class OfficerTimelineQueryTestCase(TestCase):
             key=lambda item: str(item['date']) if item['date'] else ''
         )
 
-        timeline_period = data_period(event['year'] for event in expected_result if event['year'])
-
         assert timeline == expected_result
-        assert officer_timeline_data['timeline_period'] == timeline_period
+        assert officer_timeline_data['timeline_period'] == ['2019']
 
     def test_salary_change(self):
         person = PersonFactory()
@@ -1029,66 +1036,292 @@ class OfficerTimelineQueryTestCase(TestCase):
             key=lambda item: str(item['date']) if item['date'] else ''
         )
 
-        timeline_period = data_period(event['year'] for event in expected_result if event['year'])
-
         assert timeline == expected_result
-        assert officer_timeline_data['timeline_period'] == timeline_period
+        assert officer_timeline_data['timeline_period'] == ['2019']
 
     def test_get_timeline_period(self):
-        department1 = DepartmentFactory()
-        department2 = DepartmentFactory()
+        department = DepartmentFactory()
 
-        officer1 = OfficerFactory()
-        officer2 = OfficerFactory()
+        officer = OfficerFactory()
 
-        person = PersonFactory(canonical_officer=officer1)
-        person.officers.add(officer1)
-        person.officers.add(officer2)
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
         person.save()
 
-        EventFactory(
-            kind=OFFICER_DEPT,
-            officer=officer1,
-            department=department1,
-            department_code='610',
-            department_desc='Detective Area - Central',
-            year=2008,
-            month=8,
-            day=10,
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+        complaint_3 = ComplaintFactory()
+        complaint_4 = ComplaintFactory()
+        complaint_5 = ComplaintFactory()
+        complaint_6 = ComplaintFactory()
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+        complaint_3.officers.add(officer)
+        complaint_4.officers.add(officer)
+        complaint_5.officers.add(officer)
+        complaint_6.officers.add(officer)
+
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_2 = UseOfForceFactory(officer=officer)
+        uof_3 = UseOfForceFactory(officer=officer)
+        uof_4 = UseOfForceFactory(officer=officer)
+        uof_5 = UseOfForceFactory(officer=officer)
+        uof_6 = UseOfForceFactory(officer=officer)
+
+        uof_receive_event = EventFactory(
+            kind=UOF_RECEIVE,
+            officer=officer,
+            department=department,
+            year=2009,
         )
 
-        EventFactory(
-            kind=OFFICER_DEPT,
-            officer=officer2,
-            department=department2,
-            department_code='193',
-            department_desc='Gang Investigation Division',
-            year=2017,
-            month=7,
-            day=14,
+        uof_incident_event = EventFactory(
+            kind=UOF_INCIDENT,
+            officer=officer,
+            department=department,
+            year=2010,
         )
 
-        EventFactory(
-            kind=OFFICER_DEPT,
-            officer=officer1,
-            department=department1,
-            department_code='193',
-            department_desc='Gang Investigation Division',
-            year=2013,
-            month=7,
-            day=14,
+        uof_assigned_event = EventFactory(
+            kind=UOF_ASSIGNED,
+            officer=officer,
+            department=department,
+            year=2011,
         )
 
-        EventFactory(
-            kind=OFFICER_DEPT,
-            officer=officer2,
-            department=department2,
-            department_code='193',
-            department_desc='Gang Investigation Division',
+        uof_completed_event = EventFactory(
+            kind=UOF_COMPLETED,
+            officer=officer,
+            department=department,
+            year=2011,
+        )
+
+        uof_created_event = EventFactory(
+            kind=UOF_CREATED,
+            officer=officer,
+            department=department,
+            year=2012,
+        )
+
+        uof_due_event = EventFactory(
+            kind=UOF_DUE,
+            officer=officer,
+            department=department,
             year=2014,
-            month=7,
-            day=14,
         )
 
-        result = OfficerTimelineQuery(officer1).query()
-        assert result.get('timeline_period') == ["2008", "2013-2014", "2017"]
+        complaint_incident_event = EventFactory(
+            kind=COMPLAINT_INCIDENT,
+            officer=officer,
+            department=department,
+            year=2013,
+        )
+
+        complaint_receive_event = EventFactory(
+            kind=COMPLAINT_RECEIVE,
+            officer=officer,
+            department=department,
+            year=2017,
+        )
+
+        complaint_allegation_event = EventFactory(
+            kind=ALLEGATION_CREATE,
+            officer=officer,
+            department=department,
+            year=2010,
+        )
+
+        complaint_investigation_event = EventFactory(
+            kind=INVESTIGATION_COMPLETE,
+            officer=officer,
+            department=department,
+            year=2011,
+        )
+
+        complaint_suspension_start_event = EventFactory(
+            kind=SUSPENSION_START,
+            officer=officer,
+            department=department,
+            year=2015,
+        )
+
+        complaint_suspension_end_event = EventFactory(
+            kind=SUSPENSION_END,
+            officer=officer,
+            department=department,
+            year=2017,
+        )
+
+        uof_1.events.add(uof_receive_event)
+        uof_2.events.add(uof_incident_event)
+        uof_3.events.add(uof_assigned_event)
+        uof_4.events.add(uof_completed_event)
+        uof_5.events.add(uof_created_event)
+        uof_6.events.add(uof_due_event)
+
+        complaint_1.events.add(complaint_incident_event)
+        complaint_2.events.add(complaint_receive_event)
+        complaint_3.events.add(complaint_allegation_event)
+        complaint_4.events.add(complaint_investigation_event)
+        complaint_5.events.add(complaint_suspension_start_event)
+        complaint_6.events.add(complaint_suspension_end_event)
+
+        result = OfficerTimelineQuery(officer).query()
+
+        assert result.get('timeline_period') == ["2009-2012", "2014", "2017"]
+
+    def test_get_timeline_period_with_data_period_of_deparment(self):
+        department = DepartmentFactory(data_period=[2007, 2008, 2009, 2015, 2016, 2017, 2018, 2019])
+
+        officer = OfficerFactory()
+
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
+        complaint_1 = ComplaintFactory()
+        complaint_2 = ComplaintFactory()
+        complaint_3 = ComplaintFactory()
+        complaint_4 = ComplaintFactory()
+        complaint_5 = ComplaintFactory()
+        complaint_6 = ComplaintFactory()
+        complaint_1.officers.add(officer)
+        complaint_2.officers.add(officer)
+        complaint_3.officers.add(officer)
+        complaint_4.officers.add(officer)
+        complaint_5.officers.add(officer)
+        complaint_6.officers.add(officer)
+
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_2 = UseOfForceFactory(officer=officer)
+        uof_3 = UseOfForceFactory(officer=officer)
+        uof_4 = UseOfForceFactory(officer=officer)
+        uof_5 = UseOfForceFactory(officer=officer)
+        uof_6 = UseOfForceFactory(officer=officer)
+
+        uof_receive_event = EventFactory(
+            kind=UOF_RECEIVE,
+            officer=officer,
+            department=department,
+            year=2009,
+        )
+
+        uof_incident_event = EventFactory(
+            kind=UOF_INCIDENT,
+            officer=officer,
+            department=department,
+            year=2010,
+        )
+
+        uof_assigned_event = EventFactory(
+            kind=UOF_ASSIGNED,
+            officer=officer,
+            department=department,
+            year=2011,
+        )
+
+        uof_completed_event = EventFactory(
+            kind=UOF_COMPLETED,
+            officer=officer,
+            department=department,
+            year=2012,
+        )
+
+        uof_created_event = EventFactory(
+            kind=UOF_CREATED,
+            officer=officer,
+            department=department,
+            year=2013,
+        )
+
+        uof_due_event = EventFactory(
+            kind=UOF_DUE,
+            officer=officer,
+            department=department,
+            year=2014,
+        )
+
+        complaint_incident_event = EventFactory(
+            kind=COMPLAINT_INCIDENT,
+            officer=officer,
+            department=department,
+            year=2013,
+        )
+
+        complaint_receive_event = EventFactory(
+            kind=COMPLAINT_RECEIVE,
+            officer=officer,
+            department=department,
+            year=2017,
+        )
+
+        complaint_allegation_event = EventFactory(
+            kind=ALLEGATION_CREATE,
+            officer=officer,
+            department=department,
+            year=2010,
+        )
+
+        complaint_investigation_event = EventFactory(
+            kind=INVESTIGATION_COMPLETE,
+            officer=officer,
+            department=department,
+            year=2011,
+        )
+
+        complaint_suspension_start_event = EventFactory(
+            kind=SUSPENSION_START,
+            officer=officer,
+            department=department,
+            year=2015,
+        )
+
+        complaint_suspension_end_event = EventFactory(
+            kind=SUSPENSION_END,
+            officer=officer,
+            department=department,
+            year=2017,
+        )
+
+        uof_1.events.add(uof_receive_event)
+        uof_2.events.add(uof_incident_event)
+        uof_3.events.add(uof_assigned_event)
+        uof_4.events.add(uof_completed_event)
+        uof_5.events.add(uof_created_event)
+        uof_6.events.add(uof_due_event)
+
+        complaint_1.events.add(complaint_incident_event)
+        complaint_2.events.add(complaint_receive_event)
+        complaint_3.events.add(complaint_allegation_event)
+        complaint_4.events.add(complaint_investigation_event)
+        complaint_5.events.add(complaint_suspension_start_event)
+        complaint_6.events.add(complaint_suspension_end_event)
+
+        result = OfficerTimelineQuery(officer).query()
+
+        assert result.get('timeline_period') == ["2009-2017"]
+
+    def test_get_timeline_period_with_one_event(self):
+        department = DepartmentFactory(data_period=[2015, 2016, 2017, 2018, 2019])
+
+        officer = OfficerFactory()
+
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
+        complaint = ComplaintFactory()
+        complaint.officers.add(officer)
+
+        complaint_receive_event = EventFactory(
+            kind=COMPLAINT_RECEIVE,
+            officer=officer,
+            department=department,
+            year=2017,
+        )
+
+        complaint.events.add(complaint_receive_event)
+
+        result = OfficerTimelineQuery(officer).query()
+
+        assert result.get('timeline_period') == ["2017"]
