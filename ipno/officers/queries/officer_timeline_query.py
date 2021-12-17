@@ -16,12 +16,12 @@ from officers.serializers import (
     NewsArticleTimelineSerializer,
 )
 from officers.constants import (
+    COMPLAINT_ALL_EVENTS,
     OFFICER_HIRE,
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
-    COMPLAINT_RECEIVE,
-    OFFICER_DEPT
+    OFFICER_DEPT,
 )
 from officers.models import Event
 from use_of_forces.models import UseOfForce
@@ -71,7 +71,7 @@ class OfficerTimelineQuery(object):
         complaint_timeline_queryset = Complaint.objects.prefetch_related(
             Prefetch(
                 'events',
-                queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
+                queryset=Event.objects.filter(kind__in=COMPLAINT_ALL_EVENTS),
                 to_attr='prefetched_receive_events'
             ),
         ).filter(officers__in=self.all_officers)
