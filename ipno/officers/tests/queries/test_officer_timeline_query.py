@@ -1166,12 +1166,15 @@ class OfficerTimelineQueryTestCase(TestCase):
         complaint_5.events.add(complaint_suspension_start_event)
         complaint_6.events.add(complaint_suspension_end_event)
 
-        result = OfficerTimelineQuery(officer).query()
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
 
-        assert result.get('timeline_period') == ["2009-2012", "2014", "2017"]
+        assert officer_timeline_data.get('timeline_period') == ["2009-2015", "2017"]
 
     def test_get_timeline_period_with_data_period_of_deparment(self):
-        department = DepartmentFactory(data_period=[2007, 2008, 2009, 2015, 2016, 2017, 2018, 2019])
+        department_1_data_period = [2007, 2008, 2009, 2011, 2012, 2013, 2016, 2017, 2018, 2019]
+        department_2_data_period = [1990, 1991, 1992, 1993, 2017, 2018, 2019, 2020, 2021]
+        department_1 = DepartmentFactory(data_period=department_1_data_period)
+        department_2 = DepartmentFactory(data_period=department_2_data_period)
 
         officer = OfficerFactory()
 
@@ -1202,84 +1205,84 @@ class OfficerTimelineQueryTestCase(TestCase):
         uof_receive_event = EventFactory(
             kind=UOF_RECEIVE,
             officer=officer,
-            department=department,
-            year=2009,
+            department=department_1,
+            year=1991,
         )
 
         uof_incident_event = EventFactory(
             kind=UOF_INCIDENT,
             officer=officer,
-            department=department,
-            year=2010,
+            department=department_1,
+            year=1992,
         )
 
         uof_assigned_event = EventFactory(
             kind=UOF_ASSIGNED,
             officer=officer,
-            department=department,
-            year=2011,
+            department=department_1,
+            year=2010,
         )
 
         uof_completed_event = EventFactory(
             kind=UOF_COMPLETED,
             officer=officer,
-            department=department,
+            department=department_1,
             year=2012,
         )
 
         uof_created_event = EventFactory(
             kind=UOF_CREATED,
             officer=officer,
-            department=department,
-            year=2013,
+            department=department_1,
+            year=2017,
         )
 
         uof_due_event = EventFactory(
             kind=UOF_DUE,
             officer=officer,
-            department=department,
-            year=2014,
+            department=department_2,
+            year=2018,
         )
 
         complaint_incident_event = EventFactory(
             kind=COMPLAINT_INCIDENT,
             officer=officer,
-            department=department,
-            year=2013,
+            department=department_2,
+            year=2019,
         )
 
         complaint_receive_event = EventFactory(
             kind=COMPLAINT_RECEIVE,
             officer=officer,
-            department=department,
-            year=2017,
+            department=department_2,
+            year=2020,
         )
 
         complaint_allegation_event = EventFactory(
             kind=ALLEGATION_CREATE,
             officer=officer,
-            department=department,
-            year=2010,
+            department=department_2,
+            year=2020,
         )
 
         complaint_investigation_event = EventFactory(
             kind=INVESTIGATION_COMPLETE,
             officer=officer,
-            department=department,
-            year=2011,
+            department=department_2,
+            year=2018,
         )
 
         complaint_suspension_start_event = EventFactory(
             kind=SUSPENSION_START,
             officer=officer,
-            department=department,
-            year=2015,
+            department=department_2,
+            year=2019,
         )
 
         complaint_suspension_end_event = EventFactory(
             kind=SUSPENSION_END,
             officer=officer,
-            department=department,
+            department=department_2,
             year=2017,
         )
 
@@ -1297,12 +1300,14 @@ class OfficerTimelineQueryTestCase(TestCase):
         complaint_5.events.add(complaint_suspension_start_event)
         complaint_6.events.add(complaint_suspension_end_event)
 
-        result = OfficerTimelineQuery(officer).query()
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
 
-        assert result.get('timeline_period') == ["2009-2017"]
+        assert officer_timeline_data.get('timeline_period') == ["1991-1993", "2007-2013", "2016-2020"]
 
     def test_get_timeline_period_with_one_event(self):
-        department = DepartmentFactory(data_period=[2015, 2016, 2017, 2018, 2019])
+        data_period = [2015, 2016, 2017, 2018, 2019]
+
+        department = DepartmentFactory(data_period=data_period)
 
         officer = OfficerFactory()
 
@@ -1322,6 +1327,6 @@ class OfficerTimelineQueryTestCase(TestCase):
 
         complaint.events.add(complaint_receive_event)
 
-        result = OfficerTimelineQuery(officer).query()
+        officer_timeline_data = OfficerTimelineQuery(officer).query()
 
-        assert result.get('timeline_period') == ["2017"]
+        assert officer_timeline_data.get('timeline_period') == ["2017"]

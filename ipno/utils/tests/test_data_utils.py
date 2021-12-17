@@ -84,13 +84,13 @@ class DataTestCase(TestCase):
         uof_receive_event = EventFactory(
             kind=UOF_RECEIVE,
             department=department,
-            year=2008,
+            year=1998,
         )
 
         uof_incident_event = EventFactory(
             kind=UOF_INCIDENT,
             department=department,
-            year=2009,
+            year=1999,
         )
 
         uof_assigned_event = EventFactory(
@@ -114,25 +114,25 @@ class DataTestCase(TestCase):
         uof_due_event = EventFactory(
             kind=UOF_DUE,
             department=department,
-            year=2013,
+            year=1997,
         )
 
         complaint_incident_event = EventFactory(
             kind=COMPLAINT_INCIDENT,
             department=department,
-            year=2014,
+            year=2012,
         )
 
         complaint_receive_event = EventFactory(
             kind=COMPLAINT_RECEIVE,
             department=department,
-            year=2015,
+            year=1999,
         )
 
         complaint_allegation_event = EventFactory(
             kind=ALLEGATION_CREATE,
             department=department,
-            year=2016,
+            year=2020,
         )
 
         complaint_investigation_event = EventFactory(
@@ -171,4 +171,5 @@ class DataTestCase(TestCase):
 
         result = Department.objects.get(slug__exact=department.slug)
 
-        assert result.data_period == [2008, 2009, 2010, 2011, 2012, 2013, 2015]
+        assert result.data_period == [1997, 1998, 1999, 2010, 2011, 2012,
+                                      2017, 2018, 2019, 2020]
