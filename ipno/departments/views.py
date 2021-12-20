@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
+from departments.serializers import WrglFileSerializer
 from shared.serializers.es_serializers import DocumentsESSerializer
 from shared.serializers import DepartmentSerializer, DocumentWithTextContentSerializer
 from utils.es_pagination import ESPagination
@@ -50,3 +51,10 @@ class DepartmentsViewSet(viewsets.ViewSet):
             data = DocumentWithTextContentSerializer(page, many=True).data
 
         return paginator.get_paginated_response(data)
+
+    @action(detail=True, methods=['get'], url_path='datasets')
+    def datasets(self, request, pk):
+        department = get_object_or_404(Department, slug=pk)
+        wrgl_serializers = WrglFileSerializer(department.wrgl_files.order_by('position'), many=True)
+
+        return Response(wrgl_serializers.data)

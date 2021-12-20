@@ -14,3 +14,5 @@ class DepartmentFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"{fake.city()}{n}")
     slug = factory.LazyAttribute(lambda d: slugify(d.name))
+    address = factory.LazyFunction(lambda: fake.address())
+    phone = factory.LazyFunction(lambda: fake.phone_number())
