@@ -1,10 +1,13 @@
-from datetime import date
+import pytz
+from datetime import date, datetime
 from operator import itemgetter
 
 from django.urls import reverse
-
 from rest_framework import status
 
+from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
+from news_articles.factories import NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from departments.factories import DepartmentFactory, WrglFileFactory
@@ -12,7 +15,7 @@ from officers.factories import EventFactory, OfficerFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 from utils.search_index import rebuild_search_index
-from officers.constants import OFFICER_HIRE, OFFICER_LEFT
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_INCIDENT
 
 
 class DepartmentsViewSetTestCase(AuthAPITestCase):
@@ -58,6 +61,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
+        current_date = datetime.now(pytz.utc)
         department = DepartmentFactory()
         other_department = DepartmentFactory()
 
@@ -90,9 +94,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2021,
-            month=2,
+            kind=UOF_INCIDENT,
+            year=2018,
+            month=8,
             day=3,
         )
 
@@ -108,7 +112,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=OFFICER_LEFT,
+            kind=UOF_INCIDENT,
             year=2019,
             month=4,
             day=5,
@@ -124,11 +128,29 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
 
         EventFactory(
+            department=department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2020,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
             department=other_department,
             officer=officer_1,
             kind=OFFICER_HIRE,
-            year=2017,
-            month=2,
+            year=2020,
+            month=10,
+            day=3,
+        )
+
+        EventFactory(
+            department=other_department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2020,
+            month=12,
             day=3,
         )
 
@@ -141,48 +163,69 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))
-        DocumentFactory(incident_date=date(2018, 8, 10))
+        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
             document.departments.add(department)
 
-        complaints = ComplaintFactory.create_batch(2)
+        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        for document in recent_documents:
+            document.departments.add(department)
+
+        complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
         for complaint in complaints:
             complaint.departments.add(department)
 
-        wrgl_file_1 = WrglFileFactory(department=department, position=2)
-        wrgl_file_2 = WrglFileFactory(department=department, position=1)
+        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint.departments.add(department)
+
+        article_1 = NewsArticleFactory(published_date=current_date)
+        matched_sentence_1 = MatchedSentenceFactory(
+            article=article_1,
+            extracted_keywords=['a']
+        )
+        matched_sentence_1.officers.add(officer_1)
+        matched_sentence_1.save()
+
+        article_2 = NewsArticleFactory()
+        matched_sentence_2 = MatchedSentenceFactory(
+            article=article_2,
+            extracted_keywords=['b']
+        )
+        matched_sentence_2.officers.add(officer_3)
+        matched_sentence_2.save()
+
+        wrfile_1 = WrglFileFactory(department=department, position=1)
+        wrfile_1.created_at = current_date
+        wrfile_1.save()
+
+        wrgl_file_2 = WrglFileFactory(department=department, position=2)
+        wrgl_file_2.created_at = datetime(2018, 8, 10, tzinfo=pytz.utc)
+        wrgl_file_2.save()
+
+        wrgl_file_3 = WrglFileFactory(department=department, position=3)
+        wrgl_file_3.created_at = datetime(2002, 8, 10, tzinfo=pytz.utc)
+        wrgl_file_3.save()
 
         expected_result = {
             'id': department.slug,
             'name': department.name,
             'city': department.city,
             'parish': department.parish,
+            'address': department.address,
+            'phone': department.phone,
             'location_map_url': department.location_map_url,
             'officers_count': 3,
-            'complaints_count': 2,
-            'documents_count': 5,
-            'wrgl_files': [
-                {
-                    'id': wrgl_file_2.id,
-                    'name': wrgl_file_2.name,
-                    'slug': wrgl_file_2.slug,
-                    'description': wrgl_file_2.description,
-                    'url': wrgl_file_2.url,
-                    'download_url': wrgl_file_2.download_url,
-                    'default_expanded': wrgl_file_2.default_expanded,
-                },
-                {
-                    'id': wrgl_file_1.id,
-                    'name': wrgl_file_1.name,
-                    'slug': wrgl_file_1.slug,
-                    'description': wrgl_file_1.description,
-                    'url': wrgl_file_1.url,
-                    'download_url': wrgl_file_1.download_url,
-                    'default_expanded': wrgl_file_1.default_expanded,
-                }
-            ],
+            'datasets_count': 3,
+            'recent_datasets_count': 1,
+            'news_articles_count': 2,
+            'recent_news_articles_count': 1,
+            'complaints_count': 4,
+            'sustained_complaints_count': 1,
+            'documents_count': 7,
+            'recent_documents_count': 2,
+            'incident_force_count': 2,
             'data_period': department.data_period,
         }
 
@@ -477,6 +520,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success_with_related_officer(self):
+        current_date = datetime.now(pytz.utc)
         department = DepartmentFactory(
             data_period=['20']
         )
@@ -510,8 +554,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2018,
+            month=5,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2019,
+            month=5,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
             kind=OFFICER_LEFT,
-            year=2021,
+            year=2020,
             month=2,
             day=3,
         )
@@ -528,9 +590,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=4,
+            kind=UOF_INCIDENT,
+            year=2018,
+            month=7,
             day=5,
         )
 
@@ -547,8 +609,17 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             department=other_department,
             officer=officer_1,
             kind=OFFICER_HIRE,
-            year=2017,
-            month=2,
+            year=2020,
+            month=5,
+            day=3,
+        )
+
+        EventFactory(
+            department=other_department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2020,
+            month=6,
             day=3,
         )
 
@@ -561,54 +632,122 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=date(2020, 5, 4))
-        DocumentFactory(incident_date=date(2018, 8, 10))
+        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
             document.departments.add(department)
 
-        complaints = ComplaintFactory.create_batch(2)
+        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        for document in recent_documents:
+            document.departments.add(department)
+
+        complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
         for complaint in complaints:
             complaint.departments.add(department)
 
-        wrgl_file_1 = WrglFileFactory(department=department, position=2)
-        wrgl_file_2 = WrglFileFactory(department=department, position=1)
+        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint.departments.add(department)
+
+        article_1 = NewsArticleFactory(published_date=current_date)
+        matched_sentence_1 = MatchedSentenceFactory(
+            article=article_1,
+            extracted_keywords=['a']
+        )
+        matched_sentence_1.officers.add(officer_1)
+        matched_sentence_1.save()
+
+        article_2 = NewsArticleFactory()
+        matched_sentence_2 = MatchedSentenceFactory(
+            article=article_2,
+            extracted_keywords=['b']
+        )
+        matched_sentence_2.officers.add(officer_2)
+        matched_sentence_2.save()
+
+        wrfile_1 = WrglFileFactory(department=department, position=1)
+        wrfile_1.created_at = current_date
+        wrfile_1.save()
+
+        wrgl_file_2 = WrglFileFactory(department=department, position=2)
+        wrgl_file_2.created_at = datetime(2018, 8, 10, tzinfo=pytz.utc)
+        wrgl_file_2.save()
+
+        wrgl_file_3 = WrglFileFactory(department=department, position=3)
+        wrgl_file_3.created_at = datetime(2002, 8, 10, tzinfo=pytz.utc)
+        wrgl_file_3.save()
 
         expected_result = {
             'id': department.slug,
             'name': department.name,
             'city': department.city,
             'parish': department.parish,
+            'address': department.address,
+            'phone': department.phone,
             'location_map_url': department.location_map_url,
             'officers_count': 2,
-            'complaints_count': 2,
-            'documents_count': 5,
-            'wrgl_files': [
-                {
-                    'id': wrgl_file_2.id,
-                    'name': wrgl_file_2.name,
-                    'slug': wrgl_file_2.slug,
-                    'description': wrgl_file_2.description,
-                    'url': wrgl_file_2.url,
-                    'download_url': wrgl_file_2.download_url,
-                    'default_expanded': wrgl_file_2.default_expanded,
-                },
-                {
-                    'id': wrgl_file_1.id,
-                    'name': wrgl_file_1.name,
-                    'slug': wrgl_file_1.slug,
-                    'description': wrgl_file_1.description,
-                    'url': wrgl_file_1.url,
-                    'download_url': wrgl_file_1.download_url,
-                    'default_expanded': wrgl_file_1.default_expanded,
-                }
-            ],
+            'datasets_count': 3,
+            'recent_datasets_count': 1,
+            'news_articles_count': 2,
+            'recent_news_articles_count': 1,
+            'complaints_count': 4,
+            'sustained_complaints_count': 1,
+            'documents_count': 7,
+            'recent_documents_count': 2,
+            'incident_force_count': 3,
             'data_period': department.data_period,
         }
 
         response = self.auth_client.get(
             reverse('api:departments-detail', kwargs={'pk': department.slug})
         )
+        assert response.status_code == status.HTTP_200_OK
+
+        assert response.data == expected_result
+
+    def test_datasets_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:departments-datasets', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_datasets_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-datasets', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_datasets_success(self):
+        department = DepartmentFactory()
+
+        wrgl_file_1 = WrglFileFactory(department=department, position=2)
+        wrgl_file_2 = WrglFileFactory(department=department, position=1)
+
+        response = self.auth_client.get(
+            reverse('api:departments-datasets', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': wrgl_file_2.id,
+                'name': wrgl_file_2.name,
+                'slug': wrgl_file_2.slug,
+                'description': wrgl_file_2.description,
+                'url': wrgl_file_2.url,
+                'download_url': wrgl_file_2.download_url,
+                'default_expanded': wrgl_file_2.default_expanded,
+            },
+            {
+                'id': wrgl_file_1.id,
+                'name': wrgl_file_1.name,
+                'slug': wrgl_file_1.slug,
+                'description': wrgl_file_1.description,
+                'url': wrgl_file_1.url,
+                'download_url': wrgl_file_1.download_url,
+                'default_expanded': wrgl_file_1.default_expanded,
+            }
+        ]
+
         assert response.status_code == status.HTTP_200_OK
 
         assert response.data == expected_result
