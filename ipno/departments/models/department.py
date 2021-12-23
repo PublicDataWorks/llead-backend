@@ -16,5 +16,11 @@ class Department(TimeStampsModel):
 
     officers = models.ManyToManyField('officers.Officer', through='officers.Event')
 
+    starred_officers = models.ManyToManyField(
+        'officers.Officer',
+        blank=True,
+        related_name='starred_departments',
+    )
+
     def __str__(self):
         return f"{self.name} - {self.id}"

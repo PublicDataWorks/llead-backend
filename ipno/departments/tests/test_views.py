@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytz
 from datetime import date, datetime
 from operator import itemgetter
@@ -14,8 +16,14 @@ from departments.factories import DepartmentFactory, WrglFileFactory
 from officers.factories import EventFactory, OfficerFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
+from use_of_forces.factories import UseOfForceFactory
 from utils.search_index import rebuild_search_index
-from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_INCIDENT
+from officers.constants import (
+    OFFICER_HIRE,
+    OFFICER_LEFT,
+    UOF_INCIDENT,
+    UOF_RECEIVE
+)
 
 
 class DepartmentsViewSetTestCase(AuthAPITestCase):
@@ -750,4 +758,214 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
 
+        assert response.data == expected_result
+
+    def test_officers_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:departments-officers', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_officers_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-officers', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_officers_success(self):
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
+        person_1.officers.add(officer_1)
+        person_1.officers.add(officer_2)
+        person_1.save()
+
+        officer_3 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
+        person_2.officers.add(officer_3)
+        person_2.save()
+
+        officer_4 = OfficerFactory()
+        person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
+        person_3.officers.add(officer_4)
+        person_3.save()
+
+        department = DepartmentFactory()
+        department.starred_officers.add(officer_2)
+        department.save()
+
+        use_of_force_1 = UseOfForceFactory(officer=officer_3)
+        use_of_force_2 = UseOfForceFactory(officer=officer_2)
+        use_of_force_3 = UseOfForceFactory(officer=officer_2)
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            badge_no="150",
+            year=2018,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            badge_no="100",
+            year=2018,
+            month=8,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="250",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="150",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_2 = EventFactory(
+            department=department,
+            officer=officer_2,
+            kind=UOF_RECEIVE,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        uof_incident_event_2 = EventFactory(
+            department=department,
+            officer=officer_2,
+            kind=UOF_INCIDENT,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            badge_no="123",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_1 = EventFactory(
+            department=department,
+            officer=officer_3,
+            kind=UOF_RECEIVE,
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        use_of_force_1.events.add(uof_receive_event_1)
+        use_of_force_2.events.add(uof_receive_event_2)
+        use_of_force_3.events.add(uof_incident_event_2)
+
+        response = self.auth_client.get(
+            reverse('api:departments-officers', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': officer_2.id,
+                'name': officer_2.name,
+                'is_starred': True,
+                'use_of_forces_count': 2,
+                'badges': ["150", "200", "250", "100"],
+                'complaints_count': officer_2.person.all_complaints_count,
+            },
+            {
+                'id': officer_4.id,
+                'name': officer_4.name,
+                'is_starred': False,
+                'use_of_forces_count': 0,
+                'badges': [],
+                'complaints_count': officer_4.person.all_complaints_count,
+            },
+            {
+                'id': officer_3.id,
+                'name': officer_3.name,
+                'is_starred': False,
+                'use_of_forces_count': 1,
+                'badges': ["123"],
+                'complaints_count': officer_3.person.all_complaints_count,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    def test_officers_with_maximum_starred_officers(self):
+        department = DepartmentFactory()
+        starred_officers = OfficerFactory.create_batch(3)
+        starred_person = PersonFactory(canonical_officer=starred_officers[0])
+        for starred_officer in starred_officers:
+            department.starred_officers.add(starred_officer)
+            starred_person.officers.add(starred_officer)
+        department.save()
+        starred_person.save()
+
+        featured_officer = OfficerFactory()
+        featured_person = PersonFactory(canonical_officer=featured_officer)
+        featured_person.officers.add(featured_officer)
+        featured_person.save()
+        department.officers.add(featured_officer)
+        department.save()
+
+        response = self.auth_client.get(
+            reverse('api:departments-officers', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': starred_officers[0].id,
+                'name': starred_officers[0].name,
+                'is_starred': True,
+                'use_of_forces_count': 0,
+                'badges': [],
+                'complaints_count': starred_person.all_complaints_count,
+            },
+            {
+                'id': starred_officers[1].id,
+                'name': starred_officers[1].name,
+                'is_starred': True,
+                'use_of_forces_count': 0,
+                'badges': [],
+                'complaints_count': starred_person.all_complaints_count,
+            },
+            {
+                'id': starred_officers[2].id,
+                'name': starred_officers[2].name,
+                'is_starred': True,
+                'use_of_forces_count': 0,
+                'badges': [],
+                'complaints_count': starred_person.all_complaints_count,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
