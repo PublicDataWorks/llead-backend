@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from utils.data_utils import data_period
+from utils.data_utils import format_data_period
 
 
 class WrglFileSerializer(serializers.Serializer):
@@ -39,9 +39,4 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return WrglFileSerializer(obj.wrgl_files.order_by('position'), many=True).data
 
     def get_data_period(self, obj):
-        event_years = list(obj.events.filter(
-            year__isnull=False,
-        ).values_list('year', flat=True))
-        years = event_years + obj.document_years
-
-        return data_period(years)
+        return format_data_period(obj.data_period)
