@@ -183,7 +183,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'default_expanded': wrgl_file_1.default_expanded,
                 }
             ],
-            'data_period': ['2018-2021'],
+            'data_period': department.data_period,
         }
 
         response = self.auth_client.get(
@@ -477,7 +477,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success_with_related_officer(self):
-        department = DepartmentFactory()
+        department = DepartmentFactory(
+            data_period=['20']
+        )
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory()
@@ -601,7 +603,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'default_expanded': wrgl_file_1.default_expanded,
                 }
             ],
-            'data_period': ['2018-2021'],
+            'data_period': department.data_period,
         }
 
         response = self.auth_client.get(

@@ -1,4 +1,11 @@
-def data_period(years):
+from tqdm import tqdm
+
+from departments.models import Department
+from officers.constants import UOF_ALL_EVENTS, COMPLAINT_ALL_EVENTS
+from officers.models import Event
+
+
+def format_data_period(years):
     results = []
     current_year = None
 
@@ -27,3 +34,17 @@ def sort_items(items, attrs):
         items,
         key=lambda item: get_sort_key(item, attrs)
     )
+
+
+def compute_department_data_period():
+    all_department = Department.objects.all()
+    for department in tqdm(all_department, desc='Update department data period'):
+        event_years = Event.objects.filter(
+            department=department,
+            kind__in=COMPLAINT_ALL_EVENTS + UOF_ALL_EVENTS,
+        ).values_list('year', flat=True)
+
+        sorted_event_years = sorted(list(set(event_years)))
+        department.data_period = sorted_event_years
+
+    Department.objects.bulk_update(all_department, ['data_period'])
