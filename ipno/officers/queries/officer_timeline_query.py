@@ -1,6 +1,7 @@
 from django.db.models import Prefetch, Q
 
 from complaints.models import Complaint
+from departments.models import Department
 from documents.models import Document
 from news_articles.models import NewsArticle, MatchedSentence
 from officers.serializers import (
@@ -15,17 +16,17 @@ from officers.serializers import (
     NewsArticleTimelineSerializer,
 )
 from officers.constants import (
+    COMPLAINT_ALL_EVENTS,
     OFFICER_HIRE,
     OFFICER_LEFT,
     OFFICER_PAY_EFFECTIVE,
     OFFICER_RANK,
-    COMPLAINT_RECEIVE,
-    OFFICER_DEPT
+    OFFICER_DEPT,
 )
 from officers.models import Event
 from use_of_forces.models import UseOfForce
 from utils.data_utils import sort_items
-from utils.data_utils import data_period
+from utils.data_utils import format_data_period
 
 
 class OfficerTimelineQuery(object):
@@ -70,7 +71,7 @@ class OfficerTimelineQuery(object):
         complaint_timeline_queryset = Complaint.objects.prefetch_related(
             Prefetch(
                 'events',
-                queryset=Event.objects.filter(kind=COMPLAINT_RECEIVE),
+                queryset=Event.objects.filter(kind__in=COMPLAINT_ALL_EVENTS),
                 to_attr='prefetched_receive_events'
             ),
         ).filter(officers__in=self.all_officers)
@@ -168,13 +169,28 @@ class OfficerTimelineQuery(object):
 
         return UnitChangeTimelineSerializer(unit_changes, many=True).data
 
-    def query(self):
-        timeline = self._complaint_timeline + self._use_of_force_timeline \
-               + self._join_timeline + self._left_timeline \
-               + self._document_timeline + self._salary_change_timeline \
-               + self._rank_change_timeline + self._unit_change_timeline \
-               + self._news_aticle_timeline
+    def _get_timeline_period(self, timeline):
+        officer_timeline_period = sorted(list(set([i["year"] for i in timeline if i["year"]])))
 
-        timeline_period = data_period([i["year"] for i in timeline if i["year"]])
+        if len(officer_timeline_period) > 1:
+            start_year = officer_timeline_period[0]
+            end_year = officer_timeline_period[-1]
+
+            event_years = []
+            departments = Department.objects.filter(officers__in=self.all_officers).only('data_period').all()
+            for department in departments:
+                department_period = department.data_period
+                event_years.extend(year for year in department_period if start_year <= year <= end_year)
+
+            officer_timeline_period.extend(list(event_years))
+
+        return format_data_period(officer_timeline_period)
+
+    def query(self):
+        timeline = self._complaint_timeline + self._use_of_force_timeline + self._join_timeline + self._left_timeline \
+                   + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
+                   + self._unit_change_timeline + self._news_aticle_timeline
+
+        timeline_period = self._get_timeline_period(self._complaint_timeline + self._use_of_force_timeline)
 
         return {'timeline': timeline, 'timeline_period': timeline_period}
