@@ -18,7 +18,7 @@ from data.constants import (
     IMPORT_LOG_STATUS_NO_NEW_COMMIT,
     IMPORT_LOG_STATUS_RUNNING,
     IMPORT_LOG_STATUS_FINISHED,
-    IMPORT_LOG_STATUS_ERROR
+    IMPORT_LOG_STATUS_ERROR, IMPORT_LOG_STATUS_NO_NEW_DATA
 )
 from utils.parse_utils import parse_int
 
@@ -74,6 +74,9 @@ class BaseImporter(object):
 
     def process_wrgl_data(self, old_commit_hash):
         diff_result = self.repo.diff(self.new_commit.sum, old_commit_hash)
+        if not diff_result.row_diff:
+            return
+
         old_commit = self.repo.get_commit(old_commit_hash)
 
         added_rows = []
@@ -222,20 +225,33 @@ class BaseImporter(object):
                                 'deleted_rows': [],
                                 'updated_rows': [],
                             }
-                        import_results = self.import_data(data)
-                        wrgl_repo.commit_hash = commit_hash
-                        wrgl_repo.save()
-                        self.update_import_log(
-                            import_log,
-                            {
-                                'status': IMPORT_LOG_STATUS_FINISHED,
-                                'finished_at': datetime.now(pytz.utc),
-                                'created_rows': import_results.get('created_rows'),
-                                'updated_rows': import_results.get('updated_rows'),
-                                'deleted_rows': import_results.get('deleted_rows')
-                            }
-                        )
-                        return True
+
+                        if data:
+                            import_results = self.import_data(data)
+                            wrgl_repo.commit_hash = commit_hash
+                            wrgl_repo.save()
+                            self.update_import_log(
+                                import_log,
+                                {
+                                    'status': IMPORT_LOG_STATUS_FINISHED,
+                                    'finished_at': datetime.now(pytz.utc),
+                                    'created_rows': import_results.get('created_rows'),
+                                    'updated_rows': import_results.get('updated_rows'),
+                                    'deleted_rows': import_results.get('deleted_rows')
+                                }
+                            )
+                            return True
+                        else:
+                            wrgl_repo.commit_hash = commit_hash
+                            wrgl_repo.save()
+                            self.update_import_log(
+                                import_log,
+                                {
+                                    'commit_hash': commit_hash,
+                                    'status': IMPORT_LOG_STATUS_NO_NEW_DATA,
+                                    'finished_at': datetime.now(pytz.utc),
+                                }
+                            )
                     except Exception:
                         self.update_import_log(
                             import_log,
