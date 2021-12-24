@@ -13,7 +13,9 @@ from people.factories import PersonFactory
 
 class DepartmentDetailsSerializerTestCase(TestCase):
     def test_data(self):
-        department = DepartmentFactory()
+        department = DepartmentFactory(
+            data_period=[2018, 2019, 2020, 2021]
+        )
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory()
@@ -143,45 +145,9 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         }
 
     def test_data_period(self):
-        department = DepartmentFactory()
-
-        EventFactory(
-            department=department,
-            year=2016,
+        department = DepartmentFactory(
+            data_period=[2009, 2012, 2013, 2014, 2016, 2018, 2019, 2020]
         )
-
-        EventFactory(
-            department=department,
-            year=2012,
-        )
-
-        EventFactory(
-            department=department,
-            year=2013,
-        )
-
-        EventFactory(
-            department=department,
-            year=2014,
-        )
-
-        EventFactory(
-            department=department,
-            year=2020,
-        )
-        EventFactory(
-            department=department,
-            year=2019,
-        )
-        EventFactory(
-            department=department,
-            year=None,
-        )
-
-        document_1 = DocumentFactory(incident_date=date(2009, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2018, 1, 6))
-        document_1.departments.add(department)
-        document_2.departments.add(department)
 
         result = DepartmentDetailsSerializer(department).data
         assert result['data_period'] == [
@@ -198,7 +164,9 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         assert result['data_period'] == []
 
     def test_data_with_related_officer(self):
-        department = DepartmentFactory()
+        department = DepartmentFactory(
+            data_period=[2018, 2019, 2020, 2021]
+        )
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory()

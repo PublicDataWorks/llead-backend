@@ -25,6 +25,14 @@ ALLEGATION_CREATE = "allegation_create"
 INVESTIGATION_COMPLETE = "investigation_complete"
 SUSPENSION_START = "suspension_start"
 SUSPENSION_END = "suspension_end"
+COMPLAINT_ALL_EVENTS = [
+    COMPLAINT_INCIDENT,
+    COMPLAINT_RECEIVE,
+    ALLEGATION_CREATE,
+    INVESTIGATION_COMPLETE,
+    SUSPENSION_START,
+    SUSPENSION_END,
+]
 
 APPEAL_FILE = "appeal_file"
 APPEAL_HEARING = "appeal_hearing"
@@ -36,6 +44,14 @@ UOF_ASSIGNED = "uof_assigned"
 UOF_COMPLETED = "uof_completed"
 UOF_CREATED = "uof_created"
 UOF_DUE = "uof_due"
+UOF_ALL_EVENTS = [
+    UOF_INCIDENT,
+    UOF_RECEIVE,
+    UOF_ASSIGNED,
+    UOF_COMPLETED,
+    UOF_CREATED,
+    UOF_DUE,
+]
 
 AWARD_RECEIVE = "award_receive"
 
