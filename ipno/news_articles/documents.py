@@ -3,6 +3,8 @@ from django_elasticsearch_dsl import fields
 
 from django_elasticsearch_dsl.registries import registry
 
+from departments.models import Department
+from officers.models import Officer
 from .models import NewsArticle
 from utils.es_doc import ESDoc
 from utils.es_index import ESIndex
@@ -34,6 +36,14 @@ class NewsArticleESDoc(ESDoc):
     content = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
     author = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
     source_name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    department_slugs = fields.TextField()
 
     def prepare_source_name(self, instance):
         return instance.source.source_display_name if instance.source else ''
+
+    def prepare_department_slugs(self, instance):
+        matched_officers = instance.matched_sentences.all().values_list('officers')
+        officers = Officer.objects.filter(person__officers__in=matched_officers)
+        departments = Department.objects.filter(officer__in=officers).distinct()
+
+        return [department.slug for department in departments]
