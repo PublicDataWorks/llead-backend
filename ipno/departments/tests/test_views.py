@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
-from news_articles.factories import NewsArticleFactory
+from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
@@ -964,6 +964,189 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_news_articles_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:departments-news-articles', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_news_articles_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-news-articles', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_news_articles_success(self):
+        current_date = datetime.now(pytz.utc)
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        department = DepartmentFactory()
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+        )
+
+        starred_article_source = NewsArticleSourceFactory(source_display_name='Starred Article')
+        starred_article = NewsArticleFactory(
+            source=starred_article_source,
+            published_date=datetime(2015, 1, 1),
+        )
+        starred_matched_sentence = MatchedSentenceFactory(article=starred_article)
+        starred_matched_sentence.officers.add(officer_1)
+        starred_matched_sentence.save()
+
+        department.starred_news_articles.add(starred_article)
+        department.save()
+
+        featured_article_source_1 = NewsArticleSourceFactory(source_display_name='Featured Article 1')
+        featured_article_1 = NewsArticleFactory(
+            source=featured_article_source_1,
+            published_date=current_date,
+        )
+        matched_sentence_1 = MatchedSentenceFactory(article=featured_article_1)
+        matched_sentence_1.officers.add(officer_1)
+        matched_sentence_1.save()
+
+        featured_article_source_2 = NewsArticleSourceFactory(source_display_name='Featured Article 2')
+        featured_article_2 = NewsArticleFactory(
+            source=featured_article_source_2,
+            published_date=datetime(2019, 8, 10),
+        )
+        matched_sentence_2 = MatchedSentenceFactory(article=featured_article_2)
+        matched_sentence_2.officers.add(officer_1)
+        matched_sentence_2.save()
+
+        featured_article_source_3 = NewsArticleSourceFactory(source_display_name='Featured Article 3')
+        featured_article_3 = NewsArticleFactory(
+            source=featured_article_source_3,
+            published_date=datetime(2018, 8, 10),
+        )
+        matched_sentence_3 = MatchedSentenceFactory(article=featured_article_3)
+        matched_sentence_3.officers.add(officer_1)
+        matched_sentence_3.save()
+
+        response = self.auth_client.get(
+            reverse('api:departments-news-articles', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': starred_article.id,
+                'title': starred_article.title,
+                'published_date': str(datetime(2015, 1, 1).date()),
+                'source_display_name': 'Starred Article',
+                'is_starred': True,
+                'url': starred_article.url,
+            },
+            {
+                'id': featured_article_1.id,
+                'title': featured_article_1.title,
+                'published_date': str(current_date.date()),
+                'source_display_name': 'Featured Article 1',
+                'is_starred': False,
+                'url': featured_article_1.url,
+            },
+            {
+                'id': featured_article_2.id,
+                'title': featured_article_2.title,
+                'published_date': str(datetime(2019, 8, 10).date()),
+                'source_display_name': 'Featured Article 2',
+                'is_starred': False,
+                'url': featured_article_2.url,
+            },
+            {
+                'id': featured_article_3.id,
+                'title': featured_article_3.title,
+                'published_date': str(datetime(2018, 8, 10).date()),
+                'source_display_name': 'Featured Article 3',
+                'is_starred': False,
+                'url': featured_article_3.url,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    def test_officers_with_maximum_starred_news_articles(self):
+        officer = OfficerFactory()
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
+        department = DepartmentFactory()
+
+        EventFactory(
+            department=department,
+            officer=officer,
+        )
+
+        starred_article_source_1 = NewsArticleSourceFactory(source_display_name='Starred Article 1')
+        starred_article_source_2 = NewsArticleSourceFactory(source_display_name='Starred Article 2')
+        starred_article_source_3 = NewsArticleSourceFactory(source_display_name='Starred Article 3')
+
+        starred_article_1 = NewsArticleFactory(
+            source=starred_article_source_1,
+            published_date=datetime(2019, 1, 1),
+        )
+        starred_article_2 = NewsArticleFactory(
+            source=starred_article_source_2,
+            published_date=datetime(2018, 7, 1),
+        )
+        starred_article_3 = NewsArticleFactory(
+            source=starred_article_source_3,
+            published_date=datetime(2018, 1, 1),
+        )
+
+        department.starred_news_articles.add(starred_article_1, starred_article_2, starred_article_3)
+        department.save()
+
+        featured_article_source = NewsArticleSourceFactory(source_display_name='Featured Article')
+        featured_article = NewsArticleFactory(
+            source=featured_article_source,
+        )
+        matched_sentence = MatchedSentenceFactory(article=featured_article)
+        matched_sentence.officers.add(officer)
+        matched_sentence.save()
+
+        response = self.auth_client.get(
+            reverse('api:departments-news-articles', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': starred_article_1.id,
+                'title': starred_article_1.title,
+                'published_date': str(datetime(2019, 1, 1).date()),
+                'source_display_name': 'Starred Article 1',
+                'is_starred': True,
+                'url': starred_article_1.url,
+            },
+            {
+                'id': starred_article_2.id,
+                'title': starred_article_2.title,
+                'published_date': str(datetime(2018, 7, 1).date()),
+                'source_display_name': 'Starred Article 2',
+                'is_starred': True,
+                'url': starred_article_2.url,
+            },
+            {
+                'id': starred_article_3.id,
+                'title': starred_article_3.title,
+                'published_date': str(datetime(2018, 1, 1).date()),
+                'source_display_name': 'Starred Article 3',
+                'is_starred': True,
+                'url': starred_article_3.url,
             },
         ]
 

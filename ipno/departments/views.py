@@ -11,7 +11,8 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
-from departments.serializers import WrglFileSerializer, DepartmentOfficerSerializer
+from departments.serializers import WrglFileSerializer, DepartmentOfficerSerializer, DepartmentNewsArticleSerializer
+from news_articles.models import MatchedSentence, NewsArticle
 from officers.models import Officer, Event
 from shared.serializers.es_serializers import DocumentsESSerializer
 from shared.serializers import DepartmentSerializer, DocumentWithTextContentSerializer
@@ -113,6 +114,49 @@ class DepartmentsViewSet(viewsets.ViewSet):
         officers_serializers = DepartmentOfficerSerializer(officers, many=True)
 
         return Response(officers_serializers.data)
+
+    @action(detail=True, methods=['get'], url_path='news_articles')
+    def news_articles(self, request, pk):
+        department = get_object_or_404(Department, slug=pk)
+
+        starred_news_articles = department.starred_news_articles.select_related(
+            'source'
+        ).annotate(
+            is_starred=Value(True, output_field=BooleanField())
+        ).order_by(
+            '-published_date'
+        ).all()[:DEPARTMENTS_LIMIT]
+
+        starred_news_articles_count = starred_news_articles.count()
+        sorted_featured_news_articles = []
+
+        if starred_news_articles_count < DEPARTMENTS_LIMIT:
+
+            matched_sentences = MatchedSentence.objects.filter(
+                officers__in=department.officers.all()
+            ).all()
+
+            featured_news_articles = NewsArticle.objects.filter(
+                matched_sentences__in=matched_sentences
+            ).exclude(
+                id__in=starred_news_articles,
+            ).distinct()
+
+            sorted_featured_news_articles = NewsArticle.objects.select_related(
+                'source'
+            ).filter(
+                id__in=featured_news_articles
+            ).annotate(
+                is_starred=Value(False, output_field=BooleanField())
+            ).order_by(
+                '-published_date'
+            )[:DEPARTMENTS_LIMIT - starred_news_articles_count]
+
+        news_articles = list(chain(starred_news_articles, sorted_featured_news_articles))
+
+        news_articles_serializers = DepartmentNewsArticleSerializer(news_articles, many=True)
+
+        return Response(news_articles_serializers.data)
 
     @action(detail=True, methods=['get'], url_path='datasets')
     def datasets(self, request, pk):

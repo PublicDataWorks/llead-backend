@@ -22,5 +22,11 @@ class Department(TimeStampsModel):
         related_name='starred_departments',
     )
 
+    starred_news_articles = models.ManyToManyField(
+        'news_articles.NewsArticle',
+        blank=True,
+        related_name='starred_departments',
+    )
+
     def __str__(self):
         return f"{self.name} - {self.id}"
