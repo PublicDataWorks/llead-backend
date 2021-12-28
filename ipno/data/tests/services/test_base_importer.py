@@ -440,7 +440,7 @@ class BaseImporterTestCase(TestCase):
         self.tbi.NA_ATTRIBUTES = ['desc']
         self.tbi.INT_ATTRIBUTES = ['year']
 
-        self.tbi.column_mappings = {
+        column_mappings = {
             'id': 0,
             'name': 1,
             'year': 2,
@@ -449,7 +449,7 @@ class BaseImporterTestCase(TestCase):
 
         row = ['1', 'test', '2021', 'NA']
 
-        result = self.tbi.parse_row_data(row)
+        result = self.tbi.parse_row_data(row, column_mappings)
 
         expected_result = {
             'id': '1',
@@ -460,27 +460,6 @@ class BaseImporterTestCase(TestCase):
 
         assert result == expected_result
 
-    def test_get_all_diff_rows(self):
-        raw_data = {
-            'added_rows': [
-                ['1', 'name 1'],
-            ],
-            'deleted_rows': [
-                ['2', 'name 2'],
-            ],
-            'updated_rows': [
-                ['3', 'name 3']
-            ],
-        }
-
-        result = self.tbi.get_all_diff_rows(raw_data)
-
-        assert result == [
-            ['1', 'name 1'],
-            ['2', 'name 2'],
-            ['3', 'name 3']
-        ]
-
     def test_process_wrgl_data(self):
         mock_rows = [
             Mock(off1=1, off2=None),
@@ -488,7 +467,11 @@ class BaseImporterTestCase(TestCase):
             Mock(off1=3, off2=3)
         ]
         mock_diff = Mock(return_value=Mock(row_diff=mock_rows))
-        mock_get_commit = Mock()
+        mock_old_commit = MagicMock()
+        mock_old_columns = ['id', 'column 1']
+        mock_old_commit.table.columns = mock_old_columns
+
+        mock_get_commit = Mock(return_value=mock_old_commit)
         mock_get_table_rows = Mock()
 
         def mock_get_table_rows_side_effect(table_sum, offs):
@@ -519,6 +502,10 @@ class BaseImporterTestCase(TestCase):
             'updated_rows': [['id3', 'name3']],
         }
 
+        assert self.tbi.old_column_mappings == {
+            'id': 0,
+            'column 1': 1
+        }
         assert result == expected_result
 
     def test_process_wrgl_data_no_row_diff_result(self):

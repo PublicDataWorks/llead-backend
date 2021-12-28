@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from tqdm import tqdm
@@ -27,7 +29,8 @@ class DocumentImporter(BaseImporter):
         'txt_db_id',
         'txt_db_content_hash',
         'accused',
-        'title'
+        'title',
+        'hrg_type',
     ]
     INT_ATTRIBUTES = [
         'year',
@@ -71,16 +74,26 @@ class DocumentImporter(BaseImporter):
         officer_relation_ids = {}
         modified_documents_ids = []
 
-        data = self.get_all_diff_rows(raw_data)
+        saved_data = list(chain(
+            raw_data.get('added_rows', []),
+            raw_data.get('updated_rows', []),
+        ))
+        deleted_data = raw_data.get('deleted_rows', [])
 
         officer_mappings = self.get_officer_mappings()
-        agencies = {row[self.column_mappings['agency']] for row in data if row[self.column_mappings['agency']]}
+        agencies = {
+            row[self.column_mappings['agency']] for row in saved_data if row[self.column_mappings['agency']]
+        }
+        agencies.update([
+            row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
+        ])
+
         department_mappings = self.get_department_mappings(agencies)
 
         document_mappings = self.get_document_mappings()
 
-        for row in tqdm(data, desc="Update documents' relations"):
-            document_data = self.parse_row_data(row)
+        for row in tqdm(saved_data, desc="Update saved documents' relations"):
+            document_data = self.parse_row_data(row, self.column_mappings)
             officer_uid = document_data.get('matched_uid')
             agency = row[self.column_mappings['agency']]
 
@@ -105,6 +118,22 @@ class DocumentImporter(BaseImporter):
                         department_id = department_mappings.get(slugify(formatted_agency))
                         if department_id:
                             department_relation_ids[document_id] = department_id
+
+        for row in tqdm(deleted_data, desc="Update deleted documents' relations"):
+            document_data = self.parse_row_data(row, self.old_column_mappings)
+            officer_uid = document_data.get('matched_uid')
+            agency = row[self.old_column_mappings['agency']]
+
+            if officer_uid or agency:
+                docid = document_data['docid']
+                hrg_no = document_data['hrg_no']
+                matched_uid = officer_uid
+
+                document = document_mappings.get((docid, hrg_no, matched_uid))
+                document_id = document.get('id') if document else None
+
+                if document_id:
+                    modified_documents_ids.append(document_id)
 
         department_relations = [
             DepartmentRelation(document_id=document_id, department_id=department_id)
@@ -168,7 +197,7 @@ class DocumentImporter(BaseImporter):
             self.clean_up_document(document)
 
     def handle_record_data(self, row):
-        document_data = self.parse_row_data(row)
+        document_data = self.parse_row_data(row, self.column_mappings)
         document_data['document_type'] = 'pdf'
         document_data['pages_count'] = row[self.column_mappings['page_count']] if row[
             self.column_mappings['page_count']] else None
@@ -253,7 +282,7 @@ class DocumentImporter(BaseImporter):
             self.handle_record_data(row)
 
         for row in tqdm(data.get('deleted_rows'), desc='Delete removed documents'):
-            document_data = self.parse_row_data(row)
+            document_data = self.parse_row_data(row, self.old_column_mappings)
             docid = document_data.get('docid')
             hrg_no = document_data.get('hrg_no')
             matched_uid = document_data.get('matched_uid')

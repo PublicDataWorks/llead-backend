@@ -77,6 +77,7 @@ class PersonImporterTestCase(TestCase):
 
         person_importer.retrieve_wrgl_data = Mock()
 
+        person_importer.old_column_mappings = {column: self.header.index(column) for column in self.header}
         person_importer.column_mappings = {column: self.header.index(column) for column in self.header}
 
         processed_data = {
@@ -154,6 +155,7 @@ class PersonImporterTestCase(TestCase):
 
         person_importer.retrieve_wrgl_data = Mock()
 
+        person_importer.old_column_mappings = {column: self.header.index(column) for column in self.header}
         person_importer.column_mappings = {column: self.header.index(column) for column in self.header}
 
         processed_data = {

@@ -42,7 +42,7 @@ class OfficerImporter(BaseImporter):
         }
 
     def handle_record_data(self, row):
-        officer_data = self.parse_row_data(row)
+        officer_data = self.parse_row_data(row, self.column_mappings)
         row_uid = officer_data['uid']
 
         if row_uid in self.existed_officers_uids:
@@ -72,7 +72,7 @@ class OfficerImporter(BaseImporter):
             self.handle_record_data(row)
 
         for row in tqdm(data.get('deleted_rows'), desc='Delete removed officers'):
-            row_uid = row[self.column_mappings['uid']]
+            row_uid = row[self.old_column_mappings['uid']]
             officer_id = self.officer_mappings.get(row_uid)
             if officer_id:
                 self.delete_officers_ids.append(officer_id)
