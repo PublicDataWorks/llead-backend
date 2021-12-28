@@ -1,3 +1,5 @@
+from itertools import chain
+
 from tqdm import tqdm
 
 from data.constants import PERSON_MODEL_NAME
@@ -32,16 +34,31 @@ class PersonImporter(BaseImporter):
         return {person.person_id: person.id for person in Person.objects.only('person_id', 'id')}
 
     def update_relations(self, raw_data):
+        saved_data = list(chain(
+            raw_data.get('added_rows', []),
+            raw_data.get('updated_rows', []),
+        ))
+        deleted_data = raw_data.get('deleted_rows', [])
         update_officers_attrs = []
-        data = self.get_all_diff_rows(raw_data)
 
         officer_mappings = self.get_officer_mappings()
         person_mappings = self.get_person_mappings()
 
-        for row in tqdm(data, desc='Update officer - person relation'):
-
+        for row in tqdm(saved_data, desc='Update saved officer - person relation'):
             for uid in row[self.column_mappings['uids']].split(','):
                 officer_id = officer_mappings.get(uid.strip())
+
+                if officer_id:
+                    person_id = person_mappings.get(row[self.column_mappings['person_id']])
+                    officer_data = {
+                        'id': officer_id,
+                        'person_id': person_id,
+                    }
+                    update_officers_attrs.append(officer_data)
+
+        for row in tqdm(deleted_data, desc='Update deleted officer - person relation'):
+            for old_uid in row[self.old_column_mappings['uids']].split(','):
+                officer_id = officer_mappings.get(old_uid.strip())
 
                 if officer_id:
                     person_id = person_mappings.get(row[self.column_mappings['person_id']])
@@ -59,7 +76,7 @@ class PersonImporter(BaseImporter):
 
     def handle_record_data(self, row):
         canonical_uid = row[self.column_mappings['canonical_uid']]
-        person_data = self.parse_row_data(row)
+        person_data = self.parse_row_data(row, self.column_mappings)
 
         person_id = person_data['person_id']
         person_data['canonical_officer_id'] = self.officer_mappings.get(canonical_uid)

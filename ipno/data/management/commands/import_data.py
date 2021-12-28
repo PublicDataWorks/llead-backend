@@ -28,11 +28,31 @@ class Command(BaseCommand):
 
         ProcessRematchOfficers(start_time).process()
 
-        if any([officer_imported, complaint_imported, event_imported, person_imported]):
+        if any([
+            officer_imported,
+            complaint_imported,
+            event_imported,
+            person_imported
+        ]):
+            print('Counting complaints')
             count_complaints()
 
-        if any([officer_imported, uof_imported, complaint_imported, event_imported]):
+        if any([
+            officer_imported,
+            uof_imported,
+            complaint_imported,
+            event_imported
+        ]):
+            print('Counting department data period')
             compute_department_data_period()
 
-        if any([officer_imported, uof_imported, complaint_imported, event_imported, document_imported, person_imported]):
+        if any([
+            officer_imported,
+            uof_imported,
+            complaint_imported,
+            event_imported,
+            document_imported,
+            person_imported
+        ]):
+            print('Rebuilding search index')
             rebuild_search_index()
