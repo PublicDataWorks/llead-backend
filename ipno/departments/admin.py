@@ -7,7 +7,7 @@ from news_articles.models import MatchedSentence, NewsArticle
 
 class DepartmentAdmin(ModelAdmin):
     list_display = ('id', 'name', 'created_at', 'updated_at')
-    filter_horizontal = ('starred_officers', 'starred_news_articles')
+    filter_horizontal = ('starred_officers', 'starred_news_articles', 'starred_documents', )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "starred_officers":
@@ -17,6 +17,8 @@ class DepartmentAdmin(ModelAdmin):
                 officers__in=request.officers
             ).all()
             kwargs["queryset"] = NewsArticle.objects.filter(matched_sentences__in=matched_sentences).distinct()
+        elif db_field.name == "starred_documents":
+            kwargs["queryset"] = request._obj_.documents.order_by('id').distinct().all()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, **kwargs):

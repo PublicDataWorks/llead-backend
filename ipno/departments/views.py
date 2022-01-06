@@ -11,7 +11,13 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 
 from departments.models import Department
-from departments.serializers import WrglFileSerializer, DepartmentOfficerSerializer, DepartmentNewsArticleSerializer
+from departments.serializers import (
+    WrglFileSerializer,
+    DepartmentOfficerSerializer,
+    DepartmentNewsArticleSerializer,
+    DepartmentDocumentSerializer,
+)
+from documents.models import Document
 from news_articles.models import MatchedSentence, NewsArticle
 from officers.models import Officer, Event
 from shared.serializers.es_serializers import DocumentsESSerializer
@@ -39,8 +45,8 @@ class DepartmentsViewSet(viewsets.ViewSet):
         serializer = DepartmentSerializer(departments, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path='documents')
-    def documents(self, request, pk):
+    @action(detail=True, methods=['get'], url_path='documents/search')
+    def documents_search(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
         q = self.request.query_params.get('q')
 
@@ -56,6 +62,34 @@ class DepartmentsViewSet(viewsets.ViewSet):
             data = DocumentWithTextContentSerializer(page, many=True).data
 
         return paginator.get_paginated_response(data)
+
+    @action(detail=True, methods=['get'], url_path='documents')
+    def documents(self, request, pk):
+        department = get_object_or_404(Department, slug=pk)
+
+        starred_documents = department.starred_documents.prefetch_related().annotate(
+            is_starred=Value(True, output_field=BooleanField()),
+        ).all()[:DEPARTMENTS_LIMIT]
+
+        starred_documents_count = starred_documents.count()
+        sorted_featured_documents = []
+
+        if starred_documents_count < DEPARTMENTS_LIMIT:
+            featured_documents = department.documents.exclude(
+                id__in=starred_documents,
+            )
+
+            sorted_featured_documents = Document.objects.filter(
+                id__in=featured_documents
+            ).annotate(
+                is_starred=Value(False, output_field=BooleanField()),
+            ).order_by('-incident_date')[:DEPARTMENTS_LIMIT - starred_documents_count]
+
+        documents = list(chain(starred_documents, sorted_featured_documents))
+
+        documents_serializers = DepartmentDocumentSerializer(documents, many=True)
+
+        return Response(documents_serializers.data)
 
     @action(detail=True, methods=['get'], url_path='officers')
     def officers(self, request, pk):

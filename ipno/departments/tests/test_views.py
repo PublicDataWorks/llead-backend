@@ -171,14 +171,18 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        documents = DocumentFactory.create_batch(5)
         DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
+            document.created_at = datetime(2020, 5, 4, tzinfo=pytz.utc)
             document.departments.add(department)
+            document.save()
 
-        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        recent_documents = DocumentFactory.create_batch(2)
         for document in recent_documents:
+            document.created_at = current_date
             document.departments.add(department)
+            document.save()
 
         complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
@@ -256,7 +260,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_documents_success(self):
+    def test_search_documents_without_query_success(self):
         department = DepartmentFactory()
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
@@ -268,7 +272,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             document.departments.add(department)
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug}),
+            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
             {
                 'limit': 2,
             }
@@ -309,10 +313,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
         assert response.data['previous'] is None
-        assert response.data['next'] == f'http://testserver/api/departments/{department.slug}/documents/?limit=2&offset=2'
+        assert response.data['next'] == f'http://testserver/api/departments/{department.slug}/documents/search/?limit=2&offset=2'
         assert response.data['results'] == expected_results
 
-    def test_documents_with_limit_and_offset(self):
+    def test_search_documents_with_limit_and_offset_but_without_query(self):
         department = DepartmentFactory()
 
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
@@ -324,7 +328,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             document.departments.add(department)
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug}),
+            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
             {
                 'limit': 2,
                 'offset': 2,
@@ -350,11 +354,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 3
-        assert response.data['previous'] == f'http://testserver/api/departments/{department.slug}/documents/?limit=2'
+        assert response.data['previous'] == f'http://testserver/api/departments/{department.slug}/documents/search/?limit=2'
         assert response.data['next'] is None
         assert response.data['results'] == expected_results
 
-    def test_search_documents(self):
+    def test_search_documents_with_keywords(self):
         department = DepartmentFactory()
 
         document_1 = DocumentFactory(
@@ -385,7 +389,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug}),
+            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
             {'q': 'keyword'}
         )
 
@@ -464,7 +468,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug}),
+            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
                 'offset': 1,
@@ -492,7 +496,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             },
         ]
 
-        expected_previous = f'http://testserver/api/departments/{department.slug}/documents/?limit=1&q=keyword'
+        expected_previous = f'http://testserver/api/departments/{department.slug}/documents/search/?limit=1&q=keyword'
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 2
@@ -505,7 +509,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug}),
+            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
             {'q': 'keyword'}
         )
 
@@ -515,15 +519,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['next'] is None
         assert response.data['results'] == []
 
-    def test_documents_not_found(self):
+    def test_search_documents_not_found(self):
         response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': 'slug'})
+            reverse('api:departments-documents-search', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_documents_unauthorized(self):
+    def test_search_documents_unauthorized(self):
         response = self.client.get(
-            reverse('api:departments-documents', kwargs={'pk': 'slug'})
+            reverse('api:departments-documents-search', kwargs={'pk': 'slug'})
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -640,14 +644,18 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        documents = DocumentFactory.create_batch(5)
         DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
+            document.created_at = datetime(2020, 5, 4, tzinfo=pytz.utc)
             document.departments.add(department)
+            document.save()
 
-        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        recent_documents = DocumentFactory.create_batch(2)
         for document in recent_documents:
+            document.created_at = current_date
             document.departments.add(department)
+            document.save()
 
         complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
@@ -1147,6 +1155,129 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'source_display_name': 'Starred Article 3',
                 'is_starred': True,
                 'url': starred_article_3.url,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_featured_documents_not_found(self):
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_featured_documents_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-documents', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_featured_documents_success(self):
+        current_date = datetime.now(pytz.utc)
+
+        department = DepartmentFactory()
+
+        starred_document = DocumentFactory(incident_date=datetime(2017, 8, 10))
+        department.starred_documents.add(starred_document)
+
+        featured_document_1 = DocumentFactory(incident_date=current_date)
+        featured_document_1.departments.add(department)
+
+        featured_document_2 = DocumentFactory(incident_date=datetime(2017, 11, 10))
+        featured_document_2.departments.add(department)
+
+        featured_document_3 = DocumentFactory(incident_date=datetime(2017, 8, 10))
+        featured_document_3.departments.add(department)
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': starred_document.id,
+                'title': starred_document.title,
+                'url': starred_document.url,
+                'incident_date': str(datetime(2017, 8, 10).date()),
+                'preview_image_url': starred_document.preview_image_url,
+                'pages_count': starred_document.pages_count,
+                'is_starred': True,
+            },
+            {
+                'id': featured_document_1.id,
+                'title': featured_document_1.title,
+                'url': featured_document_1.url,
+                'incident_date': str(current_date.date()),
+                'preview_image_url': featured_document_1.preview_image_url,
+                'pages_count': featured_document_1.pages_count,
+                'is_starred': False,
+            },
+            {
+                'id': featured_document_2.id,
+                'title': featured_document_2.title,
+                'url': featured_document_2.url,
+                'incident_date': str(datetime(2017, 11, 10).date()),
+                'preview_image_url': featured_document_2.preview_image_url,
+                'pages_count': featured_document_2.pages_count,
+                'is_starred': False,
+            },
+            {
+                'id': featured_document_3.id,
+                'title': featured_document_3.title,
+                'url': featured_document_3.url,
+                'incident_date': str(datetime(2017, 8, 10).date()),
+                'preview_image_url': featured_document_3.preview_image_url,
+                'pages_count': featured_document_3.pages_count,
+                'is_starred': False,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    def test_officers_with_maximum_starred_documents(self):
+        department = DepartmentFactory()
+
+        starred_documents = DocumentFactory.create_batch(3)
+        for document in starred_documents:
+            department.starred_documents.add(document)
+
+        featured_document = DocumentFactory()
+        featured_document.departments.add(department)
+
+        response = self.auth_client.get(
+            reverse('api:departments-documents', kwargs={'pk': department.slug})
+        )
+
+        expected_result = [
+            {
+                'id': starred_documents[0].id,
+                'title': starred_documents[0].title,
+                'url': starred_documents[0].url,
+                'incident_date': str(starred_documents[0].incident_date),
+                'preview_image_url': starred_documents[0].preview_image_url,
+                'pages_count': starred_documents[0].pages_count,
+                'is_starred': True,
+            },
+            {
+                'id': starred_documents[1].id,
+                'title': starred_documents[1].title,
+                'url': starred_documents[1].url,
+                'incident_date': str(starred_documents[1].incident_date),
+                'preview_image_url': starred_documents[1].preview_image_url,
+                'pages_count': starred_documents[1].pages_count,
+                'is_starred': True,
+            },
+            {
+                'id': starred_documents[2].id,
+                'title': starred_documents[2].title,
+                'url': starred_documents[2].url,
+                'incident_date': str(starred_documents[2].incident_date),
+                'preview_image_url': starred_documents[2].preview_image_url,
+                'pages_count': starred_documents[2].pages_count,
+                'is_starred': True,
             },
         ]
 

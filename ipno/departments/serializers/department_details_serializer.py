@@ -62,7 +62,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.documents.count()
 
     def get_recent_documents_count(self, obj):
-        return obj.documents.filter(incident_date__gt=self._get_recent_day).count()
+        return obj.documents.filter(created_at__gt=self._get_recent_day).count()
 
     def get_datasets_count(self, obj):
         return obj.wrgl_files.count()
