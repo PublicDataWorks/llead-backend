@@ -39,3 +39,6 @@ class Document(TimeStampsModel):
 
     class Meta:
         unique_together = ('docid', 'hrg_no', 'matched_uid', 'agency')
+
+    def __str__(self):
+        return f'{self.id} - {self.title[:50]}...'

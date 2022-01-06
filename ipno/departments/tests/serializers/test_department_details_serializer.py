@@ -122,14 +122,18 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        documents = DocumentFactory.create_batch(5)
         DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
+            document.created_at = datetime(2020, 5, 4, tzinfo=pytz.utc)
             document.departments.add(department)
+            document.save()
 
-        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        recent_documents = DocumentFactory.create_batch(2)
         for document in recent_documents:
+            document.created_at = current_date
             document.departments.add(department)
+            document.save()
 
         complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
@@ -322,14 +326,18 @@ class DepartmentDetailsSerializerTestCase(TestCase):
             day=3,
         )
 
-        documents = DocumentFactory.create_batch(5, incident_date=datetime(2020, 5, 4))
+        documents = DocumentFactory.create_batch(5)
         DocumentFactory(incident_date=datetime(2018, 8, 10))
         for document in documents:
+            document.created_at = datetime(2020, 5, 4, tzinfo=pytz.utc)
             document.departments.add(department)
+            document.save()
 
-        recent_documents = DocumentFactory.create_batch(2, incident_date=current_date)
+        recent_documents = DocumentFactory.create_batch(2)
         for document in recent_documents:
+            document.created_at = current_date
             document.departments.add(department)
+            document.save()
 
         complaints = ComplaintFactory.create_batch(3)
         ComplaintFactory()
