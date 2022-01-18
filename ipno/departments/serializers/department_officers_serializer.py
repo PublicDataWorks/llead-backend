@@ -4,7 +4,7 @@ from rest_framework import serializers
 class DepartmentOfficerSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    is_starred = serializers.BooleanField()
+    is_starred = serializers.BooleanField(default=False)
     use_of_forces_count = serializers.IntegerField()
 
     badges = serializers.SerializerMethodField()
