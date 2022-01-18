@@ -1283,3 +1283,367 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
+
+    def test_search_without_query(self):
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_search_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-search', kwargs={'pk': 'slug'})
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_search_officers_with_empty_results(self):
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
+        person_1.officers.add(officer_1)
+        person_1.officers.add(officer_2)
+        person_1.save()
+
+        department = DepartmentFactory()
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            badge_no="100",
+            year=2018,
+            month=8,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="250",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="150",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'Sean',
+                'kind': 'officers',
+            }
+        )
+
+        expected_results = []
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 0
+        assert response.data['previous'] is None
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_search_officers_success(self):
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
+        person_1.officers.add(officer_1)
+        person_1.officers.add(officer_2)
+        person_1.save()
+
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
+        person_2.officers.add(officer_3)
+        person_2.save()
+
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
+        person_3.officers.add(officer_4)
+        person_3.save()
+
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
+        person_4.officers.add(officer_5)
+        person_4.save()
+
+        officer_6 = OfficerFactory(first_name='Jay', last_name='Dang')
+        person_5 = PersonFactory(canonical_officer=officer_6)
+        person_5.officers.add(officer_6)
+        person_5.save()
+
+        department = DepartmentFactory()
+
+        use_of_force_1 = UseOfForceFactory(officer=officer_5)
+        use_of_force_2 = UseOfForceFactory(officer=officer_3)
+        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            badge_no="100",
+            year=2018,
+            month=8,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="250",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="150",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_2 = EventFactory(
+            department=department,
+            officer=officer_3,
+            kind=UOF_RECEIVE,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        uof_incident_event_2 = EventFactory(
+            department=department,
+            officer=officer_4,
+            kind=UOF_INCIDENT,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            badge_no="123",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_1 = EventFactory(
+            department=department,
+            officer=officer_5,
+            kind=UOF_RECEIVE,
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        use_of_force_1.events.add(uof_receive_event_1)
+        use_of_force_2.events.add(uof_receive_event_2)
+        use_of_force_3.events.add(uof_incident_event_2)
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'Ray',
+                'kind': 'officers',
+            }
+        )
+
+        expected_results = [
+            {
+                'id': officer_3.id,
+                'name': officer_3.name,
+                'is_starred': False,
+                'use_of_forces_count': 1,
+                'badges': ["123", "200"],
+                'complaints_count': officer_3.person.all_complaints_count,
+            },
+            {
+                'id': officer_4.id,
+                'name': officer_4.name,
+                'is_starred': False,
+                'use_of_forces_count': 1,
+                'badges': ["200"],
+                'complaints_count': officer_4.person.all_complaints_count,
+            },
+            {
+                'id': officer_2.id,
+                'name': officer_2.name,
+                'is_starred': False,
+                'use_of_forces_count': 0,
+                'badges': ["100", "150", "250"],
+                'complaints_count': officer_2.person.all_complaints_count,
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
+        assert response.data['previous'] is None
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_search_officers_with_limit_and_offset(self):
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
+        person_1.officers.add(officer_1)
+        person_1.officers.add(officer_2)
+        person_1.save()
+
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
+        person_2.officers.add(officer_3)
+        person_2.save()
+
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
+        person_3.officers.add(officer_4)
+        person_3.save()
+
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
+        person_4.officers.add(officer_5)
+        person_4.save()
+
+        officer_6 = OfficerFactory(first_name='Jay', last_name='Dang')
+        person_5 = PersonFactory(canonical_officer=officer_6)
+        person_5.officers.add(officer_6)
+        person_5.save()
+
+        department = DepartmentFactory()
+
+        use_of_force_1 = UseOfForceFactory(officer=officer_5)
+        use_of_force_2 = UseOfForceFactory(officer=officer_3)
+        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            badge_no="100",
+            year=2018,
+            month=8,
+            day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="250",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            badge_no="150",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_2 = EventFactory(
+            department=department,
+            officer=officer_3,
+            kind=UOF_RECEIVE,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        uof_incident_event_2 = EventFactory(
+            department=department,
+            officer=officer_4,
+            kind=UOF_INCIDENT,
+            badge_no="200",
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            badge_no="123",
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        uof_receive_event_1 = EventFactory(
+            department=department,
+            officer=officer_5,
+            kind=UOF_RECEIVE,
+            year=2018,
+            month=8,
+            day=20,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        use_of_force_1.events.add(uof_receive_event_1)
+        use_of_force_2.events.add(uof_receive_event_2)
+        use_of_force_3.events.add(uof_incident_event_2)
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'Ray',
+                'kind': 'officers',
+                'limit': 1,
+                'offset': 1,
+            }
+        )
+
+        expected_results = [
+            {
+                'id': officer_4.id,
+                'name': officer_4.name,
+                'is_starred': False,
+                'use_of_forces_count': 1,
+                'badges': ["200"],
+                'complaints_count': officer_4.person.all_complaints_count,
+            }
+        ]
+
+        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&q=Ray'
+        expected_next = f'http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&offset=2&q=Ray'
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
+        assert response.data['previous'] == expected_previous
+        assert response.data['next'] == expected_next
+        assert response.data['results'] == expected_results

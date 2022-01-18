@@ -6,6 +6,7 @@ from django.db.models.expressions import F, Value
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -25,7 +26,9 @@ from shared.serializers import DepartmentSerializer, DocumentWithTextContentSeri
 from utils.es_pagination import ESPagination
 from departments.serializers import DepartmentDetailsSerializer
 from departments.constants import DEPARTMENTS_LIMIT
+from search.queries import OfficersSearchQuery
 from departments.queries import DocumentsSearchQuery
+from departments.serializers.es_serializers import DepartmentOfficersESSerializer
 
 
 class DepartmentsViewSet(viewsets.ViewSet):
@@ -61,6 +64,30 @@ class DepartmentsViewSet(viewsets.ViewSet):
             page = paginator.paginate_queryset(queryset, request, view=self)
             data = DocumentWithTextContentSerializer(page, many=True).data
 
+        return paginator.get_paginated_response(data)
+
+    @action(detail=True, methods=['get'], url_path='search')
+    def search(self, request, pk):
+        q = self.request.query_params.get('q', '')
+        kind = self.request.query_params.get('kind', '')
+
+        serializer_mapping = {
+            'officers': DepartmentOfficersESSerializer,
+        }
+
+        search_query_mapping = {
+            'officers': OfficersSearchQuery,
+        }
+
+        if kind not in serializer_mapping.keys():
+            return Response(f'Missing kind param, must be in {serializer_mapping.keys()}', status=HTTP_400_BAD_REQUEST)
+
+        search_query = search_query_mapping[kind](q, pk)
+
+        paginator = ESPagination()
+        page = paginator.paginate_es_query(search_query, request)
+
+        data = serializer_mapping[kind](page).data
         return paginator.get_paginated_response(data)
 
     @action(detail=True, methods=['get'], url_path='documents')
