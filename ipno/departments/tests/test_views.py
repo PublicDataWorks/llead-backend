@@ -1647,3 +1647,198 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['previous'] == expected_previous
         assert response.data['next'] == expected_next
         assert response.data['results'] == expected_results
+
+    def test_search_news_articles_with_empty_results(self):
+        officer = OfficerFactory()
+        department = DepartmentFactory()
+        source = NewsArticleSourceFactory(source_display_name='Source')
+
+        NewsArticleFactory(
+            title='Document title keyword',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+
+        news_article_1 = NewsArticleFactory(
+            title='News article keyword1',
+            content='Text content 1',
+            source=source)
+        news_article_2 = NewsArticleFactory(
+            title='News article 2',
+            content='Text content keyword 2',
+            source=source,
+        )
+        news_article_3 = NewsArticleFactory(
+            title='Document title',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_3.officers.add(officer)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+        )
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'Sean',
+                'kind': 'news_articles',
+            }
+        )
+
+        expected_results = []
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 0
+        assert response.data['previous'] is None
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_search_news_articles_success(self):
+        department = DepartmentFactory()
+        officer = OfficerFactory(department=department)
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        source = NewsArticleSourceFactory(source_display_name='Source')
+
+        NewsArticleFactory(
+            title='Document title keyword',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+
+        news_article_1 = NewsArticleFactory(
+            title='News article skeyword1',
+            content='Text content 1',
+            source=source,
+        )
+        news_article_2 = NewsArticleFactory(
+            title='Document title',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_2.officers.add(officer)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+        )
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'keyword',
+                'kind': 'news_articles',
+            }
+        )
+
+        expected_results = [
+            {
+                'id': news_article_1.id,
+                'source_name': 'Source',
+                'title': news_article_1.title,
+                'url': news_article_1.url,
+                'date': str(news_article_1.published_date),
+                'author': news_article_1.author,
+                'content': news_article_1.content,
+                'content_highlight': None,
+                'author_highlight': None
+            },
+        ]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['previous'] is None
+        assert response.data['next'] is None
+        assert response.data['results'] == expected_results
+
+    def test_search_news_articles_with_limit_and_offset(self):
+        department = DepartmentFactory()
+        officer = OfficerFactory(department=department)
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        source = NewsArticleSourceFactory(source_display_name='Source')
+
+        NewsArticleFactory(
+            title='Document title keyword',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+
+        news_article_1 = NewsArticleFactory(
+            title='News article keyword',
+            content='Text content',
+            source=source,
+        )
+        news_article_2 = NewsArticleFactory(
+            title='News article 2',
+            content='Text content keyword 2',
+            source=source,
+        )
+        news_article_3 = NewsArticleFactory(
+            title='Document title',
+            content='Text content',
+            source=source,
+            author='dummy'
+        )
+        news_article_4 = NewsArticleFactory(
+            title='Documented title keyword',
+            content='Text content',
+            source=source,
+            author='keyword'
+        )
+
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_4 = MatchedSentenceFactory(article=news_article_4)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_3.officers.add(officer)
+        matched_sentence_4.officers.add(officer)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+        )
+
+        rebuild_search_index()
+
+        response = self.auth_client.get(
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'keyword',
+                'kind': 'news_articles',
+                'limit': '1',
+                'offset': '1',
+            }
+        )
+
+        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=news_articles&limit=1&q=keyword'
+        expected_next = f'http://testserver/api/departments/{department.slug}/search/?kind=news_articles&limit=1&offset=2&q=keyword'
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 3
+        assert response.data['previous'] == expected_previous
+        assert response.data['next'] == expected_next
