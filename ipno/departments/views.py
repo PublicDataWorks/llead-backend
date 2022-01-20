@@ -26,9 +26,9 @@ from shared.serializers import DepartmentSerializer, DocumentWithTextContentSeri
 from utils.es_pagination import ESPagination
 from departments.serializers import DepartmentDetailsSerializer
 from departments.constants import DEPARTMENTS_LIMIT
-from search.queries import OfficersSearchQuery
+from search.queries import OfficersSearchQuery, NewsArticlesSearchQuery
 from departments.queries import DocumentsSearchQuery
-from departments.serializers.es_serializers import DepartmentOfficersESSerializer
+from departments.serializers.es_serializers import DepartmentOfficersESSerializer, DepartmentNewsArticlesESSerializer
 
 
 class DepartmentsViewSet(viewsets.ViewSet):
@@ -73,10 +73,12 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
         serializer_mapping = {
             'officers': DepartmentOfficersESSerializer,
+            'news_articles': DepartmentNewsArticlesESSerializer,
         }
 
         search_query_mapping = {
             'officers': OfficersSearchQuery,
+            'news_articles': NewsArticlesSearchQuery,
         }
 
         if kind not in serializer_mapping.keys():
