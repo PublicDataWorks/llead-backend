@@ -260,104 +260,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_search_documents_without_query_success(self):
-        department = DepartmentFactory()
-
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
-        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        DocumentFactory(incident_date=date(2021, 7, 9))
-
-        for document in [document_1, document_2, document_3]:
-            document.departments.add(department)
-
-        response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
-            {
-                'limit': 2,
-            }
-        )
-
-        expected_results = [{
-            'id': document_1.id,
-            'document_type': document_1.document_type,
-            'title': document_1.title,
-            'url': document_1.url,
-            'incident_date': str(document_1.incident_date),
-            'text_content': document_1.text_content,
-            'preview_image_url': document_1.preview_image_url,
-            'pages_count': document_1.pages_count,
-            'departments': [
-                {
-                    'id': department.slug,
-                    'name': department.name,
-                },
-            ],
-        }, {
-            'id': document_3.id,
-            'document_type': document_3.document_type,
-            'title': document_3.title,
-            'url': document_3.url,
-            'incident_date': str(document_3.incident_date),
-            'text_content': document_3.text_content,
-            'preview_image_url': document_3.preview_image_url,
-            'pages_count': document_3.pages_count,
-            'departments': [
-                {
-                    'id': department.slug,
-                    'name': department.name,
-                },
-            ],
-        }]
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] is None
-        assert response.data['next'] == f'http://testserver/api/departments/{department.slug}/documents/search/?limit=2&offset=2'
-        assert response.data['results'] == expected_results
-
-    def test_search_documents_with_limit_and_offset_but_without_query(self):
-        department = DepartmentFactory()
-
-        document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 12, 5))
-        document_3 = DocumentFactory(incident_date=date(2019, 11, 6))
-        DocumentFactory(incident_date=date(2021, 7, 9))
-
-        for document in [document_1, document_2, document_3]:
-            document.departments.add(department)
-
-        response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
-            {
-                'limit': 2,
-                'offset': 2,
-            }
-        )
-
-        expected_results = [{
-            'id': document_2.id,
-            'document_type': document_2.document_type,
-            'title': document_2.title,
-            'url': document_2.url,
-            'incident_date': str(document_2.incident_date),
-            'text_content': document_2.text_content,
-            'preview_image_url': document_2.preview_image_url,
-            'pages_count': document_2.pages_count,
-            'departments': [
-                {
-                    'id': department.slug,
-                    'name': department.name,
-                },
-            ],
-        }]
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] == f'http://testserver/api/departments/{department.slug}/documents/search/?limit=2'
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
-
     def test_search_documents_with_keywords(self):
         department = DepartmentFactory()
 
@@ -389,8 +291,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
-            {'q': 'keyword'}
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'keyword',
+                'kind': 'documents',
+            }
         )
 
         expected_results = [
@@ -468,11 +373,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
                 'offset': 1,
                 'limit': 1,
+                'kind': 'documents',
             }
         )
 
@@ -496,7 +402,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             },
         ]
 
-        expected_previous = f'http://testserver/api/departments/{department.slug}/documents/search/?limit=1&q=keyword'
+        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=documents&limit=1&q=keyword'
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 2
@@ -509,8 +415,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': department.slug}),
-            {'q': 'keyword'}
+            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            {
+                'q': 'keyword',
+                'kind': 'documents',
+            }
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -518,18 +427,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['previous'] is None
         assert response.data['next'] is None
         assert response.data['results'] == []
-
-    def test_search_documents_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_search_documents_unauthorized(self):
-        response = self.client.get(
-            reverse('api:departments-documents-search', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success_with_related_officer(self):
         current_date = datetime.now(pytz.utc)
