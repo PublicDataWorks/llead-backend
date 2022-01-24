@@ -28,6 +28,7 @@ class BaseImporter(object):
     ATTRIBUTES = []
     NA_ATTRIBUTES = []
     INT_ATTRIBUTES = []
+    SLUG_ATTRIBUTES = []
     BATCH_SIZE = 500
     WRGL_OFFSET_BATCH_SIZE = 1000
     branch = 'main'
@@ -50,6 +51,9 @@ class BaseImporter(object):
 
         for attr in self.INT_ATTRIBUTES:
             row_data[attr] = parse_int(row[mappings[attr]]) if row[mappings[attr]] else None
+
+        for attr in self.SLUG_ATTRIBUTES:
+            row_data[attr] = slugify(row[mappings[attr]]) if row[mappings[attr]] else None
 
         return row_data
 
