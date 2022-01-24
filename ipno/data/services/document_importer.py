@@ -1,10 +1,12 @@
+import operator
+from functools import reduce
 from itertools import chain
-
-from django.template.defaultfilters import slugify
-from django.conf import settings
-from tqdm import tqdm
 import requests
+
+from django.conf import settings
 from dropbox.exceptions import ApiError
+from django.db.models.query_utils import Q
+from tqdm import tqdm
 
 from documents.models import Document
 from data.services.base_importer import BaseImporter
@@ -31,6 +33,9 @@ class DocumentImporter(BaseImporter):
         'accused',
         'title',
         'hrg_type',
+    ]
+    SLUG_ATTRIBUTES = [
+        'agency'
     ]
     INT_ATTRIBUTES = [
         'year',
@@ -60,19 +65,24 @@ class DocumentImporter(BaseImporter):
     def get_document_mappings(self):
         documents_attrs = [
             'id', 'docid', 'hrg_no', 'matched_uid', 'pdf_db_content_hash', 'url', 'preview_image_url',
-            'txt_db_content_hash'
+            'txt_db_content_hash', 'agency'
         ]
         documents = Document.objects.values(*documents_attrs)
         return {
-            (document['docid'], document['hrg_no'], document['matched_uid']): document for document in documents
+            (document['docid'],
+             document['hrg_no'],
+             document['matched_uid'],
+             document['agency']): document
+            for document in documents
         }
 
     def update_relations(self, raw_data):
         DepartmentRelation = Document.departments.through
         OfficerRelation = Document.officers.through
-        department_relation_ids = {}
-        officer_relation_ids = {}
-        modified_documents_ids = []
+        department_relations = []
+        officer_relations = []
+        modified_department_relations = []
+        modified_officer_relations = []
 
         saved_data = list(chain(
             raw_data.get('added_rows', []),
@@ -95,61 +105,56 @@ class DocumentImporter(BaseImporter):
         for row in tqdm(saved_data, desc="Update saved documents' relations"):
             document_data = self.parse_row_data(row, self.column_mappings)
             officer_uid = document_data.get('matched_uid')
-            agency = row[self.column_mappings['agency']]
+            agency = document_data.get('agency')
 
             if officer_uid or agency:
                 docid = document_data['docid']
                 hrg_no = document_data['hrg_no']
                 matched_uid = officer_uid
 
-                document = document_mappings.get((docid, hrg_no, matched_uid))
+                document = document_mappings.get((docid, hrg_no, matched_uid, agency))
                 document_id = document.get('id') if document else None
 
                 if document_id:
-                    modified_documents_ids.append(document_id)
-
                     if officer_uid:
                         officer_id = officer_mappings.get(officer_uid)
                         if officer_id:
-                            officer_relation_ids[document_id] = officer_id
+                            modified_officer_relations.append((document_id, officer_id))
+                            officer_relations.append((document_id, officer_id))
 
                     if agency:
-                        formatted_agency = self.format_agency(agency)
-                        department_id = department_mappings.get(slugify(formatted_agency))
+                        department_id = department_mappings.get(agency)
                         if department_id:
-                            department_relation_ids[document_id] = department_id
+                            modified_department_relations.append((document_id, department_id))
+                            department_relations.append((document_id, department_id))
 
-        for row in tqdm(deleted_data, desc="Update deleted documents' relations"):
-            document_data = self.parse_row_data(row, self.old_column_mappings)
-            officer_uid = document_data.get('matched_uid')
-            agency = row[self.old_column_mappings['agency']]
-
-            if officer_uid or agency:
-                docid = document_data['docid']
-                hrg_no = document_data['hrg_no']
-                matched_uid = officer_uid
-
-                document = document_mappings.get((docid, hrg_no, matched_uid))
-                document_id = document.get('id') if document else None
-
-                if document_id:
-                    modified_documents_ids.append(document_id)
-
-        department_relations = [
-            DepartmentRelation(document_id=document_id, department_id=department_id)
-            for document_id, department_id in department_relation_ids.items()
+        department_relation_objs = [
+            DepartmentRelation(document_id=relation[0], department_id=relation[1])
+            for relation in department_relations
         ]
 
-        officer_relations = [
-            OfficerRelation(document_id=document_id, officer_id=officer_id)
-            for document_id, officer_id in officer_relation_ids.items()
+        officer_relation_objs = [
+            OfficerRelation(document_id=relation[0], officer_id=relation[1])
+            for relation in officer_relations
         ]
 
-        DepartmentRelation.objects.filter(document_id__in=modified_documents_ids).delete()
-        DepartmentRelation.objects.bulk_create(department_relations, batch_size=self.BATCH_SIZE)
+        if modified_department_relations:
+            deleted_department_relations_query = reduce(
+                operator.or_,
+                (Q(document_id=relation[0], department_id=relation[1]) for relation in modified_department_relations)
+            )
+            DepartmentRelation.objects.filter(deleted_department_relations_query).delete()
 
-        OfficerRelation.objects.filter(document_id__in=modified_documents_ids).delete()
-        OfficerRelation.objects.bulk_create(officer_relations, batch_size=BATCH_SIZE)
+        if modified_officer_relations:
+            deleted_officer_relations_query = reduce(
+                operator.or_,
+                (Q(document_id=relation[0], officer_id=relation[1]) for relation in modified_officer_relations)
+            )
+            OfficerRelation.objects.filter(deleted_officer_relations_query).delete()
+
+        DepartmentRelation.objects.bulk_create(department_relation_objs, batch_size=self.BATCH_SIZE)
+
+        OfficerRelation.objects.bulk_create(officer_relation_objs, batch_size=BATCH_SIZE)
 
     def generate_preview_image(self, image_blob, upload_url):
         preview_url_location = upload_url.replace('.pdf', '-preview.jpeg').replace('.PDF', '-preview.jpeg')
@@ -176,26 +181,6 @@ class DocumentImporter(BaseImporter):
         except Exception:
             return ''
 
-    def clean_up_document(self, document):
-        document_url = document.get('url')
-        document_preview_url = document.get('preview_image_url')
-
-        if document_url:
-            try:
-                self.gs.delete_file_from_url(document_url.replace(settings.GC_PATH, ''))
-            except Exception:
-                pass
-
-        if document_preview_url:
-            try:
-                self.gs.delete_file_from_url(document_preview_url.replace(settings.GC_PATH, ''))
-            except Exception:
-                pass
-
-    def clean_up_documents(self, documents):
-        for document in documents:
-            self.clean_up_document(document)
-
     def handle_record_data(self, row):
         document_data = self.parse_row_data(row, self.column_mappings)
         document_data['document_type'] = 'pdf'
@@ -213,8 +198,9 @@ class DocumentImporter(BaseImporter):
         docid = document_data.get('docid')
         hrg_no = document_data.get('hrg_no')
         matched_uid = document_data.get('matched_uid')
+        agency = document_data.get('agency')
 
-        old_document = self.document_mappings.get((docid, hrg_no, matched_uid))
+        old_document = self.document_mappings.get((docid, hrg_no, matched_uid, agency))
 
         document = {
             **(old_document or {}),
@@ -224,8 +210,7 @@ class DocumentImporter(BaseImporter):
         if old_document:
             if document_data['pdf_db_content_hash'] != old_document.get('pdf_db_content_hash'):
                 should_upload_file = True
-                self.clean_up_document(old_document)
-        elif (docid, hrg_no, matched_uid) not in self.new_docids:
+        elif (docid, hrg_no, matched_uid, agency) not in self.new_docids:
             should_upload_file = True
 
         if should_upload_file:
@@ -271,8 +256,8 @@ class DocumentImporter(BaseImporter):
         if document:
             if old_document:
                 self.update_documents.append(document)
-            elif (docid, hrg_no, matched_uid) not in self.new_docids:
-                self.new_docids.append((docid, hrg_no, matched_uid))
+            elif (docid, hrg_no, matched_uid, agency) not in self.new_docids:
+                self.new_docids.append((docid, hrg_no, matched_uid, agency))
                 self.new_documents.append(document)
 
     def import_data(self, data):
@@ -286,8 +271,9 @@ class DocumentImporter(BaseImporter):
             docid = document_data.get('docid')
             hrg_no = document_data.get('hrg_no')
             matched_uid = document_data.get('matched_uid')
+            agency = document_data.get('agency')
 
-            old_document = self.document_mappings.get((docid, hrg_no, matched_uid))
+            old_document = self.document_mappings.get((docid, hrg_no, matched_uid, agency))
 
             if old_document:
                 self.delete_documents_ids.append(old_document.get('id'))
@@ -300,7 +286,6 @@ class DocumentImporter(BaseImporter):
             self.new_documents,
             self.update_documents,
             self.delete_documents_ids,
-            self.clean_up_documents
         )
 
         self.update_relations(data)
