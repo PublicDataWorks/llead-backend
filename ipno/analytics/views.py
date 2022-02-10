@@ -6,12 +6,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
+from app_config.constants import DEFAULT_RECENT_DAYS
 from documents.models import Document
 from officers.models import Officer
 from departments.models import Department
 from app_config.models import AppConfig
-
-DEFAULT_RECENT_DAYS = 30
 
 
 class AnalyticsViewSet(ViewSet):

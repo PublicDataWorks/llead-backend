@@ -1,4 +1,4 @@
-from django.db.models import Case, When
+from django.db.models import Case, When, IntegerField
 
 
 class BaseESSerializer(object):
@@ -14,7 +14,7 @@ class BaseESSerializer(object):
     def items(self):
         ids = [doc.id for doc in self.docs]
         docs_mapping = {doc.id: doc for doc in self.docs}
-        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)], output_field=IntegerField())
         data_items = self.get_queryset(ids).order_by(preserved)
         for item in data_items:
             setattr(item, 'es_doc', docs_mapping[item.id])
