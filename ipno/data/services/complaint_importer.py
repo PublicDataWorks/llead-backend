@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
@@ -63,7 +65,11 @@ class ComplaintImporter(BaseImporter):
         }
 
     def update_relations(self, raw_data):
-        data = self.get_all_diff_rows(raw_data)
+        saved_data = list(chain(
+            raw_data.get('added_rows', []),
+            raw_data.get('updated_rows', []),
+        ))
+        deleted_data = raw_data.get('deleted_rows', [])
         modified_complaints_ids = []
 
         DepartmentRelation = Complaint.departments.through
@@ -72,15 +78,18 @@ class ComplaintImporter(BaseImporter):
         officer_relation_ids = {}
 
         officer_mappings = self.get_officer_mappings()
-        agencies = {row[self.column_mappings['agency']] for row in data if row[self.column_mappings['agency']]}
+        agencies = {row[self.column_mappings['agency']] for row in saved_data if row[self.column_mappings['agency']]}
+        agencies.update([
+            row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
+        ])
         department_mappings = self.get_department_mappings(agencies)
 
         complaint_mappings = self.get_complaint_mappings()
 
-        for row in tqdm(data, desc="Update complaints' relations"):
+        for row in tqdm(saved_data, desc="Update complaints' relations"):
             officer_uid = row[self.column_mappings['uid']]
             agency = row[self.column_mappings['agency']]
-            complaint_data = self.parse_row_data(row)
+            complaint_data = self.parse_row_data(row, self.column_mappings)
 
             if officer_uid or agency:
                 allegation_uid = complaint_data.get('allegation_uid')
@@ -101,6 +110,19 @@ class ComplaintImporter(BaseImporter):
 
                         department_relation_ids[complaint_id] = department_id
 
+        for row in tqdm(saved_data, desc="Update complaints' relations"):
+            officer_uid = row[self.column_mappings['uid']]
+            agency = row[self.column_mappings['agency']]
+            complaint_data = self.parse_row_data(row, self.column_mappings)
+
+            if officer_uid or agency:
+                allegation_uid = complaint_data.get('allegation_uid')
+
+                complaint_id = complaint_mappings.get(allegation_uid)
+
+                if complaint_id:
+                    modified_complaints_ids.append(complaint_id)
+
         department_relations = [
             DepartmentRelation(complaint_id=complaint_id, department_id=department_id)
             for complaint_id, department_id in department_relation_ids.items()
@@ -118,7 +140,7 @@ class ComplaintImporter(BaseImporter):
         OfficerRelation.objects.bulk_create(officer_relations, batch_size=self.BATCH_SIZE)
 
     def handle_record_data(self, row):
-        complaint_data = self.parse_row_data(row)
+        complaint_data = self.parse_row_data(row, self.column_mappings)
         allegation_uid = complaint_data['allegation_uid']
 
         complaint_id = self.complaint_mappings.get(allegation_uid)
@@ -137,7 +159,7 @@ class ComplaintImporter(BaseImporter):
             self.handle_record_data(row)
 
         for row in tqdm(data.get('deleted_rows'), desc='Delete removed complaints'):
-            complaint_data = self.parse_row_data(row)
+            complaint_data = self.parse_row_data(row, self.old_column_mappings)
             allegation_uid = complaint_data.get('allegation_uid')
 
             complaint_id = self.complaint_mappings.get(allegation_uid)

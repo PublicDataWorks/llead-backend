@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
@@ -73,11 +75,10 @@ class UofImporter(BaseImporter):
     def handle_record_data(self, row):
         agency = row[self.column_mappings['agency']]
         officer_uid = row[self.column_mappings['uid']]
-        uof_data = self.parse_row_data(row)
+        uof_data = self.parse_row_data(row, self.column_mappings)
 
         uof_uid = uof_data['uof_uid']
 
-        uof_data = self.parse_row_data(row)
         formatted_agency = self.format_agency(agency)
         department_id = self.department_mappings.get(slugify(formatted_agency))
         uof_data['department_id'] = department_id
@@ -95,10 +96,17 @@ class UofImporter(BaseImporter):
             self.new_uofs_attrs.append(uof_data)
 
     def import_data(self, data):
-        rows = self.get_all_diff_rows(data)
+        saved_data = list(chain(
+            data.get('added_rows', []),
+            data.get('updated_rows', []),
+        ))
+        deleted_data = data.get('deleted_rows', [])
 
         self.officer_mappings = self.get_officer_mappings()
-        agencies = {row[self.column_mappings['agency']] for row in rows if row[self.column_mappings['agency']]}
+        agencies = {row[self.column_mappings['agency']] for row in saved_data if row[self.column_mappings['agency']]}
+        agencies.update([
+            row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
+        ])
         self.department_mappings = self.get_department_mappings(agencies)
 
         self.uof_mappings = self.get_uof_mappings()
@@ -107,7 +115,7 @@ class UofImporter(BaseImporter):
             self.handle_record_data(row)
 
         for row in tqdm(data.get('deleted_rows'), desc='Delete removed uofs'):
-            uof_uid = row[self.column_mappings['uof_uid']]
+            uof_uid = row[self.old_column_mappings['uof_uid']]
             uof_id = self.uof_mappings.get(uof_uid)
             if uof_id:
                 self.delete_uofs_ids.append(uof_id)
