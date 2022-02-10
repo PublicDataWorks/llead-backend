@@ -28,27 +28,32 @@ class BaseImporter(object):
     ATTRIBUTES = []
     NA_ATTRIBUTES = []
     INT_ATTRIBUTES = []
+    SLUG_ATTRIBUTES = []
     BATCH_SIZE = 500
     WRGL_OFFSET_BATCH_SIZE = 1000
     branch = 'main'
     new_commit = None
     column_mappings = {}
+    old_column_mappings = {}
 
     def format_agency(self, agency):
         agency = re.sub('CSD$', 'PD', agency)
         return re.sub('SO$', 'Sheriff', agency)
 
-    def parse_row_data(self, row):
+    def parse_row_data(self, row, mappings):
         row_data = {
-            attr: row[self.column_mappings[attr]] if row[self.column_mappings[attr]] else None
-            for attr in self.ATTRIBUTES if attr in self.column_mappings
+            attr: row[mappings[attr]] if row[mappings[attr]] else None
+            for attr in self.ATTRIBUTES if attr in mappings
         }
 
         for attr in self.NA_ATTRIBUTES:
-            row_data[attr] = row[self.column_mappings[attr]] if row[self.column_mappings[attr]] != 'NA' else None
+            row_data[attr] = row[mappings[attr]] if row[mappings[attr]] != 'NA' else None
 
         for attr in self.INT_ATTRIBUTES:
-            row_data[attr] = parse_int(row[self.column_mappings[attr]]) if row[self.column_mappings[attr]] else None
+            row_data[attr] = parse_int(row[mappings[attr]]) if row[mappings[attr]] else None
+
+        for attr in self.SLUG_ATTRIBUTES:
+            row_data[attr] = slugify(row[mappings[attr]]) if row[mappings[attr]] else None
 
         return row_data
 
@@ -78,6 +83,9 @@ class BaseImporter(object):
             return
 
         old_commit = self.repo.get_commit(old_commit_hash)
+
+        old_columns = old_commit.table.columns
+        self.old_column_mappings = {column: old_columns.index(column) for column in old_columns}
 
         added_rows = []
         deleted_rows = []
@@ -131,14 +139,6 @@ class BaseImporter(object):
             'deleted_rows': deleted_rows,
             'updated_rows': modified_rows_old,
         }
-
-    def get_all_diff_rows(self, raw_data):
-        rows = []
-
-        for value in raw_data.values():
-            rows.extend(value)
-
-        return rows
 
     def bulk_import(self, klass, new_items_attrs, update_items_attrs, delete_items_ids, cleanup_action=None):
         delete_items = klass.objects.filter(id__in=delete_items_ids)
