@@ -100,6 +100,7 @@ class NewComplaintImporterTestCase(TestCase):
 
         self.new_complaint_importer.retrieve_wrgl_data = Mock()
 
+        self.new_complaint_importer.old_column_mappings = {column: self.header.index(column) for column in self.header}
         self.new_complaint_importer.column_mappings = {column: self.header.index(column) for column in self.header}
 
         processed_data = {

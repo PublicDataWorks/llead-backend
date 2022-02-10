@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
@@ -93,7 +95,7 @@ class EventImporter(BaseImporter):
         officer_id = self.officer_mappings.get(officer_uid)
         uof_id = self.uof_mappings.get(uof_uid)
 
-        event_data = self.parse_row_data(row)
+        event_data = self.parse_row_data(row, self.column_mappings)
         formatted_agency = self.format_agency(agency)
         department_id = self.department_mappings.get(slugify(formatted_agency))
         event_data['department_id'] = department_id
@@ -111,9 +113,16 @@ class EventImporter(BaseImporter):
             self.new_events_attrs.append(event_data)
 
     def import_data(self, data):
-        rows = self.get_all_diff_rows(data)
+        saved_data = list(chain(
+            data.get('added_rows', []),
+            data.get('updated_rows', []),
+        ))
+        deleted_data = data.get('deleted_rows', [])
 
-        agencies = {row[self.column_mappings['agency']] for row in rows if row[self.column_mappings['agency']]}
+        agencies = {row[self.column_mappings['agency']] for row in saved_data if row[self.column_mappings['agency']]}
+        agencies.update([
+            row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
+        ])
         self.department_mappings = self.get_department_mappings(agencies)
 
         self.officer_mappings = self.get_officer_mappings()
@@ -124,7 +133,7 @@ class EventImporter(BaseImporter):
             self.handle_record_data(row)
 
         for row in tqdm(data.get('deleted_rows'), desc='Delete removed events'):
-            event_uid = row[self.column_mappings['event_uid']]
+            event_uid = row[self.old_column_mappings['event_uid']]
             event_id = self.event_mappings.get(event_uid)
             if event_id:
                 self.delete_events_ids.append(event_id)

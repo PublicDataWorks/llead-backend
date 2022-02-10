@@ -2,6 +2,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
 from documents.models import Document
 from news_articles.models import NewsArticle
@@ -113,6 +114,31 @@ class HistoricalDataViewSet(ViewSet):
         user.save()
 
         return Response({"detail": "updated user recent items"})
+
+    @recent_items.mapping.delete
+    def delete_recent_item(self, request):
+        recent_item = request.query_params
+
+        item_id = recent_item.get('id')
+        item_type = recent_item.get('type')
+
+        if not item_id or not item_type:
+            return Response({"error": "id and type is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_item = {
+            "id": int(item_id) if item_id.isdigit() else item_id,
+            "type": item_type
+        }
+
+        user = request.user
+        user_recent_items = user.recent_items or []
+
+        if new_item not in user_recent_items:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user_recent_items.remove(new_item)
+        user.save()
+        return Response({"detail": "deleted user recent item"})
 
     @action(detail=False, methods=['get'], url_path='recent-queries')
     def recent_queries(self, request):

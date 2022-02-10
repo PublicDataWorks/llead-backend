@@ -13,7 +13,9 @@ class DocumentManager(models.Manager):
 class Document(TimeStampsModel):
     docid = models.CharField(max_length=255, null=True, blank=True)
     hrg_no = models.CharField(max_length=255, null=True, blank=True)
+    hrg_type = models.CharField(max_length=255, null=True, blank=True)
     matched_uid = models.CharField(max_length=255, null=True, blank=True)
+    agency = models.CharField(max_length=255, null=True, blank=True)
     pdf_db_path = models.CharField(max_length=255, null=True, blank=True)
     pdf_db_content_hash = models.CharField(max_length=255, null=True, blank=True)
     txt_db_id = models.CharField(max_length=255, null=True, blank=True)
@@ -36,4 +38,7 @@ class Document(TimeStampsModel):
     objects = DocumentManager()
 
     class Meta:
-        unique_together = ('docid', 'hrg_no', 'matched_uid')
+        unique_together = ('docid', 'hrg_no', 'matched_uid', 'agency')
+
+    def __str__(self):
+        return f'{self.id} - {self.title[:50]}...'
