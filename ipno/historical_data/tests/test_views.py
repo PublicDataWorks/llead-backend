@@ -1,4 +1,5 @@
 import datetime
+from urllib.parse import urlencode
 
 from django.urls import reverse
 from rest_framework import status
@@ -338,3 +339,471 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert result == expected_data
         assert user.recent_queries == ['query 1', 'query 2']
+
+    def test_delete_recent_officer_successfully(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+            'type': RECENT_OFFICER_TYPE,
+            'id': officer.id
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"detail": "deleted user recent item"}
+
+        result = response.data
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_items == [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+
+    def test_delete_recent_department_successfully(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"detail": "deleted user recent item"}
+
+        result = response.data
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_items == [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+
+    def test_delete_recent_document_successfully(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"detail": "deleted user recent item"}
+
+        result = response.data
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_items == [
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+
+    def test_delete_recent_news_article_successfully(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"detail": "deleted user recent item"}
+
+        result = response.data
+        user = User.objects.first()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result == expected_data
+        assert user.recent_items == [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            }
+        ]
+
+    def test_not_delete_non_existed_item(self):
+        department_1 = DepartmentFactory(name='Baton Rouge PD')
+        department_2 = DepartmentFactory(name='New Orleans PD')
+
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department_1)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department_1.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department_2.slug
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = None
+
+        result = response.data
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert result == expected_data
+
+    def test_delete_without_item_type(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+            'id': department.slug
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"error": "id and type is required"}
+
+        result = response.data
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert result == expected_data
+
+    def test_delete_without_item_id(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+            'type': RECENT_DEPARTMENT_TYPE
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = {"error": "id and type is required"}
+
+        result = response.data
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert result == expected_data
+
+    def test_not_delete_department_with_digit_item_id(self):
+        department = DepartmentFactory(name='Baton Rouge PD')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        source = NewsArticleSourceFactory(source_display_name='dummy')
+        news_article = NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 7).date(),
+            source=source
+        )
+
+        document = DocumentFactory()
+        document.departments.add(department)
+
+        self.user.recent_items = [
+            {
+                'type': RECENT_DOCUMENT_TYPE,
+                'id': document.id
+            },
+            {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': department.slug
+            },
+            {
+                'type': RECENT_OFFICER_TYPE,
+                'id': officer.id
+            },
+            {
+                'type': RECENT_NEWS_ARTICLE_TYPE,
+                'id': news_article.id,
+            }
+        ]
+        self.user.save()
+
+        data = {
+                'type': RECENT_DEPARTMENT_TYPE,
+                'id': '1'
+        }
+
+        delete_url = reverse('api:historical-data-recent-items')
+        params = urlencode(data)
+
+        response = self.auth_client.delete(
+            f'{delete_url}?{params}'
+        )
+
+        expected_data = None
+
+        result = response.data
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert result == expected_data

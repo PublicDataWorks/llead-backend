@@ -18,7 +18,7 @@ from data.constants import (
     IMPORT_LOG_STATUS_NO_NEW_COMMIT,
     IMPORT_LOG_STATUS_RUNNING,
     IMPORT_LOG_STATUS_FINISHED,
-    IMPORT_LOG_STATUS_ERROR
+    IMPORT_LOG_STATUS_ERROR, IMPORT_LOG_STATUS_NO_NEW_DATA
 )
 from utils.parse_utils import parse_int
 
@@ -28,27 +28,32 @@ class BaseImporter(object):
     ATTRIBUTES = []
     NA_ATTRIBUTES = []
     INT_ATTRIBUTES = []
+    SLUG_ATTRIBUTES = []
     BATCH_SIZE = 500
     WRGL_OFFSET_BATCH_SIZE = 1000
     branch = 'main'
     new_commit = None
     column_mappings = {}
+    old_column_mappings = {}
 
     def format_agency(self, agency):
         agency = re.sub('CSD$', 'PD', agency)
         return re.sub('SO$', 'Sheriff', agency)
 
-    def parse_row_data(self, row):
+    def parse_row_data(self, row, mappings):
         row_data = {
-            attr: row[self.column_mappings[attr]] if row[self.column_mappings[attr]] else None
-            for attr in self.ATTRIBUTES if attr in self.column_mappings
+            attr: row[mappings[attr]] if row[mappings[attr]] else None
+            for attr in self.ATTRIBUTES if attr in mappings
         }
 
         for attr in self.NA_ATTRIBUTES:
-            row_data[attr] = row[self.column_mappings[attr]] if row[self.column_mappings[attr]] != 'NA' else None
+            row_data[attr] = row[mappings[attr]] if row[mappings[attr]] != 'NA' else None
 
         for attr in self.INT_ATTRIBUTES:
-            row_data[attr] = parse_int(row[self.column_mappings[attr]]) if row[self.column_mappings[attr]] else None
+            row_data[attr] = parse_int(row[mappings[attr]]) if row[mappings[attr]] else None
+
+        for attr in self.SLUG_ATTRIBUTES:
+            row_data[attr] = slugify(row[mappings[attr]]) if row[mappings[attr]] else None
 
         return row_data
 
@@ -74,7 +79,13 @@ class BaseImporter(object):
 
     def process_wrgl_data(self, old_commit_hash):
         diff_result = self.repo.diff(self.new_commit.sum, old_commit_hash)
+        if not diff_result.row_diff:
+            return
+
         old_commit = self.repo.get_commit(old_commit_hash)
+
+        old_columns = old_commit.table.columns
+        self.old_column_mappings = {column: old_columns.index(column) for column in old_columns}
 
         added_rows = []
         deleted_rows = []
@@ -128,14 +139,6 @@ class BaseImporter(object):
             'deleted_rows': deleted_rows,
             'updated_rows': modified_rows_old,
         }
-
-    def get_all_diff_rows(self, raw_data):
-        rows = []
-
-        for value in raw_data.values():
-            rows.extend(value)
-
-        return rows
 
     def bulk_import(self, klass, new_items_attrs, update_items_attrs, delete_items_ids, cleanup_action=None):
         delete_items = klass.objects.filter(id__in=delete_items_ids)
@@ -222,20 +225,33 @@ class BaseImporter(object):
                                 'deleted_rows': [],
                                 'updated_rows': [],
                             }
-                        import_results = self.import_data(data)
-                        wrgl_repo.commit_hash = commit_hash
-                        wrgl_repo.save()
-                        self.update_import_log(
-                            import_log,
-                            {
-                                'status': IMPORT_LOG_STATUS_FINISHED,
-                                'finished_at': datetime.now(pytz.utc),
-                                'created_rows': import_results.get('created_rows'),
-                                'updated_rows': import_results.get('updated_rows'),
-                                'deleted_rows': import_results.get('deleted_rows')
-                            }
-                        )
-                        return True
+
+                        if data:
+                            import_results = self.import_data(data)
+                            wrgl_repo.commit_hash = commit_hash
+                            wrgl_repo.save()
+                            self.update_import_log(
+                                import_log,
+                                {
+                                    'status': IMPORT_LOG_STATUS_FINISHED,
+                                    'finished_at': datetime.now(pytz.utc),
+                                    'created_rows': import_results.get('created_rows'),
+                                    'updated_rows': import_results.get('updated_rows'),
+                                    'deleted_rows': import_results.get('deleted_rows')
+                                }
+                            )
+                            return True
+                        else:
+                            wrgl_repo.commit_hash = commit_hash
+                            wrgl_repo.save()
+                            self.update_import_log(
+                                import_log,
+                                {
+                                    'commit_hash': commit_hash,
+                                    'status': IMPORT_LOG_STATUS_NO_NEW_DATA,
+                                    'finished_at': datetime.now(pytz.utc),
+                                }
+                            )
                     except Exception:
                         self.update_import_log(
                             import_log,
