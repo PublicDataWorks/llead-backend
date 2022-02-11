@@ -801,6 +801,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 2,
                 'badges': ["150", "200", "250", "100"],
                 'complaints_count': officer_2.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': officer_4.id,
@@ -809,6 +815,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': officer_3.id,
@@ -817,6 +829,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123"],
                 'complaints_count': officer_3.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -831,6 +849,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         for starred_officer in starred_officers:
             department.starred_officers.add(starred_officer)
             starred_person.officers.add(starred_officer)
+            EventFactory(
+                department=department,
+                officer=starred_officer,
+            )
         department.save()
         starred_person.save()
 
@@ -853,6 +875,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_officers[1].id,
@@ -861,6 +889,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_officers[2].id,
@@ -869,6 +903,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1077,6 +1117,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         starred_document = DocumentFactory(incident_date=datetime(2017, 8, 10))
         department.starred_documents.add(starred_document)
+        starred_document.departments.add(department)
 
         featured_document_1 = DocumentFactory(incident_date=current_date)
         featured_document_1.departments.add(department)
@@ -1100,6 +1141,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_document.preview_image_url,
                 'pages_count': starred_document.pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_1.id,
@@ -1109,6 +1156,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_1.preview_image_url,
                 'pages_count': featured_document_1.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_2.id,
@@ -1118,6 +1171,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_2.preview_image_url,
                 'pages_count': featured_document_2.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_3.id,
@@ -1127,6 +1186,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_3.preview_image_url,
                 'pages_count': featured_document_3.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1140,6 +1205,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         starred_documents = DocumentFactory.create_batch(3)
         for document in starred_documents:
             department.starred_documents.add(document)
+            document.departments.add(department)
 
         featured_document = DocumentFactory()
         featured_document.departments.add(department)
@@ -1157,6 +1223,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[0].preview_image_url,
                 'pages_count': starred_documents[0].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_documents[1].id,
@@ -1166,6 +1238,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[1].preview_image_url,
                 'pages_count': starred_documents[1].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_documents[2].id,
@@ -1175,6 +1253,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[2].preview_image_url,
                 'pages_count': starred_documents[2].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1377,6 +1461,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123", "200"],
                 'complaints_count': officer_3.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': officer_4.id,
@@ -1385,6 +1475,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': officer_2.id,
@@ -1393,6 +1489,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': ["100", "150", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1533,6 +1635,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             }
         ]
 
