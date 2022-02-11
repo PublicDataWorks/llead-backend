@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from mock import Mock
 
+from people.factories import PersonFactory
 from search.serializers.es_serializers import OfficersESSerializer
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
@@ -14,6 +15,15 @@ class OfficersESSerializerTestCase(TestCase):
         officer_2 = OfficerFactory(first_name='David', last_name='Jonesworth')
         officer_3 = OfficerFactory(first_name='Anthony', last_name='Davis')
         OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+        person_3 = PersonFactory(canonical_officer=officer_3)
+        person_3.officers.add(officer_3)
+        person_3.save()
 
         department = DepartmentFactory()
         EventFactory(

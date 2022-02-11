@@ -74,5 +74,11 @@ class DepartmentOfficerSerializerTestCase(TestCase):
                 'is_starred': False,
                 'complaints_count': officer_1.person.all_complaints_count,
                 'use_of_forces_count': 1,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    },
+                ],
             }
         ]

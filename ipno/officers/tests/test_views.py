@@ -112,7 +112,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             {
                 'id': officer_1.id,
                 'name': 'David Jonesworth',
-                'badges': ['12435', '67893', '5432'],
+                'badges': ['67893', '12435', '5432'],
                 'department': {
                     'id': department.slug,
                     'name': department.name,
