@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from departments.models import Department
+from shared.serializers import SimpleDepartmentSerializer
+
 
 class DepartmentOfficerSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -9,6 +12,7 @@ class DepartmentOfficerSerializer(serializers.Serializer):
 
     badges = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
+    departments = serializers.SerializerMethodField()
 
     def get_badges(self, obj):
         all_officers = obj.person.officers.all()
@@ -22,3 +26,7 @@ class DepartmentOfficerSerializer(serializers.Serializer):
 
     def get_complaints_count(self, obj):
         return obj.person.all_complaints_count
+
+    def get_departments(self, obj):
+        departments = Department.objects.filter(officers=obj).distinct()
+        return SimpleDepartmentSerializer(departments, many=True).data
