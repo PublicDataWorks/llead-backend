@@ -6,6 +6,7 @@ from rest_framework import status
 
 from authentication.models import User
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
@@ -24,6 +25,9 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         department_2 = DepartmentFactory(name='New Orleans PD')
 
         officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
         EventFactory(
             officer=officer,
             department=department_2,

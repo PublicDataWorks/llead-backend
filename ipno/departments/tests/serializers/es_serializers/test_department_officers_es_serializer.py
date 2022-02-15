@@ -18,10 +18,10 @@ class OfficersESSerializerTestCase(TestCase):
         officer_1.save()
         officer_2 = OfficerFactory(first_name='Kenneth', last_name='Anders', person=person)
 
-        department = DepartmentFactory()
+        department_1 = DepartmentFactory()
 
         uof_receive_event_1 = EventFactory(
-            department=department,
+            department=department_1,
             officer=officer_1,
             kind=UOF_RECEIVE,
             year=2018,
@@ -33,6 +33,7 @@ class OfficersESSerializerTestCase(TestCase):
 
         uof_receive_event_2 = EventFactory(
             officer=officer_1,
+            department=department_1,
             kind=UOF_RECEIVE,
             year=2020,
             month=5,
@@ -41,10 +42,10 @@ class OfficersESSerializerTestCase(TestCase):
         uof_2 = UseOfForceFactory(uof_uid='uof-uid2', officer=officer_1)
         uof_2.events.add(uof_receive_event_2)
 
-        department = DepartmentFactory()
+        department_2 = DepartmentFactory()
         EventFactory(
             officer=officer_1,
-            department=department,
+            department=department_2,
             kind=OFFICER_HIRE,
             badge_no='12345',
             year=2020,
@@ -53,6 +54,7 @@ class OfficersESSerializerTestCase(TestCase):
         )
         EventFactory(
             officer=officer_2,
+            department=department_2,
             badge_no='23456',
             year=2015,
             month=7,
@@ -71,6 +73,16 @@ class OfficersESSerializerTestCase(TestCase):
                 'badges': ['12345', '23456'],
                 'use_of_forces_count': 2,
                 'complaints_count': 5,
+                'departments': [
+                    {
+                        'id': department_1.slug,
+                        'name': department_1.name,
+                    },
+                    {
+                        'id': department_2.slug,
+                        'name': department_2.name,
+                    },
+                ],
             }
         ]
 
