@@ -215,9 +215,10 @@ class DocumentImporterTestCase(TestCase):
         assert download_url is None
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('data.services.document_importer.requests.get')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    def test_process_successfully(self, generate_from_blob_mock):
+    def test_process_successfully(self, generate_from_blob_mock, get_mock):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
@@ -294,6 +295,9 @@ class DocumentImporterTestCase(TestCase):
         }
 
         document_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
@@ -423,9 +427,10 @@ class DocumentImporterTestCase(TestCase):
         assert mock_upload_file.call_count == 6
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('data.services.document_importer.requests.get')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    def test_process_successfully_with_columns_changed(self, generate_from_blob_mock):
+    def test_process_successfully_with_columns_changed(self, generate_from_blob_mock, get_mock):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
@@ -503,6 +508,9 @@ class DocumentImporterTestCase(TestCase):
         }
 
         document_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
@@ -688,3 +696,69 @@ class DocumentImporterTestCase(TestCase):
         ocr_text = document_importer.get_ocr_text(ocr_text_id)
 
         assert ocr_text == ''
+
+    @patch('data.services.document_importer.requests.get')
+    def test_handle_pdf_file_process_success(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = 'pdf_db_path'
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {
+            'document_url': 'https://storage.googleapis.com/llead-documents-test/pdf_db_path',
+            'document_preview_url': 'preview_image_blob',
+            'document_type': 'application/pdf',
+        }
+
+    @patch('data.services.document_importer.requests.get')
+    def test_handle_doc_file_process_success(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/msword'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = 'pdf_db_path'
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {
+            'document_url': 'https://storage.googleapis.com/llead-documents-test/pdf_db_path',
+            'document_preview_url': None,
+            'document_type': 'application/msword',
+        }
+
+    @patch('data.services.document_importer.requests.get')
+    @override_settings(GC_PATH='')
+    def test_handle_file_process_fail(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = ''
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {}
