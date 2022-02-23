@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ipno-backend
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: ipno-backend
@@ -28,7 +28,7 @@ spec:
           imagePullPolicy: Always
           resources:
             requests:
-              cpu: 800m
+              cpu: 500m
               memory: 1Gi
           env:
             - name: POSTGRES_USER
