@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page, cache_control
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -16,6 +19,8 @@ from shared.serializers import OfficerSerializer
 class OfficersViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
+    @cache_control(no_store=True)
     def list(self, request):
         officers = Officer.objects.prefetch_events().filter(
             canonical_person__isnull=False
@@ -26,6 +31,8 @@ class OfficersViewSet(viewsets.ViewSet):
         serializer = OfficerSerializer(officers, many=True)
         return Response(serializer.data)
 
+    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
+    @cache_control(no_store=True)
     def retrieve(self, request, pk):
         officer = get_object_or_404(Officer.objects.prefetch_related('person__canonical_officer'), id=pk)
         serializer = OfficerDetailsSerializer(officer.person.canonical_officer)
@@ -33,6 +40,8 @@ class OfficersViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='timeline')
+    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
+    @cache_control(no_store=True)
     def timeline(self, request, pk):
         officer = get_object_or_404(Officer, id=pk)
 

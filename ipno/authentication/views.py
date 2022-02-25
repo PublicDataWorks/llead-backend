@@ -4,6 +4,9 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page, cache_control
+from django.views.decorators.vary import vary_on_headers
 
 from rest_framework import exceptions
 from rest_framework.serializers import Serializer, CharField
@@ -43,6 +46,9 @@ class TokenRevokeView(APIView):
 class UserView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(vary_on_headers("Authorization", ))
+    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
+    @cache_control(no_store=True)
     def get(self, request):
         user = request.user
         return Response(UserSerializer(user).data)

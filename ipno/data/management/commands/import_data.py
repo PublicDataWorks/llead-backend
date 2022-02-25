@@ -1,4 +1,5 @@
 from django.core.management import BaseCommand
+from django.core.cache import cache
 from django.utils import timezone
 
 from data.services import (
@@ -56,3 +57,6 @@ class Command(BaseCommand):
         ]):
             print('Rebuilding search index')
             rebuild_search_index()
+
+            print('Flushing cache table')
+            cache.clear()
