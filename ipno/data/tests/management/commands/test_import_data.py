@@ -9,6 +9,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
+    @patch('django.core.cache.cache.clear')
     @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('utils.data_utils.compute_department_data_period')
@@ -29,6 +30,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             rebuild_search_index_mock,
             count_complaints_mock,
             compute_department_data_period_mock,
+            cache_clear_mock,
     ):
         person_process_mock.return_value = True
         document_process_mock.return_value = True
@@ -47,7 +49,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         rebuild_search_index_mock.assert_called()
         count_complaints_mock.assert_called()
         compute_department_data_period_mock.assert_called()
+        cache_clear_mock.assert_called()
 
+    @patch('django.core.cache.cache.clear')
     @patch('utils.count_complaints.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
     @patch('utils.data_utils.compute_department_data_period')
@@ -68,6 +72,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             rebuild_search_index_mock,
             count_complaints_mock,
             compute_department_data_period_mock,
+            cache_clear_mock,
     ):
         person_process_mock.return_value = False
         document_process_mock.return_value = False
@@ -86,3 +91,4 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         rebuild_search_index_mock.assert_not_called()
         count_complaints_mock.assert_not_called()
         compute_department_data_period_mock.assert_not_called()
+        cache_clear_mock.assert_not_called()
