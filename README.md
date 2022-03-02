@@ -35,6 +35,9 @@
 - Follow the step in local run with option `--logging`: `bin/manage.sh --logging`
 - Run `docker-compose -f docker-compose-logging.yml up `
 
+## Automatically push code to `llead-backend` repository
+- The pushing code process is performed by `CircleCI` which is setup in `config.yml` file  
+
 ## Docs
 - [Set up ingress tls](docs/setup-ingress-tls.md)
 - [Circleci](docs/circleci.md)
