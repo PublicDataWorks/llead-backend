@@ -4,6 +4,7 @@ OFFICER_MODEL_NAME = 'Officer'
 EVENT_MODEL_NAME = 'Event'
 COMPLAINT_MODEL_NAME = 'Complaint'
 USE_OF_FORCE_MODEL_NAME = 'UseOfForce'
+APPEAL_MODEL_NAME = 'Appeal'
 DOCUMENT_MODEL_NAME = 'Document'
 NEWS_ARTICLE_MODEL_NAME = 'NewsArticle'
 NEWS_ARTICLE_OFFICER_MODEL_NAME = 'NewsArticleOfficer'
@@ -40,6 +41,10 @@ WRGL_REPOS_DEFAULT = [
     {
         'repo_name': 'person',
         'data_model': PERSON_MODEL_NAME,
+    },
+    {
+        'repo_name': 'appeal-hearing',
+        'data_model': APPEAL_MODEL_NAME,
     },
 ]
 
