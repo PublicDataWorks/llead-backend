@@ -6,6 +6,7 @@ from appeals.models import Appeal
 
 class AppealAdmin(ModelAdmin):
     list_display = ('id', 'appeal_uid', 'created_at', 'updated_at')
+    search_fields = ('id',)
     raw_id_fields = ('officer', 'department', )
 
 
