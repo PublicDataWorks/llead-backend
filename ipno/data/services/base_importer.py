@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from wrgl import Repository
 from tqdm import tqdm
 
+from appeals.models import Appeal
 from departments.models import Department
 from officers.models import Officer
 from use_of_forces.models import UseOfForce
@@ -76,6 +77,9 @@ class BaseImporter(object):
 
     def get_uof_mappings(self):
         return {use_of_force.uof_uid: use_of_force.id for use_of_force in UseOfForce.objects.only('id', 'uof_uid')}
+
+    def get_appeal_mappings(self):
+        return {appeal.appeal_uid: appeal.id for appeal in Appeal.objects.only('id', 'appeal_uid')}
 
     def process_wrgl_data(self, old_commit_hash):
         diff_result = self.repo.diff(self.new_commit.sum, old_commit_hash)
