@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
+from appeals.factories import AppealFactory
 from news_articles.factories import NewsArticleFactory
 from officers.serializers import (
     ComplaintTimelineSerializer,
@@ -23,10 +24,12 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
+    APPEAL_TIMELINE_KIND,
 )
 from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
-from officers.serializers.officer_timeline_serializers import NewsArticleTimelineSerializer, BaseTimelineSerializer
+from officers.serializers.officer_timeline_serializers import NewsArticleTimelineSerializer, BaseTimelineSerializer, \
+    AppealTimelineSerializer
 from use_of_forces.factories import UseOfForceFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
@@ -219,6 +222,52 @@ class UseOfForceTimelineSerializerTestCase(TestCase):
             'citizen_hospitalized': use_of_force.citizen_hospitalized,
             'officer_injured': use_of_force.officer_injured,
             'traffic_stop': use_of_force.traffic_stop,
+        }
+
+
+class AppealTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        appeal = AppealFactory()
+        EventFactory(
+            year=2019,
+            month=5,
+            day=4,
+            appeal=appeal,
+        )
+
+        result = AppealTimelineSerializer(appeal).data
+        assert result == {
+            'id': appeal.id,
+            'kind': APPEAL_TIMELINE_KIND,
+            'date': str(date(2019, 5, 4)),
+            'year': 2019,
+            'docket_no': appeal.docket_no,
+            'counsel': appeal.counsel,
+            'charging_supervisor': appeal.charging_supervisor,
+            'appeal_disposition': appeal.appeal_disposition,
+            'action_appealed': appeal.action_appealed,
+            'appealed': appeal.appealed,
+            'motions': appeal.motions,
+            'department': appeal.department.name,
+        }
+
+    def test_data_with_empty_date(self):
+        appeal = AppealFactory()
+        result = AppealTimelineSerializer(appeal).data
+
+        assert result == {
+            'id': appeal.id,
+            'kind': APPEAL_TIMELINE_KIND,
+            'date': None,
+            'year': None,
+            'docket_no': appeal.docket_no,
+            'counsel': appeal.counsel,
+            'charging_supervisor': appeal.charging_supervisor,
+            'appeal_disposition': appeal.appeal_disposition,
+            'action_appealed': appeal.action_appealed,
+            'appealed': appeal.appealed,
+            'motions': appeal.motions,
+            'department': appeal.department.name,
         }
 
 
