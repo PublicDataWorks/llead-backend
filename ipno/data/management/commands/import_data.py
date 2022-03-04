@@ -24,10 +24,10 @@ class Command(BaseCommand):
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
+        appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
         person_imported = PersonImporter().process()
-        appeal_imported = AppealImporter().process()
 
         ProcessRematchOfficers(start_time).process()
 
