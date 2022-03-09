@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ipno-backend
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: ipno-backend
@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: ipno-backend
+      annotations:
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
     spec:
       containers:
         - name: ipno-backend-app
@@ -28,7 +30,7 @@ spec:
           imagePullPolicy: Always
           resources:
             requests:
-              cpu: 800m
+              cpu: 500m
               memory: 1Gi
           env:
             - name: POSTGRES_USER
