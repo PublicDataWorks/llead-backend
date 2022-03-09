@@ -39,7 +39,7 @@ class Complaint(TimeStampsModel):
     rank_desc = models.CharField(max_length=255, null=True, blank=True)
     employment_status = models.CharField(max_length=255, null=True, blank=True)
     traffic_stop = models.CharField(max_length=255, null=True, blank=True)
-    allegation_desc = models.CharField(max_length=255, null=True, blank=True)
+    allegation_desc = models.TextField(null=True, blank=True)
 
     officers = models.ManyToManyField('officers.Officer', blank=True, related_name='complaints')
     departments = models.ManyToManyField('departments.Department', blank=True, related_name='complaints')
