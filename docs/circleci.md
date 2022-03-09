@@ -11,3 +11,7 @@
 - Using for google oauth
 - Create a service account -> download the JSON-formatted key file
 - cat <gcloud-credentials.json> | base64
+
+### API_TOKEN_GITHUB
+- Github Personal api token, uses for automatically pushing source code to `llead-backend` repository
+- Generate a new personal token in this [link](https://github.com/settings/tokens/new)
