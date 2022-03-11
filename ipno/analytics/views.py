@@ -33,10 +33,24 @@ class AnalyticsViewSet(ViewSet):
         summary_data = {
             'documents_count': Document.objects.count(),
             'officers_count': Officer.objects.filter(canonical_person__isnull=False).count(),
-            'departments_count': Department.objects.count(),
+            'departments_count': Department.objects.exclude(
+                complaints__isnull=True,
+                use_of_forces__isnull=True,
+                documents__isnull=True,
+            ).count(),
             'recent_documents_count': Document.objects.filter(created_at__gt=date_n).count(),
-            'recent_officers_count': Officer.objects.filter(canonical_person__isnull=False, created_at__gt=date_n).count(),
-            'recent_departments_count': Department.objects.filter(created_at__gt=date_n).count(),
+            'recent_officers_count': Officer.objects.filter(
+                canonical_person__isnull=False,
+                created_at__gt=date_n,
+            ).count(),
+            'recent_departments_count': Department.objects.filter(
+                created_at__gt=date_n,
+            ).exclude(
+                complaints__isnull=True,
+                use_of_forces__isnull=True,
+                documents__isnull=True,
+            ).count(),
+
             'recent_days': recent_date,
         }
 
