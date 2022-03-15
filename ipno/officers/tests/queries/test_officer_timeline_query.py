@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
+from appeals.factories import AppealFactory
 from news_articles.factories import NewsArticleFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.queries import OfficerTimelineQuery
@@ -30,7 +31,7 @@ from officers.constants import (
     ALLEGATION_CREATE,
     INVESTIGATION_COMPLETE,
     SUSPENSION_START,
-    SUSPENSION_END,
+    SUSPENSION_END, APPEAL_HEARING, APPEAL_TIMELINE_KIND,
 )
 from officers.constants import (
     OFFICER_HIRE,
@@ -157,6 +158,15 @@ class OfficerTimelineQueryTestCase(TestCase):
             use_of_force=use_of_force,
         )
 
+        appeal = AppealFactory(officer=officer)
+        EventFactory(
+            kind=APPEAL_HEARING,
+            year=2019,
+            month=5,
+            day=10,
+            appeal=appeal,
+        )
+
         expected_result = [
             {
                 'id': complaint_2.id,
@@ -264,6 +274,20 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'citizen_hospitalized': use_of_force.citizen_hospitalized,
                 'officer_injured': use_of_force.officer_injured,
                 'traffic_stop': use_of_force.traffic_stop,
+            },
+            {
+                'id': appeal.id,
+                'kind': APPEAL_TIMELINE_KIND,
+                'date': str(date(2019, 5, 10)),
+                'year': 2019,
+                'action_appealed': appeal.action_appealed,
+                'appeal_disposition': appeal.appeal_disposition,
+                'appealed': appeal.appealed,
+                'charging_supervisor': appeal.charging_supervisor,
+                'counsel': appeal.counsel,
+                'docket_no': appeal.docket_no,
+                'motions': appeal.motions,
+                'department': appeal.department.name,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
@@ -878,6 +902,15 @@ class OfficerTimelineQueryTestCase(TestCase):
             use_of_force=use_of_force,
         )
 
+        appeal = AppealFactory(officer=officer)
+        EventFactory(
+            kind=APPEAL_HEARING,
+            year=2019,
+            month=5,
+            day=10,
+            appeal=appeal,
+        )
+
         expected_result = [
             {
                 'id': complaint_2.id,
@@ -985,6 +1018,20 @@ class OfficerTimelineQueryTestCase(TestCase):
                 'citizen_hospitalized': use_of_force.citizen_hospitalized,
                 'officer_injured': use_of_force.officer_injured,
                 'traffic_stop': use_of_force.traffic_stop,
+            },
+            {
+                'id': appeal.id,
+                'kind': APPEAL_TIMELINE_KIND,
+                'date': str(date(2019, 5, 10)),
+                'year': 2019,
+                'action_appealed': appeal.action_appealed,
+                'appeal_disposition': appeal.appeal_disposition,
+                'appealed': appeal.appealed,
+                'charging_supervisor': appeal.charging_supervisor,
+                'counsel': appeal.counsel,
+                'docket_no': appeal.docket_no,
+                'motions': appeal.motions,
+                'department': appeal.department.name,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,

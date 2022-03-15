@@ -42,3 +42,6 @@ class Event(TimeStampsModel):
     use_of_force = models.ForeignKey(
         'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, blank=True, related_name='events'
     )
+    appeal = models.ForeignKey(
+        'appeals.Appeal', on_delete=models.CASCADE, null=True, blank=True, related_name='events'
+    )
