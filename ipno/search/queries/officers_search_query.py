@@ -4,4 +4,4 @@ from officers.documents import OfficerESDoc
 
 class OfficersSearchQuery(BaseSearchQuery):
     document_klass = OfficerESDoc
-    fields = ['name', 'badges', 'department_names']
+    fields = ['name']
