@@ -1,5 +1,6 @@
 from django.db.models import Prefetch, Q
 
+from appeals.models import Appeal
 from complaints.models import Complaint
 from departments.models import Department
 from documents.models import Document
@@ -14,6 +15,7 @@ from officers.serializers import (
     RankChangeTimelineSerializer,
     UnitChangeTimelineSerializer,
     NewsArticleTimelineSerializer,
+    AppealTimelineSerializer,
 )
 from officers.constants import (
     COMPLAINT_ALL_EVENTS,
@@ -83,6 +85,14 @@ class OfficerTimelineQuery(object):
         use_of_force_timeline_queryset = UseOfForce.objects.prefetch_related('events').filter(officer__in=self.all_officers)
 
         return UseOfForceTimelineSerializer(use_of_force_timeline_queryset, many=True).data
+
+    @property
+    def _appeal_timeline(self):
+        appeal_timeline_queryset = Appeal.objects.prefetch_related('events').filter(
+            officer__in=self.all_officers
+        )
+
+        return AppealTimelineSerializer(appeal_timeline_queryset, many=True).data
 
     @property
     def _join_timeline(self):
@@ -189,7 +199,7 @@ class OfficerTimelineQuery(object):
     def query(self):
         timeline = self._complaint_timeline + self._use_of_force_timeline + self._join_timeline + self._left_timeline \
                    + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
-                   + self._unit_change_timeline + self._news_aticle_timeline
+                   + self._unit_change_timeline + self._news_aticle_timeline + self._appeal_timeline
 
         timeline_period = self._get_timeline_period(self._complaint_timeline + self._use_of_force_timeline)
 

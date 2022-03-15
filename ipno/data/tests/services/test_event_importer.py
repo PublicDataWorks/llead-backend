@@ -5,6 +5,7 @@ from django.test.testcases import TestCase, override_settings
 
 from mock import patch, Mock
 
+from appeals.factories import AppealFactory
 from data.services import EventImporter
 from data.models import ImportLog
 from data.constants import IMPORT_LOG_STATUS_FINISHED
@@ -61,6 +62,9 @@ class EventImporterTestCase(TestCase):
 
         uof_1 = UseOfForceFactory(uof_uid='uof-uid1')
         uof_2 = UseOfForceFactory(uof_uid='uof-uid2')
+
+        appeal_1 = AppealFactory(appeal_uid='appeal-uid1')
+        appeal_2 = AppealFactory(appeal_uid='appeal-uid2')
 
         complaint_1 = ComplaintFactory(allegation_uid='complaint-uid1')
         complaint_3 = ComplaintFactory(allegation_uid='complaint-uid2')
@@ -124,7 +128,7 @@ class EventImporterTestCase(TestCase):
 
         self.event_importer.retrieve_wrgl_data.assert_called_with('event_repo')
 
-        check_columns = self.header + ['department_id', 'officer_id', 'use_of_force_id', 'complaint_ids']
+        check_columns = self.header + ['department_id', 'officer_id', 'use_of_force_id', 'complaint_ids', 'appeal_id']
         check_column_mappings = {column: check_columns.index(column) for column in check_columns}
 
         expected_event1_data = self.event1_data.copy()
@@ -132,30 +136,35 @@ class EventImporterTestCase(TestCase):
         expected_event1_data.append(officer_1.id)
         expected_event1_data.append(None)
         expected_event1_data.append({complaint_1.id})
+        expected_event1_data.append({appeal_1.id})
 
         expected_event2_data = self.event2_data.copy()
         expected_event2_data.append(None)
         expected_event2_data.append(None)
         expected_event2_data.append(uof_1.id)
         expected_event2_data.append(set())
+        expected_event2_data.append(None)
 
         expected_event3_data = self.event3_data.copy()
         expected_event3_data.append(department_2.id)
         expected_event3_data.append(officer_2.id)
         expected_event3_data.append(uof_2.id)
         expected_event3_data.append(set())
+        expected_event3_data.append({appeal_2.id})
 
         expected_event4_data = self.event4_data.copy()
         expected_event4_data.append(department_1.id)
         expected_event4_data.append(None)
         expected_event4_data.append(None)
         expected_event4_data.append(set())
+        expected_event4_data.append(None)
 
         expected_event5_data = self.event5_data.copy()
         expected_event5_data.append(department_2.id)
         expected_event5_data.append(officer_3.id)
         expected_event5_data.append(None)
         expected_event5_data.append({complaint_3.id})
+        expected_event5_data.append(None)
 
         expected_events_data = [
             expected_event1_data,
@@ -239,6 +248,9 @@ class EventImporterTestCase(TestCase):
         uof_1 = UseOfForceFactory(uof_uid='uof-uid1')
         uof_2 = UseOfForceFactory(uof_uid='uof-uid2')
 
+        appeal_1 = AppealFactory(appeal_uid='appeal-uid1')
+        appeal_2 = AppealFactory(appeal_uid='appeal-uid2')
+
         complaint_1 = ComplaintFactory(allegation_uid='complaint-uid1')
         complaint_3 = ComplaintFactory(allegation_uid='complaint-uid2')
 
@@ -302,7 +314,7 @@ class EventImporterTestCase(TestCase):
 
         self.event_importer.retrieve_wrgl_data.assert_called_with('event_repo')
 
-        check_columns = self.header + ['department_id', 'officer_id', 'use_of_force_id', 'complaint_ids']
+        check_columns = self.header + ['department_id', 'officer_id', 'use_of_force_id', 'complaint_ids', 'appeal_id']
         check_column_mappings = {column: check_columns.index(column) for column in check_columns}
 
         expected_event1_data = self.event1_data.copy()
@@ -310,30 +322,35 @@ class EventImporterTestCase(TestCase):
         expected_event1_data.append(officer_1.id)
         expected_event1_data.append(None)
         expected_event1_data.append({complaint_1.id})
+        expected_event1_data.append({appeal_1.id})
 
         expected_event2_data = self.event2_data.copy()
         expected_event2_data.append(None)
         expected_event2_data.append(None)
         expected_event2_data.append(uof_1.id)
         expected_event2_data.append(set())
+        expected_event2_data.append(None)
 
         expected_event3_data = self.event3_data.copy()
         expected_event3_data.append(department_2.id)
         expected_event3_data.append(officer_2.id)
         expected_event3_data.append(uof_2.id)
         expected_event3_data.append(set())
+        expected_event3_data.append({appeal_2.id})
 
         expected_event4_data = self.event4_data.copy()
         expected_event4_data.append(department_1.id)
         expected_event4_data.append(None)
         expected_event4_data.append(None)
         expected_event4_data.append(set())
+        expected_event4_data.append(None)
 
         expected_event5_data = self.event5_data.copy()
         expected_event5_data.append(department_2.id)
         expected_event5_data.append(officer_3.id)
         expected_event5_data.append(None)
         expected_event5_data.append({complaint_3.id})
+        expected_event5_data.append(None)
 
         expected_events_data = [
             expected_event1_data,

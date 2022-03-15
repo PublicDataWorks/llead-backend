@@ -9,6 +9,7 @@ from data.services import (
     UofImporter,
     DocumentImporter,
     PersonImporter,
+    AppealImporter,
 )
 from news_articles.services import ProcessRematchOfficers
 from utils.count_complaints import count_complaints
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
+        appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
         person_imported = PersonImporter().process()
@@ -42,7 +44,8 @@ class Command(BaseCommand):
             officer_imported,
             uof_imported,
             complaint_imported,
-            event_imported
+            event_imported,
+            appeal_imported,
         ]):
             print('Counting department data period')
             compute_department_data_period()
@@ -53,7 +56,8 @@ class Command(BaseCommand):
             complaint_imported,
             event_imported,
             document_imported,
-            person_imported
+            person_imported,
+            appeal_imported,
         ]):
             print('Rebuilding search index')
             rebuild_search_index()

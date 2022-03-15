@@ -14,6 +14,7 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
+    APPEAL_TIMELINE_KIND,
 )
 
 
@@ -117,6 +118,34 @@ class UseOfForceTimelineSerializer(BaseTimelineSerializer):
     def get_year(self, obj):
         receive_event = self._get_receive_event(obj)
         return receive_event.year if receive_event else None
+
+
+class AppealTimelineSerializer(BaseTimelineSerializer):
+    year = serializers.SerializerMethodField()
+    department = serializers.CharField(source='department.name')
+    id = serializers.IntegerField()
+    docket_no = serializers.CharField()
+    counsel = serializers.CharField()
+    charging_supervisor = serializers.CharField()
+    appeal_disposition = serializers.CharField()
+    action_appealed = serializers.CharField()
+    appealed = serializers.CharField()
+    motions = serializers.CharField()
+
+    def get_kind(self, obj):
+        return APPEAL_TIMELINE_KIND
+
+    def get_date(self, obj):
+        if obj.events.all():
+            year = obj.events.all()[0].year
+            month = obj.events.all()[0].month
+            day = obj.events.all()[0].day
+            date = parse_date(year, month, day)
+            return str(date) if date else None
+        return None
+
+    def get_year(self, obj):
+        return obj.events.all()[0].year if obj.events.all() else None
 
 
 class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
