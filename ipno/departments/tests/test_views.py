@@ -31,9 +31,18 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
         department_3 = DepartmentFactory()
+        DepartmentFactory()
 
         department_1_officers = OfficerFactory.create_batch(2)
         department_2_officers = OfficerFactory.create_batch(3)
+
+        document = DocumentFactory()
+        document.departments.add(department_1)
+
+        UseOfForceFactory(department=department_2)
+
+        complaint = ComplaintFactory()
+        complaint.departments.add(department_3)
 
         for officer in department_1_officers:
             EventFactory.create_batch(2, department=department_1, officer=officer)
