@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from mapbox_location_field.models import LocationField
 
 from utils.models import TimeStampsModel
 
@@ -12,6 +13,7 @@ class Department(TimeStampsModel):
     address = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     location_map_url = models.CharField(max_length=255, null=True, blank=True)
+    location = LocationField(null=True, blank=True)
     data_period = ArrayField(models.IntegerField(), default=list)
 
     officers = models.ManyToManyField('officers.Officer', through='officers.Event')

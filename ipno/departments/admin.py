@@ -1,5 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.forms import Media
+from mapbox_location_field.models import LocationField, AddressAutoHiddenField
+from mapbox_location_field.widgets import MapAdminInput, AddressHiddenAdminInput
+
 
 from departments.models import Department, WrglFile
 from news_articles.models import MatchedSentence, NewsArticle
@@ -8,6 +12,26 @@ from news_articles.models import MatchedSentence, NewsArticle
 class DepartmentAdmin(ModelAdmin):
     list_display = ('id', 'name', 'created_at', 'updated_at')
     filter_horizontal = ('starred_officers', 'starred_news_articles', 'starred_documents', )
+
+    change_form_template = "mapbox_location_field/admin_change.html"
+    formfield_overrides = {
+        LocationField: {'widget': MapAdminInput},
+        AddressAutoHiddenField: {"widget": AddressHiddenAdminInput, }
+    }
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """add media that is placed below form as separate argument in context"""
+        extra_context = extra_context or {}
+        extra_context["bottom_media"] = Media(
+            js=("mapbox_location_field/js/map_input.js", "mapbox_location_field/js/address_input.js"))
+        return super().change_view(request, object_id, form_url, extra_context=extra_context, )
+
+    def add_view(self, request, form_url='', extra_context=None):
+        """add media that is placed below form as separate argument in context"""
+        extra_context = extra_context or {}
+        extra_context["bottom_media"] = Media(
+            js=("mapbox_location_field/js/map_input.js", "mapbox_location_field/js/address_input.js"))
+        return super().add_view(request, form_url, extra_context=extra_context, )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "starred_officers":

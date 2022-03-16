@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = (
     'anymail',
     'adminsortable',
     'adminsortable2',
+    'mapbox_location_field',
 )
 
 LOCAL_APPS = (
@@ -199,6 +200,8 @@ WRGL_API_KEY = env.str('WRGL_API_KEY', None)
 DROPBOX_APP_KEY = env.str('DROPBOX_APP_KEY', None)
 DROPBOX_APP_SECRET = env.str('DROPBOX_APP_SECRET', None)
 DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
+
+MAPBOX_KEY = env.str('MAPBOX_KEY', None)
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 
