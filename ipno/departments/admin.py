@@ -11,6 +11,7 @@ from news_articles.models import MatchedSentence, NewsArticle
 
 class DepartmentAdmin(ModelAdmin):
     list_display = ('id', 'name', 'created_at', 'updated_at')
+    search_fields = ('slug', 'name',)
     filter_horizontal = ('starred_officers', 'starred_news_articles', 'starred_documents', )
 
     change_form_template = "mapbox_location_field/admin_change.html"

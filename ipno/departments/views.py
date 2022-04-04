@@ -1,8 +1,9 @@
 from itertools import chain
 
 from django.conf import settings
-from django.db.models import Count, BooleanField, Prefetch
-from django.db.models.expressions import F, Value
+from django.db.models import Count, BooleanField, Prefetch, Sum
+from django.db.models.expressions import F, Value, Case, When
+from django.db.models.fields import IntegerField
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page, cache_control
@@ -19,12 +20,17 @@ from departments.serializers import (
     DepartmentOfficerSerializer,
     DepartmentNewsArticleSerializer,
     DepartmentDocumentSerializer,
+    DepartmentCoordinateSerializer,
+    MigratoryEventSerializer,
 )
 from documents.models import Document
 from news_articles.models import MatchedSentence, NewsArticle
+from officers.constants import OFFICER_LEFT, OFFICER_HIRE
 from officers.models import Officer, Event
+from people.models import Person
 from shared.serializers import DepartmentSerializer
 from utils.es_pagination import ESPagination
+from utils.parse_utils import parse_date
 from departments.serializers import DepartmentDetailsSerializer
 from departments.constants import DEPARTMENTS_LIMIT
 from search.queries import OfficersSearchQuery, NewsArticlesSearchQuery, DocumentsSearchQuery
@@ -231,3 +237,83 @@ class DepartmentsViewSet(viewsets.ViewSet):
         wrgl_serializers = WrglFileSerializer(department.wrgl_files.order_by('position'), many=True)
 
         return Response(wrgl_serializers.data)
+
+    @action(detail=False, methods=['get'], url_path='migratory')
+    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
+    @cache_control(no_store=True)
+    def migratory(self, request):
+        have_left_hire_officers = Officer.objects.annotate(
+            left_count=Sum(Case(When(events__kind=OFFICER_LEFT, then=1), output_field=IntegerField())),
+            hire_count=Sum(Case(When(events__kind=OFFICER_HIRE, then=1), output_field=IntegerField())),
+        ).filter(left_count__gt=0, hire_count__gt=0)
+
+        people = Person.objects.prefetch_related(
+            'officers',
+            Prefetch(
+                'officers__events',
+                queryset=Event.objects.order_by(
+                    F('year').desc(nulls_last=True),
+                    F('month').desc(nulls_last=True),
+                    F('day').desc(nulls_last=True),
+                ).filter(
+                    kind__in=[OFFICER_LEFT, OFFICER_HIRE]
+                ).select_related('officer', 'department'),
+                to_attr='prefetch_hire_left_events'
+            ),
+        ).filter(officers__in=have_left_hire_officers).distinct()
+        migrated_officers = []
+        graphs = []
+
+        migrated_department = set()
+
+        for person in people:
+            officers = person.officers.all()
+            hire_left_events = {}
+
+            for officer in officers:
+                hire_left_officer_events = officer.prefetch_hire_left_events
+                for event in hire_left_officer_events:
+                    event_date = parse_date(event.year, event.month, event.day)
+
+                    if event_date and (event.officer.id, event_date, event.kind) not in hire_left_events:
+                        hire_left_events[(event.officer.id, event_date, event.kind)] = (event_date, event)
+
+            hire_left_dates = list(hire_left_events.values())
+            hire_left_dates.sort(key=lambda x: x[0])
+            lines = []
+
+            for index in range(0, len(hire_left_dates) - 1):
+                if hire_left_dates[index][1].department != hire_left_dates[index + 1][1].department and \
+                        hire_left_dates[index][1].kind == OFFICER_LEFT and \
+                        hire_left_dates[index + 1][1].kind == OFFICER_HIRE:
+                    lines.append((hire_left_dates[index], hire_left_dates[index+1]))
+
+            if len(lines) > 0:
+                migrated_officers.append(officers[0])
+                migratory_event = {}
+
+                for line in lines:
+                    migratory_event['start_node'] = line[0][1].department.slug
+                    migratory_event['end_node'] = line[1][1].department.slug
+                    migratory_event['start_location'] = line[0][1].department.location
+                    migratory_event['end_location'] = line[1][1].department.location
+                    migratory_event['year'] = line[1][1].year
+                    migratory_event['date'] = line[1][0]
+                    migratory_event['officer_name'] = line[0][1].officer.name
+                    migratory_event['officer_id'] = line[0][1].officer.id
+                    graphs.append(migratory_event)
+
+                    migrated_department.add(line[0][1].department.slug)
+                    migrated_department.add(line[1][1].department.slug)
+
+        graphs.sort(key=lambda obj: obj['date'])
+
+        departments = Department.objects.filter(
+            slug__in=migrated_department
+        ).order_by('slug').distinct()
+        nodes = DepartmentCoordinateSerializer(departments, many=True).data
+
+        return Response({
+            "nodes": nodes,
+            "graphs": MigratoryEventSerializer(graphs, many=True).data,
+        })
