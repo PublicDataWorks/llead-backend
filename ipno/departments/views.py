@@ -50,8 +50,12 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
     @cache_control(no_store=True)
     def list(self, request):
-        departments = Department.objects.all().annotate(
-            officersCount=Count('officers__id', distinct=True)
+        departments = Department.objects.exclude(
+                complaints__isnull=True,
+                use_of_forces__isnull=True,
+                documents__isnull=True,
+            ).annotate(
+                officersCount=Count('officers__id', distinct=True)
         ).order_by('-officersCount')[:DEPARTMENTS_LIMIT]
         serializer = DepartmentSerializer(departments, many=True)
         return Response(serializer.data)
