@@ -21,7 +21,6 @@ from departments.serializers import (
     DepartmentNewsArticleSerializer,
     DepartmentDocumentSerializer,
     DepartmentCoordinateSerializer,
-    MigratoryEventSerializer,
 )
 from documents.models import Document
 from news_articles.models import MatchedSentence, NewsArticle
@@ -33,7 +32,10 @@ from utils.es_pagination import ESPagination
 from utils.parse_utils import parse_date
 from departments.serializers import DepartmentDetailsSerializer
 from departments.constants import DEPARTMENTS_LIMIT
-from search.queries import OfficersSearchQuery, NewsArticlesSearchQuery, DocumentsSearchQuery
+from search.queries import (
+    OfficersSearchQuery,
+    NewsArticlesSearchQuery,
+    DocumentsSearchQuery)
 from departments.serializers.es_serializers import (
     DepartmentOfficersESSerializer,
     DepartmentNewsArticlesESSerializer,
@@ -311,9 +313,16 @@ class DepartmentsViewSet(viewsets.ViewSet):
         departments = Department.objects.filter(
             slug__in=migrated_department
         ).order_by('slug').distinct()
-        nodes = DepartmentCoordinateSerializer(departments, many=True).data
+        serialized_departments = DepartmentCoordinateSerializer(departments, many=True).data
+
+        nodes = {}
+        for department in serialized_departments:
+            nodes[department['id']] = {
+                'name': department['name'],
+                'location': department['location']
+            }
 
         return Response({
             "nodes": nodes,
-            "graphs": MigratoryEventSerializer(graphs, many=True).data,
+            "graphs": graphs,
         })

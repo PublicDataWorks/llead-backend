@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytz
 from datetime import date, datetime
 from operator import itemgetter
+from re import findall
 
 from django.urls import reverse
 from rest_framework import status
@@ -17,6 +18,7 @@ from officers.factories import EventFactory, OfficerFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
 from use_of_forces.factories import UseOfForceFactory
+from utils.parse_utils import parse_date
 from utils.search_index import rebuild_search_index
 from officers.constants import (
     OFFICER_HIRE,
@@ -1856,3 +1858,147 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['count'] == 3
         assert response.data['previous'] == expected_previous
         assert response.data['next'] == expected_next
+
+    def test_migratory_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-migratory')
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_migratory_list_success(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        event = EventFactory(
+            department=end_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2019,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
+        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department.location))
+
+        expected_result = {
+            'nodes': {
+                start_department.slug: {
+                    'name': start_department.name,
+                    'location': start_department_location,
+                },
+                end_department.slug: {
+                    'name': end_department.name,
+                    'location': end_department_location,
+                },
+            },
+            'graphs': [
+                {
+                    'start_node': start_department.slug,
+                    'end_node': end_department.slug,
+                    'start_location': start_department_location,
+                    'end_location': end_department_location,
+                    'year': 2019,
+                    'date': parse_date(event.year, event.month, event.day),
+                    'officer_name': officer_1.name,
+                    'officer_id': officer_1.id,
+                },
+            ]
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_empty(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=3,
+            day=3,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=end_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=None,
+            month=None,
+            day=None,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        expected_result = {
+            'nodes': {},
+            'graphs': []
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
