@@ -42,6 +42,54 @@ class OfficersESSerializerTestCase(TestCase):
             month=7,
             day=20,
         )
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="senior officer",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="sergeant",
+            year=2020,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="recruit",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="lieutenant",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         docs = [
             Mock(id=officer_2.id),
@@ -53,7 +101,11 @@ class OfficersESSerializerTestCase(TestCase):
                 'id': officer_2.id,
                 'name': 'David Jonesworth',
                 'badges': [],
-                'department': None,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'sergeant',
             },
             {
                 'id': officer_1.id,
@@ -63,12 +115,17 @@ class OfficersESSerializerTestCase(TestCase):
                     'id': department.slug,
                     'name': department.name,
                 },
+                'latest_rank': 'senior',
             },
             {
                 'id': officer_3.id,
                 'name': 'Anthony Davis',
                 'badges': [],
-                'department': None,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'lieutenant',
             },
         ]
 

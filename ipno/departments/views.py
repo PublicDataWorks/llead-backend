@@ -132,20 +132,13 @@ class DepartmentsViewSet(viewsets.ViewSet):
     def officers(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
 
-        starred_officers = department.starred_officers.prefetch_related(
+        other_prefetches = (
             Prefetch(
-                'person__officers',
-                queryset=Officer.objects.order_by('canonical_person')
+                'person__officers__departments'
             ),
-            Prefetch(
-                'person__officers__events',
-                queryset=Event.objects.order_by(
-                    F('year').desc(nulls_last=True),
-                    F('month').desc(nulls_last=True),
-                    F('day').desc(nulls_last=True),
-                )
-            ),
-        ).annotate(
+        )
+
+        starred_officers = department.starred_officers.prefetch_events(other_prefetches).annotate(
             is_starred=Value(True, output_field=BooleanField()),
             use_of_forces_count=Count('use_of_forces'),
         ).all()[:DEPARTMENTS_LIMIT]
@@ -160,20 +153,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
                 id__in=starred_officers,
             )
 
-            sorted_featured_officers = Officer.objects.prefetch_related(
-                Prefetch(
-                    'person__officers',
-                    queryset=Officer.objects.order_by('canonical_person')
-                ),
-                Prefetch(
-                    'person__officers__events',
-                    queryset=Event.objects.order_by(
-                        F('year').desc(nulls_last=True),
-                        F('month').desc(nulls_last=True),
-                        F('day').desc(nulls_last=True),
-                    )
-                ),
-            ).filter(
+            sorted_featured_officers = Officer.objects.prefetch_events(other_prefetches).filter(
                 id__in=featured_officers
             ).annotate(
                 is_starred=Value(False, output_field=BooleanField()),

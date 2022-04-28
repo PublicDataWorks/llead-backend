@@ -53,6 +53,14 @@ class OfficersSearchQueryTestCase(TestCase):
             month=5,
             day=4,
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
@@ -101,12 +109,14 @@ class OfficersSearchQueryTestCase(TestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                     {
                         'id': officer_2.id,
                         'name': officer_2.name,
                         'badges': [],
                         'department': None,
+                        'latest_rank': None,
                     },
                 ],
                 'count': 2,
@@ -297,6 +307,24 @@ class OfficersSearchQueryTestCase(TestCase):
             day=4,
         )
 
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department_1,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
             title='Document keyword1',
@@ -344,6 +372,7 @@ class OfficersSearchQueryTestCase(TestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                 ],
                 'count': 1,
@@ -452,6 +481,15 @@ class OfficersSearchQueryTestCase(TestCase):
             day=4,
         )
 
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
             title='Document keyword1',
@@ -485,6 +523,7 @@ class OfficersSearchQueryTestCase(TestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                 ],
                 'count': 1,

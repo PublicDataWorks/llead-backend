@@ -34,6 +34,24 @@ class DepartmentOfficerSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
             badge_no="250",
             year=2018,
             month=8,
@@ -70,7 +88,7 @@ class DepartmentOfficerSerializerTestCase(TestCase):
             {
                 'id': officer_1.id,
                 'name': officer_1.name,
-                'badges': ["150", "250", "123"],
+                'badges': ["150", "123", "250"],
                 'is_starred': False,
                 'complaints_count': officer_1.person.all_complaints_count,
                 'use_of_forces_count': 1,
@@ -80,5 +98,6 @@ class DepartmentOfficerSerializerTestCase(TestCase):
                         'name': department.name,
                     },
                 ],
+                'latest_rank': 'senior'
             }
         ]
