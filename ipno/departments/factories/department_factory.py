@@ -16,3 +16,4 @@ class DepartmentFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda d: slugify(d.name))
     address = factory.LazyFunction(lambda: fake.address())
     phone = factory.LazyFunction(lambda: fake.phone_number())
+    location = factory.LazyFunction(lambda: f"{fake.latitude()},{fake.longitude()}")
