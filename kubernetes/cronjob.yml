@@ -89,6 +89,11 @@ spec:
                     secretKeyRef:
                       name: ipno
                       key: host
+                - name: MAPBOX_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: mapbox
+                      key: key
                 - name: GOOGLE_APPLICATION_CREDENTIALS
                   value: "gcloud-credentials.json"
               volumeMounts:
