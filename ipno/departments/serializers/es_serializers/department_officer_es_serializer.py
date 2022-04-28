@@ -1,9 +1,8 @@
-from django.db.models import Count, Prefetch
-from django.db.models.expressions import F
+from django.db.models import Count
 
 from shared.serializers.es_serializers import BaseESSerializer
 from departments.serializers.department_officers_serializer import DepartmentOfficerSerializer
-from officers.models import Officer, Event
+from officers.models import Officer
 
 
 class DepartmentOfficersESSerializer(BaseESSerializer):
@@ -11,16 +10,7 @@ class DepartmentOfficersESSerializer(BaseESSerializer):
     model_klass = Officer
 
     def get_queryset(self, ids):
-        return self.model_klass.objects.prefetch_related(
-            Prefetch(
-                'person__officers__events',
-                queryset=Event.objects.order_by(
-                    F('year').desc(nulls_last=True),
-                    F('month').desc(nulls_last=True),
-                    F('day').desc(nulls_last=True),
-                )
-            )
-        ).filter(
+        return self.model_klass.objects.prefetch_events().filter(
             id__in=ids,
         ).annotate(
             use_of_forces_count=Count('use_of_forces')

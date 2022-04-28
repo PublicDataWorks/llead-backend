@@ -19,8 +19,8 @@ class OfficerSerializerTestCase(TestCase):
             department=department,
             badge_no='67893',
             year=2017,
-            month=None,
-            day=None,
+            month=1,
+            day=1,
         )
 
         EventFactory(
@@ -35,9 +35,9 @@ class OfficerSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='5432',
-            year=None,
-            month=None,
-            day=None,
+            year=2019,
+            month=2,
+            day=4,
         )
         EventFactory(
             officer=officer,
@@ -45,6 +45,22 @@ class OfficerSerializerTestCase(TestCase):
             year=2015,
             month=7,
             day=20,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
         )
 
         result = OfficerSerializer(officer).data
@@ -58,4 +74,5 @@ class OfficerSerializerTestCase(TestCase):
                 'id': department.slug,
                 'name': department.name,
             },
+            'latest_rank': 'senior',
         }
