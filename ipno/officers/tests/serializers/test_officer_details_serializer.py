@@ -48,9 +48,9 @@ class OfficerDetailsSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='5432',
-            year=2018,
-            month=10,
-            day=7,
+            year=None,
+            month=None,
+            day=None,
         )
         EventFactory(
             officer=officer,
@@ -109,12 +109,20 @@ class OfficerDetailsSerializerTestCase(TestCase):
             month=4,
             day=5,
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435', '5432', '67893'],
+            'badges': ['12435', '67893', '5432'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -126,7 +134,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
-            'latest_rank': 'senior',
+            'latest_rank': 'captain',
         }
 
     def test_salary_fields(self):

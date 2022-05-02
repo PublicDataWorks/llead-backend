@@ -55,6 +55,15 @@ class DepartmentOfficerSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
             badge_no="250",
             year=2018,
             month=8,
@@ -65,9 +74,9 @@ class DepartmentOfficerSerializerTestCase(TestCase):
             department=department,
             officer=officer_2,
             badge_no="123",
-            year=2018,
-            month=9,
-            day=3,
+            year=None,
+            month=None,
+            day=None,
         )
 
         uof_event = EventFactory(
@@ -93,7 +102,7 @@ class DepartmentOfficerSerializerTestCase(TestCase):
         assert result == {
                 'id': officer_1.id,
                 'name': officer_1.name,
-                'badges': ["150", "123", "250"],
+                'badges': ["150", "250", "123"],
                 'is_starred': True,
                 'complaints_count': officer_1.person.all_complaints_count,
                 'use_of_forces_count': 1,
@@ -103,5 +112,5 @@ class DepartmentOfficerSerializerTestCase(TestCase):
                         'name': department.name,
                     },
                 ],
-                'latest_rank': 'senior'
+                'latest_rank': 'captain'
         }
