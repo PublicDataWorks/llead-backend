@@ -35,9 +35,9 @@ class OfficerSerializerTestCase(TestCase):
             officer=officer,
             department=department,
             badge_no='5432',
-            year=2019,
-            month=2,
-            day=4,
+            year=None,
+            month=None,
+            day=None,
         )
         EventFactory(
             officer=officer,
@@ -62,17 +62,23 @@ class OfficerSerializerTestCase(TestCase):
             month=4,
             day=5,
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
 
         result = OfficerSerializer(officer).data
-        result['badges'] = sorted(result['badges'])
-
         assert result == {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435', '5432', '67893'],
+            'badges': ['12435', '67893', '5432'],
             'department': {
                 'id': department.slug,
                 'name': department.name,
             },
-            'latest_rank': 'senior',
+            'latest_rank': 'captain',
         }

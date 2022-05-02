@@ -38,7 +38,11 @@ class OfficerDetailsSerializer(serializers.Serializer):
             for officer in all_officers:
                 all_events.extend(officer.events.all())
 
-            all_events.sort(key=lambda k: (-k.year, -k.month, -k.day))
+            all_events.sort(key=lambda k: (
+                (k.year is None, -k.year if k.year is not None else None),
+                (k.month is None, -k.month if k.month is not None else None),
+                (k.day is None, -k.day if k.day is not None else None)
+            ))
 
             setattr(
                 obj,
