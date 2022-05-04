@@ -319,7 +319,7 @@ class BaseImporterTestCase(TestCase):
 
         self.tbi.process_wrgl_data.assert_not_called()
         self.tbi.repo.get_blocks.assert_called_with(
-            'heads/main',
+            'heads/test_repo_name',
             with_column_names=False
         )
         self.tbi.import_data.assert_called_with(processed_data)
@@ -342,9 +342,9 @@ class BaseImporterTestCase(TestCase):
         mock_repository.return_value = Mock(get_branch=mock_get_branch)
 
         self.tbi.branch = 'main'
-        self.tbi.retrieve_wrgl_data('dummy')
+        self.tbi.retrieve_wrgl_data('branch_name')
 
-        mock_get_branch.assert_called_with('main')
+        mock_get_branch.assert_called_with('branch_name')
         assert self.tbi.new_commit.table.columns == ['id', 'name']
         assert self.tbi.column_mappings == {
             'id': 0,
