@@ -60,6 +60,22 @@ class OfficersESSerializerTestCase(TestCase):
             month=7,
             day=20,
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         docs = [
             Mock(id=officer_1.id)
@@ -83,6 +99,7 @@ class OfficersESSerializerTestCase(TestCase):
                         'name': department_2.name,
                     },
                 ],
+                'latest_rank': 'senior',
             }
         ]
 

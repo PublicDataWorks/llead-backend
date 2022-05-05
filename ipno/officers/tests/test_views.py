@@ -62,8 +62,8 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             department=department,
             badge_no='67893',
             year=2017,
-            month=None,
-            day=None,
+            month=11,
+            day=4,
         )
 
         EventFactory(
@@ -78,9 +78,9 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             officer=officer_1,
             department=department,
             badge_no='5432',
-            year=None,
-            month=None,
-            day=None,
+            year=2018,
+            month=6,
+            day=5,
         )
         EventFactory(
             officer=officer_1,
@@ -88,6 +88,23 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             year=2015,
             month=7,
             day=20,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
         )
 
         officer_1_complaints = ComplaintFactory.create_batch(2)
@@ -107,16 +124,21 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'id': officer_2.id,
                 'name': 'Anthony Davis',
                 'badges': [],
-                'department': None,
+                'department':  {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'junior',
             },
             {
                 'id': officer_1.id,
                 'name': 'David Jonesworth',
-                'badges': ['67893', '12435', '5432'],
+                'badges': ['12435', '5432', '67893'],
                 'department': {
                     'id': department.slug,
                     'name': department.name,
                 },
+                'latest_rank': 'senior',
             }]
 
     def test_list_unauthorized(self):
@@ -155,16 +177,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             salary='20000',
             salary_freq='yearly',
             year=2017,
-            month=None,
-            day=None,
+            month=5,
+            day=6,
         )
         EventFactory(
             officer=officer,
             department=department,
             badge_no='5432',
-            year=None,
-            month=None,
-            day=None,
+            year=2018,
+            month=11,
+            day=4,
         )
         EventFactory(
             officer=officer,
@@ -207,11 +229,19 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             day=4,
             department=None,
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         expected_result = {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435', '67893', '5432'],
+            'badges': ['12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -219,6 +249,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'id': department.slug,
                 'name': department.name,
             }],
+            'latest_rank': 'senior',
             'salary': '57000.00',
             'salary_freq': 'yearly',
             'documents_count': 3,
@@ -609,16 +640,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             salary='20000',
             salary_freq='yearly',
             year=2017,
-            month=None,
-            day=None,
+            month=11,
+            day=4,
         )
         EventFactory(
             officer=officer,
             department=department,
             badge_no='5432',
-            year=None,
-            month=None,
-            day=None,
+            year=2018,
+            month=6,
+            day=5,
         )
         EventFactory(
             officer=officer,
@@ -669,11 +700,19 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             day=4,
             department=None,
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         expected_result = {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['13579', '12435', '67893', '5432'],
+            'badges': ['13579', '12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -687,6 +726,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                     'name': related_department.name,
                 }
             ],
+            'latest_rank': 'senior',
             'salary': '57000.00',
             'salary_freq': 'yearly',
             'documents_count': 3,
