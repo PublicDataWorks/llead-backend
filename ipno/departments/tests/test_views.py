@@ -796,6 +796,41 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=5,
         )
 
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="sergeant",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
         use_of_force_1.events.add(uof_receive_event_1)
         use_of_force_2.events.add(uof_receive_event_2)
         use_of_force_3.events.add(uof_incident_event_2)
@@ -810,14 +845,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'name': officer_2.name,
                 'is_starred': True,
                 'use_of_forces_count': 2,
-                'badges': ["150", "200", "250", "100"],
+                'badges': ["150", "200", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
                 'departments': [
                     {
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'senior',
             },
             {
                 'id': officer_4.id,
@@ -831,7 +867,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'recruit',
             },
             {
                 'id': officer_3.id,
@@ -845,7 +882,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'sergeant',
             },
         ]
 
@@ -891,7 +929,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': None,
             },
             {
                 'id': starred_officers[1].id,
@@ -905,7 +944,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': None,
             },
             {
                 'id': starred_officers[2].id,
@@ -919,7 +959,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': None,
             },
         ]
 
@@ -1450,6 +1491,41 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=5,
         )
 
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="sergeant",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
         use_of_force_1.events.add(uof_receive_event_1)
         use_of_force_2.events.add(uof_receive_event_2)
         use_of_force_3.events.add(uof_incident_event_2)
@@ -1477,7 +1553,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'sergeant',
             },
             {
                 'id': officer_4.id,
@@ -1491,21 +1568,23 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'recruit',
             },
             {
                 'id': officer_2.id,
                 'name': officer_2.name,
                 'is_starred': False,
                 'use_of_forces_count': 0,
-                'badges': ["100", "150", "250"],
+                'badges': ["150", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
                 'departments': [
                     {
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'senior',
             },
         ]
 
@@ -1622,6 +1701,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=5,
         )
 
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
         use_of_force_1.events.add(uof_receive_event_1)
         use_of_force_2.events.add(uof_receive_event_2)
         use_of_force_3.events.add(uof_incident_event_2)
@@ -1651,7 +1739,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                         'id': department.slug,
                         'name': department.name,
                     }
-                ]
+                ],
+                'latest_rank': 'recruit',
             }
         ]
 

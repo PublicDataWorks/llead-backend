@@ -33,6 +33,22 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             department=department_2,
             badge_no='12435',
         )
+        EventFactory(
+            department=department_2,
+            officer=officer,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department_2,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         source = NewsArticleSourceFactory(source_display_name='dummy')
         news_article = NewsArticleFactory(
@@ -116,6 +132,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                     'id': department_2.slug,
                     'name': department_2.name,
                 },
+                'latest_rank': 'senior',
                 'type': RECENT_OFFICER_TYPE
             },
             {

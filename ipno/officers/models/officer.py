@@ -7,16 +7,17 @@ from officers.models.event import Event
 
 
 class OfficerManager(models.Manager):
-    def prefetch_events(self):
+    def prefetch_events(self, other_prefetches=()):
         return self.get_queryset().prefetch_related(
             Prefetch(
-                'events',
+                'person__officers__events',
                 queryset=Event.objects.order_by(
                     F('year').desc(nulls_last=True),
                     F('month').desc(nulls_last=True),
                     F('day').desc(nulls_last=True),
                 ).prefetch_related('department')
             ),
+            *other_prefetches
         )
 
 

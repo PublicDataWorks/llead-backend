@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page, cache_control
 
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -34,7 +35,9 @@ class OfficersViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
     @cache_control(no_store=True)
     def retrieve(self, request, pk):
-        officer = get_object_or_404(Officer.objects.prefetch_related('person__canonical_officer'), id=pk)
+        officer = get_object_or_404(
+            Officer.objects.prefetch_related('person__canonical_officer'), id=pk
+        )
         serializer = OfficerDetailsSerializer(officer.person.canonical_officer)
 
         return Response(serializer.data)

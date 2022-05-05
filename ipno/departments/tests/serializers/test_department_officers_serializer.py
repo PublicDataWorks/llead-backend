@@ -37,6 +37,33 @@ class DepartmentOfficerSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
             badge_no="250",
             year=2018,
             month=8,
@@ -47,9 +74,9 @@ class DepartmentOfficerSerializerTestCase(TestCase):
             department=department,
             officer=officer_2,
             badge_no="123",
-            year=2018,
-            month=9,
-            day=3,
+            year=None,
+            month=None,
+            day=None,
         )
 
         uof_event = EventFactory(
@@ -85,4 +112,5 @@ class DepartmentOfficerSerializerTestCase(TestCase):
                         'name': department.name,
                     },
                 ],
-            }
+                'latest_rank': 'captain'
+        }

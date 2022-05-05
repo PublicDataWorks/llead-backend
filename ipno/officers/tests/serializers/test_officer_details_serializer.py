@@ -41,8 +41,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
             salary='20.23',
             salary_freq='hourly',
             year=2017,
-            month=None,
-            day=None,
+            month=6,
+            day=5,
         )
         EventFactory(
             officer=officer,
@@ -93,6 +93,30 @@ class OfficerDetailsSerializerTestCase(TestCase):
             day=4,
             department=None
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
@@ -110,6 +134,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
+            'latest_rank': 'captain',
         }
 
     def test_salary_fields(self):
@@ -256,6 +281,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'salary_freq': None,
             'documents_count': 3,
             'complaints_count': 2,
+            'latest_rank': None,
         }
 
     def test_data_with_related_officer_departments_and_badges(self):
@@ -290,16 +316,16 @@ class OfficerDetailsSerializerTestCase(TestCase):
             salary='20.23',
             salary_freq='hourly',
             year=2017,
-            month=None,
-            day=None,
+            month=6,
+            day=10,
         )
         EventFactory(
             officer=officer,
             department=department,
             badge_no='5432',
-            year=None,
-            month=None,
-            day=None,
+            year=2020,
+            month=7,
+            day=6,
         )
         EventFactory(
             officer=officer,
@@ -355,7 +381,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
         assert result == {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['13579', '12435', '67893', '5432'],
+            'badges': ['13579', '5432', '12435', '67893'],
             'birth_year': 1962,
             'race': 'white',
             'gender': 'male',
@@ -373,4 +399,5 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'salary_freq': 'yearly',
             'documents_count': 3,
             'complaints_count': 2,
+            'latest_rank': None,
         }

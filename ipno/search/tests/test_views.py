@@ -36,6 +36,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
             department=department_1,
             badge_no='12435',
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
@@ -92,12 +100,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                     {
                         'id': officer_2.id,
                         'name': officer_2.name,
                         'badges': [],
                         'department': None,
+                        'latest_rank': None,
                     },
                 ],
                 'count': 2,
@@ -277,6 +287,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
             department=department_1,
             badge_no='12435',
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
@@ -320,12 +338,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                     {
                         'id': officer_2.id,
                         'name': officer_2.name,
                         'badges': [],
                         'department': None,
+                        'latest_rank': None,
                     },
                 ],
                 'count': 2,
@@ -404,6 +424,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
             department=department_1,
             badge_no='12435',
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
@@ -460,6 +488,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                 ],
                 'count': 1,
@@ -563,6 +592,14 @@ class SearchViewSetTestCase(AuthAPITestCase):
             department=department_1,
             badge_no='12435',
         )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
 
         DocumentFactory(title='Document title', text_content='Text content')
         document_1 = DocumentFactory(
@@ -605,6 +642,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
                             'id': department_1.slug,
                             'name': department_1.name,
                         },
+                        'latest_rank': 'senior',
                     },
                 ],
                 'count': 1,
