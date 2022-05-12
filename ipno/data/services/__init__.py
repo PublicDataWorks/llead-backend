@@ -7,6 +7,7 @@ from .document_importer import DocumentImporter
 from .person_importer import PersonImporter
 from .new_complaint_importer import NewComplaintImporter
 from .appeal_importer import AppealImporter
+from .uof_officer_importer import UofOfficerImporter
 
 __all__ = [
     'BaseImporter',
@@ -14,6 +15,7 @@ __all__ = [
     'EventImporter',
     'ComplaintImporter',
     'UofImporter',
+    'UofOfficerImporter',
     'DocumentImporter',
     'PersonImporter',
     'NewComplaintImporter',
