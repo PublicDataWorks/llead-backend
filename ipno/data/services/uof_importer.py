@@ -12,56 +12,21 @@ class UofImporter(BaseImporter):
     data_model = USE_OF_FORCE_MODEL_NAME
     ATTRIBUTES = [
         'uof_uid',
-        'uof_tracking_number',
-        'force_description',
-        'force_type',
-        'force_level',
-        'effective_uof',
-        'accidental_discharge',
-        'less_than_lethal',
-        'status',
-        'source',
+        'uof_tracking_id',
+        'investigation_status',
         'service_type',
-        'county',
-        'traffic_stop',
-        'sustained',
-        'force_reason',
-        'weather_description',
-        'distance_from_officer',
-        'body_worn_camera_available',
-        'app_used',
-        'citizen_uid',
-        'citizen_arrested',
-        'citizen_hospitalized',
-        'citizen_injured',
-        'citizen_body_type',
-        'citizen_height',
-        'citizen_involvement',
+        'light_condition',
+        'weather_condition',
+        'shift_time',
         'disposition',
-        'citizen_sex',
-        'citizen_race',
-        'citizen_age_1',
-        'officer_current_supervisor',
-        'officer_title',
-        'officer_injured',
-        'officer_age',
-        'officer_type',
-        'officer_employment_status',
-        'officer_department',
-        'officer_division',
-        'officer_sub_division_a',
-        'officer_sub_division_b',
-
+        'division',
+        'division_level',
+        'unit',
+        'originating_bureau',
+        'agency',
     ]
 
-    INT_ATTRIBUTES = [
-        'report_year',
-        'citizen_age',
-        'officer_years_exp',
-        'officer_years_with_unit',
-    ]
-
-    UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + ['officer_id', 'department_id']
+    UPDATE_ATTRIBUTES = ATTRIBUTES + ['department_id']
 
     def __init__(self):
         self.new_uofs_attrs = []
@@ -74,7 +39,6 @@ class UofImporter(BaseImporter):
 
     def handle_record_data(self, row):
         agency = row[self.column_mappings['agency']]
-        officer_uid = row[self.column_mappings['uid']]
         uof_data = self.parse_row_data(row, self.column_mappings)
 
         uof_uid = uof_data['uof_uid']
@@ -82,9 +46,6 @@ class UofImporter(BaseImporter):
         formatted_agency = self.format_agency(agency)
         department_id = self.department_mappings.get(slugify(formatted_agency))
         uof_data['department_id'] = department_id
-
-        officer_id = self.officer_mappings.get(officer_uid)
-        uof_data['officer_id'] = officer_id
 
         uof_id = self.uof_mappings.get(uof_uid)
 
