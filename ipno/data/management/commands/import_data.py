@@ -7,6 +7,8 @@ from data.services import (
     EventImporter,
     ComplaintImporter,
     UofImporter,
+    UofOfficerImporter,
+    UofCitizenImporter,
     DocumentImporter,
     PersonImporter,
     AppealImporter,
@@ -25,6 +27,8 @@ class Command(BaseCommand):
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
         uof_officer_imported = UofOfficerImporter().process()
+        uof_citizen_imported = UofCitizenImporter().process()
+
         appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
@@ -45,6 +49,7 @@ class Command(BaseCommand):
             officer_imported,
             uof_imported,
             uof_officer_imported,
+            uof_citizen_imported,
             complaint_imported,
             event_imported,
             appeal_imported,
@@ -56,6 +61,7 @@ class Command(BaseCommand):
             officer_imported,
             uof_imported,
             uof_officer_imported,
+            uof_citizen_imported,
             complaint_imported,
             event_imported,
             document_imported,
