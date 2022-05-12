@@ -24,6 +24,7 @@ class Command(BaseCommand):
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
+        uof_officer_imported = UofOfficerImporter().process()
         appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
@@ -43,6 +44,7 @@ class Command(BaseCommand):
         if any([
             officer_imported,
             uof_imported,
+            uof_officer_imported,
             complaint_imported,
             event_imported,
             appeal_imported,
@@ -53,6 +55,7 @@ class Command(BaseCommand):
         if any([
             officer_imported,
             uof_imported,
+            uof_officer_imported,
             complaint_imported,
             event_imported,
             document_imported,
