@@ -238,7 +238,8 @@ class DepartmentsViewSet(viewsets.ViewSet):
                     F('month').desc(nulls_last=True),
                     F('day').desc(nulls_last=True),
                 ).filter(
-                    kind__in=[OFFICER_LEFT, OFFICER_HIRE]
+                    kind__in=[OFFICER_LEFT, OFFICER_HIRE],
+                    department__location__isnull=False,
                 ).select_related('officer', 'department'),
                 to_attr='prefetch_hire_left_events'
             ),
@@ -291,7 +292,8 @@ class DepartmentsViewSet(viewsets.ViewSet):
         graphs.sort(key=lambda obj: obj['date'])
 
         departments = Department.objects.filter(
-            slug__in=migrated_department
+            slug__in=migrated_department,
+            location__isnull=False,
         ).order_by('slug').distinct()
         serialized_departments = DepartmentCoordinateSerializer(departments, many=True).data
 
