@@ -2,9 +2,9 @@ from rest_framework import viewsets
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 
-from app_config.models import AppConfig, AppTextContent, FrontPageOrder
+from app_config.models import AppConfig, AppTextContent, FrontPageOrder, FrontPageCard
 from app_config.constants import CMS_KEY
-from app_config.serializers import FrontPageOrderSerializer
+from app_config.serializers import FrontPageOrderSerializer, FrontPageCardSerializer
 
 
 class AppConfigViewSet(ViewSet):
@@ -27,4 +27,12 @@ class FrontPageOrdersViewSet(viewsets.ViewSet):
         front_page_orders = FrontPageOrder.objects.all()
 
         serializer = FrontPageOrderSerializer(front_page_orders, many=True)
+        return Response(serializer.data)
+
+
+class FrontPageCardsViewSet(viewsets.ViewSet):
+    def list(self, request):
+        front_page_cards = FrontPageCard.objects.all()
+
+        serializer = FrontPageCardSerializer(front_page_cards, many=True)
         return Response(serializer.data)
