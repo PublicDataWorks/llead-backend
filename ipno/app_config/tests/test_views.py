@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from app_config.factories import AppConfigFactory, AppTextContentFactory, FrontPageOrderFactory
+from app_config.factories import AppConfigFactory, AppTextContentFactory, FrontPageOrderFactory, FrontPageCardFactory
 
 
 class AppConfigTestCase(APITestCase):
@@ -43,5 +43,23 @@ class FrontPageOrderTestCase(APITestCase):
             {
                 'section': 'TEXT_CONTENT_2',
                 'order': 2,
+            }
+        ])
+
+
+class FrontPageCardTestCase(APITestCase):
+    def test_should_return_correct_front_page_card(self):
+        FrontPageCardFactory(content='TEXT_CONTENT_1', order=1)
+        FrontPageCardFactory(content='TEXT_CONTENT_2', order=2)
+
+        url = reverse('api:front-page-cards-list')
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == ([
+            {
+                'content': 'TEXT_CONTENT_1',
+            },
+            {
+                'content': 'TEXT_CONTENT_2',
             }
         ])
