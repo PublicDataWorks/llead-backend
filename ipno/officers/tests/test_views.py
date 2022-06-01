@@ -16,7 +16,7 @@ from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, EventFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory, UseOfForceCitizenFactory
 from officers.constants import (
     COMPLAINT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
@@ -378,7 +378,9 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         matched_sentence_1.officers.add(officer)
         matched_sentence_2.officers.add(officer)
 
-        use_of_force = UseOfForceFactory(officer=officer)
+        use_of_force = UseOfForceFactory()
+        use_of_force_officer = UseOfForceOfficerFactory(officer=officer, use_of_force=use_of_force)
+        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
         EventFactory(
             kind=UOF_RECEIVE,
             year=2019,
@@ -475,25 +477,21 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'allegation_desc': complaint_1.allegation_desc,
             },
             {
-                'id': use_of_force.id,
+                'id': use_of_force_officer.id,
                 'kind': UOF_TIMELINE_KIND,
                 'date': str(date(2019, 5, 5)),
                 'year': 2019,
-                'force_type': use_of_force.force_type,
-                'force_description': use_of_force.force_description,
-                'force_reason': use_of_force.force_reason,
+                'use_of_force_description': use_of_force_officer.use_of_force_description,
+                'use_of_force_reason': use_of_force.use_of_force_reason,
                 'disposition': use_of_force.disposition,
                 'service_type': use_of_force.service_type,
-                'citizen_involvement': use_of_force.citizen_involvement,
-                'citizen_age': use_of_force.citizen_age,
-                'citizen_race': use_of_force.citizen_race,
-                'citizen_sex': use_of_force.citizen_sex,
-                'uof_tracking_number': use_of_force.uof_tracking_number,
-                'citizen_arrested': use_of_force.citizen_arrested,
-                'citizen_injured': use_of_force.citizen_injured,
-                'citizen_hospitalized': use_of_force.citizen_hospitalized,
-                'officer_injured': use_of_force.officer_injured,
-                'traffic_stop': use_of_force.traffic_stop,
+                'citizen_information': [str(use_of_force_citizen.citizen_age) + '-year-old '
+                                        + use_of_force_citizen.citizen_race + ' ' + use_of_force_citizen.citizen_sex],
+                'tracking_id': use_of_force.tracking_id,
+                'citizen_arrested': [use_of_force_citizen.citizen_arrested],
+                'citizen_injured': [use_of_force_citizen.citizen_injured],
+                'citizen_hospitalized': [use_of_force_citizen.citizen_hospitalized],
+                'officer_injured': use_of_force_officer.officer_injured,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,

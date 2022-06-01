@@ -12,7 +12,7 @@ class UofImporter(BaseImporter):
     data_model = USE_OF_FORCE_MODEL_NAME
     ATTRIBUTES = [
         'uof_uid',
-        'uof_tracking_id',
+        'tracking_id',
         'investigation_status',
         'service_type',
         'light_condition',
@@ -24,6 +24,7 @@ class UofImporter(BaseImporter):
         'unit',
         'originating_bureau',
         'agency',
+        'use_of_force_reason',
     ]
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + ['department_id']

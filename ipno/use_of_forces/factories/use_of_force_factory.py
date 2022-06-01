@@ -15,7 +15,7 @@ class UseOfForceFactory(factory.django.DjangoModelFactory):
 
     department = factory.SubFactory(DepartmentFactory)
     uof_uid = factory.LazyFunction(lambda: fake.uuid4())
-    uof_tracking_id = factory.LazyFunction(
+    tracking_id = factory.LazyFunction(
         lambda: f'{random.randint(1000, 9999)}-{random.randint(100, 999)}'
     )
     investigation_status = factory.LazyFunction(lambda: fake.word())
@@ -28,3 +28,4 @@ class UseOfForceFactory(factory.django.DjangoModelFactory):
     division_level = factory.LazyFunction(lambda: fake.word())
     unit = factory.LazyFunction(lambda: fake.word())
     originating_bureau = factory.LazyFunction(lambda: fake.word())
+    use_of_force_reason = factory.LazyFunction(lambda: fake.word())

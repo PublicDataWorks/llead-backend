@@ -60,6 +60,8 @@ OFFICER_PROFILE_SHEET = 'Demographic profile'
 OFFICER_INCIDENT_SHEET = 'Incidents'
 OFFICER_COMPLAINT_SHEET = 'Complaint details'
 OFFICER_UOF_SHEET = 'Use of force details'
+OFFICER_UOF_OFFICER_SHEET = 'Use of force officer details'
+OFFICER_UOF_CITIZEN_SHEET = 'Use of force citizen details'
 OFFICER_CAREER_SHEET = 'Career history'
 OFFICER_DOC_SHEET = 'Documents'
 
@@ -98,18 +100,21 @@ OFFICER_COMPLAINT_FIELDS = [
 ]
 
 OFFICER_UOF_FIELDS = [
-    'uof_uid', 'uof_tracking_number', 'report_year', 'force_description',
-    'force_type', 'force_level', 'effective_uof', 'accidental_discharge',
-    'less_than_lethal', 'status', 'source', 'service_type', 'county',
-    'traffic_stop', 'sustained', 'force_reason', 'weather_description',
-    'distance_from_officer', 'body_worn_camera_available', 'app_used',
-    'citizen_uid', 'citizen_arrested', 'citizen_hospitalized', 'citizen_injured',
-    'citizen_body_type', 'citizen_height', 'citizen_age', 'citizen_involvement',
-    'disposition', 'citizen_sex', 'citizen_race', 'citizen_age_1',
-    'officer_current_supervisor', 'officer_title', 'officer_injured', 'officer_age',
-    'officer_years_exp', 'officer_years_with_unit', 'officer_type', 'officer_employment_status',
-    'officer_department', 'officer_division', 'officer_sub_division_a', 'officer_sub_division_b',
-    'data_production_year', 'uid', 'agency',
+    'uof_uid', 'tracking_id', 'investigation_status',
+    'service_type', 'light_condition', 'weather_condition', 'shift_time',
+    'disposition', 'division', 'division_level', 'unit', 'originating_bureau',
+    'agency', 'use_of_force_reason',
+]
+
+OFFICER_UOF_OFFICER_FIELDS = [
+    'uof_uid', 'uid', 'use_of_force_description', 'use_of_force_level', 'use_of_force_effective',
+    'age', 'years_of_service', 'officer_injured',
+]
+
+OFFICER_UOF_CITIZEN_FIELDS = [
+    'uof_citizen_uid', 'uof_uid', 'citizen_influencing_factors', 'citizen_distance_from_officer',
+    'citizen_arrested', 'citizen_arrest_charges', 'citizen_hospitalized', 'citizen_injured',
+    'citizen_age', 'citizen_race', 'citizen_sex',
 ]
 
 TIMELINE_EVENT_KINDS = [

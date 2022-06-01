@@ -16,22 +16,22 @@ from departments.factories import DepartmentFactory
 
 class UofImporterTestCase(TestCase):
     def setUp(self):
-        self.header = ['uof_uid', 'uof_tracking_id', 'investigation_status', 'service_type', 'light_condition',
+        self.header = ['uof_uid', 'tracking_id', 'investigation_status', 'service_type', 'light_condition',
                        'weather_condition', 'shift_time', 'disposition', 'division', 'division_level', 'unit',
-                       'originating_bureau', 'agency']
+                       'originating_bureau', 'agency', 'use_of_force_reason']
         self.uof1_data = ['uof-uid1', 'FTN2015-0705', 'Completed', 'Call for Service', 'good', 'clear conditions',
                           'between 3pm-11pm', 'resolved', 'a platoon', '7th district', 'patrol', 'field operations',
-                          'New Orleans PD']
+                          'New Orleans PD', 'resisted lawful arrest']
         self.uof2_data = ['uof-uid2', 'FTN2015-0710', '', 'Arresting', 'poor', 'rainy conditions - light',
                           '', 'not sustained', 'b platoon', 'Second District', 'squad a',
-                          'FOB - Field Operations Bureau', '']
+                          'FOB - Field Operations Bureau', '', 'flight from an officer']
         self.uof3_data = ['uof-uid3', 'FTN2015-0713', 'Completed', '', 'good', '',
                           'between 7am-3pm', 'exonerated', 'c platoon', '', 'narcotics', 'management services',
-                          'Baton Rouge PD']
+                          'Baton Rouge PD', '']
         self.uof4_data = ['uof-uid4', 'FTN2015-07355', 'No', 'Traffic Stop', '', 'other', 'between 3pm-5pm', '',
-                          'tactical', '', 'persons', 'Armory Unit', 'New Orleans PD']
+                          'tactical', '', 'persons', 'Armory Unit', 'New Orleans PD', 'escape']
         self.uof5_data = ['uof-uid5', 'FTN2016-0026', 'Completed', 'Transport', 'good', 'foggy condition',
-                          'between 3pm-12am', '', 'a platoon', '', 'patrol', '', 'Baton Rouge PD']
+                          'between 3pm-12am', '', 'a platoon', '', 'patrol', '', 'Baton Rouge PD', 'room clearing']
 
         self.uof5_dup_data = self.uof5_data.copy()
 
@@ -151,7 +151,7 @@ class UofImporterTestCase(TestCase):
             field_attrs = [
                 'department_id',
                 'uof_uid',
-                'uof_tracking_id',
+                'tracking_id',
                 'investigation_status',
                 'service_type',
                 'light_condition',
@@ -163,6 +163,7 @@ class UofImporterTestCase(TestCase):
                 'unit',
                 'originating_bureau',
                 'agency',
+                'use_of_force_reason',
             ]
 
             for attr in field_attrs:
@@ -278,7 +279,7 @@ class UofImporterTestCase(TestCase):
             field_attrs = [
                 'department_id',
                 'uof_uid',
-                'uof_tracking_id',
+                'tracking_id',
                 'investigation_status',
                 'service_type',
                 'light_condition',
@@ -290,6 +291,7 @@ class UofImporterTestCase(TestCase):
                 'unit',
                 'originating_bureau',
                 'agency',
+                'use_of_force_reason',
             ]
 
             for attr in field_attrs:

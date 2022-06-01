@@ -12,7 +12,7 @@ class UseOfForceOfficerFactory(factory.django.DjangoModelFactory):
 
     uof_uid = factory.LazyFunction(lambda: fake.uuid4())
     uid = factory.LazyFunction(lambda: fake.uuid4())
-    use_of_force_type = factory.LazyFunction(lambda: fake.word())
+    use_of_force_description = factory.LazyFunction(lambda: fake.word())
     use_of_force_level = factory.LazyFunction(lambda: fake.word())
     use_of_force_effective = factory.LazyFunction(lambda: fake.word())
     age = factory.LazyFunction(lambda: fake.pyint())

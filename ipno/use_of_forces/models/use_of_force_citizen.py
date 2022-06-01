@@ -12,8 +12,8 @@ class UseOfForceCitizen(TimeStampsModel):
     citizen_arrest_charges = models.CharField(max_length=255, null=True, blank=True)
     citizen_hospitalized = models.CharField(max_length=255, null=True, blank=True)
     citizen_injured = models.CharField(max_length=255, null=True, blank=True)
-    citizen_build = models.CharField(max_length=255, null=True, blank=True)
-    citizen_height = models.CharField(max_length=255, null=True, blank=True)
+    citizen_age = models.CharField(max_length=255, null=True, blank=True)
+    citizen_race = models.CharField(max_length=255, null=True, blank=True)
     citizen_sex = models.CharField(max_length=255, null=True, blank=True)
 
     use_of_force = models.ForeignKey(

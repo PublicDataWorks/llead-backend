@@ -17,7 +17,7 @@ from departments.factories import DepartmentFactory, WrglFileFactory
 from officers.factories import EventFactory, OfficerFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 from utils.parse_utils import parse_date
 from utils.search_index import rebuild_search_index
 from officers.constants import (
@@ -710,9 +710,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.starred_officers.add(officer_2)
         department.save()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_3)
-        use_of_force_2 = UseOfForceFactory(officer=officer_2)
-        use_of_force_3 = UseOfForceFactory(officer=officer_2)
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
+
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,
@@ -1414,9 +1418,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         department = DepartmentFactory()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_5)
-        use_of_force_2 = UseOfForceFactory(officer=officer_3)
-        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
+
+        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,
@@ -1624,9 +1632,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         department = DepartmentFactory()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_5)
-        use_of_force_2 = UseOfForceFactory(officer=officer_3)
-        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
+
+        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,

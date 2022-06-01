@@ -10,7 +10,7 @@ class UofOfficerImporter(BaseImporter):
     ATTRIBUTES = [
         'uof_uid',
         'uid',
-        'use_of_force_type',
+        'use_of_force_description',
         'use_of_force_level',
         'use_of_force_effective',
         'officer_injured',
