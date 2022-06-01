@@ -46,7 +46,7 @@ class OfficersViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
     @cache_control(no_store=True)
     def timeline(self, request, pk):
-        officer = get_object_or_404(Officer, id=pk)
+        officer = get_object_or_404(Officer.objects.prefetch_related('person__officers'), id=pk)
 
         return Response(OfficerTimelineQuery(officer).query())
 

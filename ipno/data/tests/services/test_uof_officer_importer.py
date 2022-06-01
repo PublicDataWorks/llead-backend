@@ -15,7 +15,7 @@ from use_of_forces.models import UseOfForceOfficer
 
 class UofOfficerImporterTestCase(TestCase):
     def setUp(self):
-        self.header = ['uof_uid', 'uid', 'use_of_force_type', 'use_of_force_level', 'use_of_force_effective', 'age',
+        self.header = ['uof_uid', 'uid', 'use_of_force_description', 'use_of_force_level', 'use_of_force_effective', 'age',
                        'years_of_service', 'officer_injured']
         self.uof_officer_1_data = ['uof-uid1', 'officer-uid2', 'firearm', 'l1', 'yes', 28, 5, 'no']
         self.uof_officer_2_data = ['uof-uid2', 'officer-uid3', '', 'l2', 'yes', 30, None, '']
@@ -149,7 +149,7 @@ class UofOfficerImporterTestCase(TestCase):
             field_attrs = [
                 'uof_uid',
                 'uid',
-                'use_of_force_type',
+                'use_of_force_description',
                 'use_of_force_level',
                 'use_of_force_effective',
                 'age',
@@ -280,7 +280,7 @@ class UofOfficerImporterTestCase(TestCase):
             field_attrs = [
                 'uof_uid',
                 'uid',
-                'use_of_force_type',
+                'use_of_force_description',
                 'use_of_force_level',
                 'use_of_force_effective',
                 'age',

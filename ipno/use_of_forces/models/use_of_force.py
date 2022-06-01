@@ -5,7 +5,7 @@ from utils.models import TimeStampsModel
 
 class UseOfForce(TimeStampsModel):
     uof_uid = models.CharField(max_length=255, unique=True, db_index=True)
-    uof_tracking_id = models.CharField(max_length=255, null=True, blank=True)
+    tracking_id = models.CharField(max_length=255, null=True, blank=True)
     investigation_status = models.CharField(max_length=255, null=True, blank=True)
     service_type = models.CharField(max_length=255, null=True, blank=True)
     light_condition = models.CharField(max_length=255, null=True, blank=True)
@@ -17,6 +17,7 @@ class UseOfForce(TimeStampsModel):
     unit = models.CharField(max_length=255, null=True, blank=True)
     originating_bureau = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
+    use_of_force_reason = models.CharField(max_length=255, null=True, blank=True)
 
     officers = models.ManyToManyField(
         'officers.Officer',

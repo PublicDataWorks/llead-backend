@@ -6,7 +6,7 @@ from departments.serializers.es_serializers import DepartmentOfficersESSerialize
 from officers.constants import UOF_RECEIVE
 from officers.factories import OfficerFactory, EventFactory
 from people.factories import PersonFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
 
 class DepartmentOfficerSerializerTestCase(TestCase):
@@ -20,7 +20,8 @@ class DepartmentOfficerSerializerTestCase(TestCase):
 
         department = DepartmentFactory()
 
-        use_of_force = UseOfForceFactory(officer=officer_1)
+        use_of_force = UseOfForceFactory()
+        UseOfForceOfficerFactory(officer=officer_1, use_of_force=use_of_force)
 
         EventFactory(
             department=department,

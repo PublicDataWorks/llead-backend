@@ -16,8 +16,8 @@ class UofCitizenImporter(BaseImporter):
         'citizen_arrest_charges',
         'citizen_hospitalized',
         'citizen_injured',
-        'citizen_build',
-        'citizen_height',
+        'citizen_age',
+        'citizen_race',
         'citizen_sex',
     ]
 

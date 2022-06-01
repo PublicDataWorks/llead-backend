@@ -6,7 +6,7 @@ from utils.models import TimeStampsModel
 class UseOfForceOfficer(TimeStampsModel):
     uof_uid = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
-    use_of_force_type = models.CharField(max_length=255, null=True, blank=True)
+    use_of_force_description = models.CharField(max_length=255, null=True, blank=True)
     use_of_force_level = models.CharField(max_length=255, null=True, blank=True)
     use_of_force_effective = models.CharField(max_length=255, null=True, blank=True)
     age = models.IntegerField(null=True, blank=True)

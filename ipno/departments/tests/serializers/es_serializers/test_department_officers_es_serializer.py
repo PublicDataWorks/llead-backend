@@ -7,7 +7,7 @@ from departments.serializers.es_serializers import DepartmentOfficersESSerialize
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from officers.constants import OFFICER_HIRE, UOF_RECEIVE
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
 
 class OfficersESSerializerTestCase(TestCase):
@@ -28,7 +28,11 @@ class OfficersESSerializerTestCase(TestCase):
             month=8,
             day=20,
         )
-        uof_1 = UseOfForceFactory(uof_uid='uof-uid1', officer=officer_1)
+        uof_1 = UseOfForceFactory()
+        UseOfForceOfficerFactory(
+            officer=officer_1,
+            use_of_force=uof_1,
+        )
         uof_1.events.add(uof_receive_event_1)
 
         uof_receive_event_2 = EventFactory(
@@ -39,7 +43,11 @@ class OfficersESSerializerTestCase(TestCase):
             month=5,
             day=12,
         )
-        uof_2 = UseOfForceFactory(uof_uid='uof-uid2', officer=officer_1)
+        uof_2 = UseOfForceFactory()
+        UseOfForceOfficerFactory(
+            officer=officer_1,
+            use_of_force=uof_2
+        )
         uof_2.events.add(uof_receive_event_2)
 
         department_2 = DepartmentFactory()

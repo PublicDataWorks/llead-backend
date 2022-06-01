@@ -16,17 +16,17 @@ class UofImporterTestCase(TestCase):
     def setUp(self):
         self.header = ['uof_citizen_uid', 'uof_uid', 'citizen_influencing_factors', 'citizen_distance_from_officer',
                        'citizen_arrested', 'citizen_arrest_charges', 'citizen_hospitalized', 'citizen_injured',
-                       'citizen_build', 'citizen_height', 'citizen_sex']
+                       'citizen_age', 'citizen_race', 'citizen_sex']
         self.uof_citizen_1_data = ['uof_citizen_uid1', 'uof-uid1', 'unknown', '0 feet to 1 feet', 'yes', '', 'no', 'no',
-                                   'medium', '5\'7', 'male']
+                                   '30', 'white', 'male']
         self.uof_citizen_2_data = ['uof_citizen_uid2', 'uof-uid2', 'alchohol', '', 'no', '', 'no', 'mentally unstable',
-                                   'small', '5\'5', 'female']
+                                   '22', 'asian', 'female']
         self.uof_citizen_3_data = ['uof_citizen_uid3', 'uof-uid3', '', '1 feet to 3 feet', 'yes', '', 'unknown',
-                                   'unknown', '', '6\'0', 'male']
+                                   'unknown', '', 'dark', 'male']
         self.uof_citizen_4_data = ['uof_citizen_uid4', 'uof-uid4', 'none detected', '0 feet to 10 feet', '', '', 'no', '',
-                                   'medium', '', 'female']
+                                   '13', '', 'female']
         self.uof_citizen_5_data = ['uof_citizen_uid5', 'uof-uid5', 'alchohol', '', 'yes', '', 'no', 'yes',
-                                   'large', "5'5", 'male']
+                                   '50', "spanish", 'male']
 
         self.uof_citizen_5_dup_data = self.uof_citizen_5_data.copy()
 
@@ -151,8 +151,8 @@ class UofImporterTestCase(TestCase):
                 'citizen_arrest_charges',
                 'citizen_hospitalized',
                 'citizen_injured',
-                'citizen_build',
-                'citizen_height',
+                'citizen_age',
+                'citizen_race',
                 'citizen_sex',
                 'use_of_force_id',
             ]
@@ -278,8 +278,8 @@ class UofImporterTestCase(TestCase):
                 'citizen_arrest_charges',
                 'citizen_hospitalized',
                 'citizen_injured',
-                'citizen_build',
-                'citizen_height',
+                'citizen_age',
+                'citizen_race',
                 'citizen_sex',
                 'use_of_force_id',
             ]
