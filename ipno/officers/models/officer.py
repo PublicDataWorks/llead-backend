@@ -25,13 +25,12 @@ class Officer(TimeStampsModel):
     uid = models.CharField(max_length=255, unique=True, db_index=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
-    middle_initial = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     birth_year = models.IntegerField(null=True, blank=True)
     birth_month = models.IntegerField(null=True, blank=True)
     birth_day = models.IntegerField(null=True, blank=True)
     race = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.CharField(max_length=255, null=True, blank=True)
+    sex = models.CharField(max_length=255, null=True, blank=True)
 
     is_name_changed = models.BooleanField(default=False)
 

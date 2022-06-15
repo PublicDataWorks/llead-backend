@@ -8,7 +8,7 @@ from app_config.constants import DEFAULT_RECENT_DAYS
 from app_config.models import AppConfig
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from news_articles.models import MatchedSentence, NewsArticle
-from officers.constants import UOF_INCIDENT
+from officers.constants import UOF_OCCUR
 from utils.data_utils import format_data_period
 
 
@@ -77,7 +77,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.complaints.filter(disposition=ALLEGATION_DISPOSITION_SUSTAINED).count()
 
     def get_incident_force_count(self, obj):
-        return obj.events.filter(kind=UOF_INCIDENT).count()
+        return obj.events.filter(kind=UOF_OCCUR).count()
 
     def get_data_period(self, obj):
         return format_data_period(obj.data_period)

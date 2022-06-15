@@ -1,4 +1,5 @@
 from .base_importer import BaseImporter
+from .data_troubleshooting import DataTroubleshooting
 from .officer_importer import OfficerImporter
 from .event_importer import EventImporter
 from .complaint_importer import ComplaintImporter
@@ -21,5 +22,6 @@ __all__ = [
     'DocumentImporter',
     'PersonImporter',
     'NewComplaintImporter',
-    'AppealImporter'
+    'AppealImporter',
+    'DataTroubleshooting',
 ]

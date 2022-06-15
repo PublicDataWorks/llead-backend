@@ -23,8 +23,8 @@ from utils.search_index import rebuild_search_index
 from officers.constants import (
     OFFICER_HIRE,
     OFFICER_LEFT,
-    UOF_INCIDENT,
-    UOF_RECEIVE
+    UOF_OCCUR,
+    UOF_RECEIVE,
 )
 
 
@@ -113,7 +113,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=8,
             day=3,
@@ -131,7 +131,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=4,
             day=5,
@@ -167,7 +167,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=12,
             day=3,
@@ -474,7 +474,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=5,
             day=3,
@@ -483,7 +483,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=3,
@@ -510,7 +510,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=7,
             day=5,
@@ -537,7 +537,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=6,
             day=3,
@@ -767,7 +767,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -1466,7 +1466,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_4,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -1680,7 +1680,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_4,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -1997,7 +1997,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=start_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=8,
@@ -2086,7 +2086,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=start_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=8,
@@ -2159,7 +2159,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=start_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=8,

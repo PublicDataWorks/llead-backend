@@ -133,14 +133,13 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'kind': COMPLAINT_TIMELINE_KIND,
             'date': str(date(2019, 5, 4)),
             'year': 2019,
-            'rule_code': complaint.rule_code,
-            'rule_violation': complaint.rule_violation,
-            'paragraph_code': complaint.paragraph_code,
-            'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,
-            'action': complaint.action,
-            'tracking_number': complaint.tracking_number,
+            'allegation': complaint.allegation,
             'allegation_desc': complaint.allegation_desc,
+            'action': complaint.action,
+            'tracking_id': complaint.tracking_id,
+            'citizen_arrested': complaint.citizen_arrested,
+            'traffic_stop': complaint.traffic_stop,
         }
 
     def test_data_with_empty_date(self):
@@ -154,14 +153,13 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'kind': COMPLAINT_TIMELINE_KIND,
             'date': None,
             'year': None,
-            'rule_code': complaint.rule_code,
-            'rule_violation': complaint.rule_violation,
-            'paragraph_code': complaint.paragraph_code,
-            'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,
-            'action': complaint.action,
-            'tracking_number': complaint.tracking_number,
+            'allegation': complaint.allegation,
             'allegation_desc': complaint.allegation_desc,
+            'action': complaint.action,
+            'tracking_id': complaint.tracking_id,
+            'citizen_arrested': complaint.citizen_arrested,
+            'traffic_stop': complaint.traffic_stop,
         }
 
 

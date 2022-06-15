@@ -18,7 +18,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
         )
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
@@ -125,7 +125,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': ['12435', '67893', '5432'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [{
                 'id': department.slug,
                 'name': department.name,
@@ -248,7 +248,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
         )
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
@@ -275,7 +275,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': [],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [],
             'salary': None,
             'salary_freq': None,
@@ -290,7 +290,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
         )
         person = PersonFactory(canonical_officer=officer)
         related_officer = OfficerFactory()
@@ -384,7 +384,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': ['13579', '5432', '12435', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [
                 {
                     'id': department.slug,

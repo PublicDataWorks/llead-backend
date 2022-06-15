@@ -45,6 +45,7 @@ UOF_ASSIGNED = "uof_assigned"
 UOF_COMPLETED = "uof_completed"
 UOF_CREATED = "uof_created"
 UOF_DUE = "uof_due"
+UOF_OCCUR = "uof_occur"
 UOF_ALL_EVENTS = [
     UOF_INCIDENT,
     UOF_RECEIVE,
@@ -52,6 +53,7 @@ UOF_ALL_EVENTS = [
     UOF_COMPLETED,
     UOF_CREATED,
     UOF_DUE,
+    UOF_OCCUR,
 ]
 
 AWARD_RECEIVE = "award_receive"
@@ -66,9 +68,9 @@ OFFICER_CAREER_SHEET = 'Career history'
 OFFICER_DOC_SHEET = 'Documents'
 
 OFFICER_PROFILE_FIELDS = [
-            'uid', 'last_name', 'middle_name', 'middle_initial',
+            'uid', 'last_name', 'middle_name',
             'first_name', 'birth_year', 'birth_month', 'birth_day', 'race',
-            'gender'
+            'sex'
 ]
 
 OFFICER_DOC_FIELDS = [
@@ -82,21 +84,21 @@ OFFICER_INCIDENT_FIELDS = [
     'badge_no', 'employee_id', 'department_code', 'department_desc',
     'division_desc', 'sub_division_a_desc', 'sub_division_b_desc',
     'current_supervisor', 'employee_class', 'rank_code', 'rank_desc',
-    'employment_status', 'sworn', 'officer_inactive', 'employee_type',
-    'years_employed', 'salary', 'salary_freq', 'award', 'award_comments',
+    'sworn', 'officer_inactive', 'employee_type', 'years_employed',
+    'salary', 'salary_freq', 'award', 'award_comments', 'left_reason',
 ]
 
 OFFICER_COMPLAINT_FIELDS = [
-    'allegation_uid', 'tracking_number',
-    'investigation_status', 'assigned_unit', 'assigned_department',
-    'assigned_division', 'assigned_sub_division_a', 'body_worn_camera_available',
-    'app_used', 'citizen_arrested', 'allegation_finding', 'allegation',
-    'allegation_class', 'citizen', 'disposition', 'rule_code', 'rule_violation',
-    'paragraph_code', 'paragraph_violation', 'complainant_name',
-    'complainant_type', 'complainant_sex', 'complainant_race', 'recommended_action',
-    'action', 'incident_type', 'supervisor_uid',
-    'supervisor_rank', 'badge_no', 'department_code', 'department_desc',
-    'rank_desc', 'employment_status', 'uid', 'agency', 'traffic_stop',
+    'allegation_uid', 'tracking_id', 'uid', 'case_number', 'allegation',
+    'investigation_status', 'assigned_department', 'assigned_division',
+    'traffic_stop', 'body_worn_camera_available', 'app_used',
+    'citizen_arrested', 'citizen', 'disposition', 'complainant_name',
+    'complainant_type', 'complainant_sex', 'complainant_race', 'action',
+    'initial_action', 'incident_type', 'supervisor_uid', 'supervisor_rank',
+    'badge_no', 'department_code', 'department_desc', 'employment_status',
+    'investigator', 'investigator_uid', 'investigator_rank', 'shift_supervisor',
+    'allegation_desc', 'investigating_department', 'referred_by', 'incident_location',
+    'disposition_desc', 'agency',
 ]
 
 OFFICER_UOF_FIELDS = [

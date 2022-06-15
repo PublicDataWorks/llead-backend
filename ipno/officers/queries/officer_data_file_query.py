@@ -46,7 +46,6 @@ class OfficerDatafileQuery(object):
             agency=F('department__name'),
             uid=F('officer__uid'),
             uof_uid=F('use_of_force__uof_uid'),
-            officer_inactive=F('event_inactive')
         ).exclude(
             kind__in=OFFICER_CAREER_KINDS
         ).values(*OFFICER_INCIDENT_FIELDS)
@@ -56,7 +55,6 @@ class OfficerDatafileQuery(object):
     def _generate_officer_complaint_sheet(self):
         complaints = Complaint.objects.filter(officers__in=self.all_officers).annotate(
             agency=F('departments__name'),
-            uid=F('officers__uid'),
         ).values(*OFFICER_COMPLAINT_FIELDS)
 
         return pd.DataFrame(complaints)
@@ -91,7 +89,6 @@ class OfficerDatafileQuery(object):
             agency=F('department__name'),
             uid=F('officer__uid'),
             uof_uid=F('use_of_force__uof_uid'),
-            officer_inactive=F('event_inactive')
         ).values(*OFFICER_INCIDENT_FIELDS)
 
         return pd.DataFrame(career)

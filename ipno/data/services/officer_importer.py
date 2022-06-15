@@ -11,10 +11,9 @@ class OfficerImporter(BaseImporter):
         'uid',
         'last_name',
         'middle_name',
-        'middle_initial',
         'first_name',
         'race',
-        'gender',
+        'sex',
     ]
     INT_ATTRIBUTES = [
         'birth_year',
@@ -55,7 +54,8 @@ class OfficerImporter(BaseImporter):
             officer_first_name = officer_names[0]
             officer_last_name = officer_names[1]
 
-            if row[self.column_mappings['first_name']] != officer_first_name or row[self.column_mappings['last_name']] != officer_last_name:
+            if row[self.column_mappings['first_name']] != officer_first_name or \
+                    row[self.column_mappings['last_name']] != officer_last_name:
                 officer_data['is_name_changed'] = True
 
             self.update_officers_attrs.append(officer_data)
