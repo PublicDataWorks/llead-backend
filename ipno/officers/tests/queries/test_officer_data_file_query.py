@@ -105,14 +105,12 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(event_1, 'event_inactive'),
         }
         expected_event_2 = {
             **{key: getattr(event_2, key) if hasattr(event_2, key) else {} for key in OFFICER_INCIDENT_FIELDS},
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(event_2, 'event_inactive'),
         }
         expected_complaint_receive_event = {
             **{key: getattr(complaint_receive_event, key) if hasattr(complaint_receive_event, key) else {}
@@ -120,7 +118,6 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(complaint_receive_event, 'event_inactive'),
         }
         expected_uof_receive_event = {
             **{key: getattr(uof_receive_event, key) if hasattr(uof_receive_event, key) else {}
@@ -128,7 +125,6 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': uof.uof_uid,
-            'officer_inactive': getattr(uof_receive_event, 'event_inactive'),
         }
 
         expected_incidents = [
@@ -143,12 +139,10 @@ class OfficerDatafileQueryTestCase(TestCase):
 
         expected_complaint_1 = {
             **{key: getattr(complaint_1, key) if hasattr(complaint_1, key) else {} for key in OFFICER_COMPLAINT_FIELDS},
-            'uid': officer.uid,
             'agency': department.name,
         }
         expected_complaint_2 = {
             **{key: getattr(complaint_2, key) if hasattr(complaint_2, key) else {} for key in OFFICER_COMPLAINT_FIELDS},
-            'uid': officer.uid,
             'agency': department.name,
         }
 
@@ -332,14 +326,12 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(event_1, 'event_inactive'),
         }
         expected_event_2 = {
             **{key: getattr(event_2, key) if hasattr(event_2, key) else {} for key in OFFICER_INCIDENT_FIELDS},
             'uid': related_officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(event_2, 'event_inactive'),
         }
         expected_complaint_receive_event = {
             **{key: getattr(complaint_receive_event, key) if hasattr(complaint_receive_event, key) else {}
@@ -347,7 +339,6 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': officer.uid,
             'agency': department.name,
             'uof_uid': None,
-            'officer_inactive': getattr(complaint_receive_event, 'event_inactive'),
         }
         expected_uof_receive_event = {
             **{key: getattr(uof_receive_event, key) if hasattr(uof_receive_event, key) else {}
@@ -355,7 +346,6 @@ class OfficerDatafileQueryTestCase(TestCase):
             'uid': related_officer.uid,
             'agency': department.name,
             'uof_uid': uof.uof_uid,
-            'officer_inactive': getattr(uof_receive_event, 'event_inactive'),
         }
 
         expected_incidents = [
@@ -370,12 +360,10 @@ class OfficerDatafileQueryTestCase(TestCase):
 
         expected_complaint_1 = {
             **{key: getattr(complaint_1, key) if hasattr(complaint_1, key) else {} for key in OFFICER_COMPLAINT_FIELDS},
-            'uid': officer.uid,
             'agency': department.name,
         }
         expected_complaint_2 = {
             **{key: getattr(complaint_2, key) if hasattr(complaint_2, key) else {} for key in OFFICER_COMPLAINT_FIELDS},
-            'uid': related_officer.uid,
             'agency': department.name,
         }
 

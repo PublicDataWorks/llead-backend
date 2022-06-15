@@ -43,7 +43,7 @@ class DepartmentInlineAdmin(admin.TabularInline):
 
 
 class OfficerAdmin(ModelAdmin):
-    list_display = ('id', 'uid', 'last_name', 'first_name', 'count_articles')
+    list_display = ('id', 'uid', 'last_name', 'first_name', 'count_articles', 'sex')
     search_fields = ('id', 'uid', 'last_name', 'first_name')
     list_filter = (OfficerNewsArticleFilter,)
     inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin, DepartmentInlineAdmin)

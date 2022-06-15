@@ -153,7 +153,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
             person=person
         )
         person.officers.add(related_officer)
@@ -244,7 +244,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'badges': ['12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [{
                 'id': department.slug,
                 'name': department.name,
@@ -395,14 +395,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': None,
                 'year': None,
-                'rule_code': complaint_2.rule_code,
-                'rule_violation': complaint_2.rule_violation,
-                'paragraph_code': complaint_2.paragraph_code,
-                'paragraph_violation': complaint_2.paragraph_violation,
                 'disposition': complaint_2.disposition,
-                'action': complaint_2.action,
-                'tracking_number': complaint_2.tracking_number,
+                'allegation': complaint_2.allegation,
                 'allegation_desc': complaint_2.allegation_desc,
+                'action': complaint_2.action,
+                'tracking_id': complaint_2.tracking_id,
+                'citizen_arrested': complaint_2.citizen_arrested,
+                'traffic_stop': complaint_2.traffic_stop,
             },
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
@@ -467,14 +466,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': str(date(2019, 5, 4)),
                 'year': 2019,
-                'rule_code': complaint_1.rule_code,
-                'rule_violation': complaint_1.rule_violation,
-                'paragraph_code': complaint_1.paragraph_code,
-                'paragraph_violation': complaint_1.paragraph_violation,
                 'disposition': complaint_1.disposition,
-                'action': complaint_1.action,
-                'tracking_number': complaint_1.tracking_number,
+                'allegation': complaint_1.allegation,
                 'allegation_desc': complaint_1.allegation_desc,
+                'action': complaint_1.action,
+                'tracking_id': complaint_1.tracking_id,
+                'citizen_arrested': complaint_1.citizen_arrested,
+                'traffic_stop': complaint_1.traffic_stop,
             },
             {
                 'id': use_of_force_officer.id,
@@ -613,7 +611,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
             person=person
         )
         person.officers.add(related_officer)
@@ -713,7 +711,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'badges': ['13579', '12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [
                 {
                     'id': department.slug,

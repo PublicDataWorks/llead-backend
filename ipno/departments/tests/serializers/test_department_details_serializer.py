@@ -10,7 +10,7 @@ from news_articles.factories.matched_sentence_factory import MatchedSentenceFact
 from officers.factories import OfficerFactory, EventFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
-from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_INCIDENT
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_OCCUR
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from people.factories import PersonFactory
 
@@ -53,7 +53,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=8,
             day=3,
@@ -71,7 +71,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=4,
             day=5,
@@ -107,7 +107,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=12,
             day=3,
@@ -248,7 +248,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=5,
             day=3,
@@ -257,7 +257,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=3,
@@ -284,7 +284,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=7,
             day=5,
@@ -311,7 +311,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=6,
             day=3,

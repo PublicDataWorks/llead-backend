@@ -18,7 +18,7 @@ class DocumentsViewSet(viewsets.ViewSet):
     @cache_control(no_store=True)
     def list(self, request):
         documents = Document.objects.prefetch_departments().order_by(
-            'docid',
+            'docid', 'id'
         ).distinct('docid')[:DOCUMENTS_LIMIT]
 
         serializer = DocumentSerializer(documents, many=True)

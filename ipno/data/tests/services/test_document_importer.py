@@ -24,13 +24,14 @@ class DocumentImporterTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
-        self.header = ['docid', 'page_count', 'fileid', 'title', 'pdf_db_path', 'pdf_db_content_hash', 'txt_db_id',
-                       'txt_db_content_hash', 'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused', 'matched_uid',
-                       'agency', 'hrg_text', 'hrg_type']
+        self.header = ['docid', 'page_count', 'pdf_db_id', 'title', 'pdf_db_path', 'pdf_db_content_hash', 'txt_db_path',
+                       'txt_db_id', 'txt_db_content_hash', 'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused',
+                       'matched_uid', 'agency', 'hrg_text', 'hrg_type']
         self.document1_data = [
             '00fa809e', '4', 'f0fcc0d', 'document 1 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
             'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.txt',
             'id:8ceKnrnmgi0AAAAAAAAqmQ',
             'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff', '2018', '6', '14',
             'scraped', '1', 'Joseph Jones, Docket No. 17-', 'officer-uid-1', 'New Orleans PD',
@@ -53,6 +54,7 @@ class DocumentImporterTestCase(TestCase):
             '0236e725', '1', 'd4fb65b', 'document 2 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
             '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.txt',
             'id:8ceKnrnmgi0AAAAAAAAqmw',
             '2c668256378a491fd2f2812fcd4fc0f22af292b66f3f63ce6070321c57497f5a', '2018', '12', '18',
             'scraped', '1', 'Officer Terry Guillory, Docket 17-201', 'officer-uid-2', '', '', 'unknown']
@@ -60,6 +62,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 3 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '1', 'WILLIAM C. BROWN', 'officer-uid-3', 'Baton Rouge PD',
@@ -75,6 +78,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 4 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '2', 'JIM VERLANDER', '', 'New Orleans PD',
@@ -93,6 +97,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 5 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', '', 'fire']
@@ -101,6 +106,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd82391', '3', '77d489c', 'document 5 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', 'new-orleans-pd', 'unknown']

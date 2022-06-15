@@ -10,7 +10,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
     badges = serializers.SerializerMethodField()
     birth_year = serializers.IntegerField()
     race = serializers.CharField()
-    gender = serializers.CharField()
+    sex = serializers.CharField()
 
     departments = serializers.SerializerMethodField()
     salary = serializers.SerializerMethodField()

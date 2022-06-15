@@ -48,14 +48,13 @@ class LeftTimelineSerializer(BaseTimelineSerializer):
 class ComplaintTimelineSerializer(BaseTimelineSerializer):
     year = serializers.SerializerMethodField()
     id = serializers.IntegerField()
-    rule_code = serializers.CharField()
-    rule_violation = serializers.CharField()
-    paragraph_code = serializers.CharField()
-    paragraph_violation = serializers.CharField()
     disposition = serializers.CharField()
     action = serializers.CharField()
-    tracking_number = serializers.CharField()
+    tracking_id = serializers.CharField()
+    allegation = serializers.CharField()
     allegation_desc = serializers.CharField()
+    citizen_arrested = serializers.CharField()
+    traffic_stop = serializers.CharField()
 
     def _get_receive_event(self, obj):
         if not hasattr(obj, 'receive_event'):
