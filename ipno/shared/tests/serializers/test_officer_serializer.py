@@ -8,8 +8,8 @@ from departments.factories import DepartmentFactory
 
 class OfficerSerializerTestCase(TestCase):
     def test_data(self):
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
         department = DepartmentFactory()
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth', department=department)
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
         person.save()

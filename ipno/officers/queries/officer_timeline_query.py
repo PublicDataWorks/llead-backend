@@ -190,7 +190,9 @@ class OfficerTimelineQuery(object):
             end_year = officer_timeline_period[-1]
 
             event_years = []
-            departments = Department.objects.filter(officers__in=self.all_officers).only('data_period').all()
+            events = Event.objects.filter(officer__in=self.all_officers)
+            departments = Department.objects.filter(events__in=events).only('data_period').distinct()
+
             for department in departments:
                 department_period = department.data_period
                 event_years.extend(year for year in department_period if start_year <= year <= end_year)

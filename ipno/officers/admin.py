@@ -36,17 +36,11 @@ class ExcludedMatchedSentenceInlineAdmin(admin.TabularInline):
     raw_id_fields = ('matchedsentence',)
 
 
-class DepartmentInlineAdmin(admin.TabularInline):
-    model = Officer.departments.through
-    fields = ('department', )
-    extra = 0
-
-
 class OfficerAdmin(ModelAdmin):
-    list_display = ('id', 'uid', 'last_name', 'first_name', 'count_articles', 'sex')
+    list_display = ('id', 'uid', 'last_name', 'first_name', 'count_articles', 'sex', 'agency')
     search_fields = ('id', 'uid', 'last_name', 'first_name')
     list_filter = (OfficerNewsArticleFilter,)
-    inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin, DepartmentInlineAdmin)
+    inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin)
 
     raw_id_fields = ('person', )
 

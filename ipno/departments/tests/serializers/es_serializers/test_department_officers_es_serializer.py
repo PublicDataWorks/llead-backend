@@ -12,13 +12,14 @@ from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
 class OfficersESSerializerTestCase(TestCase):
     def test_serialize(self):
-        officer_1 = OfficerFactory(first_name='Kenneth', last_name='Anderson')
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Kenneth', last_name='Anderson', department=department_1)
         person = PersonFactory(canonical_officer=officer_1, all_complaints_count=5)
         officer_1.person = person
         officer_1.save()
-        officer_2 = OfficerFactory(first_name='Kenneth', last_name='Anders', person=person)
-
-        department_1 = DepartmentFactory()
+        officer_2 = OfficerFactory(first_name='Kenneth', last_name='Anders', person=person, department=department_2)
 
         uof_receive_event_1 = EventFactory(
             department=department_1,
@@ -50,7 +51,6 @@ class OfficersESSerializerTestCase(TestCase):
         )
         uof_2.events.add(uof_receive_event_2)
 
-        department_2 = DepartmentFactory()
         EventFactory(
             officer=officer_1,
             department=department_2,
@@ -97,16 +97,10 @@ class OfficersESSerializerTestCase(TestCase):
                 'badges': ['12345', '23456'],
                 'use_of_forces_count': 2,
                 'complaints_count': 5,
-                'departments': [
-                    {
-                        'id': department_1.slug,
-                        'name': department_1.name,
-                    },
-                    {
-                        'id': department_2.slug,
-                        'name': department_2.name,
-                    },
-                ],
+                'department': {
+                    'id': department_1.slug,
+                    'name': department_1.name,
+                },
                 'latest_rank': 'senior',
             }
         ]

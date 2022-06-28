@@ -24,7 +24,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory(name='Baton Rouge PD')
         department_2 = DepartmentFactory(name='New Orleans PD')
 
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth', department=department_2)
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
         person.save()

@@ -35,8 +35,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department_3 = DepartmentFactory()
         DepartmentFactory()
 
-        department_1_officers = OfficerFactory.create_batch(2)
-        department_2_officers = OfficerFactory.create_batch(3)
+        OfficerFactory.create_batch(2, department=department_1)
+        OfficerFactory.create_batch(3, department=department_2)
 
         document = DocumentFactory()
         document.departments.add(department_1)
@@ -46,16 +46,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         complaint = ComplaintFactory()
         complaint.departments.add(department_3)
 
-        for officer in department_1_officers:
-            EventFactory.create_batch(2, department=department_1, officer=officer)
+        EventFactory.create_batch(2, department=department_1)
+        EventFactory(department=department_2)
 
-        for officer in department_2_officers:
-            EventFactory(department=department_2, officer=officer)
-
-        response = self.auth_client.get(reverse('api:departments-list'))
-        assert response.status_code == status.HTTP_200_OK
-
-        assert response.data == [{
+        expected_data = [{
             'id': department_2.slug,
             'name': department_2.name,
             'city': department_2.city,
@@ -75,6 +69,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'location_map_url': department_3.location_map_url,
         }]
 
+        response = self.auth_client.get(reverse('api:departments-list'))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
+
     def test_list_unauthorized(self):
         response = self.client.get(reverse('api:departments-list'))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -84,19 +83,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department = DepartmentFactory()
         other_department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-        officer_2 = OfficerFactory()
+        officer_2 = OfficerFactory(department=department)
         person_2 = PersonFactory(canonical_officer=officer_2)
         person_2.officers.add(officer_2)
         person_2.save()
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_3)
         person_3.officers.add(officer_3)
         person_3.save()
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=other_department)
         person_4 = PersonFactory(canonical_officer=officer_4)
         person_4.officers.add(officer_4)
         person_4.save()
@@ -446,18 +445,18 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
         other_department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-        officer_2 = OfficerFactory()
+        officer_2 = OfficerFactory(department=department)
         person_1.officers.add(officer_2)
         person_1.save()
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_3)
         person_3.officers.add(officer_3)
         person_3.save()
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=other_department)
         person_4 = PersonFactory(canonical_officer=officer_4)
         person_4.officers.add(officer_4)
         person_4.save()
@@ -689,24 +688,25 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_officers_success(self):
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
+        officer_2 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        department = DepartmentFactory()
         department.starred_officers.add(officer_2)
         department.save()
 
@@ -851,12 +851,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 2,
                 'badges': ["150", "200", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'senior',
             },
             {
@@ -866,12 +864,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': officer_4.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'recruit',
             },
             {
@@ -881,12 +877,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123"],
                 'complaints_count': officer_3.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'sergeant',
             },
         ]
@@ -897,19 +891,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     @patch('departments.views.DEPARTMENTS_LIMIT', 3)
     def test_officers_with_maximum_starred_officers(self):
         department = DepartmentFactory()
-        starred_officers = OfficerFactory.create_batch(3)
+        starred_officers = OfficerFactory.create_batch(3, department=department)
         starred_person = PersonFactory(canonical_officer=starred_officers[0])
         for starred_officer in starred_officers:
             department.starred_officers.add(starred_officer)
             starred_person.officers.add(starred_officer)
-            EventFactory(
-                department=department,
-                officer=starred_officer,
-            )
         department.save()
         starred_person.save()
 
-        featured_officer = OfficerFactory()
+        featured_officer = OfficerFactory(department=department)
         featured_person = PersonFactory(canonical_officer=featured_officer)
         featured_person.officers.add(featured_officer)
         featured_person.save()
@@ -928,12 +918,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': None,
             },
             {
@@ -943,12 +931,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': None,
             },
             {
@@ -958,12 +944,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': None,
             },
         ]
@@ -985,17 +969,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_news_articles_success(self):
         current_date = datetime.now(pytz.utc)
-        officer_1 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-
-        department = DepartmentFactory()
-
-        EventFactory(
-            department=department,
-            officer=officer_1,
-        )
 
         starred_article_source = NewsArticleSourceFactory(source_display_name='Starred Article')
         starred_article = NewsArticleFactory(
@@ -1389,24 +1368,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['results'] == expected_results
 
     def test_search_officers_success(self):
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
@@ -1415,8 +1396,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5 = PersonFactory(canonical_officer=officer_6)
         person_5.officers.add(officer_6)
         person_5.save()
-
-        department = DepartmentFactory()
 
         use_of_force_1 = UseOfForceFactory()
         use_of_force_2 = UseOfForceFactory()
@@ -1556,12 +1535,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123", "200"],
                 'complaints_count': officer_3.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'sergeant',
             },
             {
@@ -1571,12 +1548,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'recruit',
             },
             {
@@ -1586,12 +1561,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': ["150", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'senior',
             },
         ]
@@ -1603,24 +1576,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['results'] == expected_results
 
     def test_search_officers_with_limit_and_offset(self):
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
@@ -1629,8 +1604,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5 = PersonFactory(canonical_officer=officer_6)
         person_5.officers.add(officer_6)
         person_5.save()
-
-        department = DepartmentFactory()
 
         use_of_force_1 = UseOfForceFactory()
         use_of_force_2 = UseOfForceFactory()
@@ -1746,12 +1719,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    }
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'recruit',
             }
         ]

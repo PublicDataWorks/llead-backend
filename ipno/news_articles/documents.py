@@ -44,6 +44,6 @@ class NewsArticleESDoc(ESDoc):
     def prepare_department_slugs(self, instance):
         matched_officers = instance.matched_sentences.all().values_list('officers')
         officers = Officer.objects.filter(person__officers__in=matched_officers)
-        departments = Department.objects.filter(officer__in=officers).distinct()
+        departments = Department.objects.filter(officers__in=officers).distinct()
 
         return [department.slug for department in departments]
