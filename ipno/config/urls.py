@@ -32,6 +32,7 @@ from app_config.views import AppConfigViewSet, FrontPageOrdersViewSet, FrontPage
 from analytics.views import AnalyticsViewSet
 from news_articles.views import NewsArticlesViewSet
 from officers.views import OfficersViewSet
+from q_and_a.views import QAndAViewSet
 from search.views import SearchViewSet
 from authentication.views import TokenRevokeView, UserView, CustomPasswordTokenVerificationView
 from status.views import StatusView
@@ -42,6 +43,7 @@ api_router = routers.SimpleRouter()
 api_router.register(r'documents', DocumentsViewSet, basename='documents')
 api_router.register(r'departments', DepartmentsViewSet, basename='departments')
 api_router.register(r'app-config', AppConfigViewSet, basename='app-config')
+api_router.register(r'q-and-a', QAndAViewSet, basename='q-and-a')
 api_router.register(r'analytics', AnalyticsViewSet, basename='analytics')
 api_router.register(r'officers', OfficersViewSet, basename='officers')
 api_router.register(r'search', SearchViewSet, basename='search')

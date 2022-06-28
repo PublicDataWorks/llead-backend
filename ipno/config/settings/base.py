@@ -64,6 +64,7 @@ LOCAL_APPS = (
     'authentication',
     'app_config',
     'core',
+    'q_and_a',
     'documents',
     'departments',
     'officers',
