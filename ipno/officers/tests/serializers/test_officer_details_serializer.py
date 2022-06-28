@@ -13,17 +13,20 @@ from people.factories import PersonFactory
 
 class OfficerDetailsSerializerTestCase(TestCase):
     def test_data(self):
+        department = DepartmentFactory()
+
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
             sex='male',
+            department=department,
         )
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
         person.save()
-        department = DepartmentFactory()
+
         EventFactory(
             officer=officer,
             department=department,
@@ -285,20 +288,23 @@ class OfficerDetailsSerializerTestCase(TestCase):
         }
 
     def test_data_with_related_officer_departments_and_badges(self):
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
             sex='male',
+            department=department,
         )
         person = PersonFactory(canonical_officer=officer)
-        related_officer = OfficerFactory()
+        related_officer = OfficerFactory(department=related_department)
         person.officers.add(officer)
         person.officers.add(related_officer)
         person.save()
-        department = DepartmentFactory()
-        related_department = DepartmentFactory()
+
         EventFactory(
             officer=officer,
             department=department,

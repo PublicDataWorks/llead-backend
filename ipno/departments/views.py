@@ -94,6 +94,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         page = paginator.paginate_es_query(search_query, request)
 
         data = serializer_mapping[kind](page).data
+
         return paginator.get_paginated_response(data)
 
     @action(detail=True, methods=['get'], url_path='documents')
@@ -134,7 +135,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
         other_prefetches = (
             Prefetch(
-                'person__officers__departments'
+                'department'
             ),
         )
 

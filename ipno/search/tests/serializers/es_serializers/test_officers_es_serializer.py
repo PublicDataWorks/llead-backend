@@ -11,10 +11,13 @@ from officers.constants import OFFICER_HIRE
 
 class OfficersESSerializerTestCase(TestCase):
     def test_serialize(self):
-        officer_1 = OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_2 = OfficerFactory(first_name='David', last_name='Jonesworth')
-        officer_3 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Kenneth', last_name='Anderson', department=department)
+        officer_2 = OfficerFactory(first_name='David', last_name='Jonesworth', department=department)
+        officer_3 = OfficerFactory(first_name='Anthony', last_name='Davis', department=department)
         OfficerFactory()
+
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -25,7 +28,6 @@ class OfficersESSerializerTestCase(TestCase):
         person_3.officers.add(officer_3)
         person_3.save()
 
-        department = DepartmentFactory()
         EventFactory(
             officer=officer_1,
             department=department,

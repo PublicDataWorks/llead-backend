@@ -40,21 +40,30 @@ from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
 
 class OfficersViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(
+            first_name='David',
+            last_name='Jonesworth',
+            department=department,
+        )
         person_1 = PersonFactory(
             canonical_officer=officer_1,
             all_complaints_count=4,
          )
         person_1.officers.add(officer_1)
         officer_1.person = person_1
-        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        officer_2 = OfficerFactory(
+            first_name='Anthony',
+            last_name='Davis',
+            department=department,
+        )
         person_2 = PersonFactory(
             canonical_officer=officer_2,
             all_complaints_count=7,
         )
         person_2.officers.add(officer_2)
         officer_2.person = person_2
-        department = DepartmentFactory()
         OfficerFactory()
 
         EventFactory(
@@ -117,9 +126,8 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             complaint.officers.add(officer_2)
 
         response = self.auth_client.get(reverse('api:officers-list'))
-        assert response.status_code == status.HTTP_200_OK
 
-        assert response.data == [
+        expected_data = [
             {
                 'id': officer_2.id,
                 'name': 'Anthony Davis',
@@ -141,11 +149,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'latest_rank': 'senior',
             }]
 
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
+
     def test_list_unauthorized(self):
         response = self.client.get(reverse('api:officers-list'))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
+        department = DepartmentFactory()
+
         person = PersonFactory()
         related_officer = OfficerFactory()
         officer = OfficerFactory(
@@ -154,12 +167,12 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             birth_year=1962,
             race='white',
             sex='male',
-            person=person
+            person=person,
+            department=department
         )
         person.officers.add(related_officer)
         person.canonical_officer = officer
         person.save()
-        department = DepartmentFactory()
         EventFactory(
             officer=officer,
             department=department,
@@ -604,21 +617,23 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         pd.testing.assert_frame_equal(xlsx_data, data)
 
     def test_retrieve_success_with_related_officer_departments_and_badges(self):
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+
         person = PersonFactory()
-        related_officer = OfficerFactory()
+        related_officer = OfficerFactory(department=related_department)
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
             sex='male',
-            person=person
+            person=person,
+            department=department,
         )
         person.officers.add(related_officer)
         person.canonical_officer = officer
         person.save()
-        department = DepartmentFactory()
-        related_department = DepartmentFactory()
         EventFactory(
             officer=officer,
             department=department,

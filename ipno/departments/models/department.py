@@ -16,8 +16,6 @@ class Department(TimeStampsModel):
     location = LocationField(null=True, blank=True, map_attrs={"readonly": False})
     data_period = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', through='officers.Event')
-
     starred_officers = models.ManyToManyField(
         'officers.Officer',
         blank=True,

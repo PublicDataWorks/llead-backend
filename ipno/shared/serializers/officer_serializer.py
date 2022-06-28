@@ -42,9 +42,7 @@ class OfficerSerializer(serializers.Serializer):
         return events
 
     def get_department(self, obj):
-        events = self._get_all_events(obj)
-        if events and events[0]:
-            return SimpleDepartmentSerializer(events[0].department).data
+        return SimpleDepartmentSerializer(obj.department).data if obj.department else None
 
     def get_latest_rank(self, obj):
         events = self._get_all_events(obj)

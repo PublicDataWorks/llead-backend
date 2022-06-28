@@ -1,3 +1,6 @@
+from itertools import chain
+
+from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from officers.models import Officer
@@ -14,6 +17,7 @@ class OfficerImporter(BaseImporter):
         'first_name',
         'race',
         'sex',
+        'agency',
     ]
     INT_ATTRIBUTES = [
         'birth_year',
@@ -23,7 +27,7 @@ class OfficerImporter(BaseImporter):
     UPDATE_ONLY_ATTRIBUTES = [
         'is_name_changed',
     ]
-    UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + UPDATE_ONLY_ATTRIBUTES
+    UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + UPDATE_ONLY_ATTRIBUTES + ['department_id']
 
     def __init__(self):
         self.new_officers_atrs = []
@@ -33,6 +37,7 @@ class OfficerImporter(BaseImporter):
         self.officer_mappings = {}
         self.officer_name_mappings = {}
         self.existed_officers_uids = []
+        self.department_mappings = {}
 
     def get_officer_name_mappings(self):
         return {
@@ -41,7 +46,13 @@ class OfficerImporter(BaseImporter):
         }
 
     def handle_record_data(self, row):
+        agency = row[self.column_mappings['agency']]
         officer_data = self.parse_row_data(row, self.column_mappings)
+
+        formatted_agency = self.format_agency(agency)
+        department_id = self.department_mappings.get(slugify(formatted_agency))
+        officer_data['department_id'] = department_id
+
         row_uid = officer_data['uid']
 
         if row_uid in self.existed_officers_uids:
@@ -64,6 +75,18 @@ class OfficerImporter(BaseImporter):
             self.new_officers_atrs.append(officer_data)
 
     def import_data(self, data):
+        saved_data = list(chain(
+            data.get('added_rows', []),
+            data.get('updated_rows', []),
+        ))
+        deleted_data = data.get('deleted_rows', [])
+
+        agencies = {row[self.column_mappings['agency']] for row in saved_data if row[self.column_mappings['agency']]}
+        agencies.update([
+            row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
+        ])
+        self.department_mappings = self.get_department_mappings(agencies)
+
         self.officer_mappings = self.get_officer_mappings()
         self.officer_name_mappings = self.get_officer_name_mappings()
         self.existed_officers_uids = list(Officer.objects.all().values_list('uid', flat=True))
