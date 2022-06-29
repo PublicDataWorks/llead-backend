@@ -4,7 +4,7 @@ from q_and_a.factories import SectionFactory, QuestionFactory
 from q_and_a.serializers import QAndASerializer
 
 
-class InformationSerializerTestCase(TestCase):
+class QAndASerializerTestCase(TestCase):
     def test_data(self):
         section = SectionFactory()
         question = QuestionFactory(section=section)
