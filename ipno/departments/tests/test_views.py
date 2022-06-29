@@ -2091,3 +2091,105 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
+
+    def test_migratory_list_with_no_department_location(self):
+        start_department = DepartmentFactory()
+        end_department1 = DepartmentFactory()
+        end_department2 = DepartmentFactory(location=None)
+        DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        event = EventFactory(
+            department=end_department1,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2019,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_2,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=5,
+            day=5,
+        )
+
+        EventFactory(
+            department=end_department2,
+            officer=officer_2,
+            kind=OFFICER_HIRE,
+            year=2020,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_INCIDENT,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_2,
+            kind=UOF_RECEIVE,
+        )
+
+        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
+        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department1.location))
+
+        expected_result = {
+            'nodes': {
+                start_department.slug: {
+                    'name': start_department.name,
+                    'location': start_department_location,
+                },
+                end_department1.slug: {
+                    'name': end_department1.name,
+                    'location': end_department_location,
+                },
+            },
+            'graphs': [
+                {
+                    'start_node': start_department.slug,
+                    'end_node': end_department1.slug,
+                    'start_location': start_department_location,
+                    'end_location': end_department_location,
+                    'year': 2019,
+                    'date': parse_date(event.year, event.month, event.day),
+                    'officer_name': officer_1.name,
+                    'officer_id': officer_1.id,
+                },
+            ]
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result

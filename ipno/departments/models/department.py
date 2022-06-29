@@ -13,7 +13,7 @@ class Department(TimeStampsModel):
     address = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     location_map_url = models.CharField(max_length=255, null=True, blank=True)
-    location = LocationField(null=True, blank=True)
+    location = LocationField(null=True, blank=True, map_attrs={"readonly": False})
     data_period = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
     officers = models.ManyToManyField('officers.Officer', through='officers.Event')
