@@ -12,7 +12,6 @@ class QuestionFactory(DjangoModelFactory):
     class Meta:
         model = Question
 
-    order = factory.LazyFunction(fake.pyint)
     question = factory.LazyFunction(lambda: fake.sentence())
     answer = factory.LazyFunction(lambda: fake.sentence())
 
