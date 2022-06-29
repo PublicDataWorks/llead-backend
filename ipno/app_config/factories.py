@@ -2,7 +2,7 @@ import factory
 from faker import Faker
 from factory.django import DjangoModelFactory
 
-from app_config.models import AppConfig, AppTextContent, FrontPageOrder
+from app_config.models import AppConfig, AppTextContent, FrontPageOrder, FrontPageCard
 
 fake = Faker()
 
@@ -29,3 +29,11 @@ class FrontPageOrderFactory(DjangoModelFactory):
 
     section = factory.LazyFunction(fake.word)
     order = factory.LazyFunction(fake.pyint)
+
+
+class FrontPageCardFactory(DjangoModelFactory):
+    class Meta:
+        model = FrontPageCard
+
+    order = factory.LazyFunction(fake.pyint)
+    content = factory.LazyFunction(fake.word)
