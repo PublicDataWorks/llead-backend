@@ -31,13 +31,13 @@ class QuestionAndAnswerTestCase(APITestCase):
 
         mock_send_mail.assert_called_with(
             subject="IPNO message from contact page",
-            from_email=settings.FEEDBACK_FROM_EMAIL,
-            recipient_list=[settings.FEEDBACK_TO_EMAIL],
+            from_email=settings.FEEDBACK_TO_EMAIL,
+            recipient_list=[settings.FEEDBACK_TO_EMAIL, email],
             html_message=render_to_string("email/dynamic_email.html", context),
             message=render_to_string("email/dynamic_email.html", context)
         )
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {
-            'detail': 'Your message has been submitted'
+            'detail': 'Your message has been sent'
         }
