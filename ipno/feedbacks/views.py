@@ -25,11 +25,12 @@ class FeedbackViewSet(ViewSet):
         Feedback.objects.create(**item)
 
         context = {
-            "message": f"Message from {email}: {message}"
+            "message": f"{message}\n"
+                       f"*Sent via form on LLEAD.co*"
         }
 
         send_mail(
-            subject="IPNO message from contact page",
+            subject="LLEAD.co Message",
             from_email=settings.FEEDBACK_TO_EMAIL,
             recipient_list=[settings.FEEDBACK_TO_EMAIL, email],
             html_message=render_to_string("email/dynamic_email.html", context),
