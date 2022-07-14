@@ -26,7 +26,7 @@ class OfficersSearchQueryTestCase(TestCase):
         department_2 = DepartmentFactory(name='Orleans keywo PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth', department=department_1)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -280,12 +280,12 @@ class OfficersSearchQueryTestCase(TestCase):
         department_2 = DepartmentFactory(name='Orleans keywo PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth', department=department_1)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
 
-        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis keywords')
+        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis keywords', department=department_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
@@ -453,7 +453,11 @@ class OfficersSearchQueryTestCase(TestCase):
         })
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(
+            first_name='David keyword',
+            last_name='Jonesworth',
+            department=department_1,
+        )
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()

@@ -11,7 +11,7 @@ class DepartmentOfficerSerializer(serializers.Serializer):
 
     badges = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
-    departments = serializers.SerializerMethodField()
+    department = serializers.SerializerMethodField()
     latest_rank = serializers.SerializerMethodField()
 
     def _get_person_officers(self, obj):
@@ -59,14 +59,8 @@ class DepartmentOfficerSerializer(serializers.Serializer):
     def get_complaints_count(self, obj):
         return obj.person.all_complaints_count
 
-    def get_departments(self, obj):
-        all_officers = self._get_person_officers(obj)
-
-        departments = set()
-        for officer in all_officers:
-            departments.update(list(set(officer.departments.all())))
-
-        return SimpleDepartmentSerializer(departments, many=True).data
+    def get_department(self, obj):
+        return SimpleDepartmentSerializer(obj.department).data if obj.department else None
 
     def get_latest_rank(self, obj):
         events = self._get_all_events(obj)

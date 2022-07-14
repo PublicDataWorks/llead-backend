@@ -6,21 +6,22 @@ from departments.serializers.es_serializers import DepartmentOfficersESSerialize
 from officers.constants import UOF_RECEIVE
 from officers.factories import OfficerFactory, EventFactory
 from people.factories import PersonFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
 
 class DepartmentOfficerSerializerTestCase(TestCase):
     def test_data(self):
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
+        officer_2 = OfficerFactory(department=department)
         person = PersonFactory(canonical_officer=officer_2, all_complaints_count=120)
         person.officers.add(officer_1)
         person.officers.add(officer_2)
         person.save()
 
-        department = DepartmentFactory()
-
-        use_of_force = UseOfForceFactory(officer=officer_1)
+        use_of_force = UseOfForceFactory()
+        UseOfForceOfficerFactory(officer=officer_1, use_of_force=use_of_force)
 
         EventFactory(
             department=department,
@@ -92,12 +93,10 @@ class DepartmentOfficerSerializerTestCase(TestCase):
                 'is_starred': False,
                 'complaints_count': officer_1.person.all_complaints_count,
                 'use_of_forces_count': 1,
-                'departments': [
-                    {
-                        'id': department.slug,
-                        'name': department.name,
-                    },
-                ],
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
                 'latest_rank': 'senior'
             }
         ]

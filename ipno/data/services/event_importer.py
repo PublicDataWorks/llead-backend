@@ -16,7 +16,6 @@ class EventImporter(BaseImporter):
     ATTRIBUTES = [
         'event_uid',
         'kind',
-
         'time',
         'raw_date',
         'allegation_uid',
@@ -32,15 +31,14 @@ class EventImporter(BaseImporter):
         'employee_class',
         'rank_code',
         'rank_desc',
-        'employment_status',
         'sworn',
-        'event_inactive',
+        'officer_inactive',
         'employee_type',
-
         'salary',
         'salary_freq',
         'award',
         'award_comments',
+        'left_reason',
     ]
     INT_ATTRIBUTES = [
         'year',

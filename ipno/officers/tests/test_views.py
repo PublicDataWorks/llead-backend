@@ -16,7 +16,7 @@ from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from officers.factories import OfficerFactory, EventFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory, UseOfForceCitizenFactory
 from officers.constants import (
     COMPLAINT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
@@ -40,21 +40,30 @@ from officers.constants import COMPLAINT_RECEIVE, ALLEGATION_CREATE
 
 class OfficersViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(
+            first_name='David',
+            last_name='Jonesworth',
+            department=department,
+        )
         person_1 = PersonFactory(
             canonical_officer=officer_1,
             all_complaints_count=4,
          )
         person_1.officers.add(officer_1)
         officer_1.person = person_1
-        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        officer_2 = OfficerFactory(
+            first_name='Anthony',
+            last_name='Davis',
+            department=department,
+        )
         person_2 = PersonFactory(
             canonical_officer=officer_2,
             all_complaints_count=7,
         )
         person_2.officers.add(officer_2)
         officer_2.person = person_2
-        department = DepartmentFactory()
         OfficerFactory()
 
         EventFactory(
@@ -117,9 +126,8 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             complaint.officers.add(officer_2)
 
         response = self.auth_client.get(reverse('api:officers-list'))
-        assert response.status_code == status.HTTP_200_OK
 
-        assert response.data == [
+        expected_data = [
             {
                 'id': officer_2.id,
                 'name': 'Anthony Davis',
@@ -141,11 +149,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'latest_rank': 'senior',
             }]
 
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
+
     def test_list_unauthorized(self):
         response = self.client.get(reverse('api:officers-list'))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
+        department = DepartmentFactory()
+
         person = PersonFactory()
         related_officer = OfficerFactory()
         officer = OfficerFactory(
@@ -153,13 +166,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
-            person=person
+            sex='male',
+            person=person,
+            department=department
         )
         person.officers.add(related_officer)
         person.canonical_officer = officer
         person.save()
-        department = DepartmentFactory()
         EventFactory(
             officer=officer,
             department=department,
@@ -244,7 +257,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'badges': ['12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [{
                 'id': department.slug,
                 'name': department.name,
@@ -378,7 +391,9 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         matched_sentence_1.officers.add(officer)
         matched_sentence_2.officers.add(officer)
 
-        use_of_force = UseOfForceFactory(officer=officer)
+        use_of_force = UseOfForceFactory()
+        use_of_force_officer = UseOfForceOfficerFactory(officer=officer, use_of_force=use_of_force)
+        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
         EventFactory(
             kind=UOF_RECEIVE,
             year=2019,
@@ -393,14 +408,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': None,
                 'year': None,
-                'rule_code': complaint_2.rule_code,
-                'rule_violation': complaint_2.rule_violation,
-                'paragraph_code': complaint_2.paragraph_code,
-                'paragraph_violation': complaint_2.paragraph_violation,
                 'disposition': complaint_2.disposition,
-                'action': complaint_2.action,
-                'tracking_number': complaint_2.tracking_number,
+                'allegation': complaint_2.allegation,
                 'allegation_desc': complaint_2.allegation_desc,
+                'action': complaint_2.action,
+                'tracking_id': complaint_2.tracking_id,
+                'citizen_arrested': complaint_2.citizen_arrested,
+                'traffic_stop': complaint_2.traffic_stop,
             },
             {
                 'kind': RANK_CHANGE_TIMELINE_KIND,
@@ -465,35 +479,30 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'kind': COMPLAINT_TIMELINE_KIND,
                 'date': str(date(2019, 5, 4)),
                 'year': 2019,
-                'rule_code': complaint_1.rule_code,
-                'rule_violation': complaint_1.rule_violation,
-                'paragraph_code': complaint_1.paragraph_code,
-                'paragraph_violation': complaint_1.paragraph_violation,
                 'disposition': complaint_1.disposition,
-                'action': complaint_1.action,
-                'tracking_number': complaint_1.tracking_number,
+                'allegation': complaint_1.allegation,
                 'allegation_desc': complaint_1.allegation_desc,
+                'action': complaint_1.action,
+                'tracking_id': complaint_1.tracking_id,
+                'citizen_arrested': complaint_1.citizen_arrested,
+                'traffic_stop': complaint_1.traffic_stop,
             },
             {
-                'id': use_of_force.id,
+                'id': use_of_force_officer.id,
                 'kind': UOF_TIMELINE_KIND,
                 'date': str(date(2019, 5, 5)),
                 'year': 2019,
-                'force_type': use_of_force.force_type,
-                'force_description': use_of_force.force_description,
-                'force_reason': use_of_force.force_reason,
+                'use_of_force_description': use_of_force_officer.use_of_force_description,
+                'use_of_force_reason': use_of_force.use_of_force_reason,
                 'disposition': use_of_force.disposition,
                 'service_type': use_of_force.service_type,
-                'citizen_involvement': use_of_force.citizen_involvement,
-                'citizen_age': use_of_force.citizen_age,
-                'citizen_race': use_of_force.citizen_race,
-                'citizen_sex': use_of_force.citizen_sex,
-                'uof_tracking_number': use_of_force.uof_tracking_number,
-                'citizen_arrested': use_of_force.citizen_arrested,
-                'citizen_injured': use_of_force.citizen_injured,
-                'citizen_hospitalized': use_of_force.citizen_hospitalized,
-                'officer_injured': use_of_force.officer_injured,
-                'traffic_stop': use_of_force.traffic_stop,
+                'citizen_information': [str(use_of_force_citizen.citizen_age) + '-year-old '
+                                        + use_of_force_citizen.citizen_race + ' ' + use_of_force_citizen.citizen_sex],
+                'tracking_id': use_of_force.tracking_id,
+                'citizen_arrested': [use_of_force_citizen.citizen_arrested],
+                'citizen_injured': [use_of_force_citizen.citizen_injured],
+                'citizen_hospitalized': [use_of_force_citizen.citizen_hospitalized],
+                'officer_injured': use_of_force_officer.officer_injured,
             },
             {
                 'kind': SALARY_CHANGE_TIMELINE_KIND,
@@ -608,21 +617,23 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         pd.testing.assert_frame_equal(xlsx_data, data)
 
     def test_retrieve_success_with_related_officer_departments_and_badges(self):
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+
         person = PersonFactory()
-        related_officer = OfficerFactory()
+        related_officer = OfficerFactory(department=related_department)
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
-            person=person
+            sex='male',
+            person=person,
+            department=department,
         )
         person.officers.add(related_officer)
         person.canonical_officer = officer
         person.save()
-        department = DepartmentFactory()
-        related_department = DepartmentFactory()
         EventFactory(
             officer=officer,
             department=department,
@@ -715,7 +726,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'badges': ['13579', '12435', '5432', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [
                 {
                     'id': department.slug,

@@ -33,6 +33,10 @@ class DocumentImporter(BaseImporter):
         'accused',
         'title',
         'hrg_type',
+        'dt_source',
+        'hrg_text',
+        'pdf_db_id',
+        'txt_db_path',
     ]
     SLUG_ATTRIBUTES = [
         'agency'
