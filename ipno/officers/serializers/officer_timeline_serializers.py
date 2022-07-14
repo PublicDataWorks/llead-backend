@@ -14,6 +14,7 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
+    APPEAL_TIMELINE_KIND,
 )
 
 
@@ -47,14 +48,13 @@ class LeftTimelineSerializer(BaseTimelineSerializer):
 class ComplaintTimelineSerializer(BaseTimelineSerializer):
     year = serializers.SerializerMethodField()
     id = serializers.IntegerField()
-    rule_code = serializers.CharField()
-    rule_violation = serializers.CharField()
-    paragraph_code = serializers.CharField()
-    paragraph_violation = serializers.CharField()
     disposition = serializers.CharField()
     action = serializers.CharField()
-    tracking_number = serializers.CharField()
+    tracking_id = serializers.CharField()
+    allegation = serializers.CharField()
     allegation_desc = serializers.CharField()
+    citizen_arrested = serializers.CharField()
+    traffic_stop = serializers.CharField()
 
     def _get_receive_event(self, obj):
         if not hasattr(obj, 'receive_event'):
@@ -81,21 +81,16 @@ class ComplaintTimelineSerializer(BaseTimelineSerializer):
 class UseOfForceTimelineSerializer(BaseTimelineSerializer):
     year = serializers.SerializerMethodField()
     id = serializers.IntegerField()
-    force_type = serializers.CharField()
-    force_description = serializers.CharField()
-    force_reason = serializers.CharField()
-    disposition = serializers.CharField()
-    service_type = serializers.CharField()
-    citizen_involvement = serializers.CharField()
-    citizen_age = serializers.IntegerField()
-    citizen_race = serializers.CharField()
-    citizen_sex = serializers.CharField()
-    uof_tracking_number = serializers.CharField()
-    citizen_arrested = serializers.CharField()
-    citizen_injured = serializers.CharField()
-    citizen_hospitalized = serializers.CharField()
+    use_of_force_description = serializers.CharField()
+    use_of_force_reason = serializers.SerializerMethodField()
+    disposition = serializers.SerializerMethodField()
+    service_type = serializers.SerializerMethodField()
+    citizen_information = serializers.SerializerMethodField()
+    tracking_id = serializers.SerializerMethodField()
+    citizen_arrested = serializers.SerializerMethodField()
+    citizen_injured = serializers.SerializerMethodField()
+    citizen_hospitalized = serializers.SerializerMethodField()
     officer_injured = serializers.CharField()
-    traffic_stop = serializers.CharField()
 
     def get_kind(self, obj):
         return UOF_TIMELINE_KIND
@@ -103,8 +98,8 @@ class UseOfForceTimelineSerializer(BaseTimelineSerializer):
     def _get_receive_event(self, obj):
         if not hasattr(obj, 'receive_event'):
             event = None
-            if obj.events.all():
-                event = obj.events.all()[0]
+            if obj.use_of_force.events.all():
+                event = obj.use_of_force.events.all()[0]
             setattr(obj, 'receive_event', event)
         return obj.receive_event
 
@@ -117,6 +112,65 @@ class UseOfForceTimelineSerializer(BaseTimelineSerializer):
     def get_year(self, obj):
         receive_event = self._get_receive_event(obj)
         return receive_event.year if receive_event else None
+
+    def get_use_of_force_reason(self, obj):
+        return obj.use_of_force.use_of_force_reason
+
+    def get_disposition(self, obj):
+        return obj.use_of_force.disposition
+
+    def get_service_type(self, obj):
+        return obj.use_of_force.service_type
+
+    def get_citizen_information(self, obj):
+        return [o.citizen_age + '-year-old ' + o.citizen_race + ' ' + o.citizen_sex if o.citizen_age
+                else o.citizen_race + ' ' + o.citizen_sex for o in obj.use_of_force.uof_citizens.all()]
+
+    def get_tracking_id(self, obj):
+        return obj.use_of_force.tracking_id
+
+    def get_citizen_arrested(self, obj):
+        arrests = [o.citizen_arrested for o in obj.use_of_force.uof_citizens.all()]
+
+        return arrests
+
+    def get_citizen_injured(self, obj):
+        injures = [o.citizen_injured for o in obj.use_of_force.uof_citizens.all()]
+
+        return injures
+
+    def get_citizen_hospitalized(self, obj):
+        hospitals = [o.citizen_hospitalized for o in obj.use_of_force.uof_citizens.all()]
+
+        return hospitals
+
+
+class AppealTimelineSerializer(BaseTimelineSerializer):
+    year = serializers.SerializerMethodField()
+    department = serializers.CharField(source='department.name')
+    id = serializers.IntegerField()
+    docket_no = serializers.CharField()
+    counsel = serializers.CharField()
+    charging_supervisor = serializers.CharField()
+    appeal_disposition = serializers.CharField()
+    action_appealed = serializers.CharField()
+    appealed = serializers.CharField()
+    motions = serializers.CharField()
+
+    def get_kind(self, obj):
+        return APPEAL_TIMELINE_KIND
+
+    def get_date(self, obj):
+        if obj.events.all():
+            year = obj.events.all()[0].year
+            month = obj.events.all()[0].month
+            day = obj.events.all()[0].day
+            date = parse_date(year, month, day)
+            return str(date) if date else None
+        return None
+
+    def get_year(self, obj):
+        return obj.events.all()[0].year if obj.events.all() else None
 
 
 class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):

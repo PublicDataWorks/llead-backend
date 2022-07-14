@@ -8,6 +8,11 @@ defaults:
     GOOGLE_PROJECT_ID: "excellent-zoo-300106"
     GOOGLE_COMPUTE_ZONE: "us-east4-a"
     GOOGLE_CLUSTER_NAME: "ipno-staging"
+  - &set-push-env
+    USER_NAME: "East Agile"
+    USER_EMAIL: "open-source@eastagile.com"
+    DESTINATION_REPOSITORY_USERNAME: "PublicDataWorks"
+    DESTINATION_REPOSITORY_NAME: "llead-backend"
   - &set-gcloud-service-key
     command: |
       echo 'export GCLOUD_SERVICE_KEY=$(echo $GCLOUD_SERVICE_KEY_BASE64 | base64 -d)' >> $BASH_ENV
@@ -66,6 +71,16 @@ jobs:
       - run:
           name: Coveralls
           command: coveralls
+
+  push_to_public:
+    description: Push code to public repository
+    machine: true
+    environment: *set-push-env
+    steps:
+      - checkout
+      - run:
+          name: Push to public
+          command: sh bin/public_push.sh
 
   push_image:
     description: Build docker image
@@ -179,6 +194,18 @@ workflows:
               ignore:
                 - staging
                 - main
+                - develop
+
+  push_to_public:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only:
+                - develop
+      - push_to_public:
+          requires:
+            - test
 
   deploy_backend:
     jobs:
@@ -201,3 +228,10 @@ workflows:
           requires:
             - django_migrate
             - django_collect_static
+      - push_to_public:
+          requires:
+            - deploy
+          filters:
+            branches:
+              only:
+                - main

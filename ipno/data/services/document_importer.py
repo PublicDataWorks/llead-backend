@@ -33,6 +33,10 @@ class DocumentImporter(BaseImporter):
         'accused',
         'title',
         'hrg_type',
+        'dt_source',
+        'hrg_text',
+        'pdf_db_id',
+        'txt_db_path',
     ]
     SLUG_ATTRIBUTES = [
         'agency'
@@ -181,9 +185,33 @@ class DocumentImporter(BaseImporter):
         except Exception:
             return ''
 
+    def handle_file_process(self, pdf_db_path):
+        upload_url = pdf_db_path.replace('/PPACT/', '')
+
+        download_url = self.ds.get_temporary_link_from_path(pdf_db_path.replace('/PPACT/', '/LLEAD/'))
+        res = requests.get(download_url)
+        image_blob = res.content
+        content_type = res.headers["content-type"]
+
+        document_url = self.upload_file(upload_url, image_blob, content_type)
+
+        if not document_url:
+            return {}
+
+        document_preview_url = None
+        if content_type == 'application/pdf':
+            document_preview_url = self.generate_preview_image(image_blob, upload_url)
+
+        uploaded_url = {
+            'document_url': document_url,
+            'document_preview_url': document_preview_url,
+            'document_type': content_type
+        }
+
+        return uploaded_url
+
     def handle_record_data(self, row):
         document_data = self.parse_row_data(row, self.column_mappings)
-        document_data['document_type'] = 'pdf'
         document_data['pages_count'] = row[self.column_mappings['page_count']] if row[
             self.column_mappings['page_count']] else None
         document_data['incident_date'] = parse_date(
@@ -219,26 +247,18 @@ class DocumentImporter(BaseImporter):
                     uploaded_file = self.uploaded_files[pdf_db_path]
                     document['url'] = uploaded_file['document_url']
                     document['preview_image_url'] = uploaded_file['document_preview_url']
+                    document['document_type'] = uploaded_file['document_type']
                 else:
-                    upload_url = pdf_db_path.replace('/PPACT/', '')
+                    uploaded_url = self.handle_file_process(pdf_db_path)
 
-                    download_url = self.ds.get_temporary_link_from_path(pdf_db_path.replace('/PPACT/', '/LLEAD/'))
-                    image_blob = requests.get(download_url).content
-
-                    document_url = self.upload_file(upload_url, image_blob, 'application/pdf')
+                    document_url = uploaded_url.get('document_url')
 
                     if not document_url:
                         return
+
                     document['url'] = document_url
-
-                    document_preview_url = self.generate_preview_image(image_blob, upload_url)
-                    if document_preview_url:
-                        document['preview_image_url'] = document_preview_url
-
-                    uploaded_url = {
-                        'document_url': document_url,
-                        'document_preview_url': document_preview_url
-                    }
+                    document['document_type'] = uploaded_url.get('document_type')
+                    document['preview_image_url'] = uploaded_url.get('document_preview_url')
 
                     self.uploaded_files[pdf_db_path] = uploaded_url
             except ApiError:

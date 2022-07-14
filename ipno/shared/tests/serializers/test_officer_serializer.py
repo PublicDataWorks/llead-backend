@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from people.factories import PersonFactory
 from shared.serializers import OfficerSerializer
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
@@ -7,15 +8,19 @@ from departments.factories import DepartmentFactory
 
 class OfficerSerializerTestCase(TestCase):
     def test_data(self):
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
         department = DepartmentFactory()
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth', department=department)
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
         EventFactory(
             officer=officer,
             department=department,
             badge_no='67893',
             year=2017,
-            month=None,
-            day=None,
+            month=1,
+            day=1,
         )
 
         EventFactory(
@@ -41,16 +46,39 @@ class OfficerSerializerTestCase(TestCase):
             month=7,
             day=20,
         )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            rank_desc="captain",
+            year=2021,
+            month=None,
+            day=None,
+        )
 
         result = OfficerSerializer(officer).data
-        result['badges'] = sorted(result['badges'])
-
         assert result == {
             'id': officer.id,
             'name': 'David Jonesworth',
-            'badges': ['12435', '5432', '67893'],
+            'badges': ['12435', '67893', '5432'],
             'department': {
                 'id': department.slug,
                 'name': department.name,
             },
+            'latest_rank': 'captain',
         }

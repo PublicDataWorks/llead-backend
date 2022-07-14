@@ -16,7 +16,6 @@ class EventImporter(BaseImporter):
     ATTRIBUTES = [
         'event_uid',
         'kind',
-
         'time',
         'raw_date',
         'allegation_uid',
@@ -32,15 +31,14 @@ class EventImporter(BaseImporter):
         'employee_class',
         'rank_code',
         'rank_desc',
-        'employment_status',
         'sworn',
-        'event_inactive',
+        'officer_inactive',
         'employee_type',
-
         'salary',
         'salary_freq',
         'award',
         'award_comments',
+        'left_reason',
     ]
     INT_ATTRIBUTES = [
         'year',
@@ -51,7 +49,8 @@ class EventImporter(BaseImporter):
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + [
         'officer_id',
         'department_id',
-        'use_of_force_id'
+        'use_of_force_id',
+        'appeal_id',
     ]
 
     def __init__(self):
@@ -63,6 +62,7 @@ class EventImporter(BaseImporter):
         self.officer_mappings = {}
         self.event_mappings = {}
         self.uof_mappings = {}
+        self.appeal_mappings = {}
 
     def get_event_mappings(self):
         return {event.event_uid: event.id for event in Event.objects.only('id', 'event_uid')}
@@ -91,9 +91,11 @@ class EventImporter(BaseImporter):
         event_uid = row[self.column_mappings['event_uid']]
         officer_uid = row[self.column_mappings['uid']]
         uof_uid = row[self.column_mappings['uof_uid']]
+        appeal_uid = row[self.column_mappings['appeal_uid']]
 
         officer_id = self.officer_mappings.get(officer_uid)
         uof_id = self.uof_mappings.get(uof_uid)
+        appeal_id = self.appeal_mappings.get(appeal_uid)
 
         event_data = self.parse_row_data(row, self.column_mappings)
         formatted_agency = self.format_agency(agency)
@@ -101,6 +103,7 @@ class EventImporter(BaseImporter):
         event_data['department_id'] = department_id
 
         event_data['use_of_force_id'] = uof_id
+        event_data['appeal_id'] = appeal_id
         event_data['officer_id'] = officer_id
 
         event_id = self.event_mappings.get(event_uid)
@@ -128,6 +131,7 @@ class EventImporter(BaseImporter):
         self.officer_mappings = self.get_officer_mappings()
         self.event_mappings = self.get_event_mappings()
         self.uof_mappings = self.get_uof_mappings()
+        self.appeal_mappings = self.get_appeal_mappings()
 
         for row in tqdm(data.get('added_rows'), desc='Create new events'):
             self.handle_record_data(row)

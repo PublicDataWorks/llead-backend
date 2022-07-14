@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
+from appeals.factories import AppealFactory
 from news_articles.factories import NewsArticleFactory
 from officers.serializers import (
     ComplaintTimelineSerializer,
@@ -23,11 +24,13 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
+    APPEAL_TIMELINE_KIND,
 )
 from officers.factories import EventFactory
 from complaints.factories import ComplaintFactory
-from officers.serializers.officer_timeline_serializers import NewsArticleTimelineSerializer, BaseTimelineSerializer
-from use_of_forces.factories import UseOfForceFactory
+from officers.serializers.officer_timeline_serializers import NewsArticleTimelineSerializer, BaseTimelineSerializer, \
+    AppealTimelineSerializer
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory, UseOfForceCitizenFactory
 from documents.factories import DocumentFactory
 from departments.factories import DepartmentFactory
 from officers.constants import (
@@ -130,14 +133,13 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'kind': COMPLAINT_TIMELINE_KIND,
             'date': str(date(2019, 5, 4)),
             'year': 2019,
-            'rule_code': complaint.rule_code,
-            'rule_violation': complaint.rule_violation,
-            'paragraph_code': complaint.paragraph_code,
-            'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,
-            'action': complaint.action,
-            'tracking_number': complaint.tracking_number,
+            'allegation': complaint.allegation,
             'allegation_desc': complaint.allegation_desc,
+            'action': complaint.action,
+            'tracking_id': complaint.tracking_id,
+            'citizen_arrested': complaint.citizen_arrested,
+            'traffic_stop': complaint.traffic_stop,
         }
 
     def test_data_with_empty_date(self):
@@ -151,20 +153,21 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             'kind': COMPLAINT_TIMELINE_KIND,
             'date': None,
             'year': None,
-            'rule_code': complaint.rule_code,
-            'rule_violation': complaint.rule_violation,
-            'paragraph_code': complaint.paragraph_code,
-            'paragraph_violation': complaint.paragraph_violation,
             'disposition': complaint.disposition,
-            'action': complaint.action,
-            'tracking_number': complaint.tracking_number,
+            'allegation': complaint.allegation,
             'allegation_desc': complaint.allegation_desc,
+            'action': complaint.action,
+            'tracking_id': complaint.tracking_id,
+            'citizen_arrested': complaint.citizen_arrested,
+            'traffic_stop': complaint.traffic_stop,
         }
 
 
 class UseOfForceTimelineSerializerTestCase(TestCase):
     def test_data(self):
         use_of_force = UseOfForceFactory()
+        use_of_force_officer = UseOfForceOfficerFactory(use_of_force=use_of_force)
+        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
         EventFactory(
             year=2019,
             month=5,
@@ -172,53 +175,93 @@ class UseOfForceTimelineSerializerTestCase(TestCase):
             use_of_force=use_of_force,
         )
 
-        result = UseOfForceTimelineSerializer(use_of_force).data
+        result = UseOfForceTimelineSerializer(use_of_force_officer).data
         assert result == {
-            'id': use_of_force.id,
+            'id': use_of_force_officer.id,
             'kind': UOF_TIMELINE_KIND,
             'date': str(date(2019, 5, 4)),
             'year': 2019,
-            'force_type': use_of_force.force_type,
-            'force_description': use_of_force.force_description,
-            'force_reason': use_of_force.force_reason,
+            'use_of_force_description': use_of_force_officer.use_of_force_description,
+            'use_of_force_reason': use_of_force.use_of_force_reason,
             'disposition': use_of_force.disposition,
             'service_type': use_of_force.service_type,
-            'citizen_involvement': use_of_force.citizen_involvement,
-            'citizen_age': use_of_force.citizen_age,
-            'citizen_race': use_of_force.citizen_race,
-            'citizen_sex': use_of_force.citizen_sex,
-            'uof_tracking_number': use_of_force.uof_tracking_number,
-            'citizen_arrested': use_of_force.citizen_arrested,
-            'citizen_injured': use_of_force.citizen_injured,
-            'citizen_hospitalized': use_of_force.citizen_hospitalized,
-            'officer_injured': use_of_force.officer_injured,
-            'traffic_stop': use_of_force.traffic_stop,
+            'citizen_information': [str(use_of_force_citizen.citizen_age) + '-year-old '
+                                    + use_of_force_citizen.citizen_race + ' ' + use_of_force_citizen.citizen_sex],
+            'tracking_id': use_of_force.tracking_id,
+            'citizen_arrested': [use_of_force_citizen.citizen_arrested],
+            'citizen_injured': [use_of_force_citizen.citizen_injured],
+            'citizen_hospitalized': [use_of_force_citizen.citizen_hospitalized],
+            'officer_injured': use_of_force_officer.officer_injured,
         }
 
     def test_data_with_empty_date(self):
         use_of_force = UseOfForceFactory()
-        result = UseOfForceTimelineSerializer(use_of_force).data
+        use_of_force_officer = UseOfForceOfficerFactory(use_of_force=use_of_force)
+        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
+        result = UseOfForceTimelineSerializer(use_of_force_officer).data
 
         assert result == {
-            'id': use_of_force.id,
+            'id': use_of_force_officer.id,
             'kind': UOF_TIMELINE_KIND,
             'date': None,
             'year': None,
-            'force_type': use_of_force.force_type,
-            'force_description': use_of_force.force_description,
-            'force_reason': use_of_force.force_reason,
+            'use_of_force_description': use_of_force_officer.use_of_force_description,
+            'use_of_force_reason': use_of_force.use_of_force_reason,
             'disposition': use_of_force.disposition,
             'service_type': use_of_force.service_type,
-            'citizen_involvement': use_of_force.citizen_involvement,
-            'citizen_age': use_of_force.citizen_age,
-            'citizen_race': use_of_force.citizen_race,
-            'citizen_sex': use_of_force.citizen_sex,
-            'uof_tracking_number': use_of_force.uof_tracking_number,
-            'citizen_arrested': use_of_force.citizen_arrested,
-            'citizen_injured': use_of_force.citizen_injured,
-            'citizen_hospitalized': use_of_force.citizen_hospitalized,
-            'officer_injured': use_of_force.officer_injured,
-            'traffic_stop': use_of_force.traffic_stop,
+            'citizen_information': [str(use_of_force_citizen.citizen_age) + '-year-old '
+                                    + use_of_force_citizen.citizen_race + ' ' + use_of_force_citizen.citizen_sex],
+            'tracking_id': use_of_force.tracking_id,
+            'citizen_arrested': [use_of_force_citizen.citizen_arrested],
+            'citizen_injured': [use_of_force_citizen.citizen_injured],
+            'citizen_hospitalized': [use_of_force_citizen.citizen_hospitalized],
+            'officer_injured': use_of_force_officer.officer_injured,
+        }
+
+
+class AppealTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        appeal = AppealFactory()
+        EventFactory(
+            year=2019,
+            month=5,
+            day=4,
+            appeal=appeal,
+        )
+
+        result = AppealTimelineSerializer(appeal).data
+        assert result == {
+            'id': appeal.id,
+            'kind': APPEAL_TIMELINE_KIND,
+            'date': str(date(2019, 5, 4)),
+            'year': 2019,
+            'docket_no': appeal.docket_no,
+            'counsel': appeal.counsel,
+            'charging_supervisor': appeal.charging_supervisor,
+            'appeal_disposition': appeal.appeal_disposition,
+            'action_appealed': appeal.action_appealed,
+            'appealed': appeal.appealed,
+            'motions': appeal.motions,
+            'department': appeal.department.name,
+        }
+
+    def test_data_with_empty_date(self):
+        appeal = AppealFactory()
+        result = AppealTimelineSerializer(appeal).data
+
+        assert result == {
+            'id': appeal.id,
+            'kind': APPEAL_TIMELINE_KIND,
+            'date': None,
+            'year': None,
+            'docket_no': appeal.docket_no,
+            'counsel': appeal.counsel,
+            'charging_supervisor': appeal.charging_supervisor,
+            'appeal_disposition': appeal.appeal_disposition,
+            'action_appealed': appeal.action_appealed,
+            'appealed': appeal.appealed,
+            'motions': appeal.motions,
+            'department': appeal.department.name,
         }
 
 

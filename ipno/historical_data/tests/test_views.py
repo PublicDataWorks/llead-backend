@@ -6,6 +6,7 @@ from rest_framework import status
 
 from authentication.models import User
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
+from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
@@ -23,11 +24,30 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory(name='Baton Rouge PD')
         department_2 = DepartmentFactory(name='New Orleans PD')
 
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
+        officer = OfficerFactory(first_name='David', last_name='Jonesworth', department=department_2)
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
         EventFactory(
             officer=officer,
             department=department_2,
             badge_no='12435',
+        )
+        EventFactory(
+            department=department_2,
+            officer=officer,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department_2,
+            officer=officer,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
         )
 
         source = NewsArticleSourceFactory(source_display_name='dummy')
@@ -112,6 +132,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                     'id': department_2.slug,
                     'name': department_2.name,
                 },
+                'latest_rank': 'senior',
                 'type': RECENT_OFFICER_TYPE
             },
             {
