@@ -24,7 +24,6 @@ spec:
               port: readiness-port
           ports:
             - name: readiness-port
-              hostPort: 8000
               containerPort: 8000
           image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
           imagePullPolicy: Always
