@@ -25,17 +25,24 @@ class Officer(TimeStampsModel):
     uid = models.CharField(max_length=255, unique=True, db_index=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
-    middle_initial = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     birth_year = models.IntegerField(null=True, blank=True)
     birth_month = models.IntegerField(null=True, blank=True)
     birth_day = models.IntegerField(null=True, blank=True)
     race = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.CharField(max_length=255, null=True, blank=True)
+    sex = models.CharField(max_length=255, null=True, blank=True)
+    agency = models.CharField(max_length=255, null=True, blank=True)
 
     is_name_changed = models.BooleanField(default=False)
 
-    departments = models.ManyToManyField('departments.Department', through='officers.Event')
+    department = models.ForeignKey(
+        'departments.Department',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='officers'
+    )
+
     person = models.ForeignKey(
         'people.Person',
         on_delete=models.SET_NULL,

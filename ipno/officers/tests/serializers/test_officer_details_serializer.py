@@ -13,17 +13,20 @@ from people.factories import PersonFactory
 
 class OfficerDetailsSerializerTestCase(TestCase):
     def test_data(self):
+        department = DepartmentFactory()
+
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
+            department=department,
         )
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
         person.save()
-        department = DepartmentFactory()
+
         EventFactory(
             officer=officer,
             department=department,
@@ -125,7 +128,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': ['12435', '67893', '5432'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [{
                 'id': department.slug,
                 'name': department.name,
@@ -248,7 +251,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
         )
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
@@ -275,7 +278,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': [],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [],
             'salary': None,
             'salary_freq': None,
@@ -285,20 +288,23 @@ class OfficerDetailsSerializerTestCase(TestCase):
         }
 
     def test_data_with_related_officer_departments_and_badges(self):
+        department = DepartmentFactory()
+        related_department = DepartmentFactory()
+
         officer = OfficerFactory(
             first_name='David',
             last_name='Jonesworth',
             birth_year=1962,
             race='white',
-            gender='male',
+            sex='male',
+            department=department,
         )
         person = PersonFactory(canonical_officer=officer)
-        related_officer = OfficerFactory()
+        related_officer = OfficerFactory(department=related_department)
         person.officers.add(officer)
         person.officers.add(related_officer)
         person.save()
-        department = DepartmentFactory()
-        related_department = DepartmentFactory()
+
         EventFactory(
             officer=officer,
             department=department,
@@ -384,7 +390,7 @@ class OfficerDetailsSerializerTestCase(TestCase):
             'badges': ['13579', '5432', '12435', '67893'],
             'birth_year': 1962,
             'race': 'white',
-            'gender': 'male',
+            'sex': 'male',
             'departments': [
                 {
                     'id': department.slug,

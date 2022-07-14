@@ -45,6 +45,7 @@ UOF_ASSIGNED = "uof_assigned"
 UOF_COMPLETED = "uof_completed"
 UOF_CREATED = "uof_created"
 UOF_DUE = "uof_due"
+UOF_OCCUR = "uof_occur"
 UOF_ALL_EVENTS = [
     UOF_INCIDENT,
     UOF_RECEIVE,
@@ -52,6 +53,7 @@ UOF_ALL_EVENTS = [
     UOF_COMPLETED,
     UOF_CREATED,
     UOF_DUE,
+    UOF_OCCUR,
 ]
 
 AWARD_RECEIVE = "award_receive"
@@ -60,13 +62,15 @@ OFFICER_PROFILE_SHEET = 'Demographic profile'
 OFFICER_INCIDENT_SHEET = 'Incidents'
 OFFICER_COMPLAINT_SHEET = 'Complaint details'
 OFFICER_UOF_SHEET = 'Use of force details'
+OFFICER_UOF_OFFICER_SHEET = 'Use of force officer details'
+OFFICER_UOF_CITIZEN_SHEET = 'Use of force citizen details'
 OFFICER_CAREER_SHEET = 'Career history'
 OFFICER_DOC_SHEET = 'Documents'
 
 OFFICER_PROFILE_FIELDS = [
-            'uid', 'last_name', 'middle_name', 'middle_initial',
+            'uid', 'last_name', 'middle_name',
             'first_name', 'birth_year', 'birth_month', 'birth_day', 'race',
-            'gender'
+            'sex'
 ]
 
 OFFICER_DOC_FIELDS = [
@@ -80,36 +84,39 @@ OFFICER_INCIDENT_FIELDS = [
     'badge_no', 'employee_id', 'department_code', 'department_desc',
     'division_desc', 'sub_division_a_desc', 'sub_division_b_desc',
     'current_supervisor', 'employee_class', 'rank_code', 'rank_desc',
-    'employment_status', 'sworn', 'officer_inactive', 'employee_type',
-    'years_employed', 'salary', 'salary_freq', 'award', 'award_comments',
+    'sworn', 'officer_inactive', 'employee_type', 'years_employed',
+    'salary', 'salary_freq', 'award', 'award_comments', 'left_reason',
 ]
 
 OFFICER_COMPLAINT_FIELDS = [
-    'allegation_uid', 'tracking_number',
-    'investigation_status', 'assigned_unit', 'assigned_department',
-    'assigned_division', 'assigned_sub_division_a', 'body_worn_camera_available',
-    'app_used', 'citizen_arrested', 'allegation_finding', 'allegation',
-    'allegation_class', 'citizen', 'disposition', 'rule_code', 'rule_violation',
-    'paragraph_code', 'paragraph_violation', 'complainant_name',
-    'complainant_type', 'complainant_sex', 'complainant_race', 'recommended_action',
-    'action', 'incident_type', 'supervisor_uid',
-    'supervisor_rank', 'badge_no', 'department_code', 'department_desc',
-    'rank_desc', 'employment_status', 'uid', 'agency', 'traffic_stop',
+    'allegation_uid', 'tracking_id', 'uid', 'case_number', 'allegation',
+    'investigation_status', 'assigned_department', 'assigned_division',
+    'traffic_stop', 'body_worn_camera_available', 'app_used',
+    'citizen_arrested', 'citizen', 'disposition', 'complainant_name',
+    'complainant_type', 'complainant_sex', 'complainant_race', 'action',
+    'initial_action', 'incident_type', 'supervisor_uid', 'supervisor_rank',
+    'badge_no', 'department_code', 'department_desc', 'employment_status',
+    'investigator', 'investigator_uid', 'investigator_rank', 'shift_supervisor',
+    'allegation_desc', 'investigating_department', 'referred_by', 'incident_location',
+    'disposition_desc', 'agency',
 ]
 
 OFFICER_UOF_FIELDS = [
-    'uof_uid', 'uof_tracking_number', 'report_year', 'force_description',
-    'force_type', 'force_level', 'effective_uof', 'accidental_discharge',
-    'less_than_lethal', 'status', 'source', 'service_type', 'county',
-    'traffic_stop', 'sustained', 'force_reason', 'weather_description',
-    'distance_from_officer', 'body_worn_camera_available', 'app_used',
-    'citizen_uid', 'citizen_arrested', 'citizen_hospitalized', 'citizen_injured',
-    'citizen_body_type', 'citizen_height', 'citizen_age', 'citizen_involvement',
-    'disposition', 'citizen_sex', 'citizen_race', 'citizen_age_1',
-    'officer_current_supervisor', 'officer_title', 'officer_injured', 'officer_age',
-    'officer_years_exp', 'officer_years_with_unit', 'officer_type', 'officer_employment_status',
-    'officer_department', 'officer_division', 'officer_sub_division_a', 'officer_sub_division_b',
-    'data_production_year', 'uid', 'agency',
+    'uof_uid', 'tracking_id', 'investigation_status',
+    'service_type', 'light_condition', 'weather_condition', 'shift_time',
+    'disposition', 'division', 'division_level', 'unit', 'originating_bureau',
+    'agency', 'use_of_force_reason',
+]
+
+OFFICER_UOF_OFFICER_FIELDS = [
+    'uof_uid', 'uid', 'use_of_force_description', 'use_of_force_level', 'use_of_force_effective',
+    'age', 'years_of_service', 'officer_injured',
+]
+
+OFFICER_UOF_CITIZEN_FIELDS = [
+    'uof_citizen_uid', 'uof_uid', 'citizen_influencing_factors', 'citizen_distance_from_officer',
+    'citizen_arrested', 'citizen_arrest_charges', 'citizen_hospitalized', 'citizen_injured',
+    'citizen_age', 'citizen_race', 'citizen_sex',
 ]
 
 TIMELINE_EVENT_KINDS = [

@@ -16,6 +16,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
     @patch('data.services.uof_importer.UofImporter.process')
+    @patch('data.services.uof_officer_importer.UofOfficerImporter.process')
+    @patch('data.services.uof_citizen_importer.UofCitizenImporter.process')
     @patch('data.services.officer_importer.OfficerImporter.process')
     @patch('data.services.document_importer.DocumentImporter.process')
     @patch('data.services.person_importer.PersonImporter.process')
@@ -27,6 +29,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             document_process_mock,
             officer_process_mock,
             uof_process_mock,
+            uof_officer_process_mock,
+            uof_citizen_process_mock,
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
@@ -39,6 +43,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         document_process_mock.return_value = True
         officer_process_mock.return_value = True
         uof_process_mock.return_value = False
+        uof_officer_process_mock.return_value = True
+        uof_citizen_process_mock.return_value = False
         complaint_process_mock.return_value = True
         event_process_mock.return_value = False
         call_command('import_data')
@@ -48,6 +54,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         document_process_mock.assert_called()
         officer_process_mock.assert_called()
         uof_process_mock.assert_called()
+        uof_officer_process_mock.assert_called()
+        uof_citizen_process_mock.assert_called()
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_called()
@@ -62,6 +70,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch('data.services.event_importer.EventImporter.process')
     @patch('data.services.complaint_importer.ComplaintImporter.process')
     @patch('data.services.uof_importer.UofImporter.process')
+    @patch('data.services.uof_officer_importer.UofOfficerImporter.process')
+    @patch('data.services.uof_citizen_importer.UofCitizenImporter.process')
     @patch('data.services.officer_importer.OfficerImporter.process')
     @patch('data.services.document_importer.DocumentImporter.process')
     @patch('data.services.person_importer.PersonImporter.process')
@@ -73,6 +83,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             document_process_mock,
             officer_process_mock,
             uof_process_mock,
+            uof_officer_process_mock,
+            uof_citizen_process_mock,
             complaint_process_mock,
             event_process_mock,
             rebuild_search_index_mock,
@@ -85,6 +97,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         document_process_mock.return_value = False
         officer_process_mock.return_value = False
         uof_process_mock.return_value = False
+        uof_officer_process_mock.return_value = False
+        uof_citizen_process_mock.return_value = False
         complaint_process_mock.return_value = False
         event_process_mock.return_value = False
         call_command('import_data')
@@ -94,6 +108,8 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         document_process_mock.assert_called()
         officer_process_mock.assert_called()
         uof_process_mock.assert_called()
+        uof_officer_process_mock.assert_called()
+        uof_citizen_process_mock.assert_called()
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
         rebuild_search_index_mock.assert_not_called()

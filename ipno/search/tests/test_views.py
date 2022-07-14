@@ -22,7 +22,11 @@ class SearchViewSetTestCase(AuthAPITestCase):
         department_2 = DepartmentFactory(name='Orleans keywo PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(
+            first_name='David keyword',
+            last_name='Jonesworth',
+            department=department_1
+        )
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -272,7 +276,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         person.officers.add(officer)
         person.save()
 
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth', department=department_1)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -411,7 +415,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         department_2 = DepartmentFactory(name='Orleans keywo PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth', department=department_1)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -578,7 +582,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory(name='New Orleans keyword PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth', department=department_1)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
@@ -711,7 +715,11 @@ class SearchViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory(name='New Orleans keyword PD')
 
         OfficerFactory(first_name='Kenneth', last_name='Anderson')
-        officer_1 = OfficerFactory(first_name='David keyword', last_name='Jonesworth')
+        officer_1 = OfficerFactory(
+            first_name='David keyword',
+            last_name='Jonesworth',
+            department=department_1,
+        )
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()

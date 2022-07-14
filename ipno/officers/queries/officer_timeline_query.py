@@ -26,7 +26,7 @@ from officers.constants import (
     OFFICER_DEPT,
 )
 from officers.models import Event
-from use_of_forces.models import UseOfForce
+from use_of_forces.models import UseOfForceOfficer
 from utils.data_utils import sort_items
 from utils.data_utils import format_data_period
 
@@ -82,9 +82,12 @@ class OfficerTimelineQuery(object):
 
     @property
     def _use_of_force_timeline(self):
-        use_of_force_timeline_queryset = UseOfForce.objects.prefetch_related('events').filter(officer__in=self.all_officers)
+        use_of_force_officer_queryset = UseOfForceOfficer.objects.prefetch_related(
+            'use_of_force__uof_citizens',
+            'use_of_force__events',
+        ).filter(officer__in=self.all_officers)
 
-        return UseOfForceTimelineSerializer(use_of_force_timeline_queryset, many=True).data
+        return UseOfForceTimelineSerializer(use_of_force_officer_queryset, many=True).data
 
     @property
     def _appeal_timeline(self):
@@ -137,8 +140,8 @@ class OfficerTimelineQuery(object):
     @property
     def _salary_change_timeline(self):
         events = Event.objects.filter(
-                kind=OFFICER_PAY_EFFECTIVE,
-            ).filter(salary__isnull=False, salary_freq__isnull=False, officer__in=self.all_officers)
+            kind=OFFICER_PAY_EFFECTIVE,
+        ).filter(salary__isnull=False, salary_freq__isnull=False, officer__in=self.all_officers)
 
         salary_changes = self._filter_event_changes(
             events,
@@ -150,11 +153,11 @@ class OfficerTimelineQuery(object):
     @property
     def _rank_change_timeline(self):
         events = Event.objects.filter(
-                kind=OFFICER_RANK,
-            ).filter(
-                Q(officer__in=self.all_officers) &
-                (Q(rank_code__isnull=False) | Q(rank_desc__isnull=False)),
-            )
+            kind=OFFICER_RANK,
+        ).filter(
+            Q(officer__in=self.all_officers) &
+            (Q(rank_code__isnull=False) | Q(rank_desc__isnull=False)),
+        )
 
         rank_changes = self._filter_event_changes(
             events,
@@ -166,11 +169,11 @@ class OfficerTimelineQuery(object):
     @property
     def _unit_change_timeline(self):
         events = Event.objects.filter(
-                kind=OFFICER_DEPT
-            ).filter(
-                Q(officer__in=self.all_officers) &
-                (Q(department_code__isnull=False) | Q(department_desc__isnull=False)),
-            )
+            kind=OFFICER_DEPT
+        ).filter(
+            Q(officer__in=self.all_officers) &
+            (Q(department_code__isnull=False) | Q(department_desc__isnull=False)),
+        )
 
         unit_changes = self._filter_event_changes(
             events,
@@ -187,7 +190,9 @@ class OfficerTimelineQuery(object):
             end_year = officer_timeline_period[-1]
 
             event_years = []
-            departments = Department.objects.filter(officers__in=self.all_officers).only('data_period').all()
+            events = Event.objects.filter(officer__in=self.all_officers)
+            departments = Department.objects.filter(events__in=events).only('data_period').distinct()
+
             for department in departments:
                 department_period = department.data_period
                 event_years.extend(year for year in department_period if start_year <= year <= end_year)
@@ -197,10 +202,12 @@ class OfficerTimelineQuery(object):
         return format_data_period(officer_timeline_period)
 
     def query(self):
-        timeline = self._complaint_timeline + self._use_of_force_timeline + self._join_timeline + self._left_timeline \
-                   + self._document_timeline + self._salary_change_timeline + self._rank_change_timeline \
-                   + self._unit_change_timeline + self._news_aticle_timeline + self._appeal_timeline
+        period_only_items = self._complaint_timeline + self._use_of_force_timeline
 
-        timeline_period = self._get_timeline_period(self._complaint_timeline + self._use_of_force_timeline)
+        timeline = period_only_items + self._join_timeline + self._left_timeline + self._document_timeline \
+            + self._salary_change_timeline + self._rank_change_timeline + self._unit_change_timeline \
+            + self._news_aticle_timeline + self._appeal_timeline
+
+        timeline_period = self._get_timeline_period(period_only_items)
 
         return {'timeline': timeline, 'timeline_period': timeline_period}

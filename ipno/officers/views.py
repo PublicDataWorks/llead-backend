@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -23,7 +24,13 @@ class OfficersViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
     @cache_control(no_store=True)
     def list(self, request):
-        officers = Officer.objects.prefetch_events().filter(
+        other_prefetches = (
+            Prefetch(
+                'department',
+            ),
+        )
+
+        officers = Officer.objects.prefetch_events(other_prefetches).filter(
             canonical_person__isnull=False
         ).order_by(
             '-person__all_complaints_count'
@@ -46,7 +53,7 @@ class OfficersViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
     @cache_control(no_store=True)
     def timeline(self, request, pk):
-        officer = get_object_or_404(Officer, id=pk)
+        officer = get_object_or_404(Officer.objects.prefetch_related('person__officers'), id=pk)
 
         return Response(OfficerTimelineQuery(officer).query())
 
