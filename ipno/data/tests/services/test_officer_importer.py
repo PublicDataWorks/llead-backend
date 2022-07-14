@@ -14,14 +14,16 @@ from officers.factories import OfficerFactory
 
 class OfficerImporterTestCase(TestCase):
     def setUp(self):
-        self.header = ['uid', 'last_name', 'middle_name', 'middle_initial', 'first_name', 'birth_year', 'birth_month', 'birth_day', 'race', 'gender']
-        self.officer1_data = ['uid1', 'Sanchez', 'C', 'C', 'Emile', '1938', '', '', 'white', 'male']
-        self.officer2_data = ['uid2', 'Monaco', 'P', 'P', 'Anthony', '1964', '12', '4', 'black / african american', 'female']
-        self.officer3_data = ['uid3', 'Maier', '', '', 'Joel', '', '', '', '', '']
-        self.officer4_data = ['uid4', 'Poindexter', 'A', 'A', 'Sylvia', '1973', '', '', '', 'male']
-        self.officer5_data = ['uid5', 'Bull', '', '', 'Edward', '', '', '', '', 'male']
-        self.officer5_dup_data = ['uid5', 'Bull', '', '', 'Edward', '', '', '', '', 'male']
-        self.officer6_data = ['uid6', 'Officer', '', '', 'Deleted', '', '', '', '', 'male']
+        self.header = ['uid', 'last_name', 'middle_name', 'first_name', 'birth_year', 'birth_month', 'birth_day',
+                       'race', 'sex', 'agency']
+        self.officer1_data = ['uid1', 'Sanchez', 'C', 'Emile', '1938', '', '', 'white', 'male', 'New Orleans PD']
+        self.officer2_data = ['uid2', 'Monaco', 'P', 'Anthony', '1964', '12', '4', 'black / african american',
+                              'female', 'Louisiana State PD']
+        self.officer3_data = ['uid3', 'Maier', '', 'Joel', '', '', '', '', '', 'New Orleans PD']
+        self.officer4_data = ['uid4', 'Poindexter', 'A', 'Sylvia', '1973', '', '', '', 'male', 'New Orleans SO']
+        self.officer5_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'Baton Rouge PD']
+        self.officer5_dup_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'Jefferson SO']
+        self.officer6_data = ['uid6', 'Officer', '', 'Deleted', '', '', '', '', 'male', 'Lafayette PD']
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
@@ -121,10 +123,9 @@ class OfficerImporterTestCase(TestCase):
             field_attrs = [
                 'last_name',
                 'middle_name',
-                'middle_initial',
                 'first_name',
                 'race',
-                'gender',
+                'sex',
             ]
             integer_field_attrs = [
                 'birth_year',
@@ -251,10 +252,9 @@ class OfficerImporterTestCase(TestCase):
             field_attrs = [
                 'last_name',
                 'middle_name',
-                'middle_initial',
                 'first_name',
                 'race',
-                'gender',
+                'sex',
             ]
             integer_field_attrs = [
                 'birth_year',
@@ -366,10 +366,9 @@ class OfficerImporterTestCase(TestCase):
             field_attrs = [
                 'last_name',
                 'middle_name',
-                'middle_initial',
                 'first_name',
                 'race',
-                'gender',
+                'sex',
             ]
             integer_field_attrs = [
                 'birth_year',

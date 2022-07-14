@@ -6,21 +6,22 @@ from departments.serializers.es_serializers import DepartmentOfficersESSerialize
 from officers.constants import UOF_RECEIVE
 from officers.factories import OfficerFactory, EventFactory
 from people.factories import PersonFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
 
 class DepartmentOfficerSerializerTestCase(TestCase):
     def test_data(self):
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
+        officer_2 = OfficerFactory(department=department)
         person = PersonFactory(canonical_officer=officer_2, all_complaints_count=120)
         person.officers.add(officer_1)
         person.officers.add(officer_2)
         person.save()
 
-        department = DepartmentFactory()
-
-        use_of_force = UseOfForceFactory(officer=officer_1)
+        use_of_force = UseOfForceFactory()
+        UseOfForceOfficerFactory(officer=officer_1, use_of_force=use_of_force)
 
         EventFactory(
             department=department,
@@ -29,6 +30,24 @@ class DepartmentOfficerSerializerTestCase(TestCase):
             year=2019,
             month=2,
             day=3,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
         )
 
         EventFactory(
@@ -70,9 +89,14 @@ class DepartmentOfficerSerializerTestCase(TestCase):
             {
                 'id': officer_1.id,
                 'name': officer_1.name,
-                'badges': ["150", "250", "123"],
+                'badges': ["150", "123", "250"],
                 'is_starred': False,
                 'complaints_count': officer_1.person.all_complaints_count,
                 'use_of_forces_count': 1,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'senior'
             }
         ]

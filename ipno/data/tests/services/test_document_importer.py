@@ -24,13 +24,14 @@ class DocumentImporterTestCase(TestCase):
         self.patcher = patch('data.services.document_importer.GoogleCloudService')
         self.patcher.start()
 
-        self.header = ['docid', 'page_count', 'fileid', 'title', 'pdf_db_path', 'pdf_db_content_hash', 'txt_db_id',
-                       'txt_db_content_hash', 'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused', 'matched_uid',
-                       'agency', 'hrg_text', 'hrg_type']
+        self.header = ['docid', 'page_count', 'pdf_db_id', 'title', 'pdf_db_path', 'pdf_db_content_hash', 'txt_db_path',
+                       'txt_db_id', 'txt_db_content_hash', 'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused',
+                       'matched_uid', 'agency', 'hrg_text', 'hrg_type']
         self.document1_data = [
             '00fa809e', '4', 'f0fcc0d', 'document 1 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.pdf',
             'ceb9779f43154497099356c8bd74cacce1faa780cb6916a85efc8b4e278a776c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.txt',
             'id:8ceKnrnmgi0AAAAAAAAqmQ',
             'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff', '2018', '6', '14',
             'scraped', '1', 'Joseph Jones, Docket No. 17-', 'officer-uid-1', 'New Orleans PD',
@@ -53,6 +54,7 @@ class DocumentImporterTestCase(TestCase):
             '0236e725', '1', 'd4fb65b', 'document 2 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.pdf',
             '5f05f28383649aad924c89627c864c615856974d22f2eb53a6bdcf4464c76d20',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0236e725.txt',
             'id:8ceKnrnmgi0AAAAAAAAqmw',
             '2c668256378a491fd2f2812fcd4fc0f22af292b66f3f63ce6070321c57497f5a', '2018', '12', '18',
             'scraped', '1', 'Officer Terry Guillory, Docket 17-201', 'officer-uid-2', '', '', 'unknown']
@@ -60,6 +62,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 3 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '1', 'WILLIAM C. BROWN', 'officer-uid-3', 'Baton Rouge PD',
@@ -75,6 +78,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 4 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '2', 'JIM VERLANDER', '', 'New Orleans PD',
@@ -93,6 +97,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd28391', '3', '77d489c', 'document 5 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', '', 'fire']
@@ -101,6 +106,7 @@ class DocumentImporterTestCase(TestCase):
             '0dd82391', '3', '77d489c', 'document 5 title',
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.pdf',
             'a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c',
+            '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
             'scraped', '3', 'OFFICER KEVIN LAPEYROUSE', '', '', 'new-orleans-pd', 'unknown']
@@ -215,9 +221,10 @@ class DocumentImporterTestCase(TestCase):
         assert download_url is None
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('data.services.document_importer.requests.get')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    def test_process_successfully(self, generate_from_blob_mock):
+    def test_process_successfully(self, generate_from_blob_mock, get_mock):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
@@ -294,6 +301,9 @@ class DocumentImporterTestCase(TestCase):
         }
 
         document_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
@@ -423,9 +433,10 @@ class DocumentImporterTestCase(TestCase):
         assert mock_upload_file.call_count == 6
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
+    @patch('data.services.document_importer.requests.get')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')
     @patch('data.services.document_importer.generate_from_blob', return_value='image_blob')
-    def test_process_successfully_with_columns_changed(self, generate_from_blob_mock):
+    def test_process_successfully_with_columns_changed(self, generate_from_blob_mock, get_mock):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
 
@@ -503,6 +514,9 @@ class DocumentImporterTestCase(TestCase):
         }
 
         document_importer.process_wrgl_data = Mock(return_value=processed_data)
+
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
             return f"{settings.GC_PATH}{upload_location}".replace(' ', '%20').replace("'", '%27')
@@ -688,3 +702,69 @@ class DocumentImporterTestCase(TestCase):
         ocr_text = document_importer.get_ocr_text(ocr_text_id)
 
         assert ocr_text == ''
+
+    @patch('data.services.document_importer.requests.get')
+    def test_handle_pdf_file_process_success(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = 'pdf_db_path'
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {
+            'document_url': 'https://storage.googleapis.com/llead-documents-test/pdf_db_path',
+            'document_preview_url': 'preview_image_blob',
+            'document_type': 'application/pdf',
+        }
+
+    @patch('data.services.document_importer.requests.get')
+    def test_handle_doc_file_process_success(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/msword'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = 'pdf_db_path'
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {
+            'document_url': 'https://storage.googleapis.com/llead-documents-test/pdf_db_path',
+            'document_preview_url': None,
+            'document_type': 'application/msword',
+        }
+
+    @patch('data.services.document_importer.requests.get')
+    @override_settings(GC_PATH='')
+    def test_handle_file_process_fail(self, get_mock):
+        get_mock_return = Mock(headers={"content-type": 'application/pdf'})
+        get_mock.return_value = get_mock_return
+
+        mock_get_temporary_link_from_path = Mock(return_value='temp_link')
+        mock_dropbox = Mock(get_temporary_link_from_path=mock_get_temporary_link_from_path)
+
+        document_importer = DocumentImporter()
+        document_importer.ds = mock_dropbox
+        document_importer.generate_preview_image = Mock(return_value='preview_image_blob')
+
+        pdf_db_path = ''
+        uploaded_url = document_importer.handle_file_process(pdf_db_path)
+
+        mock_get_temporary_link_from_path.assert_called_with(pdf_db_path)
+        get_mock.assert_called_with('temp_link')
+        assert uploaded_url == {}

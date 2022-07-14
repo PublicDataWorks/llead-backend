@@ -57,12 +57,14 @@ THIRD_PARTY_APPS = (
     'anymail',
     'adminsortable',
     'adminsortable2',
+    'mapbox_location_field',
 )
 
 LOCAL_APPS = (
     'authentication',
     'app_config',
     'core',
+    'q_and_a',
     'documents',
     'departments',
     'officers',
@@ -73,6 +75,7 @@ LOCAL_APPS = (
     'news_articles',
     'tasks',
     'people',
+    'appeals',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
@@ -89,6 +92,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CACHES = {
+   'default': {
+      'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+      'LOCATION': 'ipno_cache_table',
+   }
+}
 
 ROOT_URLCONF = 'config.urls'
 
@@ -192,6 +202,8 @@ DROPBOX_APP_KEY = env.str('DROPBOX_APP_KEY', None)
 DROPBOX_APP_SECRET = env.str('DROPBOX_APP_SECRET', None)
 DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
 
+MAPBOX_KEY = env.str('MAPBOX_KEY', None)
+
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 
 SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
@@ -201,3 +213,5 @@ NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
 
 FLUENT_LOGGING = env.bool('FLUENT_LOGGING', False)
+
+VIEW_CACHING_TIME = 60*60*24

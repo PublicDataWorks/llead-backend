@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytz
 from datetime import date, datetime
 from operator import itemgetter
+from re import findall
 
 from django.urls import reverse
 from rest_framework import status
@@ -16,13 +17,14 @@ from departments.factories import DepartmentFactory, WrglFileFactory
 from officers.factories import EventFactory, OfficerFactory
 from documents.factories import DocumentFactory
 from complaints.factories import ComplaintFactory
-from use_of_forces.factories import UseOfForceFactory
+from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
+from utils.parse_utils import parse_date
 from utils.search_index import rebuild_search_index
 from officers.constants import (
     OFFICER_HIRE,
     OFFICER_LEFT,
-    UOF_INCIDENT,
-    UOF_RECEIVE
+    UOF_OCCUR,
+    UOF_RECEIVE,
 )
 
 
@@ -31,20 +33,23 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
         department_3 = DepartmentFactory()
+        DepartmentFactory()
 
-        department_1_officers = OfficerFactory.create_batch(2)
-        department_2_officers = OfficerFactory.create_batch(3)
+        OfficerFactory.create_batch(2, department=department_1)
+        OfficerFactory.create_batch(3, department=department_2)
 
-        for officer in department_1_officers:
-            EventFactory.create_batch(2, department=department_1, officer=officer)
+        document = DocumentFactory()
+        document.departments.add(department_1)
 
-        for officer in department_2_officers:
-            EventFactory(department=department_2, officer=officer)
+        UseOfForceFactory(department=department_2)
 
-        response = self.auth_client.get(reverse('api:departments-list'))
-        assert response.status_code == status.HTTP_200_OK
+        complaint = ComplaintFactory()
+        complaint.departments.add(department_3)
 
-        assert response.data == [{
+        EventFactory.create_batch(2, department=department_1)
+        EventFactory(department=department_2)
+
+        expected_data = [{
             'id': department_2.slug,
             'name': department_2.name,
             'city': department_2.city,
@@ -64,6 +69,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'location_map_url': department_3.location_map_url,
         }]
 
+        response = self.auth_client.get(reverse('api:departments-list'))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
+
     def test_list_unauthorized(self):
         response = self.client.get(reverse('api:departments-list'))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -73,19 +83,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department = DepartmentFactory()
         other_department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-        officer_2 = OfficerFactory()
+        officer_2 = OfficerFactory(department=department)
         person_2 = PersonFactory(canonical_officer=officer_2)
         person_2.officers.add(officer_2)
         person_2.save()
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_3)
         person_3.officers.add(officer_3)
         person_3.save()
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=other_department)
         person_4 = PersonFactory(canonical_officer=officer_4)
         person_4.officers.add(officer_4)
         person_4.save()
@@ -102,7 +112,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=8,
             day=3,
@@ -120,7 +130,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=4,
             day=5,
@@ -156,7 +166,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=12,
             day=3,
@@ -435,18 +445,18 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
         other_department = DepartmentFactory()
 
-        officer_1 = OfficerFactory()
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-        officer_2 = OfficerFactory()
+        officer_2 = OfficerFactory(department=department)
         person_1.officers.add(officer_2)
         person_1.save()
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_3)
         person_3.officers.add(officer_3)
         person_3.save()
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=other_department)
         person_4 = PersonFactory(canonical_officer=officer_4)
         person_4.officers.add(officer_4)
         person_4.save()
@@ -463,7 +473,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=5,
             day=3,
@@ -472,7 +482,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2019,
             month=5,
             day=3,
@@ -499,7 +509,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2018,
             month=7,
             day=5,
@@ -526,7 +536,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory(
             department=other_department,
             officer=officer_1,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             year=2020,
             month=6,
             day=3,
@@ -678,30 +688,35 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_officers_success(self):
-        officer_1 = OfficerFactory()
-        officer_2 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
+        officer_2 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory()
+        officer_3 = OfficerFactory(department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory()
+        officer_4 = OfficerFactory(department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        department = DepartmentFactory()
         department.starred_officers.add(officer_2)
         department.save()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_3)
-        use_of_force_2 = UseOfForceFactory(officer=officer_2)
-        use_of_force_3 = UseOfForceFactory(officer=officer_2)
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
+
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,
@@ -752,7 +767,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_2,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -785,6 +800,41 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=5,
         )
 
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="sergeant",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
         use_of_force_1.events.add(uof_receive_event_1)
         use_of_force_2.events.add(uof_receive_event_2)
         use_of_force_3.events.add(uof_incident_event_2)
@@ -799,8 +849,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'name': officer_2.name,
                 'is_starred': True,
                 'use_of_forces_count': 2,
-                'badges': ["150", "200", "250", "100"],
+                'badges': ["150", "200", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'senior',
             },
             {
                 'id': officer_4.id,
@@ -809,6 +864,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'recruit',
             },
             {
                 'id': officer_3.id,
@@ -817,6 +877,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123"],
                 'complaints_count': officer_3.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'sergeant',
             },
         ]
 
@@ -826,7 +891,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     @patch('departments.views.DEPARTMENTS_LIMIT', 3)
     def test_officers_with_maximum_starred_officers(self):
         department = DepartmentFactory()
-        starred_officers = OfficerFactory.create_batch(3)
+        starred_officers = OfficerFactory.create_batch(3, department=department)
         starred_person = PersonFactory(canonical_officer=starred_officers[0])
         for starred_officer in starred_officers:
             department.starred_officers.add(starred_officer)
@@ -834,7 +899,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.save()
         starred_person.save()
 
-        featured_officer = OfficerFactory()
+        featured_officer = OfficerFactory(department=department)
         featured_person = PersonFactory(canonical_officer=featured_officer)
         featured_person.officers.add(featured_officer)
         featured_person.save()
@@ -853,6 +918,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': None,
             },
             {
                 'id': starred_officers[1].id,
@@ -861,6 +931,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': None,
             },
             {
                 'id': starred_officers[2].id,
@@ -869,6 +944,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 0,
                 'badges': [],
                 'complaints_count': starred_person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': None,
             },
         ]
 
@@ -889,17 +969,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_news_articles_success(self):
         current_date = datetime.now(pytz.utc)
-        officer_1 = OfficerFactory()
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(department=department)
         person_1 = PersonFactory(canonical_officer=officer_1)
         person_1.officers.add(officer_1)
         person_1.save()
-
-        department = DepartmentFactory()
-
-        EventFactory(
-            department=department,
-            officer=officer_1,
-        )
 
         starred_article_source = NewsArticleSourceFactory(source_display_name='Starred Article')
         starred_article = NewsArticleFactory(
@@ -1077,6 +1152,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         starred_document = DocumentFactory(incident_date=datetime(2017, 8, 10))
         department.starred_documents.add(starred_document)
+        starred_document.departments.add(department)
 
         featured_document_1 = DocumentFactory(incident_date=current_date)
         featured_document_1.departments.add(department)
@@ -1100,6 +1176,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_document.preview_image_url,
                 'pages_count': starred_document.pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_1.id,
@@ -1109,6 +1191,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_1.preview_image_url,
                 'pages_count': featured_document_1.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_2.id,
@@ -1118,6 +1206,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_2.preview_image_url,
                 'pages_count': featured_document_2.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': featured_document_3.id,
@@ -1127,6 +1221,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': featured_document_3.preview_image_url,
                 'pages_count': featured_document_3.pages_count,
                 'is_starred': False,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1140,6 +1240,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         starred_documents = DocumentFactory.create_batch(3)
         for document in starred_documents:
             department.starred_documents.add(document)
+            document.departments.add(department)
 
         featured_document = DocumentFactory()
         featured_document.departments.add(department)
@@ -1157,6 +1258,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[0].preview_image_url,
                 'pages_count': starred_documents[0].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_documents[1].id,
@@ -1166,6 +1273,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[1].preview_image_url,
                 'pages_count': starred_documents[1].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
             {
                 'id': starred_documents[2].id,
@@ -1175,6 +1288,12 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'preview_image_url': starred_documents[2].preview_image_url,
                 'pages_count': starred_documents[2].pages_count,
                 'is_starred': True,
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ]
             },
         ]
 
@@ -1249,24 +1368,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['results'] == expected_results
 
     def test_search_officers_success(self):
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
@@ -1276,11 +1397,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5.officers.add(officer_6)
         person_5.save()
 
-        department = DepartmentFactory()
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_5)
-        use_of_force_2 = UseOfForceFactory(officer=officer_3)
-        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,
@@ -1322,7 +1445,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_4,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -1351,6 +1474,41 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             department=department,
             officer=officer_4,
             year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_1,
+            rank_desc="senior",
+            year=2020,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_2,
+            rank_desc="junior",
+            year=2018,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_3,
+            rank_desc="sergeant",
+            year=2018,
+            month=4,
+            day=5,
+        )
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
             month=4,
             day=5,
         )
@@ -1377,6 +1535,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["123", "200"],
                 'complaints_count': officer_3.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'sergeant',
             },
             {
                 'id': officer_4.id,
@@ -1385,14 +1548,24 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'recruit',
             },
             {
                 'id': officer_2.id,
                 'name': officer_2.name,
                 'is_starred': False,
                 'use_of_forces_count': 0,
-                'badges': ["100", "150", "250"],
+                'badges': ["150", "100", "250"],
                 'complaints_count': officer_2.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'senior',
             },
         ]
 
@@ -1403,24 +1576,26 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['results'] == expected_results
 
     def test_search_officers_with_limit_and_offset(self):
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        department = DepartmentFactory()
+
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray')
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1')
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang')
+        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
@@ -1430,11 +1605,13 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5.officers.add(officer_6)
         person_5.save()
 
-        department = DepartmentFactory()
+        use_of_force_1 = UseOfForceFactory()
+        use_of_force_2 = UseOfForceFactory()
+        use_of_force_3 = UseOfForceFactory()
 
-        use_of_force_1 = UseOfForceFactory(officer=officer_5)
-        use_of_force_2 = UseOfForceFactory(officer=officer_3)
-        use_of_force_3 = UseOfForceFactory(officer=officer_4)
+        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
+        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
+        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
 
         EventFactory(
             department=department,
@@ -1476,7 +1653,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         uof_incident_event_2 = EventFactory(
             department=department,
             officer=officer_4,
-            kind=UOF_INCIDENT,
+            kind=UOF_OCCUR,
             badge_no="200",
             year=2018,
             month=8,
@@ -1505,6 +1682,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             department=department,
             officer=officer_4,
             year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=department,
+            officer=officer_4,
+            rank_desc="recruit",
+            year=2020,
             month=4,
             day=5,
         )
@@ -1533,6 +1719,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'use_of_forces_count': 1,
                 'badges': ["200"],
                 'complaints_count': officer_4.person.all_complaints_count,
+                'department': {
+                    'id': department.slug,
+                    'name': department.name,
+                },
+                'latest_rank': 'recruit',
             }
         ]
 
@@ -1739,3 +1930,249 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['count'] == 3
         assert response.data['previous'] == expected_previous
         assert response.data['next'] == expected_next
+
+    def test_migratory_unauthorized(self):
+        response = self.client.get(
+            reverse('api:departments-migratory')
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_migratory_list_success(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        event = EventFactory(
+            department=end_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2019,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_OCCUR,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
+        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department.location))
+
+        expected_result = {
+            'nodes': {
+                start_department.slug: {
+                    'name': start_department.name,
+                    'location': start_department_location,
+                },
+                end_department.slug: {
+                    'name': end_department.name,
+                    'location': end_department_location,
+                },
+            },
+            'graphs': [
+                {
+                    'start_node': start_department.slug,
+                    'end_node': end_department.slug,
+                    'start_location': start_department_location,
+                    'end_location': end_department_location,
+                    'year': 2019,
+                    'date': parse_date(event.year, event.month, event.day),
+                    'officer_name': officer_1.name,
+                    'officer_id': officer_1.id,
+                },
+            ]
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_empty(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=2,
+            day=3,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2018,
+            month=3,
+            day=3,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        EventFactory(
+            department=end_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=None,
+            month=None,
+            day=None,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_OCCUR,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        expected_result = {
+            'nodes': {},
+            'graphs': []
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_with_no_department_location(self):
+        start_department = DepartmentFactory()
+        end_department1 = DepartmentFactory()
+        end_department2 = DepartmentFactory(location=None)
+        DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        event = EventFactory(
+            department=end_department1,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2019,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_2,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=5,
+            day=5,
+        )
+
+        EventFactory(
+            department=end_department2,
+            officer=officer_2,
+            kind=OFFICER_HIRE,
+            year=2020,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_OCCUR,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_2,
+            kind=UOF_RECEIVE,
+        )
+
+        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
+        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department1.location))
+
+        expected_result = {
+            'nodes': {
+                start_department.slug: {
+                    'name': start_department.name,
+                    'location': start_department_location,
+                },
+                end_department1.slug: {
+                    'name': end_department1.name,
+                    'location': end_department_location,
+                },
+            },
+            'graphs': [
+                {
+                    'start_node': start_department.slug,
+                    'end_node': end_department1.slug,
+                    'start_location': start_department_location,
+                    'end_location': end_department_location,
+                    'year': 2019,
+                    'date': parse_date(event.year, event.month, event.day),
+                    'officer_name': officer_1.name,
+                    'officer_id': officer_1.id,
+                },
+            ]
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result

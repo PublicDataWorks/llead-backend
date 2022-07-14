@@ -27,4 +27,5 @@ class DepartmentDocumentSerializerTestCase(TestCase):
             'preview_image_url': document.preview_image_url,
             'pages_count': document.pages_count,
             'is_starred': True,
+            'departments': [],
         }
