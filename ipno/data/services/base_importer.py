@@ -175,13 +175,13 @@ class BaseImporter(object):
             setattr(import_log, key, value)
         import_log.save()
 
-    def retrieve_wrgl_data(self, repo_name):
+    def retrieve_wrgl_data(self, branch):
         self.repo = Repository(
-            f'https://hub.wrgl.co/api/users/{WRGL_USER}/repos/{repo_name}/',
+            f'https://hub.wrgl.co/api/users/{WRGL_USER}/repos/data/',
             settings.WRGL_API_KEY
         )
 
-        self.new_commit = self.repo.get_branch(self.branch)
+        self.new_commit = self.repo.get_branch(branch)
 
         columns = self.new_commit.table.columns
         self.column_mappings = {column: columns.index(column) for column in columns}
@@ -221,7 +221,7 @@ class BaseImporter(object):
                             data = self.process_wrgl_data(current_hash)
                         else:
                             all_rows = list(self.repo.get_blocks(
-                                    f'heads/{self.branch}',
+                                    f'heads/{wrgl_repo.repo_name}',
                                     with_column_names=False
                                 ))
                             data = {
