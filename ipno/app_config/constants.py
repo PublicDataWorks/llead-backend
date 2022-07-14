@@ -18,6 +18,11 @@ APP_TEXT_CONTENTS = [
         'description': 'The summary text display in frontpage.'
     },
     {
+        'name': 'ABOUT_PAGE_SUMMARY',
+        'value': 'LLEAD introduction',
+        'description': 'The summary text display in about.'
+    },
+    {
         'name': 'FOOTER_TEXT',
         'value': '[**Innocence Project New Orleans**](https://ip-no.org) in collaboration with [**Public Data Works**]'
                  '(https://publicdata.works)',
