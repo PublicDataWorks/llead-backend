@@ -1,7 +1,4 @@
-from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -16,8 +13,6 @@ from news_articles.constants import NEWS_ARTICLES_LIMIT
 class NewsArticlesViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
     def list(self, request):
         news_articles = NewsArticle.objects.select_related('source').filter(
             matched_sentences__officers__isnull=False,
