@@ -51,7 +51,10 @@ class HistoricalDataViewSet(ViewSet):
             departments = Department.objects.filter(slug__in=department_ids)
             officers = Officer.objects.prefetch_events().filter(id__in=officer_ids)
             documents = Document.objects.prefetch_departments().filter(id__in=document_ids)
-            news_articles = NewsArticle.objects.prefetch_related('source').filter(id__in=news_article_ids)
+            news_articles = NewsArticle.objects.prefetch_related('source').filter(
+                id__in=news_article_ids,
+                is_hidden=False
+            )
 
             recent_objects_mapping = {
                 RECENT_DEPARTMENT_TYPE: {
