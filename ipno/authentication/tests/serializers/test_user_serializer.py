@@ -11,5 +11,6 @@ class UserSerializerTestCase(TestCase):
         user_data = UserSerializer(user).data
 
         assert user_data == {
-            'email': email
+            'email': email,
+            'is_admin': False,
         }
