@@ -76,6 +76,7 @@ LOCAL_APPS = (
     'tasks',
     'people',
     'appeals',
+    'feedbacks',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
@@ -205,6 +206,8 @@ DROPBOX_REFRESH_TOKEN = env.str('DROPBOX_REFRESH_TOKEN', '')
 MAPBOX_KEY = env.str('MAPBOX_KEY', None)
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
+FEEDBACK_FROM_EMAIL = os.getenv('FEEDBACK_FROM_EMAIL')
+FEEDBACK_TO_EMAIL = os.getenv('FEEDBACK_TO_EMAIL')
 
 SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 
