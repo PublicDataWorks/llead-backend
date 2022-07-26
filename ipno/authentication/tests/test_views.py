@@ -109,7 +109,8 @@ class UserViewTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {
-            "email": user.email
+            "email": user.email,
+            "is_admin": user.is_admin
         }
 
 
