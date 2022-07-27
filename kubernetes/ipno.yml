@@ -92,6 +92,11 @@ spec:
                 secretKeyRef:
                   name: ipno
                   key: from-email
+            - name: FEEDBACK_TO_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: ipno
+                  key: feedback-to-email
             - name: HOST
               valueFrom:
                 secretKeyRef:

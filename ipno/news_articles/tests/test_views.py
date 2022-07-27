@@ -19,13 +19,20 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
             source=source,
             published_date=news_article_1.published_date - datetime.timedelta(days=1)
         )
+        news_article_3 = NewsArticleFactory(
+            source=source,
+            is_hidden=True,
+        )
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
         NewsArticleFactory()
         matched_sentence_1.officers.add(officer)
         matched_sentence_1.save()
         matched_sentence_2.officers.add(officer)
         matched_sentence_2.save()
+        matched_sentence_3.officers.add(officer)
+        matched_sentence_3.save()
 
         response = self.auth_client.get(reverse('api:news-articles-list'))
         assert response.status_code == status.HTTP_200_OK
@@ -54,3 +61,26 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
     def test_list_unauthorized(self):
         response = self.client.get(reverse('api:news-articles-list'))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_hide_success(self):
+        NewsArticleFactory(id=1)
+        NewsArticleFactory(id=2)
+        NewsArticleFactory(id=3)
+
+        response = self.admin_client.post(reverse('api:news-articles-hide', kwargs={'pk': 1}))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            'detail': 'the news articles is hidden'
+        }
+
+    def test_hide_unauthorized(self):
+        response = self.client.post(reverse('api:news-articles-hide', kwargs={'pk': 1}))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_hide_with_non_admin(self):
+        response = self.auth_client.post(reverse('api:news-articles-hide', kwargs={'pk': 1}))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_hide_not_found(self):
+        response = self.admin_client.post(reverse('api:news-articles-hide', kwargs={'pk': 1}))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
