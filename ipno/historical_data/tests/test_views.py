@@ -56,6 +56,12 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             source=source
         )
 
+        NewsArticleFactory(
+            published_date=datetime.datetime(2021, 9, 8).date(),
+            source=source,
+            is_hidden=True,
+        )
+
         document = DocumentFactory()
         document.departments.add(department_1)
 
