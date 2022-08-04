@@ -134,10 +134,12 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 'id': officer.id,
                 'name': 'David Jonesworth',
                 'badges': ['12435'],
-                'department': {
-                    'id': department_2.slug,
-                    'name': department_2.name,
-                },
+                'departments': [
+                    {
+                        'id': department_2.slug,
+                        'name': department_2.name,
+                    }
+                ],
                 'latest_rank': 'senior',
                 'type': RECENT_OFFICER_TYPE
             },

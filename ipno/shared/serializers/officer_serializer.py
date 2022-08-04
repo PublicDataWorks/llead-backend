@@ -7,7 +7,7 @@ class OfficerSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     badges = serializers.SerializerMethodField()
-    department = serializers.SerializerMethodField()
+    departments = serializers.SerializerMethodField()
     latest_rank = serializers.SerializerMethodField()
 
     def _get_all_events(self, obj):
@@ -41,8 +41,19 @@ class OfficerSerializer(serializers.Serializer):
 
         return events
 
-    def get_department(self, obj):
-        return SimpleDepartmentSerializer(obj.department).data if obj.department else None
+    def get_departments(self, obj):
+        canonical_dep = obj.person.canonical_officer.department
+
+        all_events = self._get_all_events(obj)
+
+        all_departments = {event.department for event in all_events}
+        raw_departments = list(dict.fromkeys([
+            canonical_dep,
+            *all_departments
+        ]))
+        departments = [department for department in raw_departments if department is not None]
+
+        return SimpleDepartmentSerializer(departments, many=True).data
 
     def get_latest_rank(self, obj):
         events = self._get_all_events(obj)
