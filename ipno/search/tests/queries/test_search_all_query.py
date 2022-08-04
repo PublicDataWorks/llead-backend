@@ -105,17 +105,19 @@ class OfficersSearchQueryTestCase(TestCase):
                         'id': officer_1.id,
                         'name': officer_1.name,
                         'badges': ['12435'],
-                        'department': {
-                            'id': department_1.slug,
-                            'name': department_1.name,
-                        },
+                        'departments': [
+                            {
+                                'id': department_1.slug,
+                                'name': department_1.name,
+                            }
+                        ],
                         'latest_rank': 'senior',
                     },
                     {
                         'id': officer_2.id,
                         'name': officer_2.name,
                         'badges': [],
-                        'department': None,
+                        'departments': [],
                         'latest_rank': None,
                     },
                 ],
@@ -368,10 +370,12 @@ class OfficersSearchQueryTestCase(TestCase):
                         'id': officer_1.id,
                         'name': officer_1.name,
                         'badges': ['12435'],
-                        'department': {
-                            'id': department_1.slug,
-                            'name': department_1.name,
-                        },
+                        'departments': [
+                            {
+                                'id': department_1.slug,
+                                'name': department_1.name,
+                            }
+                        ],
                         'latest_rank': 'senior',
                     },
                 ],
@@ -523,10 +527,12 @@ class OfficersSearchQueryTestCase(TestCase):
                         'id': officer_1.id,
                         'name': officer_1.name,
                         'badges': ['12435'],
-                        'department': {
-                            'id': department_1.slug,
-                            'name': department_1.name,
-                        },
+                        'departments': [
+                            {
+                                'id': department_1.slug,
+                                'name': department_1.name,
+                            },
+                        ],
                         'latest_rank': 'senior',
                     },
                 ],
