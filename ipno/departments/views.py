@@ -285,6 +285,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
                     migratory_event['date'] = line[1][0]
                     migratory_event['officer_name'] = line[0][1].officer.name
                     migratory_event['officer_id'] = line[0][1].officer.id
+                    migratory_event['left_reason'] = line[0][1].left_reason
                     graphs.append(migratory_event)
 
                     migrated_department.add(line[0][1].department.slug)

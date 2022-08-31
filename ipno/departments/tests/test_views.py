@@ -1954,6 +1954,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             year=2019,
             month=4,
             day=5,
+            left_reason='Resignation',
         )
 
         event = EventFactory(
@@ -1998,6 +1999,80 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'date': parse_date(event.year, event.month, event.day),
                     'officer_name': officer_1.name,
                     'officer_id': officer_1.id,
+                    'left_reason': 'Resignation',
+                },
+            ]
+        }
+
+        response = self.auth_client.get(
+            reverse('api:departments-migratory')
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_without_left_reason(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=OFFICER_LEFT,
+            year=2019,
+            month=4,
+            day=5,
+        )
+
+        event = EventFactory(
+            department=end_department,
+            officer=officer_1,
+            kind=OFFICER_HIRE,
+            year=2019,
+            month=6,
+            day=5,
+        )
+
+        EventFactory(
+            department=start_department,
+            officer=officer_1,
+            kind=UOF_OCCUR,
+            year=2019,
+            month=5,
+            day=8,
+        )
+
+        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
+        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department.location))
+
+        expected_result = {
+            'nodes': {
+                start_department.slug: {
+                    'name': start_department.name,
+                    'location': start_department_location,
+                },
+                end_department.slug: {
+                    'name': end_department.name,
+                    'location': end_department_location,
+                },
+            },
+            'graphs': [
+                {
+                    'start_node': start_department.slug,
+                    'end_node': end_department.slug,
+                    'start_location': start_department_location,
+                    'end_location': end_department_location,
+                    'year': 2019,
+                    'date': parse_date(event.year, event.month, event.day),
+                    'officer_name': officer_1.name,
+                    'officer_id': officer_1.id,
+                    'left_reason': None,
                 },
             ]
         }
@@ -2098,6 +2173,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             year=2019,
             month=4,
             day=5,
+            left_reason='Resignation',
         )
 
         event = EventFactory(
@@ -2166,6 +2242,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     'date': parse_date(event.year, event.month, event.day),
                     'officer_name': officer_1.name,
                     'officer_id': officer_1.id,
+                    'left_reason': 'Resignation',
                 },
             ]
         }
