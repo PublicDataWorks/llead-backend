@@ -39,6 +39,7 @@ class OfficersESSerializerTestCase(TestCase):
         )
         EventFactory(
             officer=officer_1,
+            department=department,
             badge_no=None,
             year=2015,
             month=7,
@@ -103,30 +104,36 @@ class OfficersESSerializerTestCase(TestCase):
                 'id': officer_2.id,
                 'name': 'David Jonesworth',
                 'badges': [],
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
-                },
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    },
+                ],
                 'latest_rank': 'sergeant',
             },
             {
                 'id': officer_1.id,
                 'name': 'Kenneth Anderson',
                 'badges': ['12435'],
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
-                },
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    },
+                ],
                 'latest_rank': 'senior',
             },
             {
                 'id': officer_3.id,
                 'name': 'Anthony Davis',
                 'badges': [],
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
-                },
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    },
+                ],
                 'latest_rank': 'lieutenant',
             },
         ]
