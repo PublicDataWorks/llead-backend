@@ -93,6 +93,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         )
         EventFactory(
             officer=officer_1,
+            department=None,
             badge_no=None,
             year=2015,
             month=7,
@@ -132,20 +133,24 @@ class OfficersViewSetTestCase(AuthAPITestCase):
                 'id': officer_2.id,
                 'name': 'Anthony Davis',
                 'badges': [],
-                'department':  {
-                    'id': department.slug,
-                    'name': department.name,
-                },
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ],
                 'latest_rank': 'junior',
             },
             {
                 'id': officer_1.id,
                 'name': 'David Jonesworth',
                 'badges': ['12435', '5432', '67893'],
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
-                },
+                'departments': [
+                    {
+                        'id': department.slug,
+                        'name': department.name,
+                    }
+                ],
                 'latest_rank': 'senior',
             }]
 
