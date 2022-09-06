@@ -19,7 +19,7 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
         document_1.departments.add(department_1)
         document_2.departments.add(department_2)
 
-        response = self.auth_client.get(reverse('api:documents-list'))
+        response = self.client.get(reverse('api:documents-list'))
         assert response.status_code == status.HTTP_200_OK
 
         expected_data = [
@@ -66,7 +66,3 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
         ]
 
         assert response.data == expected_data
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:documents-list'))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED

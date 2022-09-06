@@ -69,14 +69,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'location_map_url': department_3.location_map_url,
         }]
 
-        response = self.auth_client.get(reverse('api:departments-list'))
+        response = self.client.get(reverse('api:departments-list'))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_data
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:departments-list'))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
         current_date = datetime.now(pytz.utc)
@@ -251,7 +247,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'data_period': department.data_period,
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-detail', kwargs={'pk': department.slug})
         )
         assert response.status_code == status.HTTP_200_OK
@@ -259,16 +255,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_retrieve_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-detail', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_retrieve_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-detail', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_search_documents_with_keywords(self):
         department = DepartmentFactory()
@@ -300,7 +290,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
@@ -382,7 +372,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
@@ -424,7 +414,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department = DepartmentFactory()
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
@@ -621,7 +611,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'data_period': department.data_period,
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-detail', kwargs={'pk': department.slug})
         )
         assert response.status_code == status.HTTP_200_OK
@@ -629,16 +619,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_datasets_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-datasets', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_datasets_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-datasets', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_datasets_success(self):
         department = DepartmentFactory()
@@ -646,7 +630,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_1 = WrglFileFactory(department=department, position=2)
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-datasets', kwargs={'pk': department.slug})
         )
 
@@ -676,16 +660,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_officers_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-officers', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_officers_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-officers', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_officers_success(self):
         department = DepartmentFactory()
@@ -839,7 +817,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         use_of_force_2.events.add(uof_receive_event_2)
         use_of_force_3.events.add(uof_incident_event_2)
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-officers', kwargs={'pk': department.slug})
         )
 
@@ -906,7 +884,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.officers.add(featured_officer)
         department.save()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-officers', kwargs={'pk': department.slug})
         )
 
@@ -956,16 +934,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_news_articles_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-news-articles', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_news_articles_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-news-articles', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_news_articles_success(self):
         current_date = datetime.now(pytz.utc)
@@ -1015,7 +987,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence_3.officers.add(officer_1)
         matched_sentence_3.save()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-news-articles', kwargs={'pk': department.slug})
         )
 
@@ -1099,7 +1071,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence.officers.add(officer)
         matched_sentence.save()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-news-articles', kwargs={'pk': department.slug})
         )
 
@@ -1134,16 +1106,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_featured_documents_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:departments-documents', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_featured_documents_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-documents', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_featured_documents_success(self):
         current_date = datetime.now(pytz.utc)
@@ -1163,7 +1129,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document_3 = DocumentFactory(incident_date=datetime(2017, 8, 10))
         featured_document_3.departments.add(department)
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-documents', kwargs={'pk': department.slug})
         )
 
@@ -1245,7 +1211,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document = DocumentFactory()
         featured_document.departments.add(department)
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-documents', kwargs={'pk': department.slug})
         )
 
@@ -1301,16 +1267,10 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_search_without_query(self):
-        response = self.auth_client.get(
-            reverse('api:departments-search', kwargs={'pk': 'slug'})
-        )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_search_unauthorized(self):
         response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': 'slug'})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_search_officers_with_empty_results(self):
         officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
@@ -1351,7 +1311,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'Sean',
@@ -1519,7 +1479,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'Ray',
@@ -1701,7 +1661,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'Ray',
@@ -1778,7 +1738,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'Sean',
@@ -1832,7 +1792,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
@@ -1913,7 +1873,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         rebuild_search_index()
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-search', kwargs={'pk': department.slug}),
             {
                 'q': 'keyword',
@@ -1930,12 +1890,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data['count'] == 3
         assert response.data['previous'] == expected_previous
         assert response.data['next'] == expected_next
-
-    def test_migratory_unauthorized(self):
-        response = self.client.get(
-            reverse('api:departments-migratory')
-        )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_migratory_list_success(self):
         start_department = DepartmentFactory()
@@ -2004,7 +1958,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             ]
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-migratory')
         )
 
@@ -2077,7 +2031,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             ]
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-migratory')
         )
 
@@ -2143,7 +2097,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             'graphs': []
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-migratory')
         )
 
@@ -2247,7 +2201,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             ]
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:departments-migratory')
         )
 
