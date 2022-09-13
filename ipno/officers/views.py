@@ -1,9 +1,5 @@
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
-
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -14,11 +10,11 @@ from officers.models import Officer
 from officers.queries import OfficerTimelineQuery, OfficerDatafileQuery
 from officers.serializers import OfficerDetailsSerializer
 from shared.serializers import OfficerSerializer
+from utils.cache_utils import custom_cache
 
 
 class OfficersViewSet(viewsets.ViewSet):
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def list(self, request):
         officers = Officer.objects.prefetch_events().select_related(
             'person__canonical_officer__department'
@@ -31,8 +27,7 @@ class OfficersViewSet(viewsets.ViewSet):
         serializer = OfficerSerializer(officers, many=True)
         return Response(serializer.data)
 
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def retrieve(self, request, pk):
         officer = get_object_or_404(
             Officer.objects.prefetch_related('person__canonical_officer'), id=pk
@@ -42,8 +37,7 @@ class OfficersViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='timeline')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def timeline(self, request, pk):
         officer = get_object_or_404(Officer.objects.prefetch_related('person__officers'), id=pk)
 
