@@ -4,4 +4,4 @@ from departments.documents import DepartmentESDoc
 
 class DepartmentsSearchQuery(BaseSearchQuery):
     document_klass = DepartmentESDoc
-    fields = ['name']
+    fields = ['name', 'aliases']
