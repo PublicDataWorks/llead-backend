@@ -4,7 +4,7 @@ from officers.documents import OfficerESDoc
 
 class OfficersSearchQuery(BaseSearchQuery):
     document_klass = OfficerESDoc
-    fields = ['name']
+    fields = ['name', 'aliases']
 
     def query(self, order=None):
         search = self.document_klass().search()

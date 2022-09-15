@@ -36,7 +36,7 @@ class ExcludedMatchedSentenceInlineAdmin(admin.TabularInline):
 
 
 class OfficerAdmin(ModelAdmin):
-    list_display = ('uid', 'last_name', 'first_name', 'sex', 'badges', 'agency')
+    list_display = ('uid', 'last_name', 'first_name', 'sex', 'badges', 'agency', 'aliases')
     search_fields = ('last_name', 'first_name', 'events__badge_no')
     list_filter = (OfficerNewsArticleFilter,)
     inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin)
