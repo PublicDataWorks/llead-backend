@@ -60,6 +60,8 @@ class EventAdmin(ModelAdmin):
         'year', 'month', 'day', 'time', 'raw_date'
     )
     raw_id_fields = ('officer', )
+    list_filter = ('kind', )
+    search_fields = ('officer__last_name', 'officer__middle_name', 'officer__first_name', )
 
 
 admin.site.register(Officer, OfficerAdmin)
