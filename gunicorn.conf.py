@@ -1,11 +1,15 @@
+import sys
 from logging import Filter, getLogger
 from gunicorn.glogging import Logger
-import sys
+
 
 bind = "0.0.0.0:8000"
 loglevel = "info"
 accesslog = '-'
 errorlog = '-'
+
+worker_class = 'gevent'
+workers = 3
 
 
 class HealthCheckFilter(Filter):
