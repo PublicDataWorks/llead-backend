@@ -1,6 +1,7 @@
 WRGL_USER = 'ipno'
 
 OFFICER_MODEL_NAME = 'Officer'
+AGENCY_MODEL_NAME = 'Department'
 EVENT_MODEL_NAME = 'Event'
 COMPLAINT_MODEL_NAME = 'Complaint'
 USE_OF_FORCE_MODEL_NAME = 'UseOfForce'
@@ -12,6 +13,10 @@ NEWS_ARTICLE_MODEL_NAME = 'NewsArticle'
 NEWS_ARTICLE_OFFICER_MODEL_NAME = 'NewsArticleOfficer'
 PERSON_MODEL_NAME = 'Person'
 WRGL_REPOS_DEFAULT = [
+    {
+        'repo_name': 'agency-reference-list',
+        'data_model': AGENCY_MODEL_NAME,
+    },
     {
         'repo_name': 'personnel',
         'data_model': OFFICER_MODEL_NAME,

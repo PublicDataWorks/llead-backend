@@ -1,6 +1,5 @@
 from datetime import datetime
 import pytz
-import re
 import traceback
 
 from django.conf import settings
@@ -37,10 +36,6 @@ class BaseImporter(object):
     column_mappings = {}
     old_column_mappings = {}
 
-    def format_agency(self, agency):
-        agency = re.sub('CSD$', 'PD', agency)
-        return re.sub('SO$', 'Sheriff', agency)
-
     def parse_row_data(self, row, mappings):
         row_data = {
             attr: row[mappings[attr]] if row[mappings[attr]] else None
@@ -63,12 +58,8 @@ class BaseImporter(object):
                             for department in Department.objects.only('id', 'slug')}
 
         for agency in agencies:
-            formatted_agency = self.format_agency(agency)
-            slugify_formatted_agency = slugify(formatted_agency)
-
-            if not slugify_mappings.get(slugify_formatted_agency):
-                department = Department.objects.create(name=formatted_agency, slug=slugify_formatted_agency)
-                slugify_mappings[slugify(department.name)] = department.id
+            if not slugify_mappings.get(agency):
+                raise ValueError(f'No departments for {agency}')
 
         return slugify_mappings
 

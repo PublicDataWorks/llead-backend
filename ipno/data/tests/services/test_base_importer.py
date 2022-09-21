@@ -20,7 +20,6 @@ from departments.factories import DepartmentFactory
 from officers.factories import OfficerFactory
 from officers.models import Officer
 from use_of_forces.factories import UseOfForceFactory
-from departments.models import Department
 
 
 TEST_MODEL_NAME = 'TestModelName'
@@ -355,63 +354,30 @@ class BaseImporterTestCase(TestCase):
         with raises(NotImplementedError):
             BaseImporter().import_data([])
 
-    def test_format_agency(self):
-        assert BaseImporter().format_agency('Baton Rouge CSD') == 'Baton Rouge PD'
-        assert BaseImporter().format_agency('Baton Rouge SO') == 'Baton Rouge Sheriff'
-
     def test_department_mappings(self):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
-        agencies = ['St. Tammany Sheriff', 'Baton Rouge CSD', 'New Orleans PD']
+        agencies = [department_1.slug, department_2.slug]
 
         mappings = BaseImporter().get_department_mappings(agencies)
 
-        department_3 = Department.objects.filter(name='St. Tammany Sheriff').first()
         expected_mappings = {
-            slugify('New Orleans PD'): department_1.id,
-            slugify('Baton Rouge PD'): department_2.id,
-            slugify('St. Tammany Sheriff'): department_3.id
+            department_1.slug: department_1.id,
+            department_2.slug: department_2.id,
         }
-        assert department_3
         assert mappings == expected_mappings
 
-    def test_department_mappings_case_sensitive(self):
-        department_1 = DepartmentFactory(name='New Orleans PD')
-        agencies = ['St. Tammany Sheriff', 'New Orleans PD', 'st. tammany sheriff']
-
-        mappings = BaseImporter().get_department_mappings(agencies)
-
-        department_2 = Department.objects.filter(name='St. Tammany Sheriff').first()
-        expected_mappings = {
-            slugify('New Orleans PD'): department_1.id,
-            slugify('St. Tammany Sheriff'): department_2.id
-        }
-        assert department_2
-        assert mappings == expected_mappings
-
-    def test_department_mappings_change_department_name(self):
+    def test_department_mappings_non_existed_agency(self):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
-        agencies = ['St. Tammany Sheriff', 'Baton Rouge CSD', 'New Orleans PD']
+        department_3_slug = slugify('Non Existed PD')
 
-        mappings = BaseImporter().get_department_mappings(agencies)
+        agencies = [department_1.slug, department_2.slug, department_3_slug]
 
-        department_1.name = 'New Orleans Police Department'
-        department_1.save()
-        department_2.name = 'Baton Rouge Police Department'
-        department_2.save()
+        with self.assertRaises(ValueError) as context:
+            BaseImporter().get_department_mappings(agencies)
 
-        new_mappings = BaseImporter().get_department_mappings(agencies)
-
-        department_3 = Department.objects.filter(name='St. Tammany Sheriff').first()
-        expected_mappings = {
-            slugify('New Orleans PD'): department_1.id,
-            slugify('Baton Rouge PD'): department_2.id,
-            slugify('St. Tammany Sheriff'): department_3.id
-        }
-        assert department_3
-        assert mappings == expected_mappings
-        assert mappings == new_mappings
+            assert str(context) == f'No departments for {department_3_slug}'
 
     def test_officer_mappings(self):
         officer_1 = OfficerFactory()
