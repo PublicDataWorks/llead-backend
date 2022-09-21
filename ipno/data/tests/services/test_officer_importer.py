@@ -8,6 +8,7 @@ from data.services import OfficerImporter
 from data.models import ImportLog
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.factories import WrglRepoFactory
+from departments.factories import DepartmentFactory
 from officers.models import Officer
 from officers.factories import OfficerFactory
 
@@ -16,14 +17,20 @@ class OfficerImporterTestCase(TestCase):
     def setUp(self):
         self.header = ['uid', 'last_name', 'middle_name', 'first_name', 'birth_year', 'birth_month', 'birth_day',
                        'race', 'sex', 'agency']
-        self.officer1_data = ['uid1', 'Sanchez', 'C', 'Emile', '1938', '', '', 'white', 'male', 'New Orleans PD']
+        self.officer1_data = ['uid1', 'Sanchez', 'C', 'Emile', '1938', '', '', 'white', 'male', 'new-orleans-pd']
         self.officer2_data = ['uid2', 'Monaco', 'P', 'Anthony', '1964', '12', '4', 'black / african american',
-                              'female', 'Louisiana State PD']
-        self.officer3_data = ['uid3', 'Maier', '', 'Joel', '', '', '', '', '', 'New Orleans PD']
-        self.officer4_data = ['uid4', 'Poindexter', 'A', 'Sylvia', '1973', '', '', '', 'male', 'New Orleans SO']
-        self.officer5_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'Baton Rouge PD']
-        self.officer5_dup_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'Jefferson SO']
-        self.officer6_data = ['uid6', 'Officer', '', 'Deleted', '', '', '', '', 'male', 'Lafayette PD']
+                              'female', 'louisiana-state-pd']
+        self.officer3_data = ['uid3', 'Maier', '', 'Joel', '', '', '', '', '', 'new-orleans-pd']
+        self.officer4_data = ['uid4', 'Poindexter', 'A', 'Sylvia', '1973', '', '', '', 'male', 'new-orleans-so']
+        self.officer5_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'baton-rouge-pd']
+        self.officer5_dup_data = ['uid5', 'Bull', '', 'Edward', '', '', '', '', 'male', 'jefferson-so']
+        self.officer6_data = ['uid6', 'Officer', '', 'Deleted', '', '', '', '', 'male', 'lafayette-pd']
+        DepartmentFactory(name='New Orleans PD')
+        DepartmentFactory(name='Louisiana State PD')
+        DepartmentFactory(name='New Orleans SO')
+        DepartmentFactory(name='Baton Rouge PD')
+        DepartmentFactory(name='Jefferson SO')
+        DepartmentFactory(name='Lafayette PD')
 
     @override_settings(WRGL_API_KEY='wrgl-api-key')
     @patch('data.services.base_importer.WRGL_USER', 'wrgl_user')

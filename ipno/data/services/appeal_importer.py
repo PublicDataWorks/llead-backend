@@ -1,6 +1,5 @@
 from itertools import chain
 
-from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from appeals.models import Appeal
@@ -39,8 +38,7 @@ class AppealImporter(BaseImporter):
 
         appeal_uid = appeal_data['appeal_uid']
 
-        formatted_agency = self.format_agency(agency)
-        department_id = self.department_mappings.get(slugify(formatted_agency))
+        department_id = self.department_mappings.get(agency)
         appeal_data['department_id'] = department_id
 
         officer_id = self.officer_mappings.get(officer_uid)
