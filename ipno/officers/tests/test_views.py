@@ -126,7 +126,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         for complaint in officer_2_complaints:
             complaint.officers.add(officer_2)
 
-        response = self.auth_client.get(reverse('api:officers-list'))
+        response = self.client.get(reverse('api:officers-list'))
 
         expected_data = [
             {
@@ -156,10 +156,6 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_data
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:officers-list'))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_success(self):
         department = DepartmentFactory()
@@ -274,7 +270,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'complaints_count': 2,
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:officers-detail', kwargs={'pk': officer.id})
         )
         assert response.status_code == status.HTTP_200_OK
@@ -282,16 +278,10 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert response.data == expected_result
 
     def test_retrieve_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:officers-detail', kwargs={'pk': 1})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_retrieve_unauthorized(self):
         response = self.client.get(
             reverse('api:officers-detail', kwargs={'pk': 1})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_timeline_success(self):
         person = PersonFactory()
@@ -552,7 +542,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             },
         ]
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:officers-timeline', kwargs={'pk': officer.id})
         )
 
@@ -567,28 +557,16 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert timeline_period_data == ['2019']
 
     def test_timelime_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:officers-timeline', kwargs={'pk': 1})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_timelime_unauthorized(self):
         response = self.client.get(
             reverse('api:officers-timeline', kwargs={'pk': 1})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_download_xlsx_not_found(self):
-        response = self.auth_client.get(
-            reverse('api:officers-download-xlsx', kwargs={'pk': 1})
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_download_xlsx_unauthorized(self):
         response = self.client.get(
             reverse('api:officers-download-xlsx', kwargs={'pk': 1})
         )
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @patch('officers.queries.officer_data_file_query.OfficerDatafileQuery.generate_sheets_file')
     def test_download_xlsx_success(self, generate_sheets_file_mock):
@@ -610,7 +588,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
 
         expected_content_disposition = f'attachment; filename=officer-{officer.id}.xlsx'
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:officers-download-xlsx', kwargs={'pk': officer.id})
         )
         content = response.content
@@ -749,7 +727,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             'complaints_count': 2,
         }
 
-        response = self.auth_client.get(
+        response = self.client.get(
             reverse('api:officers-detail', kwargs={'pk': officer.id})
         )
         assert response.status_code == status.HTTP_200_OK

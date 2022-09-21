@@ -34,7 +34,7 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         matched_sentence_3.officers.add(officer)
         matched_sentence_3.save()
 
-        response = self.auth_client.get(reverse('api:news-articles-list'))
+        response = self.client.get(reverse('api:news-articles-list'))
         assert response.status_code == status.HTTP_200_OK
 
         expected_data = [
@@ -57,10 +57,6 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         ]
 
         assert response.data == expected_data
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:news-articles-list'))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_hide_success(self):
         NewsArticleFactory(id=1)

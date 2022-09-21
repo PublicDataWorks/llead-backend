@@ -77,6 +77,7 @@ LOCAL_APPS = (
     'people',
     'appeals',
     'feedbacks',
+    'historical_data',
 )
 
 AUTH_USER_MODEL = 'authentication.User'
