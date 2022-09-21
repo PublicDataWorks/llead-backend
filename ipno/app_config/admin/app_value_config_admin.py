@@ -1,8 +1,8 @@
 from django.contrib import admin
-from app_config.models import AppConfig
+from app_config.models import AppValueConfig
 
 
-class AppConfigAdmin(admin.ModelAdmin):
+class AppValueConfigAdmin(admin.ModelAdmin):
     list_display = ('name', 'value', 'description')
     fields = (
         'name', 'value', 'description'
@@ -16,4 +16,4 @@ class AppConfigAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.register(AppConfig, AppConfigAdmin)
+admin.site.register(AppValueConfig, AppValueConfigAdmin)

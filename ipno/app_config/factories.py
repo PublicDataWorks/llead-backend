@@ -2,14 +2,14 @@ import factory
 from faker import Faker
 from factory.django import DjangoModelFactory
 
-from app_config.models import AppConfig, AppTextContent, FrontPageOrder, FrontPageCard
+from app_config.models import AppValueConfig, AppTextContent, FrontPageOrder, FrontPageCard
 
 fake = Faker()
 
 
-class AppConfigFactory(DjangoModelFactory):
+class AppValueConfigFactory(DjangoModelFactory):
     class Meta:
-        model = AppConfig
+        model = AppValueConfig
 
     name = factory.LazyFunction(fake.word)
     value = factory.LazyFunction(fake.word)

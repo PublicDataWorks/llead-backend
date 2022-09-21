@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
 from django.views.decorators.vary import vary_on_headers
 
 from rest_framework import exceptions
@@ -22,6 +21,7 @@ from django_rest_passwordreset.signals import pre_password_reset, post_password_
 from django_rest_passwordreset.views import get_password_reset_token_expiry_time
 
 from authentication.serializers import UserSerializer
+from utils.cache_utils import custom_cache
 
 
 class TokenRevokeView(APIView):
@@ -47,8 +47,7 @@ class UserView(APIView):
     permission_classes = [IsAuthenticated]
 
     @method_decorator(vary_on_headers("Authorization", ))
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def get(self, request):
         user = request.user
         return Response(UserSerializer(user).data)

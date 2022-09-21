@@ -217,5 +217,3 @@ NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
 
 FLUENT_LOGGING = env.bool('FLUENT_LOGGING', False)
-
-VIEW_CACHING_TIME = 60*60*24

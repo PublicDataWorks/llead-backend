@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 from django.urls import reverse
 
@@ -58,12 +59,16 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
 
         assert response.data == expected_data
 
-    def test_hide_success(self):
+    @patch('news_articles.views.flush_news_article_related_caches')
+    def test_hide_success(self, mock_flush_news_article_related_caches):
         NewsArticleFactory(id=1)
         NewsArticleFactory(id=2)
         NewsArticleFactory(id=3)
 
         response = self.admin_client.post(reverse('api:news-articles-hide', kwargs={'pk': 1}))
+
+        mock_flush_news_article_related_caches.assert_called()
+
         assert response.status_code == status.HTTP_200_OK
         assert response.data == {
             'detail': 'the news articles is hidden'
