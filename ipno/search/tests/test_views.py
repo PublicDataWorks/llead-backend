@@ -188,7 +188,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
 
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {'q': 'keywo'})
+        response = self.client.get(reverse('api:search-list'), {'q': 'keywo'})
         assert response.status_code == status.HTTP_200_OK
 
         data = response.data
@@ -253,7 +253,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
             }
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {
+        response = self.client.get(reverse('api:search-list'), {
             'q': 'keywo',
             'doc_type': 'documents',
             'limit': 1,
@@ -399,7 +399,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
             'articles': {'count': 0, 'next': None, 'previous': None, 'results': []}
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {'q': 'keywo', 'doc_type': 'document'})
+        response = self.client.get(reverse('api:search-list'), {'q': 'keywo', 'doc_type': 'document'})
         assert response.status_code == status.HTTP_200_OK
 
         data = response.data
@@ -408,10 +408,6 @@ class SearchViewSetTestCase(AuthAPITestCase):
             data[search_key]['results'] = sorted(items['results'], key=itemgetter('id'))
 
         assert data == expected_data
-
-    def test_list_unauthorized(self):
-        response = self.client.get(reverse('api:search-list'), {'q': 'keywo'})
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_list_success_with_related_officer(self):
         DepartmentFactory(name='Baton Rouge PD')
@@ -573,7 +569,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
 
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {'q': 'keywo'})
+        response = self.client.get(reverse('api:search-list'), {'q': 'keywo'})
         assert response.status_code == status.HTTP_200_OK
 
         data = response.data
@@ -706,7 +702,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
 
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {
+        response = self.client.get(reverse('api:search-list'), {
             'q': 'keywo',
             'department': department_1.slug,
         })
@@ -787,7 +783,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
             },
         }
 
-        response = self.auth_client.get(reverse('api:search-list'), {
+        response = self.client.get(reverse('api:search-list'), {
             'q': 'keywo',
             'doc_type': 'articles',
             'department': department_1.slug,

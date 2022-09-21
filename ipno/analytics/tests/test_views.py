@@ -36,7 +36,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         UseOfForceFactory(department=department_4)
 
         url = reverse('api:analytics-summary')
-        response = self.auth_client.get(url)
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data == ({
             'documents_count': 8,
@@ -82,7 +82,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         UseOfForceFactory(department=department_4)
 
         url = reverse('api:analytics-summary')
-        response = self.auth_client.get(url)
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data == ({
             'documents_count': 8,
@@ -105,7 +105,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         document_2.departments.add(department_2)
 
         url = reverse('api:analytics-summary')
-        response = self.auth_client.get(url)
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data == ({
             'documents_count': 2,
@@ -126,7 +126,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         UseOfForceFactory(department=department_2)
 
         url = reverse('api:analytics-summary')
-        response = self.auth_client.get(url)
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data == ({
             'documents_count': 0,
@@ -149,7 +149,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         complaint_2.departments.add(department_2)
 
         url = reverse('api:analytics-summary')
-        response = self.auth_client.get(url)
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data == ({
             'documents_count': 0,
