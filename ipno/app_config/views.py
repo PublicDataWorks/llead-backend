@@ -2,14 +2,16 @@ from rest_framework import viewsets
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 
-from app_config.models import AppConfig, AppTextContent, FrontPageOrder, FrontPageCard
+from app_config.models import AppValueConfig, AppTextContent, FrontPageOrder, FrontPageCard
 from app_config.constants import CMS_KEY
 from app_config.serializers import FrontPageOrderSerializer, FrontPageCardSerializer
+from utils.cache_utils import custom_cache
 
 
 class AppConfigViewSet(ViewSet):
+    @custom_cache
     def list(self, request):
-        app_config = AppConfig.objects.all()
+        app_config = AppValueConfig.objects.all()
         app_text_contents = AppTextContent.objects.all()
         config_data = {}
         for config_object in app_config:
@@ -23,6 +25,7 @@ class AppConfigViewSet(ViewSet):
 
 
 class FrontPageOrdersViewSet(viewsets.ViewSet):
+    @custom_cache
     def list(self, request):
         front_page_orders = FrontPageOrder.objects.all()
 
@@ -31,6 +34,7 @@ class FrontPageOrdersViewSet(viewsets.ViewSet):
 
 
 class FrontPageCardsViewSet(viewsets.ViewSet):
+    @custom_cache
     def list(self, request):
         front_page_cards = FrontPageCard.objects.all()
 

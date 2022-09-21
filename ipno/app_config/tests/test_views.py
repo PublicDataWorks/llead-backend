@@ -2,14 +2,19 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from app_config.factories import AppConfigFactory, AppTextContentFactory, FrontPageOrderFactory, FrontPageCardFactory
+from app_config.factories import (
+    AppValueConfigFactory,
+    AppTextContentFactory,
+    FrontPageOrderFactory,
+    FrontPageCardFactory
+)
 
 
 class AppConfigTestCase(APITestCase):
     def test_should_return_correct_app_config(self):
-        AppConfigFactory(name='CONFIG_1', value='VALUE 1')
-        AppConfigFactory(name='CONFIG_2', value='VALUE 2')
-        AppConfigFactory(name='CONFIG_3', value='VALUE 3')
+        AppValueConfigFactory(name='CONFIG_1', value='VALUE 1')
+        AppValueConfigFactory(name='CONFIG_2', value='VALUE 2')
+        AppValueConfigFactory(name='CONFIG_3', value='VALUE 3')
         AppTextContentFactory(name='TEXT_CONTENT_1', value='TEXT 1')
         AppTextContentFactory(name='TEXT_CONTENT_2', value='TEXT 2')
 

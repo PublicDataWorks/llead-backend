@@ -3,7 +3,7 @@ from django.db import models
 from utils.models import TimeStampsModel
 
 
-class AppConfig(TimeStampsModel):
+class AppValueConfig(TimeStampsModel):
     name = models.CharField(max_length=32)
     value = models.CharField(max_length=64)
     description = models.TextField()

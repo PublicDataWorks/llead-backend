@@ -52,12 +52,15 @@ from officers.factories import OfficerFactory
 
 
 class CommandTestCase(TestCase):
-    def setUp(self):
-        self.command = Command()
-
     @patch('news_articles.management.commands.run_news_articles_crawlers.CrawlerProcess')
     @patch('news_articles.management.commands.run_news_articles_crawlers.get_project_settings')
-    def test_handle(self, mock_get_project_settings, mock_crawler_process):
+    @patch('news_articles.management.commands.run_news_articles_crawlers.flush_news_article_related_caches')
+    def test_handle(
+            self,
+            mock_flush_news_article_related_caches,
+            mock_get_project_settings,
+            mock_crawler_process,
+    ):
         mock_get_project_settings.return_value = 'settings'
         mock_crawl = Mock()
         mock_start = Mock()
@@ -108,6 +111,10 @@ class CommandTestCase(TestCase):
         mock_crawl.assert_has_calls(calls_similarity)
         mock_start.assert_called()
         self.command.commit_data_to_wrgl.assert_called()
+        mock_flush_news_article_related_caches.assert_called()
+
+    def setUp(self):
+        self.command = Command()
 
     def test_commit_data_to_wrgl(self):
         date = timezone.now()
