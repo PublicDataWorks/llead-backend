@@ -4,7 +4,7 @@ from django.forms import Media
 from mapbox_location_field.models import LocationField, AddressAutoHiddenField
 from mapbox_location_field.widgets import MapAdminInput, AddressHiddenAdminInput
 
-
+from departments.documents import DepartmentESDoc
 from departments.models import Department, WrglFile
 from news_articles.models import MatchedSentence, NewsArticle
 
@@ -19,6 +19,11 @@ class DepartmentAdmin(ModelAdmin):
         LocationField: {'widget': MapAdminInput},
         AddressAutoHiddenField: {"widget": AddressHiddenAdminInput, }
     }
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        es_doc = DepartmentESDoc.get(id=obj.id)
+        es_doc.update(obj)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """add media that is placed below form as separate argument in context"""
