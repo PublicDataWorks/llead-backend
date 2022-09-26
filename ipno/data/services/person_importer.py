@@ -38,7 +38,6 @@ class PersonImporter(BaseImporter):
             raw_data.get('added_rows', []),
             raw_data.get('updated_rows', []),
         ))
-        deleted_data = raw_data.get('deleted_rows', [])
         update_officers_attrs = []
 
         officer_mappings = self.get_officer_mappings()
@@ -47,18 +46,6 @@ class PersonImporter(BaseImporter):
         for row in tqdm(saved_data, desc='Update saved officer - person relation'):
             for uid in row[self.column_mappings['uids']].split(','):
                 officer_id = officer_mappings.get(uid.strip())
-
-                if officer_id:
-                    person_id = person_mappings.get(row[self.column_mappings['person_id']])
-                    officer_data = {
-                        'id': officer_id,
-                        'person_id': person_id,
-                    }
-                    update_officers_attrs.append(officer_data)
-
-        for row in tqdm(deleted_data, desc='Update deleted officer - person relation'):
-            for old_uid in row[self.old_column_mappings['uids']].split(','):
-                officer_id = officer_mappings.get(old_uid.strip())
 
                 if officer_id:
                     person_id = person_mappings.get(row[self.column_mappings['person_id']])
