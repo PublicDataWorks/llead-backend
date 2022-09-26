@@ -86,10 +86,11 @@ class ProcessRematchOfficers:
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
+                'data',
                 f'+ {len(self.officers)} officer(s)',
                 ['uid', 'newsarticle_id'],
-                gzexcel
+                gzexcel,
+                settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
             )
 
             commit_hash = result.sum if result else ''
