@@ -1,15 +1,10 @@
 from itertools import chain
-
-from django.conf import settings
 from django.db.models import Count, BooleanField, Prefetch, Sum
 from django.db.models.expressions import F, Value, Case, When
 from django.db.models.fields import IntegerField
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -28,6 +23,7 @@ from officers.constants import OFFICER_LEFT, OFFICER_HIRE
 from officers.models import Officer, Event
 from people.models import Person
 from shared.serializers import DepartmentSerializer
+from utils.cache_utils import custom_cache
 from utils.es_pagination import ESPagination
 from utils.parse_utils import parse_date
 from departments.serializers import DepartmentDetailsSerializer
@@ -44,10 +40,7 @@ from departments.serializers.es_serializers import (
 
 
 class DepartmentsViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
-
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def retrieve(self, request, pk):
         queryset = Department.objects.all()
         department = get_object_or_404(queryset, slug=pk)
@@ -55,8 +48,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
 
         return Response(serializer.data)
 
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def list(self, request):
         departments = Department.objects.exclude(
                 complaints__isnull=True,
@@ -98,8 +90,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(data)
 
     @action(detail=True, methods=['get'], url_path='documents')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def documents(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
 
@@ -128,8 +119,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         return Response(documents_serializers.data)
 
     @action(detail=True, methods=['get'], url_path='officers')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def officers(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
 
@@ -168,8 +158,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         return Response(officers_serializers.data)
 
     @action(detail=True, methods=['get'], url_path='news_articles')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def news_articles(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
 
@@ -213,8 +202,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         return Response(news_articles_serializers.data)
 
     @action(detail=True, methods=['get'], url_path='datasets')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def datasets(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
         wrgl_serializers = WrglFileSerializer(department.wrgl_files.order_by('position'), many=True)
@@ -222,8 +210,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
         return Response(wrgl_serializers.data)
 
     @action(detail=False, methods=['get'], url_path='migratory')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def migratory(self, request):
         have_left_hire_officers = Officer.objects.annotate(
             left_count=Sum(Case(When(events__kind=OFFICER_LEFT, then=1), output_field=IntegerField())),
@@ -285,6 +272,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
                     migratory_event['date'] = line[1][0]
                     migratory_event['officer_name'] = line[0][1].officer.name
                     migratory_event['officer_id'] = line[0][1].officer.id
+                    migratory_event['left_reason'] = line[0][1].left_reason
                     graphs.append(migratory_event)
 
                     migrated_department.add(line[0][1].department.slug)

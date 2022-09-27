@@ -8,15 +8,18 @@ from departments.factories import DepartmentFactory
 
 class OfficerSerializerTestCase(TestCase):
     def test_data(self):
-        department = DepartmentFactory()
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth', department=department)
-        person = PersonFactory(canonical_officer=officer)
-        person.officers.add(officer)
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
+        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth', department=department_1)
+        officer_2 = OfficerFactory(first_name='David', last_name='Jonesworth', department=department_2)
+        person = PersonFactory(canonical_officer=officer_2)
+        person.officers.add(officer_1)
+        person.officers.add(officer_2)
         person.save()
 
         EventFactory(
-            officer=officer,
-            department=department,
+            officer=officer_1,
+            department=department_1,
             badge_no='67893',
             year=2017,
             month=1,
@@ -24,61 +27,77 @@ class OfficerSerializerTestCase(TestCase):
         )
 
         EventFactory(
-            officer=officer,
-            department=department,
+            officer=officer_1,
+            department=department_1,
             badge_no='12435',
             year=2020,
             month=5,
             day=4,
         )
         EventFactory(
-            officer=officer,
-            department=department,
+            officer=officer_1,
+            department=department_1,
             badge_no='5432',
             year=None,
             month=None,
             day=None,
         )
         EventFactory(
-            officer=officer,
+            department=department_1,
+            officer=officer_1,
             badge_no=None,
             year=2015,
             month=7,
             day=20,
         )
         EventFactory(
-            department=department,
-            officer=officer,
+            department=department_2,
+            officer=officer_2,
+            badge_no=None,
+            year=2015,
+            month=7,
+            day=20,
+        )
+        EventFactory(
+            department=department_1,
+            officer=officer_1,
             rank_desc="junior",
             year=2018,
             month=4,
             day=5,
         )
         EventFactory(
-            department=department,
-            officer=officer,
+            department=department_1,
+            officer=officer_1,
             rank_desc="senior",
             year=2020,
             month=4,
             day=5,
         )
         EventFactory(
-            department=department,
-            officer=officer,
+            department=department_1,
+            officer=officer_1,
             rank_desc="captain",
             year=2021,
             month=None,
             day=None,
         )
 
-        result = OfficerSerializer(officer).data
+        result = OfficerSerializer(officer_1).data
+
         assert result == {
-            'id': officer.id,
+            'id': officer_1.id,
             'name': 'David Jonesworth',
             'badges': ['12435', '67893', '5432'],
-            'department': {
-                'id': department.slug,
-                'name': department.name,
-            },
+            'departments': [
+                {
+                    'id': department_2.slug,
+                    'name': department_2.name,
+                },
+                {
+                    'id': department_1.slug,
+                    'name': department_1.name,
+                },
+            ],
             'latest_rank': 'captain',
         }

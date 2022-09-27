@@ -41,18 +41,18 @@ class ComplaintImporterTestCase(TestCase):
                                 'officer', '', 'no', '']
         self.complaint3_data = ['complaint-uid1', 'officer-uid2', '2015-2', 'complete', '', '', '',
                                 '', '', '', '', 'not sustained', '', '', '', 'female',
-                                'hispanic', '', '2020', 'Baton Rouge PD', 'discourtesy', '', '', 'HP-50', '',
+                                'hispanic', '', '2020', 'baton-rouge-pd', 'discourtesy', '', '', 'HP-50', '',
                                 'off-duty detail', '', '', '']
         self.complaint4_data = ['complaint-uid2-allegation-uid3', '', '2018-006', 'administrative review',
                                 '', '', '', '', '', '', '', 'not sustained',
                                 '3:20 use of force - 53 hard empty hand', '', '', '', '', 'not sustained', '2018',
-                                'New Orleans PD', '', '', '', '', 'P10252', 'patrol 2nd district', '', '', '']
+                                'new-orleans-pd', '', '', '', '', 'P10252', 'patrol 2nd district', '', '', '']
         self.complaint5_data = ['complaint-uid3-charge-uid2', 'officer-uid3', '2006-0639-D', '', '', '',
                                 '', '', '',
                                 'paragraph 02 - instructions from authoritative source', 'rule 4: perf of duty',
                                 'counseling',
                                 'rule 4: perf of duty; paragraph 02 - instructions from authoritative source', '', '',
-                                '', '', '', '2020', 'Baton Rouge PD', 'rank initiated', '', '', '', '', '', '',
+                                '', '', '', '2020', 'baton-rouge-pd', 'rank initiated', '', '', '', '', '', '',
                                 'yes', '']
         self.complaint6_data = ['complaint-uid6-allegation-uid6-charge-uid2', '', '',
                                 '', '', '', '', '', '', '', '',

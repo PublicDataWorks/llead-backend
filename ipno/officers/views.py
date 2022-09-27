@@ -1,14 +1,8 @@
-from django.db.models import Prefetch
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
-
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from officers.constants import OFFICERS_LIMIT
@@ -16,21 +10,15 @@ from officers.models import Officer
 from officers.queries import OfficerTimelineQuery, OfficerDatafileQuery
 from officers.serializers import OfficerDetailsSerializer
 from shared.serializers import OfficerSerializer
+from utils.cache_utils import custom_cache
 
 
 class OfficersViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
-
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def list(self, request):
-        other_prefetches = (
-            Prefetch(
-                'department',
-            ),
-        )
-
-        officers = Officer.objects.prefetch_events(other_prefetches).filter(
+        officers = Officer.objects.prefetch_events().select_related(
+            'person__canonical_officer__department'
+        ).filter(
             canonical_person__isnull=False
         ).order_by(
             '-person__all_complaints_count'
@@ -39,8 +27,7 @@ class OfficersViewSet(viewsets.ViewSet):
         serializer = OfficerSerializer(officers, many=True)
         return Response(serializer.data)
 
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def retrieve(self, request, pk):
         officer = get_object_or_404(
             Officer.objects.prefetch_related('person__canonical_officer'), id=pk
@@ -50,8 +37,7 @@ class OfficersViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='timeline')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def timeline(self, request, pk):
         officer = get_object_or_404(Officer.objects.prefetch_related('person__officers'), id=pk)
 

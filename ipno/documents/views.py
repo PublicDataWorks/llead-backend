@@ -1,21 +1,14 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
-from django.conf import settings
-
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from documents.models import Document
 from shared.serializers import DocumentSerializer
 from documents.constants import DOCUMENTS_LIMIT
+from utils.cache_utils import custom_cache
 
 
 class DocumentsViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
-
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def list(self, request):
         documents = Document.objects.prefetch_departments().order_by(
             'docid', 'id'

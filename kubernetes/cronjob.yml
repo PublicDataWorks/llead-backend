@@ -4,8 +4,8 @@ metadata:
   name: ${CRONJOB_NAME}
 spec:
   schedule: "${CRONJOB_SCHEDULE}"
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 0
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       backoffLimit: 0

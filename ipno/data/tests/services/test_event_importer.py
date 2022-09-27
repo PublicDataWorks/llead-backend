@@ -26,7 +26,7 @@ class EventImporterTestCase(TestCase):
                        'officer_inactive', 'employee_type', 'years_employed', 'salary', 'salary_freq', 'award',
                        'award_comments', 'left_reason']
         self.event1_data = ['event-uid1', 'event_pay_effective', '2017', '12', '5', '01:00', '2017-12-05',
-                            'officer-uid1', 'complaint-uid1', 'appeal-uid1', '', 'New Orleans PD', '2592', '75774',
+                            'officer-uid1', 'complaint-uid1', 'appeal-uid1', '', 'new-orleans-pd', '2592', '75774',
                             '5060', 'police-special operations', 'Seventh District', 'Staff', 'School Crossing Guards',
                             'current-supervisor-uid', '', '405470', 'school crossing guard', 'sworn',
                             'active', 'commissioned', '24', '27866.59', 'yearly', 'award', 'award comments',
@@ -35,13 +35,13 @@ class EventImporterTestCase(TestCase):
                             'uof-uid1', '', '', '', '', '', '', '', '', '', '', '5005', 'police event', '', '', '', '',
                             '', '', '', '', '']
         self.event3_data = ['event-uid3', 'event_pay_effective', '2009', '', '', '', '', 'officer-uid2', '', '',
-                            'uof-uid2', 'Baton Rouge PD', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                            'uof-uid2', 'baton-rouge-pd', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
                             '', '67708.85', 'yearly', '', '', '']
         self.event4_data = ['event-uid4', 'event_pay_effective', '2011', '', '', '', '', '', '', '', '',
-                            'New Orleans PD', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                            'new-orleans-pd', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
                             '86832.27', 'yearly', '', '', '']
         self.event5_data = ['event-uid5', 'event_pc_12_qualification', '2019', '11', '5', '', '2019-11-05',
-                            'officer-uid3', 'complaint-uid2', '', '', 'Baton Rouge PD', '', '', '', '', '', '', '', '',
+                            'officer-uid3', 'complaint-uid2', '', '', 'baton-rouge-pd', '', '', '', '', '', '', '', '',
                             '', '', '', '', '', '', '', '', '', '', '', '']
 
         self.event_importer = EventImporter()
@@ -209,7 +209,6 @@ class EventImporterTestCase(TestCase):
                 'year',
                 'month',
                 'day',
-                'years_employed',
             ]
             decimal_field_attrs = [
                 'salary',
@@ -395,7 +394,6 @@ class EventImporterTestCase(TestCase):
                 'year',
                 'month',
                 'day',
-                'years_employed',
             ]
             decimal_field_attrs = [
                 'salary',
@@ -434,12 +432,14 @@ class EventImporterTestCase(TestCase):
         assert self.event_importer.new_event_uids == ['event-uid']
 
     def test_delete_row_with_non_exist_uid(self):
-        EventFactory()
+        department = DepartmentFactory(name='New Orleans PD')
+
+        EventFactory(department=department)
         self.event_importer.old_column_mappings = {column: self.header.index(column) for column in self.header}
         self.event_importer.column_mappings = {column: self.header.index(column) for column in self.header}
 
         event = ['event-uid', 'event_pay_effective', '2017', '12', '5', '01:00', '2017-12-05', 'officer-uid1',
-                 'complaint-uid1', 'appeal-uid1', '', 'New Orleans PD', '2592', '75774', '5060',
+                 'complaint-uid1', 'appeal-uid1', '', 'new-orleans-pd', '2592', '75774', '5060',
                  'police-special operations', 'Seventh District', 'Staff', 'School Crossing Guards',
                  'current-supervisor-uid', '', '405470', 'school crossing guard', 'full-time', 'sworn', 'active',
                  'commissioned', '24', '27866.59', 'yearly', 'award', 'award comments']

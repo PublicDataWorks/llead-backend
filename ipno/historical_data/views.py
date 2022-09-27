@@ -1,10 +1,11 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 
 from documents.models import Document
+from historical_data.models import AnonymousItem, AnonymousQuery
 from news_articles.models import NewsArticle
 from officers.models import Officer
 from departments.models import Department
@@ -23,16 +24,27 @@ from shared.serializers import DocumentSerializer
 
 
 class HistoricalDataViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @action(detail=False, methods=['get'], url_path='recent-items')
     def recent_items(self, request):
         user = request.user
-        user_recent_items = user.recent_items
+
+        if not user.is_authenticated:
+            anonymous_items = AnonymousItem.objects.order_by('-last_visited')[:10]
+            recent_items = [
+                {
+                    'id': int(anonymous_item.item_id) if anonymous_item.item_id.isdecimal() else anonymous_item.item_id,
+                    'type': anonymous_item.item_type,
+                }
+                for anonymous_item in anonymous_items
+            ]
+        else:
+            recent_items = user.recent_items
 
         recent_search_data = []
 
-        if user_recent_items:
+        if recent_items:
             department_ids = []
             officer_ids = []
             document_ids = []
@@ -45,7 +57,7 @@ class HistoricalDataViewSet(ViewSet):
                 RECENT_NEWS_ARTICLE_TYPE: news_article_ids
             }
 
-            for recent_item in user_recent_items:
+            for recent_item in recent_items:
                 ids_type_mapping[recent_item['type']].append(recent_item['id'])
 
             departments = Department.objects.filter(slug__in=department_ids)
@@ -83,11 +95,11 @@ class HistoricalDataViewSet(ViewSet):
                 },
             }
 
-            for user_recent_item in user_recent_items:
-                item_type = user_recent_item['type']
+            for recent_item in recent_items:
+                item_type = recent_item['type']
                 recent_object = recent_objects_mapping.get(item_type)
 
-                item_id = user_recent_item.get('id') if user.recent_items else None
+                item_id = recent_item.get('id')
                 item = recent_object['query'].get(item_id) if item_id else None
 
                 if item:
@@ -105,21 +117,35 @@ class HistoricalDataViewSet(ViewSet):
             "id": recent_item.get('id'),
             "type": recent_item.get('type')
         }
-
         user = request.user
-        user_recent_items = user.recent_items or []
 
-        if new_item in user_recent_items:
-            user_recent_items.remove(new_item)
-        user_recent_items.insert(0, new_item)
+        if not user.is_authenticated:
+            item, created = AnonymousItem.objects.get_or_create(
+                item_id=new_item['id'],
+                item_type=new_item['type']
+            )
 
-        user.recent_items = user_recent_items[:10]
+            if not created:
+                item.save()
+
+            return Response({"detail": "updated anonymous user recent items"})
+
+        recent_items = user.recent_items or []
+
+        if new_item in recent_items:
+            recent_items.remove(new_item)
+        recent_items.insert(0, new_item)
+
+        user.recent_items = recent_items[:10]
         user.save()
 
         return Response({"detail": "updated user recent items"})
 
     @recent_items.mapping.delete
     def delete_recent_item(self, request):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         recent_item = request.query_params
 
         item_id = recent_item.get('id')
@@ -146,15 +172,28 @@ class HistoricalDataViewSet(ViewSet):
     @action(detail=False, methods=['get'], url_path='recent-queries')
     def recent_queries(self, request):
         user = request.user
-        user_recent_queries = user.recent_queries
 
-        return Response(user_recent_queries)
+        if not user.is_authenticated:
+            anonymous_queries = AnonymousQuery.objects.order_by('-last_visited')[:10]
+            recent_queries = [o.query for o in anonymous_queries]
+        else:
+            recent_queries = user.recent_queries
+
+        return Response(recent_queries)
 
     @recent_queries.mapping.post
     def update_recent_queries(self, request):
         recent_query = request.data['q']
 
         user = request.user
+
+        if not user.is_authenticated:
+            query, created = AnonymousQuery.objects.get_or_create(query=recent_query)
+            if not created:
+                query.save()
+
+            return Response({"detail": "updated anonymous user recent queries"})
+
         user_recent_queries = user.recent_queries or []
 
         if recent_query in user_recent_queries:

@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.functional import cached_property
 from django.db.models import Prefetch, F
+from django.contrib.postgres.fields import ArrayField
 
 from utils.models import TimeStampsModel
 from officers.models.event import Event
@@ -32,6 +33,7 @@ class Officer(TimeStampsModel):
     race = models.CharField(max_length=255, null=True, blank=True)
     sex = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
+    aliases = ArrayField(models.CharField(max_length=255), default=list, null=True, blank=True)
 
     is_name_changed = models.BooleanField(default=False)
 

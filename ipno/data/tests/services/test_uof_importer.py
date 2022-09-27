@@ -21,17 +21,17 @@ class UofImporterTestCase(TestCase):
                        'originating_bureau', 'agency', 'use_of_force_reason']
         self.uof1_data = ['uof-uid1', 'FTN2015-0705', 'Completed', 'Call for Service', 'good', 'clear conditions',
                           'between 3pm-11pm', 'resolved', 'a platoon', '7th district', 'patrol', 'field operations',
-                          'New Orleans PD', 'resisted lawful arrest']
+                          'new-orleans-pd', 'resisted lawful arrest']
         self.uof2_data = ['uof-uid2', 'FTN2015-0710', '', 'Arresting', 'poor', 'rainy conditions - light',
                           '', 'not sustained', 'b platoon', 'Second District', 'squad a',
                           'FOB - Field Operations Bureau', '', 'flight from an officer']
         self.uof3_data = ['uof-uid3', 'FTN2015-0713', 'Completed', '', 'good', '',
                           'between 7am-3pm', 'exonerated', 'c platoon', '', 'narcotics', 'management services',
-                          'Baton Rouge PD', '']
+                          'baton-rouge-pd', '']
         self.uof4_data = ['uof-uid4', 'FTN2015-07355', 'No', 'Traffic Stop', '', 'other', 'between 3pm-5pm', '',
-                          'tactical', '', 'persons', 'Armory Unit', 'New Orleans PD', 'escape']
+                          'tactical', '', 'persons', 'Armory Unit', 'new-orleans-pd', 'escape']
         self.uof5_data = ['uof-uid5', 'FTN2016-0026', 'Completed', 'Transport', 'good', 'foggy condition',
-                          'between 3pm-12am', '', 'a platoon', '', 'patrol', '', 'Baton Rouge PD', 'room clearing']
+                          'between 3pm-12am', '', 'a platoon', '', 'patrol', '', 'baton-rouge-pd', 'room clearing']
 
         self.uof5_dup_data = self.uof5_data.copy()
 
@@ -299,6 +299,7 @@ class UofImporterTestCase(TestCase):
                     uof_data[check_columns_mappings[attr]] if uof_data[check_columns_mappings[attr]] else None)
 
     def test_delete_non_existed_uof(self):
+        DepartmentFactory(name='Baton Rouge PD')
         WrglRepoFactory(
             data_model=UofImporter.data_model,
             repo_name='uof_repo',

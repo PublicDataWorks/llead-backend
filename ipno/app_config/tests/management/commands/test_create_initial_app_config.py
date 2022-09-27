@@ -1,15 +1,15 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from app_config.factories import AppConfigFactory, AppTextContentFactory, FrontPageOrderFactory
-from app_config.models import AppConfig, AppTextContent, FrontPageOrder
+from app_config.factories import AppValueConfigFactory, AppTextContentFactory, FrontPageOrderFactory
+from app_config.models import AppValueConfig, AppTextContent, FrontPageOrder
 from app_config.constants import APP_CONFIG, APP_TEXT_CONTENTS, APP_FRONT_PAGE_SECTIONS
 
 
 class CreateInitialAppConfigCommandTestCase(TestCase):
     def test_call_command(self):
         call_command('create_initial_app_config')
-        config_objects = AppConfig.objects.all()
+        config_objects = AppValueConfig.objects.all()
         app_text_contents = AppTextContent.objects.all()
         app_sections = FrontPageOrder.objects.all()
         assert config_objects.count() == len(APP_CONFIG)
@@ -39,7 +39,7 @@ class CreateInitialAppConfigCommandTestCase(TestCase):
         create_app_config = APP_CONFIG[0]
         create_app_text_content = APP_TEXT_CONTENTS[0]
         create_app_section = APP_FRONT_PAGE_SECTIONS[0]
-        AppConfigFactory(
+        AppValueConfigFactory(
             name=create_app_config['name'],
             value=create_app_config['value'],
             description=create_app_config['description']
@@ -52,12 +52,12 @@ class CreateInitialAppConfigCommandTestCase(TestCase):
         FrontPageOrderFactory(
             section=create_app_section
         )
-        assert AppConfig.objects.all().count() == 1
+        assert AppValueConfig.objects.all().count() == 1
         assert AppTextContent.objects.all().count() == 1
         assert FrontPageOrder.objects.all().count() == 1
 
         call_command('create_initial_app_config')
-        config_objects = AppConfig.objects.all()
+        config_objects = AppValueConfig.objects.all()
         app_text_contents = AppTextContent.objects.all()
         app_sections = FrontPageOrder.objects.all()
         assert config_objects.count() == len(APP_CONFIG)
