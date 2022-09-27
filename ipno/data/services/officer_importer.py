@@ -1,6 +1,5 @@
 from itertools import chain
 
-from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from officers.models import Officer
@@ -49,8 +48,7 @@ class OfficerImporter(BaseImporter):
         agency = row[self.column_mappings['agency']]
         officer_data = self.parse_row_data(row, self.column_mappings)
 
-        formatted_agency = self.format_agency(agency)
-        department_id = self.department_mappings.get(slugify(formatted_agency))
+        department_id = self.department_mappings.get(agency)
         officer_data['department_id'] = department_id
 
         row_uid = officer_data['uid']
