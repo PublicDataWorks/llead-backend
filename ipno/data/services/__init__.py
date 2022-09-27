@@ -10,6 +10,7 @@ from .new_complaint_importer import NewComplaintImporter
 from .appeal_importer import AppealImporter
 from .uof_officer_importer import UofOfficerImporter
 from .uof_citizen_importer import UofCitizenImporter
+from .agency_importer import AgencyImporter
 
 __all__ = [
     'BaseImporter',
@@ -24,4 +25,5 @@ __all__ = [
     'NewComplaintImporter',
     'AppealImporter',
     'DataTroubleshooting',
+    'AgencyImporter',
 ]

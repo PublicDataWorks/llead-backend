@@ -34,7 +34,7 @@ class DocumentImporterTestCase(TestCase):
             '/PPACT/meeting-minutes-extraction/export/pdfs/00fa809e.txt',
             'id:8ceKnrnmgi0AAAAAAAAqmQ',
             'e8a785ca3624bce9fe76a630fd6dbf07ab194202ef135480c76d9dbee79ab8ff', '2018', '6', '14',
-            'scraped', '1', 'Joseph Jones, Docket No. 17-', 'officer-uid-1', 'New Orleans PD',
+            'scraped', '1', 'Joseph Jones, Docket No. 17-', 'officer-uid-1', 'new-orleans-pd',
             cleandoc("""
                    3. Discussion of Subpoenas Requested in the Appeal of Joseph Jones, Docket No. 17-
                    237-S
@@ -65,7 +65,7 @@ class DocumentImporterTestCase(TestCase):
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
-            'scraped', '1', 'WILLIAM C. BROWN', 'officer-uid-3', 'Baton Rouge PD',
+            'scraped', '1', 'WILLIAM C. BROWN', 'officer-uid-3', 'baton-rouge-pd',
             cleandoc("""
                APPEAL HEARING FOR WILLIAM C. BROWN
                Mr. William C. Brown submitted a request to withdraw his appeal. A motion was made by
@@ -81,7 +81,7 @@ class DocumentImporterTestCase(TestCase):
             '/PPACT/meeting-minutes-extraction/export/pdfs/0dd28391.txt',
             'id:8ceKnrnmgi0AAAAAAAAqng',
             'affc812dbf419a261ba5edd110c7abef90a0a3e7ee0ec285b1e90cba2f7680a7', '1999', '9', '30',
-            'scraped', '2', 'JIM VERLANDER', '', 'New Orleans PD',
+            'scraped', '2', 'JIM VERLANDER', '', 'new-orleans-pd',
             cleandoc("""
                APPEAL HEARING FOR JIM VERLANDER
                Mr. Verlander has submitted a letter stating that an agreement has been reached between

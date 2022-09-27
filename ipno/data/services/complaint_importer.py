@@ -1,6 +1,5 @@
 from itertools import chain
 
-from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from complaints.models import Complaint
@@ -92,8 +91,7 @@ class ComplaintImporter(BaseImporter):
                             officer_relation_ids[complaint_id] = officer_id
 
                     if agency:
-                        formatted_agency = self.format_agency(agency)
-                        department_id = department_mappings.get(slugify(formatted_agency))
+                        department_id = department_mappings.get(agency)
 
                         department_relation_ids[complaint_id] = department_id
 
