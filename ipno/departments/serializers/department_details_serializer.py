@@ -5,7 +5,7 @@ import pytz
 from rest_framework import serializers
 
 from app_config.constants import DEFAULT_RECENT_DAYS
-from app_config.models import AppConfig
+from app_config.models import AppValueConfig
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from news_articles.models import MatchedSentence, NewsArticle
 from officers.constants import UOF_OCCUR
@@ -35,7 +35,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
 
     @cached_property
     def _get_recent_day(self):
-        recent_date_config = AppConfig.objects.filter(name='ANALYTIC_RECENT_DAYS').first()
+        recent_date_config = AppValueConfig.objects.filter(name='ANALYTIC_RECENT_DAYS').first()
         recent_date = int(recent_date_config.value) if recent_date_config else DEFAULT_RECENT_DAYS
 
         return datetime.datetime.now(pytz.utc) - datetime.timedelta(days=recent_date)

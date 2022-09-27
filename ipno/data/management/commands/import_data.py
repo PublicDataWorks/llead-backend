@@ -12,6 +12,7 @@ from data.services import (
     DocumentImporter,
     PersonImporter,
     AppealImporter,
+    AgencyImporter,
 )
 from news_articles.services import ProcessRematchOfficers
 from utils.count_complaints import count_complaints
@@ -23,6 +24,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         start_time = timezone.now()
 
+        agency_imported = AgencyImporter().process()
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
@@ -37,6 +39,7 @@ class Command(BaseCommand):
         ProcessRematchOfficers(start_time).process()
 
         if any([
+            agency_imported,
             officer_imported,
             complaint_imported,
             event_imported,
@@ -46,6 +49,7 @@ class Command(BaseCommand):
             count_complaints()
 
         if any([
+            agency_imported,
             officer_imported,
             uof_imported,
             uof_officer_imported,
@@ -58,6 +62,7 @@ class Command(BaseCommand):
             compute_department_data_period()
 
         if any([
+            agency_imported,
             officer_imported,
             uof_imported,
             uof_officer_imported,

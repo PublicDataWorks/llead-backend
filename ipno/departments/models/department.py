@@ -15,6 +15,7 @@ class Department(TimeStampsModel):
     location_map_url = models.CharField(max_length=255, null=True, blank=True)
     location = LocationField(null=True, blank=True, map_attrs={"readonly": False})
     data_period = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
+    aliases = ArrayField(models.CharField(max_length=255), default=list, null=True, blank=True)
 
     starred_officers = models.ManyToManyField(
         'officers.Officer',

@@ -16,6 +16,8 @@ class DepartmentESDoc(ESDoc):
 
     class Django:
         model = Department
+        ignore_signals = True
 
     id = fields.IntegerField()
     name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    aliases = fields.ListField(fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer))

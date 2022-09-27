@@ -1,6 +1,5 @@
 from itertools import chain
 
-from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from use_of_forces.models import UseOfForce
@@ -44,8 +43,7 @@ class UofImporter(BaseImporter):
 
         uof_uid = uof_data['uof_uid']
 
-        formatted_agency = self.format_agency(agency)
-        department_id = self.department_mappings.get(slugify(formatted_agency))
+        department_id = self.department_mappings.get(agency)
         uof_data['department_id'] = department_id
 
         uof_id = self.uof_mappings.get(uof_uid)

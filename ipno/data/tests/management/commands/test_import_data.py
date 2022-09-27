@@ -22,8 +22,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch('data.services.document_importer.DocumentImporter.process')
     @patch('data.services.person_importer.PersonImporter.process')
     @patch('data.services.appeal_importer.AppealImporter.process')
+    @patch('data.services.agency_importer.AgencyImporter.process')
     def test_call_command(
             self,
+            agency_process_mock,
             appeal_process_mock,
             person_process_mock,
             document_process_mock,
@@ -38,6 +40,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             compute_department_data_period_mock,
             cache_clear_mock,
     ):
+        agency_process_mock.return_value = True
         appeal_process_mock.return_value = True
         person_process_mock.return_value = True
         document_process_mock.return_value = True
@@ -49,6 +52,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         event_process_mock.return_value = False
         call_command('import_data')
 
+        agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
         person_process_mock.assert_called()
         document_process_mock.assert_called()
@@ -76,8 +80,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch('data.services.document_importer.DocumentImporter.process')
     @patch('data.services.person_importer.PersonImporter.process')
     @patch('data.services.appeal_importer.AppealImporter.process')
+    @patch('data.services.agency_importer.AgencyImporter.process')
     def test_call_command_with_no_new_data(
             self,
+            agency_process_mock,
             appeal_process_mock,
             person_process_mock,
             document_process_mock,
@@ -92,6 +98,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             compute_department_data_period_mock,
             cache_clear_mock,
     ):
+        agency_process_mock.return_value = False
         appeal_process_mock.return_value = False
         person_process_mock.return_value = False
         document_process_mock.return_value = False
@@ -103,6 +110,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         event_process_mock.return_value = False
         call_command('import_data')
 
+        agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
         person_process_mock.assert_called()
         document_process_mock.assert_called()

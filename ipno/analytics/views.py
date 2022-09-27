@@ -1,24 +1,17 @@
-from django.conf import settings
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, cache_control
-
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 
 from documents.models import Document
 from news_articles.models import NewsArticle
 from officers.models import Officer
 from departments.models import Department
+from utils.cache_utils import custom_cache
 
 
 class AnalyticsViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
-
     @action(detail=False, methods=['get'], url_path='summary')
-    @method_decorator(cache_page(settings.VIEW_CACHING_TIME))
-    @cache_control(no_store=True)
+    @custom_cache
     def summary(self, request):
         summary_data = {
             'documents_count': Document.objects.count(),

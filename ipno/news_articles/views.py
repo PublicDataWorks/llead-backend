@@ -2,17 +2,17 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from news_articles.models import NewsArticle
 from shared.serializers import NewsArticleSerializer
 from news_articles.constants import NEWS_ARTICLES_LIMIT
+from utils.cache_utils import custom_cache, flush_news_article_related_caches
 
 
 class NewsArticlesViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
-
+    @custom_cache
     def list(self, request):
         news_articles = NewsArticle.objects.select_related('source').filter(
             matched_sentences__officers__isnull=False,
@@ -31,6 +31,9 @@ class NewsArticlesViewSet(viewsets.ViewSet):
 
         news_article.is_hidden = True
         news_article.save()
+
+        flush_news_article_related_caches()
+
         return Response({
             'detail': 'the news articles is hidden'
         })

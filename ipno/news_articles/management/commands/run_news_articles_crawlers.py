@@ -48,6 +48,7 @@ from news_articles.spiders import (
     DailyAdvertiserScrapyRssSpider,
     AvoyellesTodayScrapyRssSpider,
 )
+from utils.cache_utils import flush_news_article_related_caches
 from utils.wrgl_generator import WrglGenerator
 
 
@@ -108,6 +109,8 @@ class Command(BaseCommand):
         process.start()
 
         self.commit_data_to_wrgl(start_time)
+
+        flush_news_article_related_caches()
 
     def commit_data_to_wrgl(self, start_time):
         for item in self.wrgl_repos_mapping:

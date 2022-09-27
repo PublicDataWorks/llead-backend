@@ -1,6 +1,5 @@
 from itertools import chain
 
-from django.template.defaultfilters import slugify
 from tqdm import tqdm
 
 from officers.models import Event
@@ -44,7 +43,6 @@ class EventImporter(BaseImporter):
         'year',
         'month',
         'day',
-        'years_employed',
     ]
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + [
         'officer_id',
@@ -98,8 +96,7 @@ class EventImporter(BaseImporter):
         appeal_id = self.appeal_mappings.get(appeal_uid)
 
         event_data = self.parse_row_data(row, self.column_mappings)
-        formatted_agency = self.format_agency(agency)
-        department_id = self.department_mappings.get(slugify(formatted_agency))
+        department_id = self.department_mappings.get(agency)
         event_data['department_id'] = department_id
 
         event_data['use_of_force_id'] = uof_id

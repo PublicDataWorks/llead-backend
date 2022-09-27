@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from departments.models import Department
 from shared.serializers import SimpleDepartmentSerializer
 
 
@@ -79,8 +78,17 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return events
 
     def get_departments(self, obj):
-        all_officers = self._get_person_officers(obj)
-        departments = Department.objects.filter(officers__in=all_officers).distinct()
+        canonical_dep = obj.person.canonical_officer.department
+
+        all_events = self._get_all_events(obj)
+
+        all_departments = {event.department for event in all_events}
+        raw_departments = list(dict.fromkeys([
+            canonical_dep,
+            *all_departments
+        ]))
+        departments = [department for department in raw_departments if department is not None]
+
         return SimpleDepartmentSerializer(departments, many=True).data
 
     def get_salary(self, obj):

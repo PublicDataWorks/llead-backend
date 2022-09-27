@@ -37,13 +37,13 @@ jobs:
   test:
     working_directory: ~/ipno
     docker:
-      - image: circleci/python:3.8.5
+      - image: cimg/python:3.8.5
         environment:
           POSTGRES_USER: ipno
           POSTGRES_DB: ipno
           POSTGRES_PASSWORD: password
           POSTGRES_HOST: localhost
-      - image: circleci/postgres:13.1
+      - image: cimg/postgres:13.7
         environment:
           POSTGRES_USER: ipno
           POSTGRES_DB: ipno
@@ -54,6 +54,10 @@ jobs:
           - discovery.type=single-node
     steps:
       - checkout
+      - run:
+          name: Install native packages
+          command: |
+            sudo apt-get update && sudo apt-get -y install ghostscript python-wand
       - run:
           name: Install dependencies
           command: |

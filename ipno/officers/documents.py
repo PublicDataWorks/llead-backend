@@ -26,6 +26,7 @@ class OfficerESDoc(ESDoc):
     badges = fields.TextField()
     department_name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
     department_slug = fields.TextField()
+    aliases = fields.ListField(fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer))
 
     def prepare_department_name(self, instance):
         return instance.department.name if instance.department else None

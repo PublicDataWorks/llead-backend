@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from news_articles.models import NewsArticle
 from officers.models import Officer, Event
 
 
@@ -37,19 +36,22 @@ class ExcludedMatchedSentenceInlineAdmin(admin.TabularInline):
 
 
 class OfficerAdmin(ModelAdmin):
-    list_display = ('id', 'uid', 'last_name', 'first_name', 'count_articles', 'sex', 'agency')
-    search_fields = ('id', 'uid', 'last_name', 'first_name')
+    list_display = ('uid', 'last_name', 'first_name', 'sex', 'badges', 'agency', 'aliases')
+    search_fields = ('last_name', 'first_name', 'events__badge_no')
     list_filter = (OfficerNewsArticleFilter,)
     inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin)
 
     raw_id_fields = ('person', )
 
-    def count_articles(self, obj):
-        articles_ids = obj.matched_sentences.all().values_list('article__id', flat=True)  # pragma: no cover
-        news_article_timeline_queryset = NewsArticle.objects.prefetch_related('source').filter(
-            id__in=articles_ids
-        ).distinct()  # pragma: no cover
-        return news_article_timeline_queryset.count()  # pragma: no cover
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related('events')
+
+    def badges(self, obj):
+        return list(dict.fromkeys([
+            event.badge_no for event in obj.events.all()
+            if event.badge_no
+        ]))
 
 
 class EventAdmin(ModelAdmin):
@@ -58,6 +60,8 @@ class EventAdmin(ModelAdmin):
         'year', 'month', 'day', 'time', 'raw_date'
     )
     raw_id_fields = ('officer', )
+    list_filter = ('kind', )
+    search_fields = ('officer__last_name', 'officer__middle_name', 'officer__first_name', )
 
 
 admin.site.register(Officer, OfficerAdmin)
