@@ -41,7 +41,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         assert response.data == ({
             'documents_count': 8,
             'officers_count': 5,
-            'departments_count': 4,
+            'departments_count': 6,
             'news_articles_count': 10,
         })
 
@@ -87,73 +87,6 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         assert response.data == ({
             'documents_count': 8,
             'officers_count': 7,
-            'departments_count': 4,
+            'departments_count': 6,
             'news_articles_count': 10,
-        })
-
-    def test_department_count_with_only_document(self):
-        department_1 = DepartmentFactory()
-        DepartmentFactory()
-
-        document_1 = DocumentFactory()
-        document_1.departments.add(department_1)
-
-        department_2 = DepartmentFactory()
-        DepartmentFactory()
-
-        document_2 = DocumentFactory()
-        document_2.departments.add(department_2)
-
-        url = reverse('api:analytics-summary')
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == ({
-            'documents_count': 2,
-            'officers_count': 0,
-            'departments_count': 2,
-            'news_articles_count': 0,
-        })
-
-    def test_department_count_with_only_use_of_force(self):
-        department_1 = DepartmentFactory()
-        DepartmentFactory()
-
-        UseOfForceFactory(department=department_1)
-
-        department_2 = DepartmentFactory()
-        DepartmentFactory()
-
-        UseOfForceFactory(department=department_2)
-
-        url = reverse('api:analytics-summary')
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == ({
-            'documents_count': 0,
-            'officers_count': 0,
-            'departments_count': 2,
-            'news_articles_count': 0,
-        })
-
-    def test_department_count_with_only_complaint(self):
-        department_1 = DepartmentFactory()
-        DepartmentFactory()
-
-        complaint_1 = ComplaintFactory()
-        complaint_1.departments.add(department_1)
-
-        department_2 = DepartmentFactory()
-        DepartmentFactory()
-
-        complaint_2 = ComplaintFactory()
-        complaint_2.departments.add(department_2)
-
-        url = reverse('api:analytics-summary')
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == ({
-            'documents_count': 0,
-            'officers_count': 0,
-            'departments_count': 2,
-            'news_articles_count': 0,
         })

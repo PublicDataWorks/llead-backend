@@ -17,11 +17,7 @@ class AnalyticsViewSet(ViewSet):
             'documents_count': Document.objects.count(),
             'news_articles_count': NewsArticle.objects.count(),
             'officers_count': Officer.objects.filter(canonical_person__isnull=False).count(),
-            'departments_count': Department.objects.exclude(
-                complaints__isnull=True,
-                use_of_forces__isnull=True,
-                documents__isnull=True,
-            ).count(),
+            'departments_count': Department.objects.count(),
         }
 
         return Response(summary_data)
