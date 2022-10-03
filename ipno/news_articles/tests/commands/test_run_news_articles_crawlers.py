@@ -163,10 +163,11 @@ class CommandTestCase(TestCase):
 
         called_create_wrgl_similarity = [
             call(
-                settings.NEWS_ARTICLE_WRGL_REPO,
+                'data',
                 '+ 1 object(s)',
                 ['id'],
-                news
+                news,
+                settings.NEWS_ARTICLE_WRGL_REPO,
             ),
         ]
 
@@ -223,10 +224,11 @@ class CommandTestCase(TestCase):
 
         called_create_wrgl_similarity = [
             call(
-                settings.NEWS_ARTICLE_WRGL_REPO,
+                'data',
                 '+ 1 object(s)',
                 ['id'],
-                news
+                news,
+                settings.NEWS_ARTICLE_WRGL_REPO,
             ),
         ]
 
