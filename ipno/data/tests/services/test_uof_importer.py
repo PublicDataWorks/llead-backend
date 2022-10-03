@@ -24,7 +24,7 @@ class UofImporterTestCase(TestCase):
                           'new-orleans-pd', 'resisted lawful arrest']
         self.uof2_data = ['uof-uid2', 'FTN2015-0710', '', 'Arresting', 'poor', 'rainy conditions - light',
                           '', 'not sustained', 'b platoon', 'Second District', 'squad a',
-                          'FOB - Field Operations Bureau', '', 'flight from an officer']
+                          'FOB - Field Operations Bureau', 'new-orleans-pd', 'flight from an officer']
         self.uof3_data = ['uof-uid3', 'FTN2015-0713', 'Completed', '', 'good', '',
                           'between 7am-3pm', 'exonerated', 'c platoon', '', 'narcotics', 'management services',
                           'baton-rouge-pd', '']
@@ -127,7 +127,7 @@ class UofImporterTestCase(TestCase):
         expected_uof1_data.append(officer_1.id)
 
         expected_uof2_data = self.uof2_data.copy()
-        expected_uof2_data.append(None)
+        expected_uof2_data.append(department_1.id)
         expected_uof2_data.append(None)
 
         expected_uof4_data = self.uof4_data.copy()
@@ -255,7 +255,7 @@ class UofImporterTestCase(TestCase):
         expected_uof1_data.append(officer_1.id)
 
         expected_uof2_data = self.uof2_data.copy()
-        expected_uof2_data.append(None)
+        expected_uof2_data.append(department_1.id)
         expected_uof2_data.append(None)
 
         expected_uof4_data = self.uof4_data.copy()

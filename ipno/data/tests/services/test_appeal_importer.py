@@ -21,7 +21,7 @@ class AppealImporterTestCase(TestCase):
         self.appeal1_data = ['appeal_uid1', '00-10', 'officer-uid1', 'Dirks', 'Paul Fontenot',
                              'appeal upheld', 'suspension', 'Yes', 'new-orleans-pd', 'amicable settlement']
         self.appeal2_data = ['appeal_uid2', '07-06', 'officer-uid-invalid', 'Falcon', '',
-                             'appeal withdrawn', 'dismissed', 'Yes - denied', '',
+                             'appeal withdrawn', 'dismissed', 'Yes - denied', 'new-orleans-pd',
                              'motion for summary disposition']
         self.appeal3_data = ['appeal_uid3', '07-08', 'officer-uid2', 'Floyd', 'Michael D. Edmonson',
                              'appeal dismissed/denied', 'letter of reprimand', '', 'baton-rouge-pd',
@@ -127,7 +127,7 @@ class AppealImporterTestCase(TestCase):
         expected_appeal1_data.append(officer_1.id)
 
         expected_appeal2_data = self.appeal2_data.copy()
-        expected_appeal2_data.append(None)
+        expected_appeal2_data.append(department_1.id)
         expected_appeal2_data.append(None)
 
         expected_appeal4_data = self.appeal4_data.copy()
@@ -248,7 +248,7 @@ class AppealImporterTestCase(TestCase):
         expected_appeal1_data.append(officer_1.id)
 
         expected_appeal2_data = self.appeal2_data.copy()
-        expected_appeal2_data.append(None)
+        expected_appeal2_data.append(department_1.id)
         expected_appeal2_data.append(None)
 
         expected_appeal4_data = self.appeal4_data.copy()

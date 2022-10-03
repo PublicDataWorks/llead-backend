@@ -96,7 +96,7 @@ class EventImporter(BaseImporter):
         appeal_id = self.appeal_mappings.get(appeal_uid)
 
         event_data = self.parse_row_data(row, self.column_mappings)
-        department_id = self.department_mappings.get(agency)
+        department_id = self.department_mappings[agency]
         event_data['department_id'] = department_id
 
         event_data['use_of_force_id'] = uof_id
@@ -123,7 +123,7 @@ class EventImporter(BaseImporter):
         agencies.update([
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
-        self.department_mappings = self.get_department_mappings(agencies)
+        self.department_mappings = self.get_department_mappings()
 
         self.officer_mappings = self.get_officer_mappings()
         self.event_mappings = self.get_event_mappings()
