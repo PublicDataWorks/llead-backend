@@ -53,13 +53,9 @@ class BaseImporter(object):
 
         return row_data
 
-    def get_department_mappings(self, agencies):
+    def get_department_mappings(self):
         slugify_mappings = {department.slug: department.id
                             for department in Department.objects.only('id', 'slug')}
-
-        for agency in agencies:
-            if not slugify_mappings.get(agency):
-                raise ValueError(f'No departments for {agency}')
 
         return slugify_mappings
 
