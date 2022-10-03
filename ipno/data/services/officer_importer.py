@@ -48,7 +48,7 @@ class OfficerImporter(BaseImporter):
         agency = row[self.column_mappings['agency']]
         officer_data = self.parse_row_data(row, self.column_mappings)
 
-        department_id = self.department_mappings.get(agency)
+        department_id = self.department_mappings[agency]
         officer_data['department_id'] = department_id
 
         row_uid = officer_data['uid']
@@ -83,7 +83,7 @@ class OfficerImporter(BaseImporter):
         agencies.update([
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
-        self.department_mappings = self.get_department_mappings(agencies)
+        self.department_mappings = self.get_department_mappings()
 
         self.officer_mappings = self.get_officer_mappings()
         self.officer_name_mappings = self.get_officer_name_mappings()

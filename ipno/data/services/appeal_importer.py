@@ -38,7 +38,7 @@ class AppealImporter(BaseImporter):
 
         appeal_uid = appeal_data['appeal_uid']
 
-        department_id = self.department_mappings.get(agency)
+        department_id = self.department_mappings[agency]
         appeal_data['department_id'] = department_id
 
         officer_id = self.officer_mappings.get(officer_uid)
@@ -65,7 +65,7 @@ class AppealImporter(BaseImporter):
         agencies.update([
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
-        self.department_mappings = self.get_department_mappings(agencies)
+        self.department_mappings = self.get_department_mappings()
 
         self.appeal_mappings = self.get_appeal_mappings()
 
