@@ -94,10 +94,11 @@ class ProcessRematchOfficersTestCase(TestCase):
         assert mock_generate_csv_file.call_args[0][0].first().uid == data.first().uid
         assert mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'news_article_officer'
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'data'
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 officer(s)'
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][4] == 'news_article_officer'
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
@@ -201,10 +202,11 @@ class ProcessRematchOfficersTestCase(TestCase):
         assert mock_generate_csv_file.call_args[0][0].first().uid == data.first().uid
         assert mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'news_article_officer'
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'data'
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 officer(s)'
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
         assert self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][4] == 'news_article_officer'
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
