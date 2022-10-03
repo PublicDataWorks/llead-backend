@@ -120,10 +120,11 @@ class Command(BaseCommand):
 
             if count_updated_objects:
                 result = self.wrgl.create_wrgl_commit(
-                    item['wrgl_repo'],
+                    'data',
                     f'+ {count_updated_objects} object(s)',
                     ['id'],
-                    csv_file
+                    csv_file,
+                    settings.NEWS_ARTICLE_WRGL_REPO
                 )
 
                 commit_hash = result.sum if result else ''

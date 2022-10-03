@@ -32,7 +32,7 @@ class EventImporterTestCase(TestCase):
                             'active', 'commissioned', '24', '27866.59', 'yearly', 'award', 'award comments',
                             'Retirement']
         self.event2_data = ['event-uid2', 'event_rank', '2008', '', '', '', '', 'officer-uid-invalid', '', '',
-                            'uof-uid1', '', '', '', '', '', '', '', '', '', '', '5005', 'police event', '', '', '', '',
+                            'uof-uid1', 'new-orleans-pd', '', '', '', '', '', '', '', '', '', '5005', 'police event', '', '', '', '',
                             '', '', '', '', '']
         self.event3_data = ['event-uid3', 'event_pay_effective', '2009', '', '', '', '', 'officer-uid2', '', '',
                             'uof-uid2', 'baton-rouge-pd', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
@@ -140,7 +140,7 @@ class EventImporterTestCase(TestCase):
         expected_event1_data.append({appeal_1.id})
 
         expected_event2_data = self.event2_data.copy()
-        expected_event2_data.append(None)
+        expected_event2_data.append(department_1.id)
         expected_event2_data.append(None)
         expected_event2_data.append(uof_1.id)
         expected_event2_data.append(set())
@@ -325,7 +325,7 @@ class EventImporterTestCase(TestCase):
         expected_event1_data.append({appeal_1.id})
 
         expected_event2_data = self.event2_data.copy()
-        expected_event2_data.append(None)
+        expected_event2_data.append(department_1.id)
         expected_event2_data.append(None)
         expected_event2_data.append(uof_1.id)
         expected_event2_data.append(set())
@@ -416,11 +416,13 @@ class EventImporterTestCase(TestCase):
             assert event_complaint_ids == event_data[check_column_mappings['complaint_ids']]
 
     def test_handle_record_data_with_duplicate_uid(self):
+        DepartmentFactory(name='New Orleans PD')
+        self.event_importer.department_mappings = self.event_importer.get_department_mappings()
         self.event_importer.old_column_mappings = {column: self.header.index(column) for column in self.header}
         self.event_importer.column_mappings = {column: self.header.index(column) for column in self.header}
 
         event = ['event-uid', 'event_pay_effective', '2017', '12', '5', '01:00', '2017-12-05', 'officer-uid1',
-                 'complaint-uid1', 'appeal-uid1', '', 'New Orleans PD', '2592', '75774', '5060',
+                 'complaint-uid1', 'appeal-uid1', '', 'new-orleans-pd', '2592', '75774', '5060',
                  'police-special operations', 'Seventh District', 'Staff', 'School Crossing Guards',
                  'current-supervisor-uid', '', '405470', 'school crossing guard', 'full-time', 'sworn', 'active',
                  'commissioned', '24', '27866.59', 'yearly', 'award', 'award comments']
