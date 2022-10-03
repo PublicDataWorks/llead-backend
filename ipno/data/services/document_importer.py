@@ -102,7 +102,7 @@ class DocumentImporter(BaseImporter):
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
 
-        department_mappings = self.get_department_mappings(agencies)
+        department_mappings = self.get_department_mappings()
 
         document_mappings = self.get_document_mappings()
 
@@ -127,10 +127,9 @@ class DocumentImporter(BaseImporter):
                             officer_relations.append((document_id, officer_id))
 
                     if agency:
-                        department_id = department_mappings.get(agency)
-                        if department_id:
-                            modified_department_relations.append((document_id, department_id))
-                            department_relations.append((document_id, department_id))
+                        department_id = department_mappings[agency]
+                        modified_department_relations.append((document_id, department_id))
+                        department_relations.append((document_id, department_id))
 
         department_relation_objs = [
             DepartmentRelation(document_id=relation[0], department_id=relation[1])

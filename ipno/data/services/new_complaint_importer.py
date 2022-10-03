@@ -81,7 +81,7 @@ class NewComplaintImporter(BaseImporter):
         agencies.update([
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
-        department_mappings = self.get_department_mappings(agencies)
+        department_mappings = self.get_department_mappings()
 
         complaint_mappings = self.get_complaint_mappings()
 
@@ -103,7 +103,7 @@ class NewComplaintImporter(BaseImporter):
                         officer_relation_ids[complaint_id] = officer_id
 
                 if agency:
-                    department_id = department_mappings.get(agency)
+                    department_id = department_mappings[agency]
 
                     department_relation_ids[complaint_id] = department_id
 

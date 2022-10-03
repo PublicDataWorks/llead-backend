@@ -3,7 +3,6 @@ from csv import DictWriter
 from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase, override_settings
-from django.utils.text import slugify
 
 from mock import patch, Mock
 from pytest import raises
@@ -357,27 +356,14 @@ class BaseImporterTestCase(TestCase):
     def test_department_mappings(self):
         department_1 = DepartmentFactory(name='New Orleans PD')
         department_2 = DepartmentFactory(name='Baton Rouge PD')
-        agencies = [department_1.slug, department_2.slug]
 
-        mappings = BaseImporter().get_department_mappings(agencies)
+        mappings = BaseImporter().get_department_mappings()
 
         expected_mappings = {
             department_1.slug: department_1.id,
             department_2.slug: department_2.id,
         }
         assert mappings == expected_mappings
-
-    def test_department_mappings_non_existed_agency(self):
-        department_1 = DepartmentFactory(name='New Orleans PD')
-        department_2 = DepartmentFactory(name='Baton Rouge PD')
-        department_3_slug = slugify('Non Existed PD')
-
-        agencies = [department_1.slug, department_2.slug, department_3_slug]
-
-        with self.assertRaises(ValueError) as context:
-            BaseImporter().get_department_mappings(agencies)
-
-            assert str(context) == f'No departments for {department_3_slug}'
 
     def test_officer_mappings(self):
         officer_1 = OfficerFactory()
