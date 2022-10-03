@@ -42,8 +42,7 @@ class UofImporter(BaseImporter):
         uof_data = self.parse_row_data(row, self.column_mappings)
 
         uof_uid = uof_data['uof_uid']
-
-        department_id = self.department_mappings.get(agency)
+        department_id = self.department_mappings[agency]
         uof_data['department_id'] = department_id
 
         uof_id = self.uof_mappings.get(uof_uid)
@@ -67,7 +66,7 @@ class UofImporter(BaseImporter):
         agencies.update([
             row[self.old_column_mappings['agency']] for row in deleted_data if row[self.old_column_mappings['agency']]
         ])
-        self.department_mappings = self.get_department_mappings(agencies)
+        self.department_mappings = self.get_department_mappings()
 
         self.uof_mappings = self.get_uof_mappings()
 
