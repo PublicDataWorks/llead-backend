@@ -278,8 +278,8 @@ class ScrapyRssSpiderTestCase(TestCase):
 
     def test_get_upload_pdf_location(self):
         date = datetime.now().date()
-        location = self.spider.get_upload_pdf_location(date, 'id')
-        file_name = f'{date.strftime("%Y-%m-%d")}_{self.spider.name}_id.pdf'
+        location = self.spider.get_upload_pdf_location(date, 'title')
+        file_name = f'{date.strftime("%Y-%m-%d")}_title.pdf'
         assert location == f'{NEWS_ARTICLE_CLOUD_SPACES}/{self.spider.name}/{file_name}'
 
     def test_upload_file_to_gcloud(self):
