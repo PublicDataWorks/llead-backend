@@ -23,13 +23,15 @@ defaults:
       then
         echo 'export DEPLOY_ENV=--production' >> $BASH_ENV
         echo 'export CLOUD_SQL_DATABASE=$CLOUD_SQL_PRODUCTION' >> $BASH_ENV
-        echo 'export NAMESPACE_ENV=default' >> $BASH_ENV
+        echo 'export NAMESPACE_ENV=ipno-production' >> $BASH_ENV
         echo 'export DAILY_TIME=$PROD_DAILY_TIME' >> $BASH_ENV
+        echo 'export DOCKER_PRETAG=backend-production' >> $BASH_ENV
       else
         echo 'export DEPLOY_ENV=--staging' >> $BASH_ENV
         echo 'export CLOUD_SQL_DATABASE=$CLOUD_SQL_STAGING' >> $BASH_ENV
         echo 'export NAMESPACE_ENV=ipno-staging' >> $BASH_ENV
         echo 'export DAILY_TIME=$STAGING_DAILY_TIME' >> $BASH_ENV
+        echo 'export DOCKER_PRETAG=backend-staging' >> $BASH_ENV
       fi
 
 version: 2.1
@@ -58,6 +60,11 @@ jobs:
           name: Install native packages
           command: |
             sudo apt-get update && sudo apt-get -y install ghostscript python-wand
+      - restore_cache:
+          keys:
+            - backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/dev.txt" }}-{{ .Branch }}
+          paths:
+            - /home/circleci/.pyenv/versions/3.8.5/lib/python3.8/site-packages
       - run:
           name: Install dependencies
           command: |
@@ -66,6 +73,10 @@ jobs:
           name: Install spacy dependencies for nlp
           command: |
             python -m spacy download en_core_web_sm
+      - save_cache:
+          key: backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/dev.txt" }}-{{ .Branch }}
+          paths:
+            - /home/circleci/.pyenv/versions/3.8.5/lib/python3.8/site-packages
       - run:
           name: flake8
           command: flake8
@@ -93,21 +104,23 @@ jobs:
     steps:
       - checkout
       - run: *set-gcloud-service-key
-      - restore_cache:
-          keys:
-            - backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/base.txt" }}-{{ .Branch }}
-          paths:
-            - /home/circleci/caches/app.tar
-      - run: echo "backend-$CIRCLE_BUILD_NUM" > buildnum
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: echo "$DOCKER_PRETAG-$CIRCLE_BUILD_NUM" > buildtag
       - run: echo -e "$GCLOUD_SERVICE_KEY_BASE64" | base64 --d > gcloud-credentials.json
       - persist_to_workspace:
           root: .
           paths:
-            - buildnum
+            - buildtag
       - run:
           name: Build image
           command: |
-            docker build -t gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildnum) .
+            docker build -t ipno-backend .
+      - run:
+          name: Tag image
+          command: |
+            docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildtag)
+            docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$DOCKER_PRETAG-latest
       - gcp-gke/install
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: $GOOGLE_CLUSTER_NAME
@@ -116,11 +129,8 @@ jobs:
           name: Push image
           command: |
             gcloud auth configure-docker
-            docker push gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildnum)
-      - save_cache:
-          key: backend-{{ checksum "Dockerfile" }}-{{ checksum "requirements/base.txt" }}-{{ .Branch }}
-          paths:
-            - /home/circleci/caches/app.tar
+            docker push --all-tags us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend
+
 
   django_migrate:
     description: Migrate database
@@ -139,7 +149,7 @@ jobs:
       - run:
           name: Start job
           command: |
-            bin/run_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) migrate
+            bin/run_spot_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildtag) migrate
 
   django_collect_static:
     description: Collect static
@@ -158,7 +168,7 @@ jobs:
       - run:
           name: Collect static
           command: |
-            bin/run_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) collectstatic --no-input
+            bin/run_spot_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildtag) collectstatic --no-input
 
   deploy:
     description: Deploy application to Google Kubernetes Engine
@@ -177,16 +187,16 @@ jobs:
       - run:
           name: Create initial project config
           command: |
-            bin/run_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) init_project_config
+            bin/run_spot_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildtag) init_project_config
       - run:
           name: Deploy
           command: |
-            export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildnum)
+            export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildtag)
             cat kubernetes/ipno.yml | envsubst | kubectl apply -n $NAMESPACE_ENV -f -
       - run:
           name: Setup cronjobs
           command: |
-            bin/run_cronjob.sh $DEPLOY_ENV $(cat /tmp/workspace/buildnum) run_daily_tasks "$DAILY_TIME"
+            bin/run_cronjob.sh $DEPLOY_ENV $(cat /tmp/workspace/buildtag) run_daily_tasks "$DAILY_TIME"
 
 workflows:
   version: 2

@@ -1,12 +1,10 @@
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
+apiVersion: cert-manager.io/v1
+kind: Issuer
 metadata:
   name: letsencrypt
-  labels:
-    name: letsencrypt
 spec:
   acme:
-    email: jeevs.sinclair@eastagile.com
+    email: ipno@eastagile.com
     privateKeySecretRef:
       name: letsencrypt
     server: https://acme-v02.api.letsencrypt.org/directory

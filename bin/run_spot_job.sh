@@ -56,7 +56,7 @@ export COMMAND="$(echo $REST | sed 's/ /\", \"/g')"
 
 kubectl config set-context --current --namespace=$NAMESPACE
 
-cat kubernetes/job.yml | envsubst | kubectl delete -f - -n $NAMESPACE || true
+cat kubernetes/spot_job.yml | envsubst | kubectl delete -f - -n $NAMESPACE || true
 
 trap stop_job_or_not 2
 
@@ -71,7 +71,7 @@ function stop_job_or_not() {
     exit 0
 }
 
-JOB_STATUS="$(cat kubernetes/job.yml | envsubst | kubectl apply -f - -n $NAMESPACE)"
+JOB_STATUS="$(cat kubernetes/spot_job.yml | envsubst | kubectl apply -f - -n $NAMESPACE)"
 echo $JOB_STATUS
 
 PHASE=Pending

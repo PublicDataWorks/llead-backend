@@ -109,6 +109,11 @@ spec:
                   fi
                   sleep 1
               done
+      tolerations:
+        - key: cloud.google.com/gke-spot
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
       nodeSelector:
         cloud.google.com/gke-spot: "true"
       volumes:

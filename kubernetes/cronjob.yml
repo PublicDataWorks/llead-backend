@@ -11,9 +11,19 @@ spec:
       backoffLimit: 0
       template:
         spec:
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 1
+                preference:
+                  matchExpressions:
+                  - key: cloud.google.com/gke-nodepool
+                    operator: In
+                    values:
+                    - ipno-autoscaling
           containers:
             - name: ipno-cronjob
-              image: gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
+              image: us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
               resources:
                 requests:
                   cpu: 1
@@ -22,7 +32,9 @@ spec:
               args:
                 - |
                   trap "touch /tmp/pod/main-terminated" EXIT
-                  ipno/manage.py ${CRONJOB_COMMAND}
+                  timeout 20 sh -c 'until nc -z localhost 5432; do sleep 1; echo "wait for db"; done; echo "db connected"'
+                  status=$?
+                  if [[ status -eq 0 ]]; then ipno/manage.py "${CRONJOB_COMMAND}";else exit $status; fi
               env:
                 - name: POSTGRES_USER
                   valueFrom:
@@ -79,37 +91,39 @@ spec:
                     secretKeyRef:
                       name: sendinblue
                       key: api-key
-                - name: FROM_EMAIL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ipno
-                      key: from-email
-                - name: FEEDBACK_TO_EMAIL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ipno
-                      key: feedback-to-email
-                - name: HOST
-                  valueFrom:
-                    secretKeyRef:
-                      name: ipno
-                      key: host
                 - name: MAPBOX_KEY
                   valueFrom:
                     secretKeyRef:
                       name: mapbox
                       key: key
+                - name: FROM_EMAIL
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ipno
+                      key: from-email
+                - name: FEEDBACK_TO_EMAIL
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ipno
+                      key: feedback-to-email
+                - name: HOST
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ipno
+                      key: host
                 - name: GOOGLE_APPLICATION_CREDENTIALS
-                  value: "gcloud-credentials.json"
+                  value: "/var/secrets/google/service-account.json"
               volumeMounts:
                 - mountPath: /tmp/pod
                   name: tmp-pod
-            - image: gcr.io/cloudsql-docker/gce-proxy:1.25.0-alpine
+                - name: backend-gsa
+                  mountPath: /var/secrets/google
+            - image: us.gcr.io/cloudsql-docker/gce-proxy:1.32.0-alpine
               name: cloudsql-proxy
               command: [ "/bin/sh", "-c" ]
               args:
                 - |
-                  /cloud_sql_proxy --dir=/cloudsql -instances=excellent-zoo-300106:us-east4:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false -credential_file=/secrets/cloudsql/credentials.json &
+                  /cloud_sql_proxy -instances=$GOOGLE_PROJECT_ID:us-east4:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false &
                   CHILD_PID=$!
                   while true
                     do
@@ -121,28 +135,10 @@ spec:
                         sleep 1
                     done
               volumeMounts:
-                - name: cloudsql-oauth-credentials
-                  mountPath: /secrets/cloudsql
-                  readOnly: true
-                - name: ssl-certs
-                  mountPath: /etc/ssl/certs
-                - name: cloudsql
-                  mountPath: /cloudsql
                 - name: tmp-pod
                   mountPath: /tmp/pod
-                  readOnly: true
-          imagePullSecrets:
-            - name: regcred
           volumes:
-            - name: cloudsql-oauth-credentials
-              secret:
-                secretName: cloudsql-oauth-credentials
-            - name: ssl-certs
-              hostPath:
-                path: /etc/ssl/certs
-            - name: cloudsql
-              emptyDir: {}
             - name: tmp-pod
               emptyDir: {}
           restartPolicy: "Never"
-  concurrencyPolicy: Replace
+  concurrencyPolicy: Forbid
