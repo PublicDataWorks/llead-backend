@@ -12,7 +12,7 @@ elif [ -z "$1" ]; then
     echo "Must specify either --production or --staging."
     exit 1
 elif [ "$1" == "--production" ]; then
-    NAMESPACE=default
+    NAMESPACE=ipno-production
 elif [ "$1" == "--staging" ]; then
     NAMESPACE=ipno-staging
 else
@@ -23,6 +23,12 @@ fi
 if [ -z "$2" ]; then
     echo "Must specify backend image tag as second argument."
     exit 1
+elif [ "$2" == "_" ]; then
+    if [ "$1" == "--production" ]; then
+      IMAGE_TAG="backend-production-latest"
+    elif [ "$1" == "--staging" ]; then
+      IMAGE_TAG="backend-staging-latest"
+    fi
 else
     IMAGE_TAG="$2"
 fi
