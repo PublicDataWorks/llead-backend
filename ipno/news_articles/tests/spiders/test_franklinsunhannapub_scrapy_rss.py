@@ -149,7 +149,7 @@ class TheFranklinSunScrapyRssSpiderTestCase(TestCase):
             link='response link',
         )
 
-        mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
+        mock_get_upload_pdf_location.assert_called_with(published_date, 'response title')
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
 
@@ -236,7 +236,7 @@ class TheFranklinSunScrapyRssSpiderTestCase(TestCase):
             link='response link',
         )
 
-        mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
+        mock_get_upload_pdf_location.assert_called_with(published_date, 'response title')
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
 
@@ -315,7 +315,7 @@ class TheFranklinSunScrapyRssSpiderTestCase(TestCase):
             link='response link',
         )
 
-        mock_get_upload_pdf_location.assert_called_with(published_date, 'response guid')
+        mock_get_upload_pdf_location.assert_called_with(published_date, 'response title')
 
         mock_upload_file_to_gcloud.assert_called_with(mocked_pdf_built, mocked_pdf_location, FILE_TYPES['PDF'])
 
