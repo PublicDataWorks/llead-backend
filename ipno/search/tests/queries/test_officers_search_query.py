@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from officers.factories import OfficerFactory
+from officers.factories import OfficerFactory, EventFactory
 from people.factories import PersonFactory
 from search.queries.officers_search_query import OfficersSearchQuery
 from utils.search_index import rebuild_search_index
@@ -79,3 +79,96 @@ class OfficersSearchQueryTestCase(TestCase):
         officer_ids = {item['id'] for item in result}
 
         assert officer_ids == {officer_1.id, officer_2.id, officer_3.id}
+
+    def test_badge_number_query(self):
+        officer = OfficerFactory(first_name='Kenneth', last_name='Anderson')
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
+        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        EventFactory(
+            badge_no='113',
+            officer=officer,
+            year=1998,
+        )
+        EventFactory(
+            badge_no='256',
+            officer=officer,
+            year=1999,
+        )
+        EventFactory(
+            badge_no='1135',
+            officer=officer_1,
+            year=1998,
+        )
+        EventFactory(
+            badge_no='111367',
+            officer=officer_2,
+            year=1998,
+        )
+
+        rebuild_search_index()
+
+        result = OfficersSearchQuery('113').search()
+        officer_ids = {item['id'] for item in result}
+
+        assert officer_ids == {officer.id}
+
+    def test_badge_number_query_with_same_badge(self):
+        officer = OfficerFactory(first_name='Kenneth', last_name='Anderson')
+        person = PersonFactory(canonical_officer=officer)
+        person.officers.add(officer)
+        person.save()
+
+        officer_1 = OfficerFactory(first_name='David', last_name='Jonesworth')
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory(first_name='Anthony', last_name='Davis')
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        EventFactory(
+            badge_no='113',
+            officer=officer,
+            year=1998,
+        )
+        EventFactory(
+            badge_no='256',
+            officer=officer,
+            year=1999,
+        )
+        EventFactory(
+            badge_no='1135',
+            officer=officer_1,
+            year=1998,
+        )
+        EventFactory(
+            badge_no='111367',
+            officer=officer_2,
+            year=1998,
+        )
+        EventFactory(
+            badge_no='256',
+            officer=officer_2,
+            year=1998,
+        )
+
+        rebuild_search_index()
+
+        result = OfficersSearchQuery('256').search()
+        officer_ids = {item['id'] for item in result}
+
+        assert officer_ids == {officer.id, officer_2.id}

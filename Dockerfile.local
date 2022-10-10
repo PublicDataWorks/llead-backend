@@ -1,7 +1,7 @@
 FROM python:3.8.5
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get -y install ghostscript
+RUN apt-get update && apt-get -y install ghostscript netcat
 
 COPY policy.xml /etc/ImageMagick-6/policy.xml
 
