@@ -33,8 +33,8 @@ spec:
                 - |
                   trap "touch /tmp/pod/main-terminated" EXIT
                   timeout 20 sh -c 'until nc -z localhost 5432; do sleep 1; echo "wait for db"; done; echo "db connected"'
-                  status=$?
-                  if [[ status -eq 0 ]]; then ipno/manage.py "${CRONJOB_COMMAND}";else exit $status; fi
+                  STATUS=$?
+                  if [ $STATUS -eq 0 ]; then ipno/manage.py ${CRONJOB_COMMAND};else echo "cannot connect to db"; exit $STATUS; fi
               env:
                 - name: POSTGRES_USER
                   valueFrom:
@@ -123,7 +123,7 @@ spec:
               command: [ "/bin/sh", "-c" ]
               args:
                 - |
-                  /cloud_sql_proxy -instances=$GOOGLE_PROJECT_ID:us-east4:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false &
+                  /cloud_sql_proxy -instances=$GOOGLE_PROJECT_ID:us-central1:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false &
                   CHILD_PID=$!
                   while true
                     do
@@ -140,5 +140,9 @@ spec:
           volumes:
             - name: tmp-pod
               emptyDir: {}
+            - name: backend-gsa
+              secret:
+                secretName: backend-gsa
+          serviceAccountName: backend-ksa
           restartPolicy: "Never"
   concurrencyPolicy: Forbid

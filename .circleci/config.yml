@@ -6,8 +6,8 @@ defaults:
   - &gcloud-env
     PROJECT_NAME: "IPNO"
     GOOGLE_PROJECT_ID: "excellent-zoo-300106"
-    GOOGLE_COMPUTE_ZONE: "us-east4-a"
-    GOOGLE_CLUSTER_NAME: "ipno-staging"
+    GOOGLE_COMPUTE_ZONE: "us-central1-a"
+    GOOGLE_CLUSTER_NAME: "ipno"
   - &set-push-env
     USER_NAME: "East Agile"
     USER_EMAIL: "open-source@eastagile.com"
@@ -79,13 +79,13 @@ jobs:
             - /home/circleci/.pyenv/versions/3.8.5/lib/python3.8/site-packages
       - run:
           name: flake8
-          command: flake8
+          command: python -m flake8
       - run:
           name: Tests
           command: python -m pytest --cov-report term --cov=ipno ipno
       - run:
           name: Coveralls
-          command: coveralls
+          command: python -m coveralls
 
   push_to_public:
     description: Push code to public repository
@@ -99,11 +99,13 @@ jobs:
 
   push_image:
     description: Build docker image
-    machine: true
+    docker:
+      - image: cimg/python:3.8.5
     environment: *gcloud-env
     steps:
       - checkout
       - run: *set-gcloud-service-key
+      - run: *set-deploy-env
       - setup_remote_docker:
           docker_layer_caching: true
       - run: echo "$DOCKER_PRETAG-$CIRCLE_BUILD_NUM" > buildtag
@@ -129,7 +131,8 @@ jobs:
           name: Push image
           command: |
             gcloud auth configure-docker
-            docker push --all-tags us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend
+            docker push us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildtag)
+            docker push us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$DOCKER_PRETAG-latest
 
 
   django_migrate:

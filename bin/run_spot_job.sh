@@ -52,11 +52,15 @@ echo "Running $JOB_NAME with image us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$IM
 
 export BACKEND_IMAGE_TAG=$IMAGE_TAG
 export JOB_NAME
-export COMMAND="$(echo $REST | sed 's/ /\", \"/g')"
+export COMMAND=$REST
 
 kubectl config set-context --current --namespace=$NAMESPACE
 
-cat kubernetes/spot_job.yml | envsubst | kubectl delete -f - -n $NAMESPACE || true
+echo $COMMAND
+
+cat kubernetes/spot_job.yml \
+| envsubst '${JOB_NAME} ${GOOGLE_PROJECT_ID} ${BACKEND_IMAGE_TAG} ${COMMAND} ${CLOUD_SQL_DATABASE}' \
+| kubectl delete -f - -n $NAMESPACE || true
 
 trap stop_job_or_not 2
 
@@ -71,7 +75,9 @@ function stop_job_or_not() {
     exit 0
 }
 
-JOB_STATUS="$(cat kubernetes/spot_job.yml | envsubst | kubectl apply -f - -n $NAMESPACE)"
+JOB_STATUS="$(cat kubernetes/spot_job.yml \
+| envsubst '${JOB_NAME} ${GOOGLE_PROJECT_ID} ${BACKEND_IMAGE_TAG} ${COMMAND} ${CLOUD_SQL_DATABASE}'\
+| kubectl apply -f - -n $NAMESPACE)"
 echo $JOB_STATUS
 
 PHASE=Pending
