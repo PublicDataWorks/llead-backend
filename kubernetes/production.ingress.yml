@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   name: ipno-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "backend-ipno-staging-ip"
+    kubernetes.io/ingress.global-static-ip-name: "backend-ipno-production-ip"
     kubernetes.io/tls-acme: "true"
     cert-manager.io/issuer: "letsencrypt"
     kubernetes.io/ingress.class: gce
@@ -13,12 +13,12 @@ metadata:
 spec:
   tls:
     - hosts:
-        - api-staging.llead.co
-        - admin-staging.llead.co
-        - staging.llead.co
+        - api.llead.co
+        - admin.llead.co
+        - llead.co
       secretName: letsencrypt-tls
   rules:
-    - host: staging.llead.co
+    - host: llead.co
       http:
         paths:
           - pathType: Prefix
@@ -28,7 +28,7 @@ spec:
                 name: ipno-frontend
                 port:
                   number: 80
-    - host: admin-staging.llead.co
+    - host: admin.llead.co
       http:
         paths:
           - pathType: Prefix
@@ -38,7 +38,7 @@ spec:
                 name: ipno-backend
                 port:
                   number: 80
-    - host: api-staging.llead.co
+    - host: api.llead.co
       http:
         paths:
           - pathType: Prefix
