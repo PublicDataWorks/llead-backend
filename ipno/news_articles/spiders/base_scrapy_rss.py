@@ -4,6 +4,8 @@ from html import escape
 from dateutil.parser import parse
 
 from django.conf import settings
+from django.utils.text import slugify
+
 from bs4 import BeautifulSoup
 from itemloaders.processors import TakeFirst
 import logging
@@ -155,8 +157,8 @@ class ScrapyRssSpider(scrapy.Spider):
             )
         )
 
-    def get_upload_pdf_location(self, published_date, record_id):
-        file_name = f'{published_date.strftime("%Y-%m-%d")}_{self.name}_{record_id}.pdf'
+    def get_upload_pdf_location(self, published_date, title):
+        file_name = f'{published_date.strftime("%Y-%m-%d")}_{slugify(title)}.pdf'
         return f'{NEWS_ARTICLE_CLOUD_SPACES}/{self.name}/{file_name}'
 
     def upload_file_to_gcloud(self, buffer, file_location, file_type):

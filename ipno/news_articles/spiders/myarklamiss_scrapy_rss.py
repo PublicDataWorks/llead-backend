@@ -54,7 +54,7 @@ class MyArkLamissScrapyRssSpider(ScrapyRssSpider):
             link=link
         ).build_pdf()
 
-        pdf_location = self.get_upload_pdf_location(published_date, guid)
+        pdf_location = self.get_upload_pdf_location(published_date, title)
 
         uploaded_url = self.upload_file_to_gcloud(pdf_buffer, pdf_location, FILE_TYPES['PDF'])
 
