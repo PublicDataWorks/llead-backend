@@ -59,5 +59,7 @@ export CRONJOB_SCHEDULE=$CRONJOB_SCHEDULE
 
 kubectl config set-context --current --namespace=$NAMESPACE
 
-cat kubernetes/cronjob.yml | envsubst | kubectl apply -f - -n $NAMESPACE
+cat kubernetes/cronjob.yml \
+| envsubst '${CRONJOB_NAME} ${CRONJOB_SCHEDULE} ${GOOGLE_PROJECT_ID} ${BACKEND_IMAGE_TAG} ${CRONJOB_COMMAND} ${CLOUD_SQL_DATABASE}'\
+| kubectl apply -f - -n $NAMESPACE
 kubectl get cronjobs -n $NAMESPACE

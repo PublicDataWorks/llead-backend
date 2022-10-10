@@ -13,8 +13,13 @@ spec:
           - |
             trap "touch /tmp/pod/main-terminated" EXIT
             timeout 20 sh -c 'until nc -z localhost 5432; do sleep 1; echo "wait for db"; done; echo "db connected"'
-            status=$?
-            if [[ status -eq 0 ]]; then ipno/manage.py "${COMMAND}";else exit $status; fi
+            STATUS=$?
+            if [ $STATUS -eq 0 ]; then ipno/manage.py ${COMMAND};else echo "cannot connect to db"; exit $STATUS; fi
+        volumeMounts:
+          - name: backend-gsa
+            mountPath: /var/secrets/google
+          - mountPath: /tmp/pod
+            name: tmp-pod
         env:
           - name: POSTGRES_USER
             valueFrom:
@@ -96,9 +101,12 @@ spec:
       - image: us.gcr.io/cloudsql-docker/gce-proxy:1.32.0-alpine
         name: cloudsql-proxy
         command: [ "/bin/sh", "-c" ]
+        volumeMounts:
+          - mountPath: /tmp/pod
+            name: tmp-pod
         args:
           - |
-            /cloud_sql_proxy -instances=$GOOGLE_PROJECT_ID:us-east4:${CLOUD_SQL_DATABASE}=tcp:5432 -verbose=false &
+            /cloud_sql_proxy -instances=$GOOGLE_PROJECT_ID:us-central1:${CLOUD_SQL_DATABASE}=tcp:5432 &
             CHILD_PID=$!
             while true
               do
@@ -109,10 +117,12 @@ spec:
                   fi
                   sleep 1
               done
-      nodeSelector:
-        cloud.google.com/gke-spot: "true"
       volumes:
+        - name: tmp-pod
+          emptyDir: { }
         - name: backend-gsa
-          mountPath: /var/secrets/google
+          secret:
+            secretName: backend-gsa
+      serviceAccountName: backend-ksa
       restartPolicy: Never
   backoffLimit: 4
