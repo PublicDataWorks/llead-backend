@@ -12,7 +12,7 @@ elif [ -z "$1" ]; then
     echo "Must specify command."
     exit 1
 elif [ "$1" == "--production" ]; then
-    NAMESPACE=default
+    NAMESPACE=ipno-production
 elif [ "$1" == "--staging" ]; then
     NAMESPACE=ipno-staging
 elif [ "$1" == "--logging" ]; then

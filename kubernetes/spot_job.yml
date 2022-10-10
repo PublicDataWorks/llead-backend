@@ -14,7 +14,7 @@ spec:
             trap "touch /tmp/pod/main-terminated" EXIT
             timeout 20 sh -c 'until nc -z localhost 5432; do sleep 1; echo "wait for db"; done; echo "db connected"'
             STATUS=$?
-            if [ $STATUS -eq 0 ]; then ipno/manage.py ${COMMAND};else echo "cannot connect to db"; exit $STATUS; fi
+            if [ $STATUS -eq 0 ]; then ipno/manage.py ${COMMAND};else echo "cannot connect to db";exit $STATUS; fi
         volumeMounts:
           - name: backend-gsa
             mountPath: /var/secrets/google
@@ -117,12 +117,19 @@ spec:
                   fi
                   sleep 1
               done
+      tolerations:
+        - key: cloud.google.com/gke-spot
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+      nodeSelector:
+        cloud.google.com/gke-spot: "true"
       volumes:
-        - name: tmp-pod
-          emptyDir: { }
         - name: backend-gsa
           secret:
             secretName: backend-gsa
+        - name: tmp-pod
+          emptyDir: { }
       serviceAccountName: backend-ksa
       restartPolicy: Never
   backoffLimit: 4
