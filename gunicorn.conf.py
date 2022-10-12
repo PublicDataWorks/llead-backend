@@ -2,6 +2,9 @@ import sys
 from logging import Filter, getLogger
 from gunicorn.glogging import Logger
 
+from gevent import monkey
+from psycogreen.gevent import patch_psycopg
+
 
 bind = "0.0.0.0:8000"
 loglevel = "info"
@@ -10,6 +13,16 @@ errorlog = '-'
 
 worker_class = 'gevent'
 workers = 3
+
+
+def do_post_fork(server, worker):
+    monkey.patch_all()
+    patch_psycopg()
+
+    worker.log.info("Made Psycopg2 Green")
+
+
+post_fork = do_post_fork
 
 
 class HealthCheckFilter(Filter):
