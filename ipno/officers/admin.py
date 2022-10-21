@@ -37,11 +37,11 @@ class ExcludedMatchedSentenceInlineAdmin(admin.TabularInline):
 
 class OfficerAdmin(ModelAdmin):
     list_display = ('uid', 'last_name', 'first_name', 'sex', 'badges', 'agency', 'aliases')
-    search_fields = ('last_name', 'first_name', 'events__badge_no')
+    search_fields = ('last_name', 'first_name', 'events__badge_no', 'uid')
     list_filter = (OfficerNewsArticleFilter,)
     inlines = (MatchedSentenceInlineAdmin, ExcludedMatchedSentenceInlineAdmin)
 
-    raw_id_fields = ('person', )
+    raw_id_fields = ('person', 'department')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -59,9 +59,9 @@ class EventAdmin(ModelAdmin):
         'id', 'officer', 'department', 'kind',
         'year', 'month', 'day', 'time', 'raw_date'
     )
-    raw_id_fields = ('officer', )
+    raw_id_fields = ('officer', 'department', 'use_of_force', 'appeal')
     list_filter = ('kind', )
-    search_fields = ('officer__last_name', 'officer__middle_name', 'officer__first_name', )
+    search_fields = ('officer__last_name', 'officer__middle_name', 'officer__first_name', 'event_uid')
 
 
 admin.site.register(Officer, OfficerAdmin)

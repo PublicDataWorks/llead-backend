@@ -44,3 +44,6 @@ class Event(TimeStampsModel):
     appeal = models.ForeignKey(
         'appeals.Appeal', on_delete=models.CASCADE, null=True, blank=True, related_name='events'
     )
+
+    def __str__(self):
+        return f'{self.kind or ""} - {self.id} - {self.event_uid[:5]}'

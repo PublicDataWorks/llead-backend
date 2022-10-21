@@ -47,3 +47,6 @@ class Complaint(TimeStampsModel):
 
     class Meta:
         unique_together = ('allegation_uid',)
+
+    def __str__(self):
+        return f'{self.id} - {self.allegation_uid[:5]}'

@@ -11,3 +11,6 @@ class Person(TimeStampsModel):
         on_delete=models.CASCADE,
         related_name='canonical_person',
     )
+
+    def __str__(self):
+        return f'{self.id} - {self.canonical_officer.uid[:5]}'
