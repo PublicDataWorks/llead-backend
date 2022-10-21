@@ -55,7 +55,7 @@ class Officer(TimeStampsModel):
     objects = OfficerManager()
 
     def __str__(self):
-        return f'{self.name or ""} - {self.id}'
+        return f'{self.name or ""} - {self.id} - {self.uid[:5]}'
 
     @property
     def name(self):

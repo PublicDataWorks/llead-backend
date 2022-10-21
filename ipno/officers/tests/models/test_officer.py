@@ -26,7 +26,7 @@ class OfficerTestCase(TestCase):
 
     def test_str(self):
         officer = OfficerFactory()
-        assert str(officer) == f"{officer.name} - {officer.id}"
+        assert str(officer) == f"{officer.name} - {officer.id} - {officer.uid[:5]}"
 
     def test_badges(self):
         officer = OfficerFactory()
