@@ -27,3 +27,6 @@ class UseOfForce(TimeStampsModel):
     department = models.ForeignKey(
         'departments.Department', on_delete=models.CASCADE, null=True, related_name='use_of_forces'
     )
+
+    def __str__(self):
+        return f'{self.id} - {self.uof_uid[:5]}'

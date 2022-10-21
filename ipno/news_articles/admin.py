@@ -105,7 +105,7 @@ class MatchedArticleOfficersFilter(admin.SimpleListFilter):
 class MatchedSentenceAdmin(ModelAdmin):
     list_filter = (MatchedArticleOfficersFilter,)
     list_display = ('id', 'article', 'extracted_keywords')
-    filter_horizontal = ('officers', 'excluded_officers')
+    raw_id_fields = ('officers', 'excluded_officers', 'article')
 
 
 class CrawledPostAdmin(ModelAdmin):
@@ -173,16 +173,18 @@ class MatchingKeywordAdmin(ModelAdmin):
         return False  # pragma: no cover
 
 
+class OfficerInlineAdmin(admin.TabularInline):
+    model = ExcludeOfficer.officers.through
+    verbose_name_plural = 'Officers'
+    extra = 1
+    raw_id_fields = ('officer', )
+
+
 class ExcludeOfficerAdmin(ModelAdmin):
     list_display = ('officers_list', 'ran_at', 'status')
     readonly_fields = ('ran_at', )
-    filter_horizontal = ('officers',)
-
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        last_exclude_officers = ExcludeOfficer.objects.filter(ran_at__isnull=False).order_by('-created_at').first()
-        form.base_fields['officers'].initial = last_exclude_officers.officers.all() if last_exclude_officers else []
-        return form
+    raw_id_fields = ('officers',)
+    inlines = [OfficerInlineAdmin]
 
     def status(self, obj):
         if obj == ExcludeOfficer.objects.last():

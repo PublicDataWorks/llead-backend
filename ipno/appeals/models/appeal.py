@@ -17,3 +17,6 @@ class Appeal(TimeStampsModel):
     department = models.ForeignKey(
         'departments.Department', on_delete=models.CASCADE, null=True, related_name='appeals'
     )
+
+    def __str__(self):
+        return f'{self.id} - {self.appeal_uid[:5]}'
