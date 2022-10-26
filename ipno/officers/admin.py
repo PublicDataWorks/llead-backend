@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
+from officers.documents import OfficerESDoc
 from officers.models import Officer, Event
 
 
@@ -46,6 +47,11 @@ class OfficerAdmin(ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('events')
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        es_doc = OfficerESDoc.get(id=obj.id)
+        es_doc.update(obj)
 
     def badges(self, obj):
         return list(dict.fromkeys([
