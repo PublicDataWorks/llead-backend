@@ -1331,19 +1331,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     def test_search_officers_success(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department, complaint_fraction=0.3)
         officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department, complaint_fraction=0.9)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department, complaint_fraction=0.7)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
@@ -1539,19 +1539,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
     def test_search_officers_with_limit_and_offset(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department)
+        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department, complaint_fraction=0.3)
         officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department)
+        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department, complaint_fraction=0.7)
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department)
+        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department, complaint_fraction=0.9)
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()

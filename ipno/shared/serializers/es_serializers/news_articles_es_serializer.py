@@ -8,4 +8,4 @@ class NewsArticlesESSerializer(BaseESSerializer):
     model_klass = NewsArticle
 
     def get_queryset(self, ids):
-        return self.model_klass.objects.filter(id__in=ids)
+        return self.model_klass.objects.select_related('source').filter(id__in=ids)
