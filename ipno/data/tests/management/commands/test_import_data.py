@@ -6,8 +6,8 @@ from mock import patch
 
 class CreateInitialWRGLReposCommandTestCase(TestCase):
     def setUp(self):
-        self.patcher = patch('data.services.document_importer.GoogleCloudService')
-        self.patcher.start()
+        patch('data.services.agency_importer.GoogleCloudService').start()
+        patch('data.services.document_importer.GoogleCloudService').start()
 
     @patch('django.core.cache.cache.clear')
     @patch('utils.data_utils.compute_department_data_period')
