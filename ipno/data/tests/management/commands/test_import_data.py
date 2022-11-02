@@ -11,6 +11,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
 
     @patch('django.core.cache.cache.clear')
     @patch('utils.data_utils.compute_department_data_period')
+    @patch('utils.count_data.calculate_complaint_fraction')
     @patch('utils.count_data.calculate_officer_fraction')
     @patch('utils.count_data.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
@@ -39,6 +40,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             rebuild_search_index_mock,
             count_complaints_mock,
             calculate_officer_fraction_mock,
+            calculate_complaint_fraction_mock,
             compute_department_data_period_mock,
             cache_clear_mock,
     ):
@@ -67,11 +69,13 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         rebuild_search_index_mock.assert_called()
         count_complaints_mock.assert_called()
         calculate_officer_fraction_mock.assert_called()
+        calculate_complaint_fraction_mock.assert_called()
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
     @patch('django.core.cache.cache.clear')
     @patch('utils.data_utils.compute_department_data_period')
+    @patch('utils.count_data.calculate_complaint_fraction')
     @patch('utils.count_data.calculate_officer_fraction')
     @patch('utils.count_data.count_complaints')
     @patch('utils.search_index.rebuild_search_index')
@@ -100,6 +104,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
             rebuild_search_index_mock,
             count_complaints_mock,
             calculate_officer_fraction_mock,
+            calculate_complaint_fraction_mock,
             compute_department_data_period_mock,
             cache_clear_mock,
     ):
@@ -128,5 +133,6 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         rebuild_search_index_mock.assert_not_called()
         count_complaints_mock.assert_not_called()
         calculate_officer_fraction_mock.assert_not_called()
+        calculate_complaint_fraction_mock.assert_not_called()
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()

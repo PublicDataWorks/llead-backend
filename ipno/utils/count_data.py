@@ -3,6 +3,7 @@ from tqdm import tqdm
 from django.db.models import Count
 
 from departments.models import Department
+from officers.models import Officer
 from people.models import Person
 
 
@@ -23,8 +24,19 @@ def calculate_officer_fraction():
         officer_count=Count('officers')
     ).order_by('-officer_count').first().officer_count
 
-    for department in tqdm(all_departments, desc='Update officer count percentage'):
-        percentage = department.officers.count()/max_officer_count
+    for department in tqdm(all_departments, desc='Update officer fraction'):
+        fraction = department.officers.count()/max_officer_count
 
-        department.officer_fraction = percentage
+        department.officer_fraction = fraction
         department.save()
+
+
+def calculate_complaint_fraction():
+    all_officers = Officer.objects.all()
+    max_complaint_count = Person.objects.order_by('-all_complaints_count').first().all_complaints_count
+
+    for officer in tqdm(all_officers, desc='Update complaint fraction'):
+        fraction = officer.person.all_complaints_count/max_complaint_count
+
+        officer.complaint_fraction = fraction
+        officer.save()
