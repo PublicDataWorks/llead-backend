@@ -34,6 +34,7 @@ class Officer(TimeStampsModel):
     sex = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
     aliases = ArrayField(models.CharField(max_length=255), default=list, null=True, blank=True)
+    complaint_fraction = models.FloatField(null=True, blank=True)
 
     is_name_changed = models.BooleanField(default=False)
 

@@ -27,6 +27,7 @@ class OfficerESDoc(ESDoc):
     department_name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
     department_slug = fields.TextField()
     aliases = fields.ListField(fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer))
+    complaint_fraction = fields.FloatField()
 
     def prepare_department_name(self, instance):
         return instance.department.name if instance.department else None
