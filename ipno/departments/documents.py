@@ -21,3 +21,4 @@ class DepartmentESDoc(ESDoc):
     id = fields.IntegerField()
     name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
     aliases = fields.ListField(fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer))
+    officer_fraction = fields.FloatField()

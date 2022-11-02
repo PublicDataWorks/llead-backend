@@ -8,7 +8,7 @@ from data.models import WrglRepo
 
 
 class MigrateToAllegationCommandTestCase(TestCase):
-    @patch('utils.count_complaints.count_complaints')
+    @patch('utils.count_data.count_complaints')
     @patch('data.services.new_complaint_importer.NewComplaintImporter.process')
     def test_call_command(
             self,
@@ -27,7 +27,7 @@ class MigrateToAllegationCommandTestCase(TestCase):
         assert wrgl_repo.repo_name == 'allegation'
         assert not wrgl_repo.commit_hash
 
-    @patch('utils.count_complaints.count_complaints')
+    @patch('utils.count_data.count_complaints')
     @patch('data.services.new_complaint_importer.NewComplaintImporter.process')
     def test_call_command_with_no_new_data(
             self,
