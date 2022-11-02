@@ -2,7 +2,7 @@ from django.core.management import BaseCommand
 
 from data.models import WrglRepo
 from data.services import NewComplaintImporter
-from utils.count_complaints import count_complaints
+from utils.count_data import count_complaints
 
 
 class Command(BaseCommand):
