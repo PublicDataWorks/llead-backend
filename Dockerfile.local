@@ -14,4 +14,4 @@ RUN python -m spacy download en_core_web_sm
 
 ADD . /code
 
-CMD gunicorn config.wsgi -c gunicorn.conf.py --chdir /code/ipno
+CMD gunicorn config.wsgi -c gunicorn-local.conf.py --chdir /code/ipno

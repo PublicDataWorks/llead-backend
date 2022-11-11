@@ -34,7 +34,6 @@ services:
     command: "gunicorn config.wsgi -c gunicorn-logging.conf.py --chdir /code/ipno"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
-      FLUENT_LOGGING: "True"
     volumes:
       - .:/code
       - log-folder:/var/log
@@ -42,10 +41,16 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - fluent-bit
     networks:
       - elasticsearch
       - db
+    links:
+      - fluent-bit
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: web
 
   fluent-bit:
     build:
@@ -53,7 +58,7 @@ services:
       dockerfile: fluent-bit/Dockerfile.fluent
     command: "/fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf"
     ports:
-        - "24224:24224/tcp"
+        - "24224:24224"
         - "24224:24224/udp"
     volumes:
       - ./fluent-bit:/fluent-bit/etc/
