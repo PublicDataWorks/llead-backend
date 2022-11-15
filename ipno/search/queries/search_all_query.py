@@ -8,7 +8,7 @@ from shared.serializers.es_serializers import NewsArticlesESSerializer
 from utils.es_pagination import ESPagination
 
 SEARCH_MAPPINGS = {
-    'departments': {
+    'agencies': {
         'search_query': DepartmentsSearchQuery,
         'serializer': DepartmentsESSerializer,
     },
