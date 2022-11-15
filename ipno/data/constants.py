@@ -78,3 +78,5 @@ IMPORT_LOG_STATUSES = (
     (IMPORT_LOG_STATUS_FINISHED, 'Finished'),
     (IMPORT_LOG_STATUS_ERROR, 'Error')
 )
+
+MAP_IMAGES_SUB_DIR = 'map_images'
