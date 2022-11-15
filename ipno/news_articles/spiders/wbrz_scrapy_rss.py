@@ -1,4 +1,3 @@
-from django.conf import settings
 from scrapy.loader import ItemLoader
 
 from news_articles.constants import WBRZ_SOURCE
@@ -13,7 +12,6 @@ class WBRZScrapyRssSpider(ScrapyRssSpider):
     allowed_domains = ['feedburner.com', 'wbrz.com']
     urls = ['https://feeds.feedburner.com/wbrz/news']
     custom_settings = {
-        'LOG_FILE': None if not settings.FLUENT_LOGGING else settings.FLUENT_PYTHON_LOG_FILE,
         'LOG_LEVEL': 'INFO',
     }
 

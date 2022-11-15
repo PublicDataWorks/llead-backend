@@ -14,12 +14,23 @@ import environ
 import os
 from datetime import timedelta
 
+import structlog
+from google.cloud.logging.handlers import StructuredLogHandler
+from google.cloud.logging_v2.handlers import setup_logging
+
+from utils.log_utils import drop_health_check_event
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = environ.Path(__file__) - 4
 APPS_DIR = BASE_DIR.path('ipno')
 
 env = environ.Env()
-environ.Env.read_env(f'{BASE_DIR}/.env')
+
+env_file = f'{BASE_DIR}/.env'
+
+if os.path.isfile(env_file):
+    environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -93,6 +104,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_structlog.middlewares.RequestMiddleware',
 ]
 
 CACHES = {
@@ -216,4 +228,35 @@ WRGL_USER = os.getenv('WRGL_USER', '')
 NEWS_ARTICLE_WRGL_REPO = 'news_article'
 NEWS_ARTICLE_OFFICER_WRGL_REPO = 'news_article_officer'
 
-FLUENT_LOGGING = env.bool('FLUENT_LOGGING', False)
+SIMPLE_LOG = env.bool('SIMPLE_LOG', False)
+
+timestamper = structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S")
+shared_processors = [
+    structlog.contextvars.merge_contextvars,
+    structlog.stdlib.add_log_level,
+    structlog.stdlib.add_logger_name,
+    structlog.stdlib.filter_by_level,
+    structlog.processors.format_exc_info,
+    timestamper,
+    drop_health_check_event,
+    structlog.processors.UnicodeDecoder(),
+    structlog.processors.StackInfoRenderer(),
+    structlog.stdlib.PositionalArgumentsFormatter(),
+]
+
+structlog.configure(
+    processors=shared_processors + [
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+if not SIMPLE_LOG:
+    handler = StructuredLogHandler()
+    setup_logging(handler)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+}

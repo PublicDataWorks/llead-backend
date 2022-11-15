@@ -70,7 +70,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         start_time = timezone.now()
 
-        process = CrawlerProcess(get_project_settings())
+        process = CrawlerProcess(get_project_settings(), install_root_handler=settings.SIMPLE_LOG)
+
         process.crawl(TheLensNolaScrapyRssSpider)
         process.crawl(NolaScrapyRssSpider)
         process.crawl(VermillionTodayScrapyRssSpider)
