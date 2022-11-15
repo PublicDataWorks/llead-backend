@@ -1,4 +1,3 @@
-from django.conf import settings
 from scrapy.loader import ItemLoader
 
 from news_articles.constants import THEADVERTISER_SOURCE
@@ -16,7 +15,6 @@ class DailyAdvertiserScrapyRssSpider(ScrapyRssSpider):
     ]
     urls = ['http://rssfeeds.theadvertiser.com/lafeyettela/news']
     custom_settings = {
-        'LOG_FILE': None if not settings.FLUENT_LOGGING else settings.FLUENT_PYTHON_LOG_FILE,
         'LOG_LEVEL': 'INFO',
     }
 
