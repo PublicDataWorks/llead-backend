@@ -74,7 +74,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         expected_data = {
-            'departments': {
+            'agencies': {
                 'results': [
                     {
                         'id': department_1.slug,
@@ -314,7 +314,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         expected_data = {
-            'departments': {
+            'agencies': {
                 'results': [
                     {
                         'id': department_1.slug,
@@ -462,7 +462,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         expected_data = {
-            'departments': {
+            'agencies': {
                 'results': [
                     {
                         'id': department_1.slug,
@@ -632,7 +632,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         expected_data = {
-            'departments': {
+            'agencies': {
                 'results': [],
                 'count': 0,
                 'next': None,
