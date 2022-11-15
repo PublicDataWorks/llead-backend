@@ -10,13 +10,16 @@ errorlog = '-'
 worker_class = 'gevent'
 workers = 3
 
+monkey.patch_all()
+
 
 def do_post_fork(server, worker):
-    monkey.patch_all()
     patch_psycopg()
 
     worker.log.info("Made Psycopg2 Green")
 
+
+post_fork = do_post_fork
 
 logconfig_dict = {
     'version': 1,
