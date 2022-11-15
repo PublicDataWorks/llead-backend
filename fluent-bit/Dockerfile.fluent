@@ -1,3 +1,0 @@
-FROM fluent/fluent-bit:1.8.6
-ADD fluent-bit/ /fluent-bit/etc/
-CMD /bin/fluent-bit -c /etc/fluent-bit/fluent-bit.conf
