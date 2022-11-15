@@ -71,7 +71,7 @@ class CommandTestCase(TestCase):
         self.command.handle()
 
         mock_get_project_settings.assert_called()
-        mock_crawler_process.assert_called_with('settings')
+        mock_crawler_process.assert_called_with('settings', install_root_handler=settings.SIMPLE_LOG)
         calls_similarity = [
             call(TheLensNolaScrapyRssSpider),
             call(NolaScrapyRssSpider),
