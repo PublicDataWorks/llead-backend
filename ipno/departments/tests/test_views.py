@@ -957,7 +957,17 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         starred_matched_sentence.officers.add(officer_1)
         starred_matched_sentence.save()
 
+        hidden_starred_article = NewsArticleFactory(
+            source=starred_article_source,
+            published_date=datetime(2015, 1, 1),
+            is_hidden=True,
+        )
+        hidden_starred_matched_sentence = MatchedSentenceFactory(article=hidden_starred_article)
+        hidden_starred_matched_sentence.officers.add(officer_1)
+        hidden_starred_matched_sentence.save()
+
         department.starred_news_articles.add(starred_article)
+        department.starred_news_articles.add(hidden_starred_article)
         department.save()
 
         featured_article_source_1 = NewsArticleSourceFactory(source_display_name='Featured Article 1')
@@ -982,6 +992,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_article_3 = NewsArticleFactory(
             source=featured_article_source_3,
             published_date=datetime(2018, 8, 10),
+            is_hidden=True,
         )
         matched_sentence_3 = MatchedSentenceFactory(article=featured_article_3)
         matched_sentence_3.officers.add(officer_1)
@@ -1015,14 +1026,6 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 'source_display_name': 'Featured Article 2',
                 'is_starred': False,
                 'url': featured_article_2.url,
-            },
-            {
-                'id': featured_article_3.id,
-                'title': featured_article_3.title,
-                'published_date': str(datetime(2018, 8, 10).date()),
-                'source_display_name': 'Featured Article 3',
-                'is_starred': False,
-                'url': featured_article_3.url,
             },
         ]
 

@@ -162,7 +162,9 @@ class DepartmentsViewSet(viewsets.ViewSet):
     def news_articles(self, request, pk):
         department = get_object_or_404(Department, slug=pk)
 
-        starred_news_articles = department.starred_news_articles.select_related(
+        starred_news_articles = department.starred_news_articles.filter(
+            is_hidden=False
+        ).select_related(
             'source'
         ).annotate(
             is_starred=Value(True, output_field=BooleanField())
@@ -188,7 +190,8 @@ class DepartmentsViewSet(viewsets.ViewSet):
             sorted_featured_news_articles = NewsArticle.objects.select_related(
                 'source'
             ).filter(
-                id__in=featured_news_articles
+                id__in=featured_news_articles,
+                is_hidden=False,
             ).annotate(
                 is_starred=Value(False, output_field=BooleanField())
             ).order_by(
