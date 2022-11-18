@@ -9,8 +9,10 @@ class BaseSearchQuery(object):
         self.q = q
         self.department = department
 
-    def query(self, order=None):
+    def query(self, order=None, pre_term_query=None):
         search = self.document_klass().search()
+        if pre_term_query:
+            search = search.query('term', **pre_term_query)
         if self.department:
             search = search.query('match_phrase', department_slugs=self.department)
         if not order:
