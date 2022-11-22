@@ -18,7 +18,7 @@ class FeedbackViewSet(ViewSet):
 
         email = feedback.get('email')
         message = feedback.get('message')
-        date_time = datetime.now(pytz.utc).strftime('%I:%M:%S%p %m/%d/%Y')
+        date_time = datetime.now(pytz.timezone('US/Central')).strftime('%I:%M:%S%p %m/%d/%Y')
 
         item = {
             'email': email,
