@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.db import transaction
 
-from officers.documents import OfficerESDoc
 from officers.models import Officer, Event
+from officers.tasks import rebuild_officer_index
 
 
 class OfficerNewsArticleFilter(admin.SimpleListFilter):
@@ -50,8 +51,9 @@ class OfficerAdmin(ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        es_doc = OfficerESDoc.get(id=obj.id)
-        es_doc.update(obj)
+
+        if change:
+            transaction.on_commit(lambda: rebuild_officer_index(obj.id))
 
     def badges(self, obj):
         return list(dict.fromkeys([

@@ -26,12 +26,14 @@ defaults:
         echo 'export NAMESPACE_ENV=ipno-production' >> $BASH_ENV
         echo 'export DAILY_TIME=$PROD_DAILY_TIME' >> $BASH_ENV
         echo 'export DOCKER_PRETAG=backend-production' >> $BASH_ENV
+        echo 'export CELERY_NUM_WORKER=4' >> $BASH_ENV
       else
         echo 'export DEPLOY_ENV=--staging' >> $BASH_ENV
         echo 'export CLOUD_SQL_DATABASE=$CLOUD_SQL_STAGING' >> $BASH_ENV
         echo 'export NAMESPACE_ENV=ipno-staging' >> $BASH_ENV
         echo 'export DAILY_TIME=$STAGING_DAILY_TIME' >> $BASH_ENV
         echo 'export DOCKER_PRETAG=backend-staging' >> $BASH_ENV
+        echo 'export CELERY_NUM_WORKER=2' >> $BASH_ENV
       fi
 
 version: 2.1
@@ -54,6 +56,8 @@ jobs:
         name: elasticsearch
         environment:
           - discovery.type=single-node
+      - image: redis:7.0.5
+        name: redis
     steps:
       - checkout
       - run:
@@ -191,6 +195,11 @@ jobs:
           name: Create initial project config
           command: |
             bin/run_spot_job.sh $DEPLOY_ENV $(cat /tmp/workspace/buildtag) init_project_config
+      - run:
+          name: Deploy celery
+          command: |
+            export BACKEND_IMAGE_TAG=$(cat /tmp/workspace/buildtag)
+            cat kubernetes/celery.yml | envsubst | kubectl apply -n $NAMESPACE_ENV -f -
       - run:
           name: Deploy
           command: |
