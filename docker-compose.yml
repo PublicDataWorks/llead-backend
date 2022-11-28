@@ -14,6 +14,29 @@ services:
     logging:
       driver: none
 
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    networks:
+      - redis
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    command: celery -A ipno.config worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    networks:
+      - redis
+      - db
+      - elasticsearch
+
   elasticsearch:
     image: elasticsearch:7.10.1
     environment:
@@ -39,9 +62,11 @@ services:
     depends_on:
       - db
       - elasticsearch
+      - redis
     networks:
       - elasticsearch
       - db
+      - redis
 
 volumes:
   esdata:
@@ -50,4 +75,6 @@ networks:
   elasticsearch:
     driver: bridge
   db:
+    driver: bridge
+  redis:
     driver: bridge

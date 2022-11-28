@@ -1,5 +1,6 @@
 FROM python:3.8.5
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=$PYTHONPATH:/code/ipno
 
 RUN apt-get update && apt-get -y install ghostscript netcat
 
