@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from news_articles.documents import NewsArticleESDoc
 from news_articles.models import NewsArticle
 from shared.serializers import NewsArticleSerializer
 from news_articles.constants import NEWS_ARTICLES_LIMIT
@@ -31,6 +32,9 @@ class NewsArticlesViewSet(viewsets.ViewSet):
 
         news_article.is_hidden = True
         news_article.save()
+
+        es_doc = NewsArticleESDoc.get(id=pk)
+        es_doc.update(news_article)
 
         flush_news_article_related_caches()
 
