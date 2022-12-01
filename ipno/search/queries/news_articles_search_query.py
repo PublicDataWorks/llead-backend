@@ -6,5 +6,10 @@ class NewsArticlesSearchQuery(BaseSearchQuery):
     document_klass = NewsArticleESDoc
     fields = ['title', 'content', 'author', 'source_name']
 
-    def query(self):
-        return super(NewsArticlesSearchQuery, self).query(order='-published_date').highlight('content', 'author')
+    def query(self, order=None, pre_term_query=None):
+        return super(NewsArticlesSearchQuery, self).query(
+            order='-published_date',
+            pre_term_query={
+                'is_hidden': False
+            }
+        ).highlight('content', 'author')
