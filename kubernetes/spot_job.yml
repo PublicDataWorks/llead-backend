@@ -81,6 +81,16 @@ spec:
               secretKeyRef:
                 name: mapbox
                 key: key
+          - name: CELERY_BROKER_URL
+            valueFrom:
+              secretKeyRef:
+                name: celery
+                key: broker-url
+          - name: CELERY_RESULT_BACKEND
+            valueFrom:
+              secretKeyRef:
+                name: celery
+                key: result-backend
           - name: FROM_EMAIL
             valueFrom:
               configMapKeyRef:

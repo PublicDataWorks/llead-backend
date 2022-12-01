@@ -1,34 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ipno-backend
+  name: celery
   labels:
-    app: ipno-backend
+    app: celery
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: ipno-backend
+      app: celery
   template:
     metadata:
       labels:
-        app: ipno-backend
+        app: celery
     spec:
       containers:
-        - name: ipno-backend-app
-          readinessProbe:
-            httpGet:
-              path: /api/status/
-              port: readiness-port
-          ports:
-            - name: readiness-port
-              containerPort: 8000
-          image: us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
+        - name: celery-app
+          image: us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:backend-staging-latest
           imagePullPolicy: Always
           resources:
             requests:
               cpu: 500m
               memory: 1Gi
+          command: ["celery"]
+          args: ["-A", "ipno.config", "worker", "-l", "info", "-c", "$CELERY_NUM_WORKER"]
           volumeMounts:
             - name: backend-gsa
               mountPath: /var/secrets/google
@@ -93,6 +88,16 @@ spec:
                 secretKeyRef:
                   name: mapbox
                   key: key
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: broker-url
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: result-backend
             - name: FROM_EMAIL
               valueFrom:
                 configMapKeyRef:
@@ -110,16 +115,6 @@ spec:
                   key: host
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/var/secrets/google/service-account.json"
-            - name: CELERY_BROKER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: celery
-                  key: broker-url
-            - name: CELERY_RESULT_BACKEND
-              valueFrom:
-                secretKeyRef:
-                  name: celery
-                  key: result-backend
         - image: us.gcr.io/cloudsql-docker/gce-proxy:1.32.0-alpine
           name: cloudsql-proxy
           command: ["/cloud_sql_proxy",
@@ -130,19 +125,3 @@ spec:
           secret:
             secretName: backend-gsa
       serviceAccountName: backend-ksa
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: ipno-backend
-  labels:
-    app: ipno-backend
-spec:
-  type: ClusterIP
-  ports:
-    - targetPort: 8000
-      port: 80
-  selector:
-    app: ipno-backend

@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.db import transaction
 from django.forms import Media
 from mapbox_location_field.models import LocationField, AddressAutoHiddenField
 from mapbox_location_field.widgets import MapAdminInput, AddressHiddenAdminInput
 
-from departments.documents import DepartmentESDoc
 from departments.models import Department, WrglFile
+from departments.tasks import rebuild_department_index
 from news_articles.models import MatchedSentence, NewsArticle
 
 
@@ -22,8 +23,9 @@ class DepartmentAdmin(ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        es_doc = DepartmentESDoc.get(id=obj.id)
-        es_doc.update(obj)
+
+        if change:
+            transaction.on_commit(lambda: rebuild_department_index(obj.id))
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """add media that is placed below form as separate argument in context"""
