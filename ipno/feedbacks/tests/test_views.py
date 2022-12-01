@@ -18,7 +18,7 @@ class QuestionAndAnswerTestCase(APITestCase):
 
         email = 'email@gmail.com'
         message = 'Test message'
-        date_time = datetime.now(pytz.utc).strftime('%I:%M:%S%p %m/%d/%Y')
+        date_time = datetime.now(pytz.timezone('US/Central')).strftime('%I:%M:%S%p %m/%d/%Y')
 
         context = {
             "message": f"{message}\n\n"
