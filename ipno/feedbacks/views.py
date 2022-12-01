@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+import pytz
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -16,6 +18,7 @@ class FeedbackViewSet(ViewSet):
 
         email = feedback.get('email')
         message = feedback.get('message')
+        date_time = datetime.now(pytz.timezone('US/Central')).strftime('%I:%M:%S%p %m/%d/%Y')
 
         item = {
             'email': email,
@@ -25,8 +28,8 @@ class FeedbackViewSet(ViewSet):
         Feedback.objects.create(**item)
 
         context = {
-            "message": f"{message}\n"
-                       f"*Sent via form on LLEAD.co*"
+            "message": f"{message}\n\n"
+                       f"*Sent via contact form on [LLEAD.co](LLEAD.co) at {date_time}*"
         }
 
         send_mail(
