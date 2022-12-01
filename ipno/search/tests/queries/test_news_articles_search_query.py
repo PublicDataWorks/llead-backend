@@ -27,17 +27,26 @@ class NewsArticlesSearchQueryTestCase(TestCase):
             author='author keyword',
             published_date=news_article_1.published_date - datetime.timedelta(days=2)
         )
+        news_article_4 = NewsArticleFactory(
+            title='keyword title',
+            source=source,
+            published_date=news_article_1.published_date - datetime.timedelta(days=3),
+            is_hidden=True
+        )
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
         matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_4 = MatchedSentenceFactory(article=news_article_4)
         matched_sentence_1.officers.add(officer)
         matched_sentence_2.officers.add(officer)
         matched_sentence_3.officers.add(officer)
+        matched_sentence_4.officers.add(officer)
 
         rebuild_search_index()
 
         result = NewsArticlesSearchQuery('keyword').search()
 
+        assert len(result) == 3
         assert result[0]['id'] == news_article_1.id
         assert result[1]['id'] == news_article_2.id
         assert result[2]['id'] == news_article_3.id
