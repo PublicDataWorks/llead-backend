@@ -1,3 +1,6 @@
+from datetime import datetime
+import pytz
+
 from mock import patch
 
 from django.conf import settings
@@ -15,10 +18,11 @@ class QuestionAndAnswerTestCase(APITestCase):
 
         email = 'email@gmail.com'
         message = 'Test message'
+        date_time = datetime.now(pytz.timezone('US/Central')).strftime('%I:%M:%S%p %m/%d/%Y')
 
         context = {
-            "message": f"{message}\n"
-                       f"*Sent via form on LLEAD.co*"
+            "message": f"{message}\n\n"
+                       f"*Sent via contact form on [LLEAD.co](LLEAD.co) at {date_time}*"
         }
 
         response = self.client.post(

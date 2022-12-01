@@ -6,7 +6,7 @@ omit =
     */wsgi.py
     */asgi.py
     ipno/manage.py
-    */settings/*.py
+    ipno/config/*
     *admin.py
     */test*.py
 

@@ -36,6 +36,7 @@ class NewsArticleESDoc(ESDoc):
     content = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
     author = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
     source_name = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    is_hidden = fields.BooleanField()
     department_slugs = fields.TextField()
 
     def prepare_source_name(self, instance):
