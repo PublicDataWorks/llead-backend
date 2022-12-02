@@ -93,11 +93,16 @@ spec:
                 secretKeyRef:
                   name: celery
                   key: broker-url
-            - name: CELERY_RESULT_BACKEND
+            - name: REDIS_SENTINEL_MASTER_NAME
               valueFrom:
                 secretKeyRef:
                   name: celery
-                  key: result-backend
+                  key: sentinel-master-name
+            - name: REDIS_SENTINEL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: sentinel-password
             - name: FROM_EMAIL
               valueFrom:
                 configMapKeyRef:
