@@ -93,6 +93,21 @@ spec:
                 secretKeyRef:
                   name: mapbox
                   key: key
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: broker-url
+            - name: REDIS_SENTINEL_MASTER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: sentinel-master-name
+            - name: REDIS_SENTINEL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: celery
+                  key: sentinel-password
             - name: FROM_EMAIL
               valueFrom:
                 configMapKeyRef:
@@ -110,16 +125,6 @@ spec:
                   key: host
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/var/secrets/google/service-account.json"
-            - name: CELERY_BROKER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: celery
-                  key: broker-url
-            - name: CELERY_RESULT_BACKEND
-              valueFrom:
-                secretKeyRef:
-                  name: celery
-                  key: result-backend
         - image: us.gcr.io/cloudsql-docker/gce-proxy:1.32.0-alpine
           name: cloudsql-proxy
           command: ["/cloud_sql_proxy",
