@@ -69,6 +69,7 @@ THIRD_PARTY_APPS = (
     'adminsortable',
     'adminsortable2',
     'mapbox_location_field',
+    'django_celery_results',
 )
 
 LOCAL_APPS = (
@@ -261,5 +262,21 @@ LOGGING = {
     "disable_existing_loggers": True,
 }
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379')
+
+CELERY_BROKER_URL = env.str('CELERY_BROKER_URL', 'redis://redis:6379')
+
+USE_SENTINEL_REDIS = False
+if 'sentinel' in CELERY_BROKER_URL:
+    USE_SENTINEL_REDIS = True
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+
+if USE_SENTINEL_REDIS:
+    REDIS_SENTINEL_MASTER_NAME = env.str('REDIS_SENTINEL_MASTER_NAME', 'mymaster')
+    REDIS_SENTINEL_PASSWORD = env.str('REDIS_SENTINEL_PASSWORD', '')
+
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        'master_name': REDIS_SENTINEL_MASTER_NAME,
+        'sentinel_kwargs': {'password': REDIS_SENTINEL_PASSWORD}
+    }
