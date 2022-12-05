@@ -7,7 +7,12 @@ from django.utils import timezone
 from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.models import WrglRepo
 from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
-from news_articles.models import MatchingKeyword, NewsArticle, ExcludeOfficer, MatchedSentence
+from news_articles.models import (
+    ExcludeOfficer,
+    MatchedSentence,
+    MatchingKeyword,
+    NewsArticle,
+)
 from officers.models import Officer
 from utils.nlp import NLP
 from utils.wrgl_generator import WrglGenerator
@@ -19,17 +24,32 @@ class ProcessMatchingArticle:
         self.nlp = NLP()
         self.wrgl = WrglGenerator()
         self.officers = self.get_officer_data()
-        self.latest_keywords_obj = MatchingKeyword.objects.order_by('-created_at').first()
-        self.last_run_keywords_obj = MatchingKeyword.objects.filter(ran_at__isnull=False).order_by('-created_at').first()
+        self.latest_keywords_obj = MatchingKeyword.objects.order_by(
+            "-created_at"
+        ).first()
+        self.last_run_keywords_obj = (
+            MatchingKeyword.objects.filter(ran_at__isnull=False)
+            .order_by("-created_at")
+            .first()
+        )
 
-        self.latest_keywords = set(self.latest_keywords_obj.keywords) if self.latest_keywords_obj else set()
-        self.last_run_keywords = set(self.last_run_keywords_obj.keywords) if self.last_run_keywords_obj else set()
+        self.latest_keywords = (
+            set(self.latest_keywords_obj.keywords)
+            if self.latest_keywords_obj
+            else set()
+        )
+        self.last_run_keywords = (
+            set(self.last_run_keywords_obj.keywords)
+            if self.last_run_keywords_obj
+            else set()
+        )
 
-        latest_exclude_officers = ExcludeOfficer.objects.order_by('-created_at').first()
-        self.excluded_officers_ids = latest_exclude_officers.officers.values_list(
-            'id',
-            flat=True
-        ) if latest_exclude_officers else []
+        latest_exclude_officers = ExcludeOfficer.objects.order_by("-created_at").first()
+        self.excluded_officers_ids = (
+            latest_exclude_officers.officers.values_list("id", flat=True)
+            if latest_exclude_officers
+            else []
+        )
 
     def process(self):
         if self.latest_keywords != self.last_run_keywords:
@@ -63,7 +83,9 @@ class ProcessMatchingArticle:
         if not deleted_keywords:
             return
 
-        matched_sentences = MatchedSentence.objects.filter(extracted_keywords__overlap=list(deleted_keywords))
+        matched_sentences = MatchedSentence.objects.filter(
+            extracted_keywords__overlap=list(deleted_keywords)
+        )
 
         for sentence in matched_sentences:
             extracted_keywords = set(sentence.extracted_keywords)
@@ -94,8 +116,12 @@ class ProcessMatchingArticle:
                 if keywords:
                     matched_sentences[sentence] = keywords
 
-            update_sentences = set(old_matched_sentence.keys()) & set(matched_sentences.keys())
-            create_sentences = set(matched_sentences.keys()) - set(old_matched_sentence.keys())
+            update_sentences = set(old_matched_sentence.keys()) & set(
+                matched_sentences.keys()
+            )
+            create_sentences = set(matched_sentences.keys()) - set(
+                old_matched_sentence.keys()
+            )
 
             for old_sentence in update_sentences:
                 matched_new_keywords = matched_sentences.get(old_sentence)
@@ -180,30 +206,35 @@ class ProcessMatchingArticle:
 
     def commit_data_to_wrgl(self):
         MatchedSentenceOfficer = MatchedSentence.officers.through
-        data = MatchedSentenceOfficer.objects.order_by(
-            'officer_id',
-            'matchedsentence__article__id'
-        ).annotate(
-            uid=F('officer__uid'),
-            created_at=F('matchedsentence__created_at'),
-            newsarticle_id=F('matchedsentence__article__id'),
-        ).all()
+        data = (
+            MatchedSentenceOfficer.objects.order_by(
+                "officer_id", "matchedsentence__article__id"
+            )
+            .annotate(
+                uid=F("officer__uid"),
+                created_at=F("matchedsentence__created_at"),
+                newsarticle_id=F("matchedsentence__article__id"),
+            )
+            .all()
+        )
 
-        count_updated_objects = data.filter(matchedsentence__updated_at__gte=self.start_time).count()
+        count_updated_objects = data.filter(
+            matchedsentence__updated_at__gte=self.start_time
+        ).count()
 
         if count_updated_objects:
             columns = NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                'data',
-                f'+ {len(self.latest_keywords)} keyword(s)',
-                ['uid', 'newsarticle_id'],
+                "data",
+                f"+ {len(self.latest_keywords)} keyword(s)",
+                ["uid", "newsarticle_id"],
                 gzexcel,
                 settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
             )
 
-            commit_hash = result.sum if result else ''
+            commit_hash = result.sum if result else ""
             wrgl_repo = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
             if commit_hash and wrgl_repo.commit_hash != commit_hash:

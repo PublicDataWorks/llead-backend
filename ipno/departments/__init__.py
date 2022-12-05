@@ -1,1 +1,1 @@
-default_app_config = 'departments.apps.Department'
+default_app_config = "departments.apps.Department"

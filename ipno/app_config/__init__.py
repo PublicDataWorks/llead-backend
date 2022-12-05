@@ -1,1 +1,1 @@
-default_app_config = 'app_config.apps.SiteAppConfig'
+default_app_config = "app_config.apps.SiteAppConfig"

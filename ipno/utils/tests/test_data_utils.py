@@ -6,63 +6,67 @@ from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from departments.models import Department
 from officers.constants import (
-    COMPLAINT_RECEIVE,
-    UOF_RECEIVE,
-    COMPLAINT_INCIDENT,
     ALLEGATION_CREATE,
+    COMPLAINT_INCIDENT,
+    COMPLAINT_RECEIVE,
     INVESTIGATION_COMPLETE,
-    SUSPENSION_START,
     SUSPENSION_END,
-    UOF_INCIDENT,
+    SUSPENSION_START,
     UOF_ASSIGNED,
     UOF_COMPLETED,
     UOF_CREATED,
-    UOF_DUE
+    UOF_DUE,
+    UOF_INCIDENT,
+    UOF_RECEIVE,
 )
 from officers.factories import EventFactory
 from use_of_forces.factories import UseOfForceFactory
-from utils.data_utils import format_data_period, sort_items, compute_department_data_period
+from utils.data_utils import (
+    compute_department_data_period,
+    format_data_period,
+    sort_items,
+)
 
 
 class DataTestCase(TestCase):
     def test_data_period(self):
         years = [2018, 2019, 2009, 2012, 2013, 2014]
 
-        assert format_data_period(years) == ['2009', '2012-2014', '2018-2019']
+        assert format_data_period(years) == ["2009", "2012-2014", "2018-2019"]
 
     def test_data_period_with_empty_data(self):
         assert format_data_period([]) == []
 
     def test_sorted_items(self):
         item_1 = Mock(
-            key_1='20',
-            key_2='a',
-            key_3='x',
+            key_1="20",
+            key_2="a",
+            key_3="x",
         )
         item_2 = Mock(
             key_1=None,
-            key_2='a',
-            key_3='z',
+            key_2="a",
+            key_3="z",
         )
         item_3 = Mock(
-            key_1='16',
-            key_2='b',
-            key_3='z',
+            key_1="16",
+            key_2="b",
+            key_3="z",
         )
         item_4 = Mock(
-            key_1='16',
+            key_1="16",
             key_2=None,
-            key_3='z',
+            key_3="z",
         )
         item_5 = Mock(
-            key_1='16',
-            key_2='a',
-            key_3='z',
+            key_1="16",
+            key_2="a",
+            key_3="z",
         )
         items = [item_1, item_2, item_3, item_4, item_5]
         expected_result = [item_5, item_3, item_4, item_1, item_2]
 
-        assert sort_items(items, ['key_1', 'key_2']) == expected_result
+        assert sort_items(items, ["key_1", "key_2"]) == expected_result
 
     def test_compute_department_data_period(self):
         department = DepartmentFactory()
@@ -171,5 +175,15 @@ class DataTestCase(TestCase):
 
         result = Department.objects.get(slug__exact=department.slug)
 
-        assert result.data_period == [1997, 1998, 1999, 2010, 2011, 2012,
-                                      2017, 2018, 2019, 2020]
+        assert result.data_period == [
+            1997,
+            1998,
+            1999,
+            2010,
+            2011,
+            2012,
+            2017,
+            2018,
+            2019,
+            2020,
+        ]

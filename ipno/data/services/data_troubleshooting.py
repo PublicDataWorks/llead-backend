@@ -1,37 +1,34 @@
 from django.conf import settings
 
-from wrgl import Repository
 from tqdm import tqdm
+from wrgl import Repository
 
-from data.models import WrglRepo
-from data.constants import WRGL_USER
-from officers.models import Officer
-from officers.models import Event
-from complaints.models import Complaint
-from use_of_forces.models import UseOfForce
-from use_of_forces.models import UseOfForceOfficer
-from use_of_forces.models import UseOfForceCitizen
-from documents.models import Document
-from people.models import Person
 from appeals.models import Appeal
+from complaints.models import Complaint
+from data.constants import WRGL_USER
+from data.models import WrglRepo
+from documents.models import Document
+from officers.models import Event, Officer
+from people.models import Person
+from use_of_forces.models import UseOfForce, UseOfForceCitizen, UseOfForceOfficer
 
 
 class DataTroubleshooting:
     new_commit = None
     column_mappings = {}
     model_mappings = {
-        'Officer': Officer,
-        'Event': Event,
-        'Complaint': Complaint,
-        'UseOfForce': UseOfForce,
-        'UseOfForceOfficer': UseOfForceOfficer,
-        'UseOfForceCitizen': UseOfForceCitizen,
-        'Document': Document,
-        'Person': Person,
-        'Appeal': Appeal,
+        "Officer": Officer,
+        "Event": Event,
+        "Complaint": Complaint,
+        "UseOfForce": UseOfForce,
+        "UseOfForceOfficer": UseOfForceOfficer,
+        "UseOfForceCitizen": UseOfForceCitizen,
+        "Document": Document,
+        "Person": Person,
+        "Appeal": Appeal,
     }
 
-    def __init__(self, data_model='Officer', updated_fields=('sex',), table_id='uid'):
+    def __init__(self, data_model="Officer", updated_fields=("sex",), table_id="uid"):
         self.data_model = data_model
         self.updated_fields = updated_fields
         self.table_id = table_id
@@ -39,8 +36,8 @@ class DataTroubleshooting:
 
     def retrieve_wrgl_data(self, branch):
         self.repo = Repository(
-            f'https://hub.wrgl.co/api/users/{WRGL_USER}/repos/data/',
-            settings.WRGL_API_KEY
+            f"https://hub.wrgl.co/api/users/{WRGL_USER}/repos/data/",
+            settings.WRGL_API_KEY,
         )
 
         self.new_commit = self.repo.get_branch(branch)
@@ -53,14 +50,15 @@ class DataTroubleshooting:
 
         self.retrieve_wrgl_data(wrgl_repo.repo_name)
 
-        all_rows = list(self.repo.get_blocks(
-            f'heads/{wrgl_repo.repo_name}',
-            with_column_names=False
-        ))
+        all_rows = list(
+            self.repo.get_blocks(
+                f"heads/{wrgl_repo.repo_name}", with_column_names=False
+            )
+        )
 
         updated_objects = []
 
-        for row in tqdm(all_rows, desc='Update fields'):
+        for row in tqdm(all_rows, desc="Update fields"):
             table_id = row[self.column_mappings[self.table_id]]
 
             kwargs = {self.table_id: table_id}
@@ -71,4 +69,6 @@ class DataTroubleshooting:
 
             updated_objects.append(updated_object)
 
-        self.model.objects.bulk_update(updated_objects, self.updated_fields, batch_size=1000)
+        self.model.objects.bulk_update(
+            updated_objects, self.updated_fields, batch_size=1000
+        )

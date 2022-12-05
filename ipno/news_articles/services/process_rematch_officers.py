@@ -1,13 +1,14 @@
 from collections import defaultdict
-from tqdm import tqdm
 
 from django.conf import settings
 from django.db.models import F, Q
 
+from tqdm import tqdm
+
 from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.models import WrglRepo
 from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
-from news_articles.models import MatchedSentence, ExcludeOfficer
+from news_articles.models import ExcludeOfficer, MatchedSentence
 from officers.models import Officer
 from utils.nlp import NLP
 from utils.wrgl_generator import WrglGenerator
@@ -24,11 +25,12 @@ class ProcessRematchOfficers:
         self.nlp = NLP()
         self.wrgl = WrglGenerator()
 
-        latest_exclude_officers = ExcludeOfficer.objects.order_by('-created_at').first()
-        self.excluded_officers_ids = latest_exclude_officers.officers.values_list(
-            'id',
-            flat=True
-        ) if latest_exclude_officers else []
+        latest_exclude_officers = ExcludeOfficer.objects.order_by("-created_at").first()
+        self.excluded_officers_ids = (
+            latest_exclude_officers.officers.values_list("id", flat=True)
+            if latest_exclude_officers
+            else []
+        )
 
     def get_updated_officers(self):
         updated_officers = Officer.objects.filter(is_name_changed=True)
@@ -36,7 +38,7 @@ class ProcessRematchOfficers:
             officer.matched_sentences.clear()
             officer.is_name_changed = False
 
-        Officer.objects.bulk_update(updated_officers, ['is_name_changed'])
+        Officer.objects.bulk_update(updated_officers, ["is_name_changed"])
         return updated_officers
 
     def get_officers_data(self, officers):
@@ -51,8 +53,12 @@ class ProcessRematchOfficers:
         if len(self.officers):
             matched_sentences = MatchedSentence.objects.all()
 
-            for matched_sentence in tqdm(matched_sentences, desc='Match officers with existed sentences'):
-                matched_officers = self.nlp.process(matched_sentence.text, self.officers)
+            for matched_sentence in tqdm(
+                matched_sentences, desc="Match officers with existed sentences"
+            ):
+                matched_officers = self.nlp.process(
+                    matched_sentence.text, self.officers
+                )
                 matched_officers_obj = Officer.objects.filter(
                     Q(id__in=matched_officers) & ~Q(id__in=self.excluded_officers_ids)
                 )
@@ -70,30 +76,35 @@ class ProcessRematchOfficers:
 
     def commit_data_to_wrgl(self):
         MatchedSentenceOfficer = MatchedSentence.officers.through
-        data = MatchedSentenceOfficer.objects.order_by(
-            'officer_id',
-            'matchedsentence__article__id'
-        ).annotate(
-            uid=F('officer__uid'),
-            created_at=F('matchedsentence__created_at'),
-            newsarticle_id=F('matchedsentence__article__id'),
-        ).all()
+        data = (
+            MatchedSentenceOfficer.objects.order_by(
+                "officer_id", "matchedsentence__article__id"
+            )
+            .annotate(
+                uid=F("officer__uid"),
+                created_at=F("matchedsentence__created_at"),
+                newsarticle_id=F("matchedsentence__article__id"),
+            )
+            .all()
+        )
 
-        count_updated_objects = data.filter(matchedsentence__updated_at__gte=self.start_time).count()
+        count_updated_objects = data.filter(
+            matchedsentence__updated_at__gte=self.start_time
+        ).count()
 
         if count_updated_objects:
             columns = NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                'data',
-                f'+ {len(self.officers)} officer(s)',
-                ['uid', 'newsarticle_id'],
+                "data",
+                f"+ {len(self.officers)} officer(s)",
+                ["uid", "newsarticle_id"],
                 gzexcel,
                 settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
             )
 
-            commit_hash = result.sum if result else ''
+            commit_hash = result.sum if result else ""
             wrgl_repo = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
             if commit_hash and wrgl_repo.commit_hash != commit_hash:

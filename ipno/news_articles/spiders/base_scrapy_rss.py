@@ -1,15 +1,14 @@
+import logging
 import re
 from html import escape
-
-from dateutil.parser import parse
 
 from django.conf import settings
 from django.utils.text import slugify
 
-from bs4 import BeautifulSoup
-from itemloaders.processors import TakeFirst
-import logging
 import scrapy
+from bs4 import BeautifulSoup
+from dateutil.parser import parse
+from itemloaders.processors import TakeFirst
 from scrapy import signals
 
 from news_articles.constants import (
@@ -47,13 +46,16 @@ class ScrapyRssSpider(scrapy.Spider):
     allowed_domains = []
     urls = []
     post_guids = []
-    guid_pre = ''
-    guid_post = ''
+    guid_pre = ""
+    guid_post = ""
     guid_special_cases = []
     rss_has_content = False
     custom_settings = {
-        'LOG_LEVEL': 'INFO',
-        'USER_AGENT': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36',
+        "LOG_LEVEL": "INFO",
+        "USER_AGENT": (
+            "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like"
+            " Gecko) Chrome/37.0.2049.0 Safari/537.36"
+        ),
     }
 
     def __init__(self):
@@ -73,8 +75,7 @@ class ScrapyRssSpider(scrapy.Spider):
         crawler_log = CrawlerLog.objects.filter(source__source_name=spider.name).last()
 
         news_article_count = NewsArticle.objects.filter(
-            source__source_name=spider.name,
-            created_at__gte=crawler_log.created_at
+            source__source_name=spider.name, created_at__gte=crawler_log.created_at
         ).count()
 
         crawler_log.created_rows = news_article_count
@@ -98,8 +99,10 @@ class ScrapyRssSpider(scrapy.Spider):
         error = CrawlerError(
             response_url=response.url,
             response_status_code=response.status,
-            error_message=f'Error occurs while crawling data!\n{failure.getTraceback()}',
-            log=crawler_log
+            error_message=(
+                f"Error occurs while crawling data!\n{failure.getTraceback()}"
+            ),
+            log=crawler_log,
         )
 
         error.save()
@@ -116,9 +119,9 @@ class ScrapyRssSpider(scrapy.Spider):
         rss_items = self.parse_item(response)
 
         for item in rss_items:
-            rss_item_link = item['link']
-            guid = self.parse_guid(item['guid'])
-            published_date = parse(item['published_date']).date()
+            rss_item_link = item["link"]
+            guid = self.parse_guid(item["guid"])
+            published_date = parse(item["published_date"]).date()
 
             if guid not in self.post_guids:
                 self.post_guids.append(guid)
@@ -127,38 +130,35 @@ class ScrapyRssSpider(scrapy.Spider):
                         url=rss_item_link,
                         callback=self.parse_article,
                         meta={
-                            'link': rss_item_link,
-                            'guid': guid,
-                            'title': item['title'],
-                            'author': item.get('author'),
-                            'published_date': published_date,
-                        }
+                            "link": rss_item_link,
+                            "guid": guid,
+                            "title": item["title"],
+                            "author": item.get("author"),
+                            "published_date": published_date,
+                        },
                     )
                 else:
-                    yield self.create_article({
-                        'title': item['title'],
-                        'link': rss_item_link,
-                        'guid': guid,
-                        'author': item.get('author'),
-                        'published_date': published_date,
-                        'content': item.get('content'),
-                    })
+                    yield self.create_article(
+                        {
+                            "title": item["title"],
+                            "link": rss_item_link,
+                            "guid": guid,
+                            "author": item.get("author"),
+                            "published_date": published_date,
+                            "content": item.get("content"),
+                        }
+                    )
 
     def get_crawled_post_guid(self):
         self.post_guids = list(
-            CrawledPost.objects.filter(
-                source__source_name=self.name
-            ).order_by(
-                '-created_at'
-            ).values_list(
-                'post_guid',
-                flat=True
-            )
+            CrawledPost.objects.filter(source__source_name=self.name)
+            .order_by("-created_at")
+            .values_list("post_guid", flat=True)
         )
 
     def get_upload_pdf_location(self, published_date, title):
         file_name = f'{published_date.strftime("%Y-%m-%d")}_{slugify(title)}.pdf'
-        return f'{NEWS_ARTICLE_CLOUD_SPACES}/{self.name}/{file_name}'
+        return f"{NEWS_ARTICLE_CLOUD_SPACES}/{self.name}/{file_name}"
 
     def upload_file_to_gcloud(self, buffer, file_location, file_type):
         try:
@@ -169,53 +169,66 @@ class ScrapyRssSpider(scrapy.Spider):
             logger.error(e)
 
     def parse_guid(self, guid):
-        parsed_guid = guid.replace(self.guid_pre, '').replace(self.guid_post, '')
+        parsed_guid = guid.replace(self.guid_pre, "").replace(self.guid_post, "")
 
         for guid_special_cases in self.guid_special_cases:
-            parsed_guid = parsed_guid.replace(guid_special_cases, '')
+            parsed_guid = parsed_guid.replace(guid_special_cases, "")
 
         return parsed_guid
 
     def parse_section(self, paragraph):
-
         raw_parsed_paragraph = BeautifulSoup(paragraph, "html.parser")
-        parsed_paragraph = re.sub(r'&lt;(.+?)&gt;', '', escape(raw_parsed_paragraph.get_text()))
+        parsed_paragraph = re.sub(
+            r"&lt;(.+?)&gt;", "", escape(raw_parsed_paragraph.get_text())
+        )
         tag_name = raw_parsed_paragraph.currentTag()[0].name
-        text_content_raw = parsed_paragraph.replace('\xa0', '')
-        text_content = re.sub(r'\n\n+', '\n', text_content_raw)
+        text_content_raw = parsed_paragraph.replace("\xa0", "")
+        text_content = re.sub(r"\n\n+", "\n", text_content_raw)
 
         if tag_name in UNPARSED_TAGS:
             return None
 
         return {
-            'style': TAG_STYLE_MAPPINGS.get(tag_name, 'BodyText'),
-            'content': text_content,
+            "style": TAG_STYLE_MAPPINGS.get(tag_name, "BodyText"),
+            "content": text_content,
         }
 
     def parse_paragraphs(self, content_paragraphs):
-        raw_paragraphs = [self.parse_section(paragraph) for paragraph in content_paragraphs]
-        paragraphs = [paragraph for paragraph in raw_paragraphs if paragraph is not None]
+        raw_paragraphs = [
+            self.parse_section(paragraph) for paragraph in content_paragraphs
+        ]
+        paragraphs = [
+            paragraph for paragraph in raw_paragraphs if paragraph is not None
+        ]
 
         return paragraphs
 
     def remove_by_in_author(self, raw_author):
-        return re.sub(r'^[Bb][Yy]:? ', '', raw_author).strip()
+        return re.sub(r"^[Bb][Yy]:? ", "", raw_author).strip()
 
     def remove_author_redundant_text(self, raw_author):
-        return re.sub(r'(\|+)(.+)', '', raw_author).strip() if raw_author.count('|') == 1 else raw_author
+        return (
+            re.sub(r"(\|+)(.+)", "", raw_author).strip()
+            if raw_author.count("|") == 1
+            else raw_author
+        )
 
     def remove_author_email(self, raw_author):
-        return re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '', raw_author).strip()
+        return re.sub(
+            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "", raw_author
+        ).strip()
 
     def remove_multi_nicks(self, raw_author):
-        raw_parsed_author_lst = re.split(r' (\|+) @\S*', raw_author)
+        raw_parsed_author_lst = re.split(r" (\|+) @\S*", raw_author)
         author_lst = [name.strip() for name in raw_parsed_author_lst if len(name) > 1]
-        return ', '.join(author_lst)
+        return ", ".join(author_lst)
 
     def clean_author(self, raw_author):
         if raw_author:
             removed_by_author = self.remove_by_in_author(raw_author)
-            removed_redundant_text = self.remove_author_redundant_text(removed_by_author)
+            removed_redundant_text = self.remove_author_redundant_text(
+                removed_by_author
+            )
             removed_author_email = self.remove_author_email(removed_redundant_text)
             return self.remove_multi_nicks(removed_author_email)
         return raw_author

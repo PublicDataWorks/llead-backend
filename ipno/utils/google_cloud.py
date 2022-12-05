@@ -1,6 +1,6 @@
-from google.cloud.storage import Client
-
 from django.conf import settings
+
+from google.cloud.storage import Client
 
 
 class GoogleCloudService:
@@ -25,9 +25,5 @@ class GoogleCloudService:
         """Moves a blob inside a bucket with a new name."""
         source_blob = self.bucket.blob(source_blob_name)
 
-        self.bucket.copy_blob(
-            source_blob,
-            self.bucket,
-            destination_blob_name
-        )
+        self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)

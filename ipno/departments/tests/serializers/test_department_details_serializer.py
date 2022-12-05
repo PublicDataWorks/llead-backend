@@ -1,17 +1,18 @@
 from datetime import datetime
-import pytz
 
 from django.test import TestCase
 
-from departments.serializers import DepartmentDetailsSerializer
+import pytz
+
+from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
+from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory, WrglFileFactory
+from departments.serializers import DepartmentDetailsSerializer
+from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
-from officers.factories import OfficerFactory, EventFactory
-from documents.factories import DocumentFactory
-from complaints.factories import ComplaintFactory
 from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_OCCUR
-from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
+from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
 
 
@@ -19,9 +20,7 @@ class DepartmentDetailsSerializerTestCase(TestCase):
     def test_data(self):
         current_date = datetime.now(pytz.utc)
 
-        department = DepartmentFactory(
-            data_period=[2018, 2019, 2020, 2021]
-        )
+        department = DepartmentFactory(data_period=[2018, 2019, 2020, 2021])
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory(department=department)
@@ -140,21 +139,21 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         for complaint in complaints:
             complaint.departments.add(department)
 
-        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint = ComplaintFactory(
+            disposition=ALLEGATION_DISPOSITION_SUSTAINED
+        )
         sustained_complaint.departments.add(department)
 
         article_1 = NewsArticleFactory(published_date=current_date)
         matched_sentence_1 = MatchedSentenceFactory(
-            article=article_1,
-            extracted_keywords=['a']
+            article=article_1, extracted_keywords=["a"]
         )
         matched_sentence_1.officers.add(officer_1)
         matched_sentence_1.save()
 
         article_2 = NewsArticleFactory()
         matched_sentence_2 = MatchedSentenceFactory(
-            article=article_2,
-            extracted_keywords=['b']
+            article=article_2, extracted_keywords=["b"]
         )
         matched_sentence_2.officers.add(officer_3)
         matched_sentence_2.save()
@@ -173,24 +172,24 @@ class DepartmentDetailsSerializerTestCase(TestCase):
 
         result = DepartmentDetailsSerializer(department).data
         assert result == {
-            'id': department.slug,
-            'name': department.name,
-            'city': department.city,
-            'parish': department.parish,
-            'phone': department.phone,
-            'address': department.address,
-            'location_map_url': department.location_map_url,
-            'officers_count': 3,
-            'datasets_count': 3,
-            'recent_datasets_count': 1,
-            'news_articles_count': 2,
-            'recent_news_articles_count': 1,
-            'complaints_count': 4,
-            'sustained_complaints_count': 1,
-            'documents_count': 7,
-            'recent_documents_count': 2,
-            'incident_force_count': 2,
-            'data_period': ['2018-2021'],
+            "id": department.slug,
+            "name": department.name,
+            "city": department.city,
+            "parish": department.parish,
+            "phone": department.phone,
+            "address": department.address,
+            "location_map_url": department.location_map_url,
+            "officers_count": 3,
+            "datasets_count": 3,
+            "recent_datasets_count": 1,
+            "news_articles_count": 2,
+            "recent_news_articles_count": 1,
+            "complaints_count": 4,
+            "sustained_complaints_count": 1,
+            "documents_count": 7,
+            "recent_documents_count": 2,
+            "incident_force_count": 2,
+            "data_period": ["2018-2021"],
         }
 
     def test_data_period(self):
@@ -199,25 +198,23 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         )
 
         result = DepartmentDetailsSerializer(department).data
-        assert result['data_period'] == [
-            '2009',
-            '2012-2014',
-            '2016',
-            '2018-2020',
+        assert result["data_period"] == [
+            "2009",
+            "2012-2014",
+            "2016",
+            "2018-2020",
         ]
 
     def test_data_period_with_empty_data(self):
         department = DepartmentFactory()
 
         result = DepartmentDetailsSerializer(department).data
-        assert result['data_period'] == []
+        assert result["data_period"] == []
 
     def test_data_with_related_officer(self):
         current_date = datetime.now(pytz.utc)
 
-        department = DepartmentFactory(
-            data_period=[2018, 2019, 2020, 2021]
-        )
+        department = DepartmentFactory(data_period=[2018, 2019, 2020, 2021])
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory(department=department)
@@ -344,21 +341,21 @@ class DepartmentDetailsSerializerTestCase(TestCase):
         for complaint in complaints:
             complaint.departments.add(department)
 
-        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint = ComplaintFactory(
+            disposition=ALLEGATION_DISPOSITION_SUSTAINED
+        )
         sustained_complaint.departments.add(department)
 
         article_1 = NewsArticleFactory(published_date=current_date)
         matched_sentence_1 = MatchedSentenceFactory(
-            article=article_1,
-            extracted_keywords=['a']
+            article=article_1, extracted_keywords=["a"]
         )
         matched_sentence_1.officers.add(officer_1)
         matched_sentence_1.save()
 
         article_2 = NewsArticleFactory()
         matched_sentence_2 = MatchedSentenceFactory(
-            article=article_2,
-            extracted_keywords=['b']
+            article=article_2, extracted_keywords=["b"]
         )
         matched_sentence_2.officers.add(officer_2)
         matched_sentence_2.save()
@@ -377,22 +374,22 @@ class DepartmentDetailsSerializerTestCase(TestCase):
 
         result = DepartmentDetailsSerializer(department).data
         assert result == {
-            'id': department.slug,
-            'name': department.name,
-            'city': department.city,
-            'parish': department.parish,
-            'address': department.address,
-            'phone': department.phone,
-            'location_map_url': department.location_map_url,
-            'officers_count': 2,
-            'datasets_count': 3,
-            'recent_datasets_count': 1,
-            'news_articles_count': 2,
-            'recent_news_articles_count': 1,
-            'complaints_count': 4,
-            'sustained_complaints_count': 1,
-            'documents_count': 7,
-            'recent_documents_count': 2,
-            'incident_force_count': 3,
-            'data_period': ['2018-2021'],
+            "id": department.slug,
+            "name": department.name,
+            "city": department.city,
+            "parish": department.parish,
+            "address": department.address,
+            "phone": department.phone,
+            "location_map_url": department.location_map_url,
+            "officers_count": 2,
+            "datasets_count": 3,
+            "recent_datasets_count": 1,
+            "news_articles_count": 2,
+            "recent_news_articles_count": 1,
+            "complaints_count": 4,
+            "sustained_complaints_count": 1,
+            "documents_count": 7,
+            "recent_documents_count": 2,
+            "incident_force_count": 3,
+            "data_period": ["2018-2021"],
         }

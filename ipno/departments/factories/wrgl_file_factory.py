@@ -1,8 +1,8 @@
 import factory
 from faker import Faker
 
-from departments.models import WrglFile
 from departments.factories.department_factory import DepartmentFactory
+from departments.models import WrglFile
 
 fake = Faker()
 
@@ -15,6 +15,6 @@ class WrglFileFactory(factory.django.DjangoModelFactory):
     description = factory.LazyFunction(lambda: fake.sentence())
     slug = factory.LazyFunction(lambda: fake.slug())
     url = factory.LazyFunction(lambda: fake.uri())
-    download_url = factory.LazyFunction(lambda: fake.file_path(extension='csv'))
+    download_url = factory.LazyFunction(lambda: fake.file_path(extension="csv"))
 
     department = factory.SubFactory(DepartmentFactory)

@@ -1,6 +1,6 @@
 import factory
-from faker import Faker
 from factory.django import DjangoModelFactory
+from faker import Faker
 
 from q_and_a.factories.section_factory import SectionFactory
 from q_and_a.models import Question

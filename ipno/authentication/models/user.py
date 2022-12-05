@@ -1,8 +1,6 @@
-from django.db import models
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
-)
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 from utils.models import TimeStampsModel
 
@@ -10,7 +8,7 @@ from utils.models import TimeStampsModel
 class MyUserManager(BaseUserManager):  # pragma: no cover
     def create_user(self, email, password=None):
         if not email:
-            raise ValueError('Users must have an email address')
+            raise ValueError("Users must have an email address")
 
         user = self.model(
             email=self.normalize_email(email),
@@ -32,7 +30,7 @@ class MyUserManager(BaseUserManager):  # pragma: no cover
 
 class User(AbstractBaseUser, TimeStampsModel):  # pragma: no cover
     email = models.EmailField(
-        verbose_name='email address',
+        verbose_name="email address",
         max_length=255,
         unique=True,
     )
@@ -43,7 +41,7 @@ class User(AbstractBaseUser, TimeStampsModel):  # pragma: no cover
 
     objects = MyUserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
 
     def __str__(self):
         return self.email

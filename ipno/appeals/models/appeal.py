@@ -13,10 +13,15 @@ class Appeal(TimeStampsModel):
     appealed = models.CharField(max_length=255, null=True, blank=True)
     motions = models.CharField(max_length=255, null=True, blank=True)
 
-    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True, related_name='appeals')
+    officer = models.ForeignKey(
+        "officers.Officer", on_delete=models.CASCADE, null=True, related_name="appeals"
+    )
     department = models.ForeignKey(
-        'departments.Department', on_delete=models.CASCADE, null=True, related_name='appeals'
+        "departments.Department",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="appeals",
     )
 
     def __str__(self):
-        return f'{self.id} - {self.appeal_uid[:5]}'
+        return f"{self.id} - {self.appeal_uid[:5]}"
