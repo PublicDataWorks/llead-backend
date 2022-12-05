@@ -13,5 +13,7 @@ class TaskFactory(factory.django.DjangoModelFactory):
 
     task_name = factory.LazyFunction(lambda: fake.word())
     command = factory.LazyFunction(lambda: fake.sentence())
-    task_type = factory.Faker('random_element', elements=[type[0] for type in TASK_TYPES])
+    task_type = factory.Faker(
+        "random_element", elements=[type[0] for type in TASK_TYPES]
+    )
     should_run = factory.LazyFunction(lambda: fake.boolean())

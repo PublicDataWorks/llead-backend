@@ -1,31 +1,27 @@
-from unittest.mock import patch
-
-import pytz
 from datetime import date, datetime
 from operator import itemgetter
 from re import findall
+from unittest.mock import patch
 
 from django.urls import reverse
+
 from rest_framework import status
 
+import pytz
+
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
+from complaints.factories import ComplaintFactory
+from departments.factories import DepartmentFactory, WrglFileFactory
+from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
+from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_OCCUR, UOF_RECEIVE
+from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
-from departments.factories import DepartmentFactory, WrglFileFactory
-from officers.factories import EventFactory, OfficerFactory
-from documents.factories import DocumentFactory
-from complaints.factories import ComplaintFactory
 from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 from utils.parse_utils import parse_date
 from utils.search_index import rebuild_search_index
-from officers.constants import (
-    OFFICER_HIRE,
-    OFFICER_LEFT,
-    UOF_OCCUR,
-    UOF_RECEIVE,
-)
 
 
 class DepartmentsViewSetTestCase(AuthAPITestCase):
@@ -49,27 +45,31 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         EventFactory.create_batch(2, department=department_1)
         EventFactory(department=department_2)
 
-        expected_data = [{
-            'id': department_2.slug,
-            'name': department_2.name,
-            'city': department_2.city,
-            'parish': department_2.parish,
-            'location_map_url': department_2.location_map_url,
-        }, {
-            'id': department_1.slug,
-            'name': department_1.name,
-            'city': department_1.city,
-            'parish': department_1.parish,
-            'location_map_url': department_1.location_map_url,
-        }, {
-            'id': department_3.slug,
-            'name': department_3.name,
-            'city': department_3.city,
-            'parish': department_3.parish,
-            'location_map_url': department_3.location_map_url,
-        }]
+        expected_data = [
+            {
+                "id": department_2.slug,
+                "name": department_2.name,
+                "city": department_2.city,
+                "parish": department_2.parish,
+                "location_map_url": department_2.location_map_url,
+            },
+            {
+                "id": department_1.slug,
+                "name": department_1.name,
+                "city": department_1.city,
+                "parish": department_1.parish,
+                "location_map_url": department_1.location_map_url,
+            },
+            {
+                "id": department_3.slug,
+                "name": department_3.name,
+                "city": department_3.city,
+                "parish": department_3.parish,
+                "location_map_url": department_3.location_map_url,
+            },
+        ]
 
-        response = self.client.get(reverse('api:departments-list'))
+        response = self.client.get(reverse("api:departments-list"))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_data
@@ -195,21 +195,21 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         for complaint in complaints:
             complaint.departments.add(department)
 
-        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint = ComplaintFactory(
+            disposition=ALLEGATION_DISPOSITION_SUSTAINED
+        )
         sustained_complaint.departments.add(department)
 
         article_1 = NewsArticleFactory(published_date=current_date)
         matched_sentence_1 = MatchedSentenceFactory(
-            article=article_1,
-            extracted_keywords=['a']
+            article=article_1, extracted_keywords=["a"]
         )
         matched_sentence_1.officers.add(officer_1)
         matched_sentence_1.save()
 
         article_2 = NewsArticleFactory()
         matched_sentence_2 = MatchedSentenceFactory(
-            article=article_2,
-            extracted_keywords=['b']
+            article=article_2, extracted_keywords=["b"]
         )
         matched_sentence_2.officers.add(officer_3)
         matched_sentence_2.save()
@@ -227,28 +227,28 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_3.save()
 
         expected_result = {
-            'id': department.slug,
-            'name': department.name,
-            'city': department.city,
-            'parish': department.parish,
-            'address': department.address,
-            'phone': department.phone,
-            'location_map_url': department.location_map_url,
-            'officers_count': 3,
-            'datasets_count': 3,
-            'recent_datasets_count': 1,
-            'news_articles_count': 2,
-            'recent_news_articles_count': 1,
-            'complaints_count': 4,
-            'sustained_complaints_count': 1,
-            'documents_count': 7,
-            'recent_documents_count': 2,
-            'incident_force_count': 2,
-            'data_period': department.data_period,
+            "id": department.slug,
+            "name": department.name,
+            "city": department.city,
+            "parish": department.parish,
+            "address": department.address,
+            "phone": department.phone,
+            "location_map_url": department.location_map_url,
+            "officers_count": 3,
+            "datasets_count": 3,
+            "recent_datasets_count": 1,
+            "news_articles_count": 2,
+            "recent_news_articles_count": 1,
+            "complaints_count": 4,
+            "sustained_complaints_count": 1,
+            "documents_count": 7,
+            "recent_documents_count": 2,
+            "incident_force_count": 2,
+            "data_period": department.data_period,
         }
 
         response = self.client.get(
-            reverse('api:departments-detail', kwargs={'pk': department.slug})
+            reverse("api:departments-detail", kwargs={"pk": department.slug})
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -256,7 +256,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_retrieve_not_found(self):
         response = self.client.get(
-            reverse('api:departments-detail', kwargs={'pk': 'slug'})
+            reverse("api:departments-detail", kwargs={"pk": "slug"})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -264,25 +264,25 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department = DepartmentFactory()
 
         document_1 = DocumentFactory(
-            title='Document title 1',
-            text_content='Text content 1',
-            incident_date=date(2020, 5, 4)
+            title="Document title 1",
+            text_content="Text content 1",
+            incident_date=date(2020, 5, 4),
         )
         document_2 = DocumentFactory(
-            title='Document title keyword3',
-            text_content='Text content 3',
-            incident_date=date(2019, 11, 6)
+            title="Document title keyword3",
+            text_content="Text content 3",
+            incident_date=date(2019, 11, 6),
         )
         document_3 = DocumentFactory(
-            title='Document title keyword 4',
-            text_content='Text content keyword 4',
-            incident_date=date(2021, 7, 9)
+            title="Document title keyword 4",
+            text_content="Text content keyword 4",
+            incident_date=date(2021, 7, 9),
         )
 
         DocumentFactory(
-            title='Document title keyword2',
-            text_content='Text content keyword 2',
-            incident_date=date(2017, 12, 5)
+            title="Document title keyword2",
+            text_content="Text content keyword 2",
+            incident_date=date(2017, 12, 5),
         )
 
         for document in [document_1, document_2, document_3]:
@@ -291,80 +291,81 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'keyword',
-                'kind': 'documents',
-            }
+                "q": "keyword",
+                "kind": "documents",
+            },
         )
 
         expected_results = [
             {
-                'id': document_2.id,
-                'document_type': document_2.document_type,
-                'title': document_2.title,
-                'url': document_2.url,
-                'incident_date': str(document_2.incident_date),
-                'preview_image_url': document_2.preview_image_url,
-                'pages_count': document_2.pages_count,
-                'departments': [
+                "id": document_2.id,
+                "document_type": document_2.document_type,
+                "title": document_2.title,
+                "url": document_2.url,
+                "incident_date": str(document_2.incident_date),
+                "preview_image_url": document_2.preview_image_url,
+                "pages_count": document_2.pages_count,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'text_content': document_2.text_content,
-                'text_content_highlight': None,
-            }, {
-                'id': document_3.id,
-                'document_type': document_3.document_type,
-                'title': document_3.title,
-                'url': document_3.url,
-                'incident_date': str(document_3.incident_date),
-                'preview_image_url': document_3.preview_image_url,
-                'pages_count': document_3.pages_count,
-                'departments': [
+                "text_content": document_2.text_content,
+                "text_content_highlight": None,
+            },
+            {
+                "id": document_3.id,
+                "document_type": document_3.document_type,
+                "title": document_3.title,
+                "url": document_3.url,
+                "incident_date": str(document_3.incident_date),
+                "preview_image_url": document_3.preview_image_url,
+                "pages_count": document_3.pages_count,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'text_content': document_3.text_content,
-                'text_content_highlight': 'Text content <em>keyword</em> 4',
-            }
+                "text_content": document_3.text_content,
+                "text_content_highlight": "Text content <em>keyword</em> 4",
+            },
         ]
 
-        results = sorted(response.data['results'], key=itemgetter('id'))
+        results = sorted(response.data["results"], key=itemgetter("id"))
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 2
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
+        assert response.data["count"] == 2
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
         assert results == expected_results
 
     def test_search_documents_with_limit_and_offset(self):
         department = DepartmentFactory()
 
         document_1 = DocumentFactory(
-            title='Document title 1',
-            text_content='Text content 1',
-            incident_date=date(2020, 5, 4)
+            title="Document title 1",
+            text_content="Text content 1",
+            incident_date=date(2020, 5, 4),
         )
         document_2 = DocumentFactory(
-            title='Document title keyword3',
-            text_content='Text content 3',
-            incident_date=date(2019, 11, 6)
+            title="Document title keyword3",
+            text_content="Text content 3",
+            incident_date=date(2019, 11, 6),
         )
         document_3 = DocumentFactory(
-            title='Document title keyword 4',
-            text_content='Text content keyword 4',
-            incident_date=date(2021, 7, 9)
+            title="Document title keyword 4",
+            text_content="Text content keyword 4",
+            incident_date=date(2021, 7, 9),
         )
 
         DocumentFactory(
-            title='Document title keyword2',
-            text_content='Text content keyword 2',
-            incident_date=date(2017, 12, 5)
+            title="Document title keyword2",
+            text_content="Text content keyword 2",
+            incident_date=date(2017, 12, 5),
         )
 
         for document in [document_1, document_2, document_3]:
@@ -373,66 +374,67 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'keyword',
-                'offset': 1,
-                'limit': 1,
-                'kind': 'documents',
-            }
+                "q": "keyword",
+                "offset": 1,
+                "limit": 1,
+                "kind": "documents",
+            },
         )
 
         expected_results = [
             {
-                'id': document_2.id,
-                'document_type': document_2.document_type,
-                'title': document_2.title,
-                'url': document_2.url,
-                'incident_date': str(document_2.incident_date),
-                'preview_image_url': document_2.preview_image_url,
-                'pages_count': document_2.pages_count,
-                'departments': [
+                "id": document_2.id,
+                "document_type": document_2.document_type,
+                "title": document_2.title,
+                "url": document_2.url,
+                "incident_date": str(document_2.incident_date),
+                "preview_image_url": document_2.preview_image_url,
+                "pages_count": document_2.pages_count,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'text_content': document_2.text_content,
-                'text_content_highlight': None,
+                "text_content": document_2.text_content,
+                "text_content_highlight": None,
             },
         ]
 
-        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=documents&limit=1&q=keyword'
+        expected_previous = (
+            f"http://testserver/api/departments/{department.slug}/"
+            "search/?kind=documents&limit=1&q=keyword"
+        )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 2
-        assert response.data['previous'] == expected_previous
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 2
+        assert response.data["previous"] == expected_previous
+        assert response.data["next"] is None
+        assert response.data["results"] == expected_results
 
     def test_search_documents_with_empty_results(self):
         department = DepartmentFactory()
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'keyword',
-                'kind': 'documents',
-            }
+                "q": "keyword",
+                "kind": "documents",
+            },
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 0
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
-        assert response.data['results'] == []
+        assert response.data["count"] == 0
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
+        assert response.data["results"] == []
 
     def test_retrieve_success_with_related_officer(self):
         current_date = datetime.now(pytz.utc)
-        department = DepartmentFactory(
-            data_period=['20']
-        )
+        department = DepartmentFactory(data_period=["20"])
         other_department = DepartmentFactory()
 
         officer_1 = OfficerFactory(department=department)
@@ -559,21 +561,21 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         for complaint in complaints:
             complaint.departments.add(department)
 
-        sustained_complaint = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
+        sustained_complaint = ComplaintFactory(
+            disposition=ALLEGATION_DISPOSITION_SUSTAINED
+        )
         sustained_complaint.departments.add(department)
 
         article_1 = NewsArticleFactory(published_date=current_date)
         matched_sentence_1 = MatchedSentenceFactory(
-            article=article_1,
-            extracted_keywords=['a']
+            article=article_1, extracted_keywords=["a"]
         )
         matched_sentence_1.officers.add(officer_1)
         matched_sentence_1.save()
 
         article_2 = NewsArticleFactory()
         matched_sentence_2 = MatchedSentenceFactory(
-            article=article_2,
-            extracted_keywords=['b']
+            article=article_2, extracted_keywords=["b"]
         )
         matched_sentence_2.officers.add(officer_2)
         matched_sentence_2.save()
@@ -591,28 +593,28 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_3.save()
 
         expected_result = {
-            'id': department.slug,
-            'name': department.name,
-            'city': department.city,
-            'parish': department.parish,
-            'address': department.address,
-            'phone': department.phone,
-            'location_map_url': department.location_map_url,
-            'officers_count': 2,
-            'datasets_count': 3,
-            'recent_datasets_count': 1,
-            'news_articles_count': 2,
-            'recent_news_articles_count': 1,
-            'complaints_count': 4,
-            'sustained_complaints_count': 1,
-            'documents_count': 7,
-            'recent_documents_count': 2,
-            'incident_force_count': 3,
-            'data_period': department.data_period,
+            "id": department.slug,
+            "name": department.name,
+            "city": department.city,
+            "parish": department.parish,
+            "address": department.address,
+            "phone": department.phone,
+            "location_map_url": department.location_map_url,
+            "officers_count": 2,
+            "datasets_count": 3,
+            "recent_datasets_count": 1,
+            "news_articles_count": 2,
+            "recent_news_articles_count": 1,
+            "complaints_count": 4,
+            "sustained_complaints_count": 1,
+            "documents_count": 7,
+            "recent_documents_count": 2,
+            "incident_force_count": 3,
+            "data_period": department.data_period,
         }
 
         response = self.client.get(
-            reverse('api:departments-detail', kwargs={'pk': department.slug})
+            reverse("api:departments-detail", kwargs={"pk": department.slug})
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -620,7 +622,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_datasets_not_found(self):
         response = self.client.get(
-            reverse('api:departments-datasets', kwargs={'pk': 'slug'})
+            reverse("api:departments-datasets", kwargs={"pk": "slug"})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -631,28 +633,28 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
 
         response = self.client.get(
-            reverse('api:departments-datasets', kwargs={'pk': department.slug})
+            reverse("api:departments-datasets", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': wrgl_file_2.id,
-                'name': wrgl_file_2.name,
-                'slug': wrgl_file_2.slug,
-                'description': wrgl_file_2.description,
-                'url': wrgl_file_2.url,
-                'download_url': wrgl_file_2.download_url,
-                'default_expanded': wrgl_file_2.default_expanded,
+                "id": wrgl_file_2.id,
+                "name": wrgl_file_2.name,
+                "slug": wrgl_file_2.slug,
+                "description": wrgl_file_2.description,
+                "url": wrgl_file_2.url,
+                "download_url": wrgl_file_2.download_url,
+                "default_expanded": wrgl_file_2.default_expanded,
             },
             {
-                'id': wrgl_file_1.id,
-                'name': wrgl_file_1.name,
-                'slug': wrgl_file_1.slug,
-                'description': wrgl_file_1.description,
-                'url': wrgl_file_1.url,
-                'download_url': wrgl_file_1.download_url,
-                'default_expanded': wrgl_file_1.default_expanded,
-            }
+                "id": wrgl_file_1.id,
+                "name": wrgl_file_1.name,
+                "slug": wrgl_file_1.slug,
+                "description": wrgl_file_1.description,
+                "url": wrgl_file_1.url,
+                "download_url": wrgl_file_1.download_url,
+                "default_expanded": wrgl_file_1.default_expanded,
+            },
         ]
 
         assert response.status_code == status.HTTP_200_OK
@@ -661,7 +663,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_officers_not_found(self):
         response = self.client.get(
-            reverse('api:departments-officers', kwargs={'pk': 'slug'})
+            reverse("api:departments-officers", kwargs={"pk": "slug"})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -818,55 +820,55 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         use_of_force_3.events.add(uof_incident_event_2)
 
         response = self.client.get(
-            reverse('api:departments-officers', kwargs={'pk': department.slug})
+            reverse("api:departments-officers", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': officer_2.id,
-                'name': officer_2.name,
-                'is_starred': True,
-                'use_of_forces_count': 2,
-                'badges': ["150", "200", "100", "250"],
-                'complaints_count': officer_2.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_2.id,
+                "name": officer_2.name,
+                "is_starred": True,
+                "use_of_forces_count": 2,
+                "badges": ["150", "200", "100", "250"],
+                "complaints_count": officer_2.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'senior',
+                "latest_rank": "senior",
             },
             {
-                'id': officer_4.id,
-                'name': officer_4.name,
-                'is_starred': False,
-                'use_of_forces_count': 0,
-                'badges': [],
-                'complaints_count': officer_4.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_4.id,
+                "name": officer_4.name,
+                "is_starred": False,
+                "use_of_forces_count": 0,
+                "badges": [],
+                "complaints_count": officer_4.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'recruit',
+                "latest_rank": "recruit",
             },
             {
-                'id': officer_3.id,
-                'name': officer_3.name,
-                'is_starred': False,
-                'use_of_forces_count': 1,
-                'badges': ["123"],
-                'complaints_count': officer_3.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_3.id,
+                "name": officer_3.name,
+                "is_starred": False,
+                "use_of_forces_count": 1,
+                "badges": ["123"],
+                "complaints_count": officer_3.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'sergeant',
+                "latest_rank": "sergeant",
             },
         ]
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
 
-    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    @patch("departments.views.DEPARTMENTS_LIMIT", 3)
     def test_officers_with_maximum_starred_officers(self):
         department = DepartmentFactory()
         starred_officers = OfficerFactory.create_batch(3, department=department)
@@ -885,48 +887,48 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.save()
 
         response = self.client.get(
-            reverse('api:departments-officers', kwargs={'pk': department.slug})
+            reverse("api:departments-officers", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': starred_officers[0].id,
-                'name': starred_officers[0].name,
-                'is_starred': True,
-                'use_of_forces_count': 0,
-                'badges': [],
-                'complaints_count': starred_person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": starred_officers[0].id,
+                "name": starred_officers[0].name,
+                "is_starred": True,
+                "use_of_forces_count": 0,
+                "badges": [],
+                "complaints_count": starred_person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': None,
+                "latest_rank": None,
             },
             {
-                'id': starred_officers[1].id,
-                'name': starred_officers[1].name,
-                'is_starred': True,
-                'use_of_forces_count': 0,
-                'badges': [],
-                'complaints_count': starred_person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": starred_officers[1].id,
+                "name": starred_officers[1].name,
+                "is_starred": True,
+                "use_of_forces_count": 0,
+                "badges": [],
+                "complaints_count": starred_person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': None,
+                "latest_rank": None,
             },
             {
-                'id': starred_officers[2].id,
-                'name': starred_officers[2].name,
-                'is_starred': True,
-                'use_of_forces_count': 0,
-                'badges': [],
-                'complaints_count': starred_person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": starred_officers[2].id,
+                "name": starred_officers[2].name,
+                "is_starred": True,
+                "use_of_forces_count": 0,
+                "badges": [],
+                "complaints_count": starred_person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': None,
+                "latest_rank": None,
             },
         ]
 
@@ -935,7 +937,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_news_articles_not_found(self):
         response = self.client.get(
-            reverse('api:departments-news-articles', kwargs={'pk': 'slug'})
+            reverse("api:departments-news-articles", kwargs={"pk": "slug"})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -948,7 +950,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_1.officers.add(officer_1)
         person_1.save()
 
-        starred_article_source = NewsArticleSourceFactory(source_display_name='Starred Article')
+        starred_article_source = NewsArticleSourceFactory(
+            source_display_name="Starred Article"
+        )
         starred_article = NewsArticleFactory(
             source=starred_article_source,
             published_date=datetime(2015, 1, 1),
@@ -962,7 +966,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             published_date=datetime(2015, 1, 1),
             is_hidden=True,
         )
-        hidden_starred_matched_sentence = MatchedSentenceFactory(article=hidden_starred_article)
+        hidden_starred_matched_sentence = MatchedSentenceFactory(
+            article=hidden_starred_article
+        )
         hidden_starred_matched_sentence.officers.add(officer_1)
         hidden_starred_matched_sentence.save()
 
@@ -970,7 +976,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.starred_news_articles.add(hidden_starred_article)
         department.save()
 
-        featured_article_source_1 = NewsArticleSourceFactory(source_display_name='Featured Article 1')
+        featured_article_source_1 = NewsArticleSourceFactory(
+            source_display_name="Featured Article 1"
+        )
         featured_article_1 = NewsArticleFactory(
             source=featured_article_source_1,
             published_date=current_date,
@@ -979,7 +987,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence_1.officers.add(officer_1)
         matched_sentence_1.save()
 
-        featured_article_source_2 = NewsArticleSourceFactory(source_display_name='Featured Article 2')
+        featured_article_source_2 = NewsArticleSourceFactory(
+            source_display_name="Featured Article 2"
+        )
         featured_article_2 = NewsArticleFactory(
             source=featured_article_source_2,
             published_date=datetime(2019, 8, 10),
@@ -988,7 +998,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence_2.officers.add(officer_1)
         matched_sentence_2.save()
 
-        featured_article_source_3 = NewsArticleSourceFactory(source_display_name='Featured Article 3')
+        featured_article_source_3 = NewsArticleSourceFactory(
+            source_display_name="Featured Article 3"
+        )
         featured_article_3 = NewsArticleFactory(
             source=featured_article_source_3,
             published_date=datetime(2018, 8, 10),
@@ -999,40 +1011,40 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence_3.save()
 
         response = self.client.get(
-            reverse('api:departments-news-articles', kwargs={'pk': department.slug})
+            reverse("api:departments-news-articles", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': starred_article.id,
-                'title': starred_article.title,
-                'published_date': str(datetime(2015, 1, 1).date()),
-                'source_display_name': 'Starred Article',
-                'is_starred': True,
-                'url': starred_article.url,
+                "id": starred_article.id,
+                "title": starred_article.title,
+                "published_date": str(datetime(2015, 1, 1).date()),
+                "source_display_name": "Starred Article",
+                "is_starred": True,
+                "url": starred_article.url,
             },
             {
-                'id': featured_article_1.id,
-                'title': featured_article_1.title,
-                'published_date': str(current_date.date()),
-                'source_display_name': 'Featured Article 1',
-                'is_starred': False,
-                'url': featured_article_1.url,
+                "id": featured_article_1.id,
+                "title": featured_article_1.title,
+                "published_date": str(current_date.date()),
+                "source_display_name": "Featured Article 1",
+                "is_starred": False,
+                "url": featured_article_1.url,
             },
             {
-                'id': featured_article_2.id,
-                'title': featured_article_2.title,
-                'published_date': str(datetime(2019, 8, 10).date()),
-                'source_display_name': 'Featured Article 2',
-                'is_starred': False,
-                'url': featured_article_2.url,
+                "id": featured_article_2.id,
+                "title": featured_article_2.title,
+                "published_date": str(datetime(2019, 8, 10).date()),
+                "source_display_name": "Featured Article 2",
+                "is_starred": False,
+                "url": featured_article_2.url,
             },
         ]
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
 
-    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    @patch("departments.views.DEPARTMENTS_LIMIT", 3)
     def test_officers_with_maximum_starred_news_articles(self):
         officer = OfficerFactory()
         person = PersonFactory(canonical_officer=officer)
@@ -1046,9 +1058,15 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             officer=officer,
         )
 
-        starred_article_source_1 = NewsArticleSourceFactory(source_display_name='Starred Article 1')
-        starred_article_source_2 = NewsArticleSourceFactory(source_display_name='Starred Article 2')
-        starred_article_source_3 = NewsArticleSourceFactory(source_display_name='Starred Article 3')
+        starred_article_source_1 = NewsArticleSourceFactory(
+            source_display_name="Starred Article 1"
+        )
+        starred_article_source_2 = NewsArticleSourceFactory(
+            source_display_name="Starred Article 2"
+        )
+        starred_article_source_3 = NewsArticleSourceFactory(
+            source_display_name="Starred Article 3"
+        )
 
         starred_article_1 = NewsArticleFactory(
             source=starred_article_source_1,
@@ -1063,10 +1081,14 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             published_date=datetime(2018, 1, 1),
         )
 
-        department.starred_news_articles.add(starred_article_1, starred_article_2, starred_article_3)
+        department.starred_news_articles.add(
+            starred_article_1, starred_article_2, starred_article_3
+        )
         department.save()
 
-        featured_article_source = NewsArticleSourceFactory(source_display_name='Featured Article')
+        featured_article_source = NewsArticleSourceFactory(
+            source_display_name="Featured Article"
+        )
         featured_article = NewsArticleFactory(
             source=featured_article_source,
         )
@@ -1075,33 +1097,33 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence.save()
 
         response = self.client.get(
-            reverse('api:departments-news-articles', kwargs={'pk': department.slug})
+            reverse("api:departments-news-articles", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': starred_article_1.id,
-                'title': starred_article_1.title,
-                'published_date': str(datetime(2019, 1, 1).date()),
-                'source_display_name': 'Starred Article 1',
-                'is_starred': True,
-                'url': starred_article_1.url,
+                "id": starred_article_1.id,
+                "title": starred_article_1.title,
+                "published_date": str(datetime(2019, 1, 1).date()),
+                "source_display_name": "Starred Article 1",
+                "is_starred": True,
+                "url": starred_article_1.url,
             },
             {
-                'id': starred_article_2.id,
-                'title': starred_article_2.title,
-                'published_date': str(datetime(2018, 7, 1).date()),
-                'source_display_name': 'Starred Article 2',
-                'is_starred': True,
-                'url': starred_article_2.url,
+                "id": starred_article_2.id,
+                "title": starred_article_2.title,
+                "published_date": str(datetime(2018, 7, 1).date()),
+                "source_display_name": "Starred Article 2",
+                "is_starred": True,
+                "url": starred_article_2.url,
             },
             {
-                'id': starred_article_3.id,
-                'title': starred_article_3.title,
-                'published_date': str(datetime(2018, 1, 1).date()),
-                'source_display_name': 'Starred Article 3',
-                'is_starred': True,
-                'url': starred_article_3.url,
+                "id": starred_article_3.id,
+                "title": starred_article_3.title,
+                "published_date": str(datetime(2018, 1, 1).date()),
+                "source_display_name": "Starred Article 3",
+                "is_starred": True,
+                "url": starred_article_3.url,
             },
         ]
 
@@ -1110,7 +1132,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_featured_documents_not_found(self):
         response = self.client.get(
-            reverse('api:departments-documents', kwargs={'pk': 'slug'})
+            reverse("api:departments-documents", kwargs={"pk": "slug"})
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -1133,76 +1155,76 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document_3.departments.add(department)
 
         response = self.client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug})
+            reverse("api:departments-documents", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': starred_document.id,
-                'title': starred_document.title,
-                'url': starred_document.url,
-                'incident_date': str(datetime(2017, 8, 10).date()),
-                'preview_image_url': starred_document.preview_image_url,
-                'pages_count': starred_document.pages_count,
-                'is_starred': True,
-                'departments': [
+                "id": starred_document.id,
+                "title": starred_document.title,
+                "url": starred_document.url,
+                "incident_date": str(datetime(2017, 8, 10).date()),
+                "preview_image_url": starred_document.preview_image_url,
+                "pages_count": starred_document.pages_count,
+                "is_starred": True,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
             {
-                'id': featured_document_1.id,
-                'title': featured_document_1.title,
-                'url': featured_document_1.url,
-                'incident_date': str(current_date.date()),
-                'preview_image_url': featured_document_1.preview_image_url,
-                'pages_count': featured_document_1.pages_count,
-                'is_starred': False,
-                'departments': [
+                "id": featured_document_1.id,
+                "title": featured_document_1.title,
+                "url": featured_document_1.url,
+                "incident_date": str(current_date.date()),
+                "preview_image_url": featured_document_1.preview_image_url,
+                "pages_count": featured_document_1.pages_count,
+                "is_starred": False,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
             {
-                'id': featured_document_2.id,
-                'title': featured_document_2.title,
-                'url': featured_document_2.url,
-                'incident_date': str(datetime(2017, 11, 10).date()),
-                'preview_image_url': featured_document_2.preview_image_url,
-                'pages_count': featured_document_2.pages_count,
-                'is_starred': False,
-                'departments': [
+                "id": featured_document_2.id,
+                "title": featured_document_2.title,
+                "url": featured_document_2.url,
+                "incident_date": str(datetime(2017, 11, 10).date()),
+                "preview_image_url": featured_document_2.preview_image_url,
+                "pages_count": featured_document_2.pages_count,
+                "is_starred": False,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
             {
-                'id': featured_document_3.id,
-                'title': featured_document_3.title,
-                'url': featured_document_3.url,
-                'incident_date': str(datetime(2017, 8, 10).date()),
-                'preview_image_url': featured_document_3.preview_image_url,
-                'pages_count': featured_document_3.pages_count,
-                'is_starred': False,
-                'departments': [
+                "id": featured_document_3.id,
+                "title": featured_document_3.title,
+                "url": featured_document_3.url,
+                "incident_date": str(datetime(2017, 8, 10).date()),
+                "preview_image_url": featured_document_3.preview_image_url,
+                "pages_count": featured_document_3.pages_count,
+                "is_starred": False,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
         ]
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
 
-    @patch('departments.views.DEPARTMENTS_LIMIT', 3)
+    @patch("departments.views.DEPARTMENTS_LIMIT", 3)
     def test_officers_with_maximum_starred_documents(self):
         department = DepartmentFactory()
 
@@ -1215,54 +1237,54 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document.departments.add(department)
 
         response = self.client.get(
-            reverse('api:departments-documents', kwargs={'pk': department.slug})
+            reverse("api:departments-documents", kwargs={"pk": department.slug})
         )
 
         expected_result = [
             {
-                'id': starred_documents[0].id,
-                'title': starred_documents[0].title,
-                'url': starred_documents[0].url,
-                'incident_date': str(starred_documents[0].incident_date),
-                'preview_image_url': starred_documents[0].preview_image_url,
-                'pages_count': starred_documents[0].pages_count,
-                'is_starred': True,
-                'departments': [
+                "id": starred_documents[0].id,
+                "title": starred_documents[0].title,
+                "url": starred_documents[0].url,
+                "incident_date": str(starred_documents[0].incident_date),
+                "preview_image_url": starred_documents[0].preview_image_url,
+                "pages_count": starred_documents[0].pages_count,
+                "is_starred": True,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
             {
-                'id': starred_documents[1].id,
-                'title': starred_documents[1].title,
-                'url': starred_documents[1].url,
-                'incident_date': str(starred_documents[1].incident_date),
-                'preview_image_url': starred_documents[1].preview_image_url,
-                'pages_count': starred_documents[1].pages_count,
-                'is_starred': True,
-                'departments': [
+                "id": starred_documents[1].id,
+                "title": starred_documents[1].title,
+                "url": starred_documents[1].url,
+                "incident_date": str(starred_documents[1].incident_date),
+                "preview_image_url": starred_documents[1].preview_image_url,
+                "pages_count": starred_documents[1].pages_count,
+                "is_starred": True,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
             {
-                'id': starred_documents[2].id,
-                'title': starred_documents[2].title,
-                'url': starred_documents[2].url,
-                'incident_date': str(starred_documents[2].incident_date),
-                'preview_image_url': starred_documents[2].preview_image_url,
-                'pages_count': starred_documents[2].pages_count,
-                'is_starred': True,
-                'departments': [
+                "id": starred_documents[2].id,
+                "title": starred_documents[2].title,
+                "url": starred_documents[2].url,
+                "incident_date": str(starred_documents[2].incident_date),
+                "preview_image_url": starred_documents[2].preview_image_url,
+                "pages_count": starred_documents[2].pages_count,
+                "is_starred": True,
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     }
-                ]
+                ],
             },
         ]
 
@@ -1271,14 +1293,14 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
     def test_search_without_query(self):
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': 'slug'})
+            reverse("api:departments-search", kwargs={"pk": "slug"})
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_search_officers_with_empty_results(self):
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley')
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley')
+        officer_1 = OfficerFactory(first_name="Ray", last_name="Miley")
+        officer_2 = OfficerFactory(first_name="Grayven", last_name="Miley")
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
@@ -1316,47 +1338,66 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'Sean',
-                'kind': 'officers',
-            }
+                "q": "Sean",
+                "kind": "officers",
+            },
         )
 
         expected_results = []
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 0
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 0
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
+        assert response.data["results"] == expected_results
 
     def test_search_officers_success(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department, complaint_fraction=0.3)
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
+        officer_1 = OfficerFactory(
+            first_name="Ray",
+            last_name="Miley",
+            department=department,
+            complaint_fraction=0.3,
+        )
+        officer_2 = OfficerFactory(
+            first_name="Grayven", last_name="Miley", department=department
+        )
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department, complaint_fraction=0.9)
+        officer_3 = OfficerFactory(
+            first_name="Tom",
+            last_name="Ray",
+            department=department,
+            complaint_fraction=0.9,
+        )
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department, complaint_fraction=0.7)
+        officer_4 = OfficerFactory(
+            first_name="Sean",
+            last_name="Ray1",
+            department=department,
+            complaint_fraction=0.7,
+        )
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
+        officer_5 = OfficerFactory(
+            first_name="Sean", last_name="Dang", department=department
+        )
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
 
-        officer_6 = OfficerFactory(first_name='Jay', last_name='Dang')
+        officer_6 = OfficerFactory(first_name="Jay", last_name="Dang")
         person_5 = PersonFactory(canonical_officer=officer_6)
         person_5.officers.add(officer_6)
         person_5.save()
@@ -1484,87 +1525,106 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'Ray',
-                'kind': 'officers',
-            }
+                "q": "Ray",
+                "kind": "officers",
+            },
         )
 
         expected_results = [
             {
-                'id': officer_3.id,
-                'name': officer_3.name,
-                'is_starred': False,
-                'use_of_forces_count': 1,
-                'badges': ["123", "200"],
-                'complaints_count': officer_3.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_3.id,
+                "name": officer_3.name,
+                "is_starred": False,
+                "use_of_forces_count": 1,
+                "badges": ["123", "200"],
+                "complaints_count": officer_3.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'sergeant',
+                "latest_rank": "sergeant",
             },
             {
-                'id': officer_4.id,
-                'name': officer_4.name,
-                'is_starred': False,
-                'use_of_forces_count': 1,
-                'badges': ["200"],
-                'complaints_count': officer_4.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_4.id,
+                "name": officer_4.name,
+                "is_starred": False,
+                "use_of_forces_count": 1,
+                "badges": ["200"],
+                "complaints_count": officer_4.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'recruit',
+                "latest_rank": "recruit",
             },
             {
-                'id': officer_2.id,
-                'name': officer_2.name,
-                'is_starred': False,
-                'use_of_forces_count': 0,
-                'badges': ["150", "100", "250"],
-                'complaints_count': officer_2.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_2.id,
+                "name": officer_2.name,
+                "is_starred": False,
+                "use_of_forces_count": 0,
+                "badges": ["150", "100", "250"],
+                "complaints_count": officer_2.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'senior',
+                "latest_rank": "senior",
             },
         ]
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 3
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
+        assert response.data["results"] == expected_results
 
     def test_search_officers_with_limit_and_offset(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory(first_name='Ray', last_name='Miley', department=department, complaint_fraction=0.3)
-        officer_2 = OfficerFactory(first_name='Grayven', last_name='Miley', department=department)
+        officer_1 = OfficerFactory(
+            first_name="Ray",
+            last_name="Miley",
+            department=department,
+            complaint_fraction=0.3,
+        )
+        officer_2 = OfficerFactory(
+            first_name="Grayven", last_name="Miley", department=department
+        )
         person_1 = PersonFactory(canonical_officer=officer_2, all_complaints_count=150)
         person_1.officers.add(officer_1)
         person_1.officers.add(officer_2)
         person_1.save()
 
-        officer_3 = OfficerFactory(first_name='Tom', last_name='Ray', department=department, complaint_fraction=0.7)
+        officer_3 = OfficerFactory(
+            first_name="Tom",
+            last_name="Ray",
+            department=department,
+            complaint_fraction=0.7,
+        )
         person_2 = PersonFactory(canonical_officer=officer_3, all_complaints_count=100)
         person_2.officers.add(officer_3)
         person_2.save()
 
-        officer_4 = OfficerFactory(first_name='Sean', last_name='Ray1', department=department, complaint_fraction=0.9)
+        officer_4 = OfficerFactory(
+            first_name="Sean",
+            last_name="Ray1",
+            department=department,
+            complaint_fraction=0.9,
+        )
         person_3 = PersonFactory(canonical_officer=officer_4, all_complaints_count=110)
         person_3.officers.add(officer_4)
         person_3.save()
 
-        officer_5 = OfficerFactory(first_name='Sean', last_name='Dang', department=department)
+        officer_5 = OfficerFactory(
+            first_name="Sean", last_name="Dang", department=department
+        )
         person_4 = PersonFactory(canonical_officer=officer_5, all_complaints_count=110)
         person_4.officers.add(officer_5)
         person_4.save()
 
-        officer_6 = OfficerFactory(first_name='Jay', last_name='Dang')
+        officer_6 = OfficerFactory(first_name="Jay", last_name="Dang")
         person_5 = PersonFactory(canonical_officer=officer_6)
         person_5.officers.add(officer_6)
         person_5.save()
@@ -1666,66 +1726,71 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'Ray',
-                'kind': 'officers',
-                'limit': 1,
-                'offset': 1,
-            }
+                "q": "Ray",
+                "kind": "officers",
+                "limit": 1,
+                "offset": 1,
+            },
         )
 
         expected_results = [
             {
-                'id': officer_4.id,
-                'name': officer_4.name,
-                'is_starred': False,
-                'use_of_forces_count': 1,
-                'badges': ["200"],
-                'complaints_count': officer_4.person.all_complaints_count,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_4.id,
+                "name": officer_4.name,
+                "is_starred": False,
+                "use_of_forces_count": 1,
+                "badges": ["200"],
+                "complaints_count": officer_4.person.all_complaints_count,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'recruit',
+                "latest_rank": "recruit",
             }
         ]
 
-        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&q=Ray'
-        expected_next = f'http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&offset=2&q=Ray'
+        expected_previous = (
+            f"http://testserver/api/departments/{department.slug}"
+            "/search/?kind=officers&limit=1&q=Ray"
+        )
+        expected_next = (
+            f"http://testserver/api/departments/{department.slug}"
+            "/search/?kind=officers&limit=1&offset=2&q=Ray"
+        )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] == expected_previous
-        assert response.data['next'] == expected_next
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 3
+        assert response.data["previous"] == expected_previous
+        assert response.data["next"] == expected_next
+        assert response.data["results"] == expected_results
 
     def test_search_news_articles_with_empty_results(self):
         officer = OfficerFactory()
         department = DepartmentFactory()
-        source = NewsArticleSourceFactory(source_display_name='Source')
+        source = NewsArticleSourceFactory(source_display_name="Source")
 
         NewsArticleFactory(
-            title='Document title keyword',
-            content='Text content',
+            title="Document title keyword",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
 
         news_article_1 = NewsArticleFactory(
-            title='News article keyword1',
-            content='Text content 1',
-            source=source)
+            title="News article keyword1", content="Text content 1", source=source
+        )
         news_article_2 = NewsArticleFactory(
-            title='News article 2',
-            content='Text content keyword 2',
+            title="News article 2",
+            content="Text content keyword 2",
             source=source,
         )
         news_article_3 = NewsArticleFactory(
-            title='Document title',
-            content='Text content',
+            title="Document title",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
@@ -1743,45 +1808,45 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'Sean',
-                'kind': 'news_articles',
-            }
+                "q": "Sean",
+                "kind": "news_articles",
+            },
         )
 
         expected_results = []
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 0
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 0
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
+        assert response.data["results"] == expected_results
 
     def test_search_news_articles_success(self):
         department = DepartmentFactory()
         officer = OfficerFactory(department=department)
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
-        source = NewsArticleSourceFactory(source_display_name='Source')
+        source = NewsArticleSourceFactory(source_display_name="Source")
 
         NewsArticleFactory(
-            title='Document title keyword',
-            content='Text content',
+            title="Document title keyword",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
 
         news_article_1 = NewsArticleFactory(
-            title='News article skeyword1',
-            content='Text content 1',
+            title="News article skeyword1",
+            content="Text content 1",
             source=source,
         )
         news_article_2 = NewsArticleFactory(
-            title='Document title',
-            content='Text content',
+            title="Document title",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
@@ -1797,68 +1862,68 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'keyword',
-                'kind': 'news_articles',
-            }
+                "q": "keyword",
+                "kind": "news_articles",
+            },
         )
 
         expected_results = [
             {
-                'id': news_article_1.id,
-                'source_name': 'Source',
-                'title': news_article_1.title,
-                'url': news_article_1.url,
-                'date': str(news_article_1.published_date),
-                'author': news_article_1.author,
-                'content': news_article_1.content,
-                'content_highlight': None,
-                'author_highlight': None
+                "id": news_article_1.id,
+                "source_name": "Source",
+                "title": news_article_1.title,
+                "url": news_article_1.url,
+                "date": str(news_article_1.published_date),
+                "author": news_article_1.author,
+                "content": news_article_1.content,
+                "content_highlight": None,
+                "author_highlight": None,
             },
         ]
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 1
-        assert response.data['previous'] is None
-        assert response.data['next'] is None
-        assert response.data['results'] == expected_results
+        assert response.data["count"] == 1
+        assert response.data["previous"] is None
+        assert response.data["next"] is None
+        assert response.data["results"] == expected_results
 
     def test_search_news_articles_with_limit_and_offset(self):
         department = DepartmentFactory()
         officer = OfficerFactory(department=department)
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
-        source = NewsArticleSourceFactory(source_display_name='Source')
+        source = NewsArticleSourceFactory(source_display_name="Source")
 
         NewsArticleFactory(
-            title='Document title keyword',
-            content='Text content',
+            title="Document title keyword",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
 
         news_article_1 = NewsArticleFactory(
-            title='News article keyword',
-            content='Text content',
+            title="News article keyword",
+            content="Text content",
             source=source,
         )
         news_article_2 = NewsArticleFactory(
-            title='News article 2',
-            content='Text content keyword 2',
+            title="News article 2",
+            content="Text content keyword 2",
             source=source,
         )
         news_article_3 = NewsArticleFactory(
-            title='Document title',
-            content='Text content',
+            title="Document title",
+            content="Text content",
             source=source,
-            author='dummy'
+            author="dummy",
         )
         news_article_4 = NewsArticleFactory(
-            title='Documented title keyword',
-            content='Text content',
+            title="Documented title keyword",
+            content="Text content",
             source=source,
-            author='keyword'
+            author="keyword",
         )
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
@@ -1878,22 +1943,28 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse('api:departments-search', kwargs={'pk': department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.slug}),
             {
-                'q': 'keyword',
-                'kind': 'news_articles',
-                'limit': '1',
-                'offset': '1',
-            }
+                "q": "keyword",
+                "kind": "news_articles",
+                "limit": "1",
+                "offset": "1",
+            },
         )
 
-        expected_previous = f'http://testserver/api/departments/{department.slug}/search/?kind=news_articles&limit=1&q=keyword'
-        expected_next = f'http://testserver/api/departments/{department.slug}/search/?kind=news_articles&limit=1&offset=2&q=keyword'
+        expected_previous = (
+            f"http://testserver/api/departments/{department.slug}"
+            "/search/?kind=news_articles&limit=1&q=keyword"
+        )
+        expected_next = (
+            f"http://testserver/api/departments/{department.slug}"
+            "/search/?kind=news_articles&limit=1&offset=2&q=keyword"
+        )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 3
-        assert response.data['previous'] == expected_previous
-        assert response.data['next'] == expected_next
+        assert response.data["count"] == 3
+        assert response.data["previous"] == expected_previous
+        assert response.data["next"] == expected_next
 
     def test_migratory_list_success(self):
         start_department = DepartmentFactory()
@@ -1912,7 +1983,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             year=2019,
             month=4,
             day=5,
-            left_reason='Resignation',
+            left_reason="Resignation",
         )
 
         event = EventFactory(
@@ -1933,38 +2004,44 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=8,
         )
 
-        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
-        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department.location))
+        start_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(
+                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
+            )
+        )
+        end_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(r"[-+]?(?:\d*\.\d+|\d+)", end_department.location)
+        )
 
         expected_result = {
-            'nodes': {
+            "nodes": {
                 start_department.slug: {
-                    'name': start_department.name,
-                    'location': start_department_location,
+                    "name": start_department.name,
+                    "location": start_department_location,
                 },
                 end_department.slug: {
-                    'name': end_department.name,
-                    'location': end_department_location,
+                    "name": end_department.name,
+                    "location": end_department_location,
                 },
             },
-            'graphs': [
+            "graphs": [
                 {
-                    'start_node': start_department.slug,
-                    'end_node': end_department.slug,
-                    'start_location': start_department_location,
-                    'end_location': end_department_location,
-                    'year': 2019,
-                    'date': parse_date(event.year, event.month, event.day),
-                    'officer_name': officer_1.name,
-                    'officer_id': officer_1.id,
-                    'left_reason': 'Resignation',
+                    "start_node": start_department.slug,
+                    "end_node": end_department.slug,
+                    "start_location": start_department_location,
+                    "end_location": end_department_location,
+                    "year": 2019,
+                    "date": parse_date(event.year, event.month, event.day),
+                    "officer_name": officer_1.name,
+                    "officer_id": officer_1.id,
+                    "left_reason": "Resignation",
                 },
-            ]
+            ],
         }
 
-        response = self.client.get(
-            reverse('api:departments-migratory')
-        )
+        response = self.client.get(reverse("api:departments-migratory"))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
@@ -2006,38 +2083,44 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=8,
         )
 
-        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
-        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department.location))
+        start_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(
+                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
+            )
+        )
+        end_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(r"[-+]?(?:\d*\.\d+|\d+)", end_department.location)
+        )
 
         expected_result = {
-            'nodes': {
+            "nodes": {
                 start_department.slug: {
-                    'name': start_department.name,
-                    'location': start_department_location,
+                    "name": start_department.name,
+                    "location": start_department_location,
                 },
                 end_department.slug: {
-                    'name': end_department.name,
-                    'location': end_department_location,
+                    "name": end_department.name,
+                    "location": end_department_location,
                 },
             },
-            'graphs': [
+            "graphs": [
                 {
-                    'start_node': start_department.slug,
-                    'end_node': end_department.slug,
-                    'start_location': start_department_location,
-                    'end_location': end_department_location,
-                    'year': 2019,
-                    'date': parse_date(event.year, event.month, event.day),
-                    'officer_name': officer_1.name,
-                    'officer_id': officer_1.id,
-                    'left_reason': None,
+                    "start_node": start_department.slug,
+                    "end_node": end_department.slug,
+                    "start_location": start_department_location,
+                    "end_location": end_department_location,
+                    "year": 2019,
+                    "date": parse_date(event.year, event.month, event.day),
+                    "officer_name": officer_1.name,
+                    "officer_id": officer_1.id,
+                    "left_reason": None,
                 },
-            ]
+            ],
         }
 
-        response = self.client.get(
-            reverse('api:departments-migratory')
-        )
+        response = self.client.get(reverse("api:departments-migratory"))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
@@ -2096,14 +2179,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             day=8,
         )
 
-        expected_result = {
-            'nodes': {},
-            'graphs': []
-        }
+        expected_result = {"nodes": {}, "graphs": []}
 
-        response = self.client.get(
-            reverse('api:departments-migratory')
-        )
+        response = self.client.get(reverse("api:departments-migratory"))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
@@ -2131,7 +2209,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             year=2019,
             month=4,
             day=5,
-            left_reason='Resignation',
+            left_reason="Resignation",
         )
 
         event = EventFactory(
@@ -2176,38 +2254,46 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             kind=UOF_RECEIVE,
         )
 
-        start_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', start_department.location))
-        end_department_location = tuple(float(coordinate) for coordinate in findall(r'[-+]?(?:\d*\.\d+|\d+)', end_department1.location))
+        start_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(
+                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
+            )
+        )
+        end_department_location = tuple(
+            float(coordinate)
+            for coordinate in findall(
+                r"[-+]?(?:\d*\.\d+|\d+)", end_department1.location
+            )
+        )
 
         expected_result = {
-            'nodes': {
+            "nodes": {
                 start_department.slug: {
-                    'name': start_department.name,
-                    'location': start_department_location,
+                    "name": start_department.name,
+                    "location": start_department_location,
                 },
                 end_department1.slug: {
-                    'name': end_department1.name,
-                    'location': end_department_location,
+                    "name": end_department1.name,
+                    "location": end_department_location,
                 },
             },
-            'graphs': [
+            "graphs": [
                 {
-                    'start_node': start_department.slug,
-                    'end_node': end_department1.slug,
-                    'start_location': start_department_location,
-                    'end_location': end_department_location,
-                    'year': 2019,
-                    'date': parse_date(event.year, event.month, event.day),
-                    'officer_name': officer_1.name,
-                    'officer_id': officer_1.id,
-                    'left_reason': 'Resignation',
+                    "start_node": start_department.slug,
+                    "end_node": end_department1.slug,
+                    "start_location": start_department_location,
+                    "end_location": end_department_location,
+                    "year": 2019,
+                    "date": parse_date(event.year, event.month, event.day),
+                    "officer_name": officer_1.name,
+                    "officer_id": officer_1.id,
+                    "left_reason": "Resignation",
                 },
-            ]
+            ],
         }
 
-        response = self.client.get(
-            reverse('api:departments-migratory')
-        )
+        response = self.client.get(reverse("api:departments-migratory"))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result

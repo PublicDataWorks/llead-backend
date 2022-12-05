@@ -1,6 +1,9 @@
 -r base.txt
 -r test.txt
 
+
+isort==5.10.1
+black==22.10.0
 flake8==3.8.4
 django-debug-toolbar==3.2.1
 ipdb==0.13.4

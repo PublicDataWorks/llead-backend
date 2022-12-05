@@ -5,54 +5,56 @@ from news_articles.models import (
     CrawledPost,
     CrawlerError,
     CrawlerLog,
+    ExcludeOfficer,
+    MatchedSentence,
     MatchingKeyword,
     NewsArticle,
     NewsArticleSource,
-    ExcludeOfficer,
-    MatchedSentence,
 )
 
 
 class NewsArticleOfficersFilter(admin.SimpleListFilter):
-    title = 'Officers'
-    parameter_name = 'officers'
+    title = "Officers"
+    parameter_name = "officers"
 
     def lookups(self, request, model_admin):
         return (
-            ('exist', 'Has officers'),
-            ('exclude', 'Has excluded officers'),
-            ('not_exist', 'Does not have any officers'),
+            ("exist", "Has officers"),
+            ("exclude", "Has excluded officers"),
+            ("not_exist", "Does not have any officers"),
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'exist':
+        if self.value() == "exist":
             return queryset.filter(matched_sentences__officers__isnull=False).distinct()
-        if self.value() == 'exclude':
-            return queryset.filter(matched_sentences__excluded_officers__isnull=False).distinct()
-        if self.value() == 'not_exist':
+        if self.value() == "exclude":
+            return queryset.filter(
+                matched_sentences__excluded_officers__isnull=False
+            ).distinct()
+        if self.value() == "not_exist":
             return queryset.filter(matched_sentences__officers__isnull=True).distinct()
 
 
 class NewsArticleContentFilter(admin.SimpleListFilter):
-    title = 'Content'
-    parameter_name = 'empty'
+    title = "Content"
+    parameter_name = "empty"
 
     def lookups(self, request, model_admin):
         return (
-            ('exist', 'Has content'),
-            ('not_exist', 'Does not have content'),
+            ("exist", "Has content"),
+            ("not_exist", "Does not have content"),
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'exist':
-            return queryset.exclude(content='').distinct()
-        if self.value() == 'not_exist':
-            return queryset.filter(content='').distinct()
+        if self.value() == "exist":
+            return queryset.exclude(content="").distinct()
+        if self.value() == "not_exist":
+            return queryset.filter(content="").distinct()
 
 
 class CustomNameFilter(admin.SimpleListFilter):
-    title = 'Source'
-    parameter_name = 'source_display_name'
+    title = "Source"
+    parameter_name = "source_display_name"
 
     def lookups(self, request, model_admin):
         return super().lookups(request, model_admin)
@@ -63,11 +65,11 @@ class CustomNameFilter(admin.SimpleListFilter):
 
 class MatchedSentenceInlineAdmin(admin.TabularInline):
     model = MatchedSentence
-    fields = ('text', 'extracted_keywords', 'officers')
+    fields = ("text", "extracted_keywords", "officers")
     show_change_link = True
     can_delete = False
     extra = 0
-    list_display = ('text', 'extracted_keywords')
+    list_display = ("text", "extracted_keywords")
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover
@@ -77,52 +79,63 @@ class MatchedSentenceInlineAdmin(admin.TabularInline):
 
 
 class NewsArticleAdmin(ModelAdmin):
-    list_filter = (NewsArticleOfficersFilter, NewsArticleContentFilter, 'source__source_display_name')
-    list_display = ('id', 'source', 'author', 'title')
+    list_filter = (
+        NewsArticleOfficersFilter,
+        NewsArticleContentFilter,
+        "source__source_display_name",
+    )
+    list_display = ("id", "source", "author", "title")
     inlines = [MatchedSentenceInlineAdmin]
 
 
 class MatchedArticleOfficersFilter(admin.SimpleListFilter):
-    title = 'Officers'
-    parameter_name = 'officers'
+    title = "Officers"
+    parameter_name = "officers"
 
     def lookups(self, request, model_admin):
         return (
-            ('exist', 'Has officers'),
-            ('exclude', 'Has excluded officers'),
-            ('not_exist', 'Does not have any officers'),
+            ("exist", "Has officers"),
+            ("exclude", "Has excluded officers"),
+            ("not_exist", "Does not have any officers"),
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'exist':
+        if self.value() == "exist":
             return queryset.filter(officers__isnull=False).distinct()
-        if self.value() == 'exclude':
+        if self.value() == "exclude":
             return queryset.filter(excluded_officers__isnull=False).distinct()
-        if self.value() == 'not_exist':
+        if self.value() == "not_exist":
             return queryset.filter(officers__isnull=True).distinct()
 
 
 class MatchedSentenceAdmin(ModelAdmin):
     list_filter = (MatchedArticleOfficersFilter,)
-    list_display = ('id', 'article', 'extracted_keywords')
-    raw_id_fields = ('officers', 'excluded_officers', 'article')
+    list_display = ("id", "article", "extracted_keywords")
+    raw_id_fields = ("officers", "excluded_officers", "article")
 
 
 class CrawledPostAdmin(ModelAdmin):
-    list_display = ('source', 'post_guid')
+    list_display = ("source", "post_guid")
 
 
 class CrawlerErrorInlineAdmin(admin.TabularInline):
     model = CrawlerError
-    fields = ('error_message',)
+    fields = ("error_message",)
     show_change_link = True
     can_delete = False
-    list_display = ('response_url', 'response_status_code', 'error_message')
+    list_display = ("response_url", "response_status_code", "error_message")
 
 
 class CrawlerLogAdmin(ModelAdmin):
     inlines = [CrawlerErrorInlineAdmin]
-    list_display = ('source', 'status', 'created_at', 'created_rows', 'error_rows', 'updated_at')
+    list_display = (
+        "source",
+        "status",
+        "created_at",
+        "created_rows",
+        "error_rows",
+        "updated_at",
+    )
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover
@@ -146,8 +159,8 @@ class CrawlerErrorAdmin(ModelAdmin):
 
 
 class NewsArticleSourceAdmin(ModelAdmin):
-    list_display = ('source_name', 'source_display_name')
-    readonly_fields = ('source_name', )
+    list_display = ("source_name", "source_display_name")
+    readonly_fields = ("source_name",)
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover
@@ -157,14 +170,14 @@ class NewsArticleSourceAdmin(ModelAdmin):
 
 
 class MatchingKeywordAdmin(ModelAdmin):
-    list_display = ('keywords', 'ran_at', 'status')
-    readonly_fields = ('ran_at', )
+    list_display = ("keywords", "ran_at", "status")
+    readonly_fields = ("ran_at",)
 
     def status(self, obj):
         if obj == MatchingKeyword.objects.last():
-            return 'Up-to-date'
+            return "Up-to-date"
         else:
-            return 'Out-of-date'
+            return "Out-of-date"
 
     def has_change_permission(self, request, obj=None):
         return False  # pragma: no cover
@@ -175,25 +188,25 @@ class MatchingKeywordAdmin(ModelAdmin):
 
 class OfficerInlineAdmin(admin.TabularInline):
     model = ExcludeOfficer.officers.through
-    verbose_name_plural = 'Officers'
+    verbose_name_plural = "Officers"
     extra = 1
-    raw_id_fields = ('officer', )
+    raw_id_fields = ("officer",)
 
 
 class ExcludeOfficerAdmin(ModelAdmin):
-    list_display = ('officers_list', 'ran_at', 'status')
-    readonly_fields = ('ran_at', )
-    raw_id_fields = ('officers',)
+    list_display = ("officers_list", "ran_at", "status")
+    readonly_fields = ("ran_at",)
+    raw_id_fields = ("officers",)
     inlines = [OfficerInlineAdmin]
 
     def status(self, obj):
         if obj == ExcludeOfficer.objects.last():
-            return 'Up-to-date'
+            return "Up-to-date"
         else:
-            return 'Out-of-date'
+            return "Out-of-date"
 
     def officers_list(self, obj):
-        officers_list = ', '.join([officer.name for officer in obj.officers.all()])
+        officers_list = ", ".join([officer.name for officer in obj.officers.all()])
         return f'{officers_list[:100]}{"..." if len(officers_list) > 100 else ""}'
 
     def has_change_permission(self, request, obj=None):  # pragma: no cover

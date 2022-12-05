@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from django.utils import timezone
 
-from news_articles.services import ProcessMatchingArticle, ProcessExcludeArticleOfficer
+from news_articles.services import ProcessExcludeArticleOfficer, ProcessMatchingArticle
 from utils.cache_utils import flush_news_article_related_caches
 from utils.search_index import rebuild_search_index
 

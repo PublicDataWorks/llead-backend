@@ -5,5 +5,5 @@ from q_and_a.factories import SectionFactory
 
 class SectionTestCase(TestCase):
     def test_str(selfs):
-        section = SectionFactory(name='Name')
-        assert str(section) == 'Name'
+        section = SectionFactory(name="Name")
+        assert str(section) == "Name"

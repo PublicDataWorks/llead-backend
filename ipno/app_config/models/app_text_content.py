@@ -1,7 +1,8 @@
 from django.db import models
 
-from utils.models import TimeStampsModel
 from martor.models import MartorField
+
+from utils.models import TimeStampsModel
 
 
 class AppTextContent(TimeStampsModel):

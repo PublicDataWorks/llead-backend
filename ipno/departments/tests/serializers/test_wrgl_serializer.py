@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from departments.serializers import WrglFileSerializer
 from departments.factories import WrglFileFactory
+from departments.serializers import WrglFileSerializer
 
 
 class WrglFileSerializerTestCase(TestCase):
@@ -10,11 +10,11 @@ class WrglFileSerializerTestCase(TestCase):
 
         result = WrglFileSerializer(wrgl_file).data
         assert result == {
-            'id': wrgl_file.id,
-            'name': wrgl_file.name,
-            'slug': wrgl_file.slug,
-            'description': wrgl_file.description,
-            'url': wrgl_file.url,
-            'download_url': wrgl_file.download_url,
-            'default_expanded': wrgl_file.default_expanded,
+            "id": wrgl_file.id,
+            "name": wrgl_file.name,
+            "slug": wrgl_file.slug,
+            "description": wrgl_file.description,
+            "url": wrgl_file.url,
+            "download_url": wrgl_file.download_url,
+            "default_expanded": wrgl_file.default_expanded,
         }
