@@ -1,6 +1,6 @@
-from shared.serializers.es_serializers.base_es_serializer import BaseESSerializer
-from shared.serializers import DocumentSearchSerializer
 from documents.models import Document
+from shared.serializers import DocumentSearchSerializer
+from shared.serializers.es_serializers.base_es_serializer import BaseESSerializer
 
 
 class DocumentsESSerializer(BaseESSerializer):

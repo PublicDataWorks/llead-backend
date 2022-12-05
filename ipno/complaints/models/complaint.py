@@ -4,7 +4,9 @@ from utils.models import TimeStampsModel
 
 
 class Complaint(TimeStampsModel):
-    allegation_uid = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    allegation_uid = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True
+    )
     tracking_id = models.CharField(max_length=255, null=True, blank=True)
     uid = models.CharField(max_length=255, null=True, blank=True)
     case_number = models.CharField(max_length=255, null=True, blank=True)
@@ -41,12 +43,18 @@ class Complaint(TimeStampsModel):
     incident_location = models.CharField(max_length=255, null=True, blank=True)
     disposition_desc = models.CharField(max_length=255, null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', blank=True, related_name='complaints')
-    departments = models.ManyToManyField('departments.Department', blank=True, related_name='complaints')
-    events = models.ManyToManyField('officers.Event', blank=True, related_name='complaints')
+    officers = models.ManyToManyField(
+        "officers.Officer", blank=True, related_name="complaints"
+    )
+    departments = models.ManyToManyField(
+        "departments.Department", blank=True, related_name="complaints"
+    )
+    events = models.ManyToManyField(
+        "officers.Event", blank=True, related_name="complaints"
+    )
 
     class Meta:
-        unique_together = ('allegation_uid',)
+        unique_together = ("allegation_uid",)
 
     def __str__(self):
-        return f'{self.id} - {self.allegation_uid[:5]}'
+        return f"{self.id} - {self.allegation_uid[:5]}"

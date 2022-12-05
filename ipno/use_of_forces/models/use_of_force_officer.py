@@ -13,10 +13,21 @@ class UseOfForceOfficer(TimeStampsModel):
     years_of_service = models.IntegerField(null=True, blank=True)
     officer_injured = models.CharField(max_length=255, null=True, blank=True)
 
-    officer = models.ForeignKey('officers.Officer', on_delete=models.CASCADE, null=True, related_name='uof_officers')
+    officer = models.ForeignKey(
+        "officers.Officer",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="uof_officers",
+    )
     use_of_force = models.ForeignKey(
-        'use_of_forces.UseOfForce', on_delete=models.CASCADE, null=True, related_name='uof_officers'
+        "use_of_forces.UseOfForce",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="uof_officers",
     )
 
     class Meta:
-        unique_together = ('uof_uid', 'uid',)
+        unique_together = (
+            "uof_uid",
+            "uid",
+        )

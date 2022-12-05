@@ -5,7 +5,11 @@ from departments.factories import DepartmentFactory
 from officers.factories import OfficerFactory
 from people.factories import PersonFactory
 from people.models import Person
-from utils.count_data import count_complaints, calculate_officer_fraction, calculate_complaint_fraction
+from utils.count_data import (
+    calculate_complaint_fraction,
+    calculate_officer_fraction,
+    count_complaints,
+)
 
 
 class CountComplaintsTestCase(TestCase):
@@ -42,9 +46,9 @@ class CountComplaintsTestCase(TestCase):
 
 class CalculateOfficerFractionTestCase(TestCase):
     def test_calculate_officer_fraction(self):
-        department_1 = DepartmentFactory(name='Orleans PD')
-        department_2 = DepartmentFactory(name='New Orleans PD')
-        department_3 = DepartmentFactory(name='New Orleans Parish Sheriff Office')
+        department_1 = DepartmentFactory(name="Orleans PD")
+        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_3 = DepartmentFactory(name="New Orleans Parish Sheriff Office")
 
         department_1_officers = OfficerFactory.create_batch(45)
         department_2_officers = OfficerFactory.create_batch(180)

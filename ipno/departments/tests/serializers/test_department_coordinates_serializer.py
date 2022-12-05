@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from departments.serializers import DepartmentCoordinateSerializer
 from departments.factories import DepartmentFactory
+from departments.serializers import DepartmentCoordinateSerializer
 
 
 class DepartmentCoodinateSerializerTestCase(TestCase):
@@ -10,7 +10,7 @@ class DepartmentCoodinateSerializerTestCase(TestCase):
 
         result = DepartmentCoordinateSerializer(department).data
         assert result == {
-            'id': department.slug,
-            'name': department.name,
-            'location': department.location,
+            "id": department.slug,
+            "name": department.name,
+            "location": department.location,
         }

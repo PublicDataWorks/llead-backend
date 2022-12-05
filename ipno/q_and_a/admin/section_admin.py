@@ -1,7 +1,8 @@
 from django.contrib import admin
+
 from adminsortable2.admin import SortableAdminMixin
 
-from q_and_a.models import Section, Question
+from q_and_a.models import Question, Section
 
 
 class QuestionInlineAdmin(admin.StackedInline):
@@ -10,7 +11,7 @@ class QuestionInlineAdmin(admin.StackedInline):
 
 
 class SectionAdmin(SortableAdminMixin, admin.ModelAdmin):
-    list_display = ('order', 'name')
+    list_display = ("order", "name")
     inlines = (QuestionInlineAdmin,)
 
 

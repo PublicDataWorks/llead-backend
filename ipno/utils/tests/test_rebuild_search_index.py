@@ -6,16 +6,15 @@ from utils.search_index import rebuild_search_index
 
 
 class SearchIndexTestCase(TestCase):
-    @patch('documents.documents.DocumentESDoc.rebuild_index')
-    @patch('officers.documents.OfficerESDoc.rebuild_index')
-    @patch('departments.documents.DepartmentESDoc.rebuild_index')
+    @patch("documents.documents.DocumentESDoc.rebuild_index")
+    @patch("officers.documents.OfficerESDoc.rebuild_index")
+    @patch("departments.documents.DepartmentESDoc.rebuild_index")
     def test_rebuild_search_index(
-            self,
-            department_rebuild_index,
-            officer_rebuild_index,
-            document_rebuild_index,
+        self,
+        department_rebuild_index,
+        officer_rebuild_index,
+        document_rebuild_index,
     ):
-
         rebuild_search_index()
 
         department_rebuild_index.assert_called()

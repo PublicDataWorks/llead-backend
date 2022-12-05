@@ -1,7 +1,7 @@
 from django.db import models
 
-from utils.models import TimeStampsModel
 from data.constants import IMPORT_LOG_STATUSES
+from utils.models import TimeStampsModel
 
 
 class ImportLog(TimeStampsModel):
