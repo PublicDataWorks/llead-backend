@@ -1,7 +1,6 @@
 from gevent import monkey
 from psycogreen.gevent import patch_psycopg
 
-
 bind = "0.0.0.0:8000"
 loglevel = "info"
 accesslog = None

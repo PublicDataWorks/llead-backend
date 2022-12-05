@@ -1,8 +1,9 @@
 import datetime
 from functools import cached_property
 
-import pytz
 from rest_framework import serializers
+
+import pytz
 
 from app_config.constants import DEFAULT_RECENT_DAYS
 from app_config.models import AppValueConfig
@@ -13,7 +14,7 @@ from utils.data_utils import format_data_period
 
 
 class DepartmentDetailsSerializer(serializers.Serializer):
-    id = serializers.CharField(source='slug')
+    id = serializers.CharField(source="slug")
     name = serializers.CharField()
     city = serializers.CharField()
     parish = serializers.CharField()
@@ -35,8 +36,12 @@ class DepartmentDetailsSerializer(serializers.Serializer):
 
     @cached_property
     def _get_recent_day(self):
-        recent_date_config = AppValueConfig.objects.filter(name='ANALYTIC_RECENT_DAYS').first()
-        recent_date = int(recent_date_config.value) if recent_date_config else DEFAULT_RECENT_DAYS
+        recent_date_config = AppValueConfig.objects.filter(
+            name="ANALYTIC_RECENT_DAYS"
+        ).first()
+        recent_date = (
+            int(recent_date_config.value) if recent_date_config else DEFAULT_RECENT_DAYS
+        )
 
         return datetime.datetime.now(pytz.utc) - datetime.timedelta(days=recent_date)
 
@@ -47,16 +52,24 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         officers = obj.officers.all()
         matched_sentences = MatchedSentence.objects.filter(officers__in=officers).all()
 
-        return NewsArticle.objects.filter(matched_sentences__in=matched_sentences).distinct().count()
+        return (
+            NewsArticle.objects.filter(matched_sentences__in=matched_sentences)
+            .distinct()
+            .count()
+        )
 
     def get_recent_news_articles_count(self, obj):
         officers = obj.officers.all()
         matched_sentences = MatchedSentence.objects.filter(officers__in=officers).all()
 
-        return NewsArticle.objects.filter(
-            matched_sentences__in=matched_sentences,
-            published_date__gt=self._get_recent_day,
-        ).distinct().count()
+        return (
+            NewsArticle.objects.filter(
+                matched_sentences__in=matched_sentences,
+                published_date__gt=self._get_recent_day,
+            )
+            .distinct()
+            .count()
+        )
 
     def get_documents_count(self, obj):
         return obj.documents.count()
@@ -74,7 +87,9 @@ class DepartmentDetailsSerializer(serializers.Serializer):
         return obj.complaints.count()
 
     def get_sustained_complaints_count(self, obj):
-        return obj.complaints.filter(disposition=ALLEGATION_DISPOSITION_SUSTAINED).count()
+        return obj.complaints.filter(
+            disposition=ALLEGATION_DISPOSITION_SUSTAINED
+        ).count()
 
     def get_incident_force_count(self, obj):
         return obj.events.filter(kind=UOF_OCCUR).count()

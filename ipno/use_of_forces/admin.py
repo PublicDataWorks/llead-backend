@@ -5,20 +5,23 @@ from .models import UseOfForce, UseOfForceCitizen, UseOfForceOfficer
 
 
 class UseOfForceAdmin(ModelAdmin):
-    list_display = ('id', 'created_at', 'updated_at')
-    search_fields = ('uof_uid', )
-    raw_id_fields = ('department',)
+    list_display = ("id", "created_at", "updated_at")
+    search_fields = ("uof_uid",)
+    raw_id_fields = ("department",)
 
 
 class UseOfForceOfficerAdmin(ModelAdmin):
-    list_display = ('id', 'created_at', 'updated_at')
-    search_fields = ('uof_uid', )
-    raw_id_fields = ('officer', 'use_of_force')
+    list_display = ("id", "created_at", "updated_at")
+    search_fields = ("uof_uid",)
+    raw_id_fields = ("officer", "use_of_force")
 
 
 class UseOfForceCitizenAdmin(ModelAdmin):
-    list_display = ('id', 'created_at', 'updated_at')
-    search_fields = ('uof_uid', 'uof_citizen_uid', )
+    list_display = ("id", "created_at", "updated_at")
+    search_fields = (
+        "uof_uid",
+        "uof_citizen_uid",
+    )
 
 
 admin.site.register(UseOfForce, UseOfForceAdmin)

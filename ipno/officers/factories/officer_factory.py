@@ -7,8 +7,8 @@ from officers.models import Officer
 
 fake = Faker()
 
-RACES = ['white', 'black']
-GENDERS = ['male', 'female']
+RACES = ["white", "black"]
+GENDERS = ["male", "female"]
 
 
 class OfficerFactory(factory.django.DjangoModelFactory):
@@ -25,4 +25,6 @@ class OfficerFactory(factory.django.DjangoModelFactory):
     race = factory.LazyFunction(lambda: random.choice(RACES))
     sex = factory.LazyFunction(lambda: random.choice(GENDERS))
     is_name_changed = factory.LazyFunction(lambda: fake.boolean())
-    complaint_fraction = factory.LazyFunction(lambda: fake.pyfloat(min_value=0, max_value=1))
+    complaint_fraction = factory.LazyFunction(
+        lambda: fake.pyfloat(min_value=0, max_value=1)
+    )

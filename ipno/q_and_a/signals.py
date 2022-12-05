@@ -8,4 +8,4 @@ from utils.cache_utils import delete_cache
 @receiver(post_save, sender=Section)
 @receiver(post_save, sender=Question)
 def app_config_cache(*args, **kwargs):
-    delete_cache('api:q-and-a-list')
+    delete_cache("api:q-and-a-list")

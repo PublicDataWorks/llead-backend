@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from data.models import WrglRepo, ImportLog
+from data.models import ImportLog, WrglRepo
 
 
 class WrglRepoAdmin(admin.ModelAdmin):
-    list_display = ('data_model', 'repo_name', 'commit_hash', 'updated_at')
+    list_display = ("data_model", "repo_name", "commit_hash", "updated_at")
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover
@@ -18,15 +18,15 @@ class WrglRepoAdmin(admin.ModelAdmin):
 
 class ImportLogAdmin(admin.ModelAdmin):
     list_display = (
-        'data_model',
-        'repo_name',
-        'commit_hash',
-        'status',
-        'created_rows',
-        'updated_rows',
-        'deleted_rows',
-        'started_at',
-        'finished_at',
+        "data_model",
+        "repo_name",
+        "commit_hash",
+        "status",
+        "created_rows",
+        "updated_rows",
+        "deleted_rows",
+        "started_at",
+        "finished_at",
     )
 
     def has_add_permission(self, request, obj=None):

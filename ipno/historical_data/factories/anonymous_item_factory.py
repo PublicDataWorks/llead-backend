@@ -1,7 +1,7 @@
 import factory
 import pytz
-from faker import Faker
 from factory.django import DjangoModelFactory
+from faker import Faker
 
 from historical_data.models import AnonymousItem
 

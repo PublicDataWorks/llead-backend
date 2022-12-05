@@ -1,3 +1,4 @@
 [flake8]
-max-line-length = 160
-exclude = .git,.pytest_cache,__pycache__,venv,coverage
+max-line-length = 120
+exclude = .git,.pytest_cache,__pycache__,venv,coverage,*/migrations/*
+extend-ignore = E203,

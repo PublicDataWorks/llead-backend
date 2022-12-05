@@ -6,7 +6,7 @@ from utils.models import TimeStampsModel
 class DocumentManager(models.Manager):
     def prefetch_departments(self):
         return self.get_queryset().prefetch_related(
-            'departments',
+            "departments",
         )
 
 
@@ -36,13 +36,17 @@ class Document(TimeStampsModel):
     incident_date = models.DateField(null=True, blank=True)
     text_content = models.TextField(null=True, blank=True)
 
-    officers = models.ManyToManyField('officers.Officer', blank=True, related_name='documents')
-    departments = models.ManyToManyField('departments.Department', blank=True, related_name='documents')
+    officers = models.ManyToManyField(
+        "officers.Officer", blank=True, related_name="documents"
+    )
+    departments = models.ManyToManyField(
+        "departments.Department", blank=True, related_name="documents"
+    )
 
     objects = DocumentManager()
 
     class Meta:
-        unique_together = ('docid', 'hrg_no', 'matched_uid', 'agency')
+        unique_together = ("docid", "hrg_no", "matched_uid", "agency")
 
     def __str__(self):
-        return f'{self.id} - {self.title[:50]}...'
+        return f"{self.id} - {self.title[:50]}..."

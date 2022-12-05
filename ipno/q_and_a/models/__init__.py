@@ -1,5 +1,4 @@
-from .section import Section
 from .question import Question
+from .section import Section
 
-
-__all__ = ['Section', 'Question']
+__all__ = ["Section", "Question"]

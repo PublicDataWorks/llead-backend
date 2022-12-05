@@ -9,7 +9,7 @@ from utils.cache_utils import custom_cache
 class QAndAViewSet(viewsets.ViewSet):
     @custom_cache
     def list(self, request):
-        sections = Section.objects.prefetch_related('questions').all()
+        sections = Section.objects.prefetch_related("questions").all()
 
         serializer = QAndASerializer(sections, many=True)
         return Response(serializer.data)

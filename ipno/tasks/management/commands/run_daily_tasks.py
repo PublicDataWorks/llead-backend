@@ -1,7 +1,8 @@
-from django.core.management import call_command, BaseCommand
-from django.utils import timezone
 import logging
 import traceback
+
+from django.core.management import BaseCommand, call_command
+from django.utils import timezone
 
 from tasks.constants import DAILY_TASK
 from tasks.models import Task, TaskLog
@@ -24,7 +25,10 @@ class Command(BaseCommand):
                 task_log.finished_at = timezone.now()
                 task_log.save()
             except Exception:
-                traceback_msg = f'Error when running command {task_command}:\n{traceback.format_exc()}'
+                traceback_msg = (
+                    "Error when running command"
+                    f" {task_command}:\n{traceback.format_exc()}"
+                )
                 logger.error(traceback_msg)
                 task_log.error_message = traceback_msg
                 task_log.save()

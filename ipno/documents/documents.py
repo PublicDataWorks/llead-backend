@@ -1,12 +1,13 @@
 from django.conf import settings
-from django_elasticsearch_dsl import fields
 
+from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 
-from .models import Document
+from utils.analyzers import autocomplete_analyzer, search_analyzer, text_analyzer
 from utils.es_doc import ESDoc
 from utils.es_index import ESIndex
-from utils.analyzers import autocomplete_analyzer, search_analyzer, text_analyzer
+
+from .models import Document
 
 
 @registry.register_document
@@ -20,17 +21,25 @@ class DocumentESDoc(ESDoc):
 
     def get_indexing_queryset(self):
         return self.get_queryset().prefetch_related(
-            'officers',
-            'departments',
+            "officers",
+            "departments",
         )
 
     id = fields.IntegerField()
-    title = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
-    text_content = fields.TextField(analyzer=text_analyzer, search_analyzer=search_analyzer)
-    officer_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    title = fields.TextField(
+        analyzer=autocomplete_analyzer, search_analyzer=search_analyzer
+    )
+    text_content = fields.TextField(
+        analyzer=text_analyzer, search_analyzer=search_analyzer
+    )
+    officer_names = fields.TextField(
+        analyzer=autocomplete_analyzer, search_analyzer=search_analyzer
+    )
     officer_badges = fields.TextField()
     department_ids = fields.IntegerField()
-    department_names = fields.TextField(analyzer=autocomplete_analyzer, search_analyzer=search_analyzer)
+    department_names = fields.TextField(
+        analyzer=autocomplete_analyzer, search_analyzer=search_analyzer
+    )
     department_slugs = fields.TextField()
 
     def prepare_officer_names(self, instance):

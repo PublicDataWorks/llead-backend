@@ -7,10 +7,10 @@ from utils.count_data import count_complaints
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        complaint = WrglRepo.objects.filter(repo_name='complaint').first()
+        complaint = WrglRepo.objects.filter(repo_name="complaint").first()
         if complaint:
-            complaint.repo_name = 'allegation'
-            complaint.commit_hash = ''
+            complaint.repo_name = "allegation"
+            complaint.commit_hash = ""
             complaint.save()
 
         new_complaint_imported = NewComplaintImporter().process()

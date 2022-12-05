@@ -6,11 +6,12 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.dev')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 
     try:
         from gevent import monkey
         from psycogreen.gevent import patch_psycopg
+
         monkey.patch_all()
         patch_psycopg()
     except ImportError:
@@ -27,5 +28,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

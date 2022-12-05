@@ -5,9 +5,9 @@ from django.urls import reverse
 
 from rest_framework.response import Response
 
+from departments.models import Department
 from news_articles.models import MatchedSentence
 from officers.models import Officer
-from departments.models import Department
 
 
 def custom_cache(func):
@@ -35,15 +35,17 @@ def flush_news_article_related_caches(start_time=None):
     officers = Officer.objects.filter(matched_sentences__in=matched_sentences)
     departments = Department.objects.filter(officers__in=officers).distinct()
 
-    delete_cache('api:news-articles-list')
-    delete_cache('api:analytics-summary')
+    delete_cache("api:news-articles-list")
+    delete_cache("api:analytics-summary")
 
     for officer in officers:
-        delete_cache('api:officers-timeline', url_kwargs={'pk': officer.id})
+        delete_cache("api:officers-timeline", url_kwargs={"pk": officer.id})
 
     for department in departments:
-        delete_cache('api:departments-detail', url_kwargs={'pk': department.slug})
-        delete_cache('api:departments-news-articles', url_kwargs={'pk': department.slug})
+        delete_cache("api:departments-detail", url_kwargs={"pk": department.slug})
+        delete_cache(
+            "api:departments-news-articles", url_kwargs={"pk": department.slug}
+        )
 
 
 def delete_cache(pattern, url_kwargs=None):

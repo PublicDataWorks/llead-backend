@@ -14,7 +14,12 @@ class NewsArticle(TimeStampsModel):
     is_hidden = models.BooleanField(default=False)
 
     is_processed = models.BooleanField(default=False)
-    source = models.ForeignKey('news_articles.NewsArticleSource', null=True, blank=True, on_delete=models.CASCADE)
+    source = models.ForeignKey(
+        "news_articles.NewsArticleSource",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
 
     def __str__(self):
         return f'{self.title[:50]}{"..." if len(self.title) > 50 else ""}'
