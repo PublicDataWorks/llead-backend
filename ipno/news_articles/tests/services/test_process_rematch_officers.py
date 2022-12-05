@@ -1,9 +1,9 @@
 from unittest.mock import Mock, call
 
+from django.conf import settings
+from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
-from django.db.models import F
-from django.conf import settings
 
 from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
 from data.factories import WrglRepoFactory
@@ -34,19 +34,21 @@ class ProcessRematchOfficersTestCase(TestCase):
         assert result[0].id == officer.id
 
     def test_get_officer_data(self):
-        officer1a = OfficerFactory(first_name='first_name1', last_name='last_name1')
-        officer1b = OfficerFactory(first_name='first_name1', last_name='last_name1')
-        officer2 = OfficerFactory(first_name='first_name2', last_name='last_name2')
+        officer1a = OfficerFactory(first_name="first_name1", last_name="last_name1")
+        officer1b = OfficerFactory(first_name="first_name1", last_name="last_name1")
+        officer2 = OfficerFactory(first_name="first_name2", last_name="last_name2")
 
-        officers_data = self.pro.get_officers_data([
-            officer1a,
-            officer1b,
-            officer2,
-        ])
+        officers_data = self.pro.get_officers_data(
+            [
+                officer1a,
+                officer1b,
+                officer2,
+            ]
+        )
 
         expected_result = {
-            'first_name1 last_name1': [officer1a.id, officer1b.id],
-            'first_name2 last_name2': [officer2.id]
+            "first_name1 last_name1": [officer1a.id, officer1b.id],
+            "first_name2 last_name2": [officer2.id],
         }
 
         assert officers_data == expected_result
@@ -59,7 +61,7 @@ class ProcessRematchOfficersTestCase(TestCase):
         WrglRepoFactory(
             data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME,
             repo_name=settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
-            commit_hash='old_commit',
+            commit_hash="old_commit",
         )
 
         def mock_generate_csv_file_side_effect(data, columns):
@@ -74,35 +76,48 @@ class ProcessRematchOfficersTestCase(TestCase):
 
         mock_wrgl_generator_object = Mock(
             generate_csv_file=mock_generate_csv_file,
-            create_wrgl_commit=mock_create_wrgl_commit
+            create_wrgl_commit=mock_create_wrgl_commit,
         )
         self.pro.wrgl = mock_wrgl_generator_object
 
         MatchedSentenceOfficer = MatchedSentence.officers.through
-        data = MatchedSentenceOfficer.objects.order_by(
-            'officer_id',
-            'matchedsentence__article__id'
-        ).annotate(
-            uid=F('officer__uid'),
-            created_at=F('matchedsentence__created_at'),
-            newsarticle_id=F('matchedsentence__article__id'),
-        ).all()
+        data = (
+            MatchedSentenceOfficer.objects.order_by(
+                "officer_id", "matchedsentence__article__id"
+            )
+            .annotate(
+                uid=F("officer__uid"),
+                created_at=F("matchedsentence__created_at"),
+                newsarticle_id=F("matchedsentence__article__id"),
+            )
+            .all()
+        )
         self.pro.officers = [officer]
 
         self.pro.commit_data_to_wrgl()
 
         assert mock_generate_csv_file.call_args[0][0].first().uid == data.first().uid
-        assert mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
+        assert (
+            mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
+        )
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'data'
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 officer(s)'
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][4] == 'news_article_officer'
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "data"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == "+ 1 officer(s)"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == [
+            "uid",
+            "newsarticle_id",
+        ]
+        assert (
+            self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid
+            == data.first().uid
+        )
+        assert (
+            self.pro.wrgl.create_wrgl_commit.call_args[0][4] == "news_article_officer"
+        )
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
-        assert news_wrgl.commit_hash == 'hash'
+        assert news_wrgl.commit_hash == "hash"
 
     def test_process_without_officers(self):
         self.pro.officers = []
@@ -112,10 +127,10 @@ class ProcessRematchOfficersTestCase(TestCase):
         assert not result
 
     def test_process_with_officers(self):
-        OfficerFactory(first_name='first_name1', last_name='last_name1')
-        OfficerFactory(first_name='first_name1', last_name='last_name1')
-        officer2 = OfficerFactory(first_name='first_name2', last_name='last_name2')
-        officer3 = OfficerFactory(first_name='first_name3', last_name='last_name3')
+        OfficerFactory(first_name="first_name1", last_name="last_name1")
+        OfficerFactory(first_name="first_name1", last_name="last_name1")
+        officer2 = OfficerFactory(first_name="first_name2", last_name="last_name2")
+        officer3 = OfficerFactory(first_name="first_name3", last_name="last_name3")
 
         sent1 = MatchedSentenceFactory()
         sent2 = MatchedSentenceFactory()
@@ -150,14 +165,14 @@ class ProcessRematchOfficersTestCase(TestCase):
         WrglRepoFactory(
             data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME,
             repo_name=settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
-            commit_hash='hash',
+            commit_hash="hash",
         )
 
         self.pro.commit_data_to_wrgl()
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
-        assert news_wrgl.commit_hash == 'hash'
+        assert news_wrgl.commit_hash == "hash"
 
     def test_not_updating_commit_hash(self):
         news = NewsArticleFactory()
@@ -167,7 +182,7 @@ class ProcessRematchOfficersTestCase(TestCase):
         WrglRepoFactory(
             data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME,
             repo_name=settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
-            commit_hash='hash',
+            commit_hash="hash",
         )
 
         def mock_generate_csv_file_side_effect(data, columns):
@@ -182,32 +197,45 @@ class ProcessRematchOfficersTestCase(TestCase):
 
         mock_wrgl_generator_object = Mock(
             generate_csv_file=mock_generate_csv_file,
-            create_wrgl_commit=mock_create_wrgl_commit
+            create_wrgl_commit=mock_create_wrgl_commit,
         )
         self.pro.wrgl = mock_wrgl_generator_object
 
         MatchedSentenceOfficer = MatchedSentence.officers.through
-        data = MatchedSentenceOfficer.objects.order_by(
-            'officer_id',
-            'matchedsentence__article__id'
-        ).annotate(
-            uid=F('officer__uid'),
-            created_at=F('matchedsentence__created_at'),
-            newsarticle_id=F('matchedsentence__article__id'),
-        ).all()
+        data = (
+            MatchedSentenceOfficer.objects.order_by(
+                "officer_id", "matchedsentence__article__id"
+            )
+            .annotate(
+                uid=F("officer__uid"),
+                created_at=F("matchedsentence__created_at"),
+                newsarticle_id=F("matchedsentence__article__id"),
+            )
+            .all()
+        )
         self.pro.officers = [officer]
 
         self.pro.commit_data_to_wrgl()
 
         assert mock_generate_csv_file.call_args[0][0].first().uid == data.first().uid
-        assert mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
+        assert (
+            mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
+        )
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == 'data'
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == '+ 1 officer(s)'
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == ['uid', 'newsarticle_id']
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid == data.first().uid
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][4] == 'news_article_officer'
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "data"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == "+ 1 officer(s)"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == [
+            "uid",
+            "newsarticle_id",
+        ]
+        assert (
+            self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid
+            == data.first().uid
+        )
+        assert (
+            self.pro.wrgl.create_wrgl_commit.call_args[0][4] == "news_article_officer"
+        )
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
 
-        assert news_wrgl.commit_hash == 'hash'
+        assert news_wrgl.commit_hash == "hash"

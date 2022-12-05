@@ -1,24 +1,24 @@
-from django.db import models
-from django.utils.functional import cached_property
-from django.db.models import Prefetch, F
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+from django.db.models import F, Prefetch
+from django.utils.functional import cached_property
 
-from utils.models import TimeStampsModel
 from officers.models.event import Event
+from utils.models import TimeStampsModel
 
 
 class OfficerManager(models.Manager):
     def prefetch_events(self, other_prefetches=()):
         return self.get_queryset().prefetch_related(
             Prefetch(
-                'person__officers__events',
+                "person__officers__events",
                 queryset=Event.objects.order_by(
-                    F('year').desc(nulls_last=True),
-                    F('month').desc(nulls_last=True),
-                    F('day').desc(nulls_last=True),
-                ).prefetch_related('department')
+                    F("year").desc(nulls_last=True),
+                    F("month").desc(nulls_last=True),
+                    F("day").desc(nulls_last=True),
+                ).prefetch_related("department"),
             ),
-            *other_prefetches
+            *other_prefetches,
         )
 
 
@@ -33,25 +33,27 @@ class Officer(TimeStampsModel):
     race = models.CharField(max_length=255, null=True, blank=True)
     sex = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
-    aliases = ArrayField(models.CharField(max_length=255), default=list, null=True, blank=True)
+    aliases = ArrayField(
+        models.CharField(max_length=255), default=list, null=True, blank=True
+    )
     complaint_fraction = models.FloatField(null=True, blank=True)
 
     is_name_changed = models.BooleanField(default=False)
 
     department = models.ForeignKey(
-        'departments.Department',
+        "departments.Department",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        related_name='officers'
+        related_name="officers",
     )
 
     person = models.ForeignKey(
-        'people.Person',
+        "people.Person",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='officers'
+        related_name="officers",
     )
     objects = OfficerManager()
 
@@ -60,17 +62,20 @@ class Officer(TimeStampsModel):
 
     @property
     def name(self):
-        return ' '.join([item for item in [self.first_name, self.last_name] if item])
+        return " ".join([item for item in [self.first_name, self.last_name] if item])
 
     @property
     def badges(self):
-        return list(dict.fromkeys([
-            event.badge_no for event in self.events.all()
-            if event.badge_no
-        ]))
+        return list(
+            dict.fromkeys(
+                [event.badge_no for event in self.events.all() if event.badge_no]
+            )
+        )
 
     @cached_property
     def document_years(self):
-        return list(self.documents.filter(
-            incident_date__isnull=False,
-        ).values_list('incident_date__year', flat=True))
+        return list(
+            self.documents.filter(
+                incident_date__isnull=False,
+            ).values_list("incident_date__year", flat=True)
+        )

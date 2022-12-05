@@ -3,7 +3,7 @@ from .department_news_article_es_serializer import DepartmentNewsArticlesESSeria
 from .department_officer_es_serializer import DepartmentOfficersESSerializer
 
 __all__ = [
-    'DepartmentOfficersESSerializer',
-    'DepartmentNewsArticlesESSerializer',
-    'DepartmentDocumentsESSerializer',
+    "DepartmentOfficersESSerializer",
+    "DepartmentNewsArticlesESSerializer",
+    "DepartmentDocumentsESSerializer",
 ]

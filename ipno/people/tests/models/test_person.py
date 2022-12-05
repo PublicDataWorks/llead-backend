@@ -11,4 +11,4 @@ class PersonTestCase(TestCase):
         person.officers.add(officer)
         person.save()
 
-        assert str(person) == f'{person.id} - {officer.uid[:5]}'
+        assert str(person) == f"{person.id} - {officer.uid[:5]}"

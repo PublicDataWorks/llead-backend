@@ -9,7 +9,15 @@ class CrawlerLog(TimeStampsModel):
     created_rows = models.IntegerField(null=True)
     error_rows = models.IntegerField(null=True)
 
-    source = models.ForeignKey('news_articles.NewsArticleSource', null=True, blank=True, on_delete=models.CASCADE)
+    source = models.ForeignKey(
+        "news_articles.NewsArticleSource",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
 
     def __str__(self):
-        return f'{self.source.source_name.title()} log id {self.pk} on date {str(self.created_at.date())}'
+        return (
+            f"{self.source.source_name.title()} log id {self.pk} on date"
+            f" {str(self.created_at.date())}"
+        )

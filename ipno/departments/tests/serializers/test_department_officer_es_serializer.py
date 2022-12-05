@@ -1,10 +1,11 @@
 from unittest.mock import Mock
+
 from django.test import TestCase
 
 from departments.factories import DepartmentFactory
 from departments.serializers.es_serializers import DepartmentOfficersESSerializer
 from officers.constants import UOF_RECEIVE
-from officers.factories import OfficerFactory, EventFactory
+from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
 from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
 
@@ -79,24 +80,22 @@ class DepartmentOfficerSerializerTestCase(TestCase):
 
         use_of_force.events.add(uof_event)
 
-        docs = [
-            Mock(id=officer_1.id)
-        ]
+        docs = [Mock(id=officer_1.id)]
 
         result = DepartmentOfficersESSerializer(docs).data
 
         assert result == [
             {
-                'id': officer_1.id,
-                'name': officer_1.name,
-                'badges': ["150", "123", "250"],
-                'is_starred': False,
-                'complaints_count': officer_1.person.all_complaints_count,
-                'use_of_forces_count': 1,
-                'department': {
-                    'id': department.slug,
-                    'name': department.name,
+                "id": officer_1.id,
+                "name": officer_1.name,
+                "badges": ["150", "123", "250"],
+                "is_starred": False,
+                "complaints_count": officer_1.person.all_complaints_count,
+                "use_of_forces_count": 1,
+                "department": {
+                    "id": department.slug,
+                    "name": department.name,
                 },
-                'latest_rank': 'senior'
+                "latest_rank": "senior",
             }
         ]

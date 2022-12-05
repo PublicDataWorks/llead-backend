@@ -1,4 +1,4 @@
 class ESIndex:
     settings = {
-        'max_ngram_diff': 20,
+        "max_ngram_diff": 20,
     }

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from shared.serializers.news_article_with_text_content_serializer import NewsArticleWithTextContentSerializer
+from shared.serializers.news_article_with_text_content_serializer import (
+    NewsArticleWithTextContentSerializer,
+)
 
 
 class NewsArticleSearchSerializer(NewsArticleWithTextContentSerializer):

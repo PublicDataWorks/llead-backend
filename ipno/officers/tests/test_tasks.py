@@ -15,21 +15,17 @@ class OfficerTaskTestCase(TestCase):
 
     def test_rebuild_officer_index_successfully(self):
         department = DepartmentFactory()
-        officer = OfficerFactory(
-            id=1,
-            department=department,
-            aliases=['abc']
-        )
+        officer = OfficerFactory(id=1, department=department, aliases=["abc"])
         person = PersonFactory(canonical_officer=officer)
         person.officers.add(officer)
         person.save()
 
         rebuild_search_index()
 
-        officer.aliases = ['def']
+        officer.aliases = ["def"]
         officer.save()
 
         rebuild_officer_index(1)
 
         es_doc = OfficerESDoc.get(id=1)
-        assert es_doc.aliases == ['def']
+        assert es_doc.aliases == ["def"]

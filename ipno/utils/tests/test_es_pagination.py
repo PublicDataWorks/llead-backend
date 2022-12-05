@@ -8,7 +8,7 @@ from utils.es_pagination import ESPagination
 class ESPaginationTestCase(TestCase):
     def test_paginate_es_query(self):
         request = Mock()
-        request.query_params = {'limit': 20, 'offset': 30}
+        request.query_params = {"limit": 20, "offset": 30}
         search_result = Mock()
         search_result.hits = Mock()
         search_result.hits.total.value = 50

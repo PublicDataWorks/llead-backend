@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from shared.serializers.document_with_text_content_serializer import DocumentWithTextContentSerializer
+from shared.serializers.document_with_text_content_serializer import (
+    DocumentWithTextContentSerializer,
+)
 
 
 class DocumentSearchSerializer(DocumentWithTextContentSerializer):

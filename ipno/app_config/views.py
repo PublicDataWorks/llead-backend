@@ -1,10 +1,15 @@
 from rest_framework import viewsets
-from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 
-from app_config.models import AppValueConfig, AppTextContent, FrontPageOrder, FrontPageCard
 from app_config.constants import CMS_KEY
-from app_config.serializers import FrontPageOrderSerializer, FrontPageCardSerializer
+from app_config.models import (
+    AppTextContent,
+    AppValueConfig,
+    FrontPageCard,
+    FrontPageOrder,
+)
+from app_config.serializers import FrontPageCardSerializer, FrontPageOrderSerializer
 from utils.cache_utils import custom_cache
 
 

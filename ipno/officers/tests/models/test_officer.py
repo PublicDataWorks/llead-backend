@@ -2,27 +2,27 @@ from datetime import date
 
 from django.test.testcases import TestCase
 
-from officers.factories import OfficerFactory, EventFactory
 from documents.factories import DocumentFactory
+from officers.factories import EventFactory, OfficerFactory
 from officers.models import Officer
 
 
 class OfficerTestCase(TestCase):
     def test_name(selfs):
-        officer = OfficerFactory(first_name='David', last_name='Jonesworth')
-        assert officer.name == 'David Jonesworth'
+        officer = OfficerFactory(first_name="David", last_name="Jonesworth")
+        assert officer.name == "David Jonesworth"
 
     def test_name_with_empty_first_name(selfs):
-        officer = OfficerFactory(first_name=None, last_name='Jonesworth')
-        assert officer.name == 'Jonesworth'
+        officer = OfficerFactory(first_name=None, last_name="Jonesworth")
+        assert officer.name == "Jonesworth"
 
     def test_name_with_empty_last_name(selfs):
-        officer = OfficerFactory(first_name='David', last_name=None)
-        assert officer.name == 'David'
+        officer = OfficerFactory(first_name="David", last_name=None)
+        assert officer.name == "David"
 
     def test_empty_name(selfs):
         officer = OfficerFactory(first_name=None, last_name=None)
-        assert officer.name == ''
+        assert officer.name == ""
 
     def test_str(self):
         officer = OfficerFactory()
@@ -32,28 +32,28 @@ class OfficerTestCase(TestCase):
         officer = OfficerFactory()
         EventFactory(
             officer=officer,
-            badge_no='12435',
+            badge_no="12435",
             year=2020,
             month=5,
             day=4,
         )
         EventFactory(
             officer=officer,
-            badge_no='67893',
+            badge_no="67893",
             year=2017,
             month=None,
             day=None,
         )
         EventFactory(
             officer=officer,
-            badge_no='5432',
+            badge_no="5432",
             year=None,
             month=None,
             day=None,
         )
         EventFactory(
             officer=officer,
-            badge_no='12435',
+            badge_no="12435",
             year=2015,
             month=7,
             day=20,
@@ -68,7 +68,7 @@ class OfficerTestCase(TestCase):
 
         prefetch_officer = Officer.objects.prefetch_events()[0]
 
-        assert prefetch_officer.badges == ['12435', '67893', '5432']
+        assert prefetch_officer.badges == ["12435", "67893", "5432"]
 
     def test_document_years(self):
         officer = OfficerFactory()
