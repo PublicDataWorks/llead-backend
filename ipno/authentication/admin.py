@@ -1,20 +1,22 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 
 from authentication.models import User
 
 
 class UserCreationForm(forms.ModelForm):  # pragma: no cover
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
 
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ("email",)
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -36,7 +38,7 @@ class UserChangeForm(forms.ModelForm):  # pragma: no cover
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'is_active', 'is_admin')
+        fields = ("email", "password", "is_active", "is_admin")
 
     def clean_password(self):
         return self.initial["password"]
@@ -46,20 +48,23 @@ class UserAdmin(BaseUserAdmin):  # pragma: no cover
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'is_admin')
-    list_filter = ('is_admin',)
+    list_display = ("email", "is_admin")
+    list_filter = ("is_admin",)
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'recent_items', 'recent_queries')}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        (None, {"fields": ("email", "password", "recent_items", "recent_queries")}),
+        ("Permissions", {"fields": ("is_admin",)}),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
+            },
+        ),
     )
-    search_fields = ('email',)
-    ordering = ('email',)
+    search_fields = ("email",)
+    ordering = ("email",)
     filter_horizontal = ()
 
 

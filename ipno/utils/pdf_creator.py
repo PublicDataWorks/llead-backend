@@ -1,8 +1,15 @@
 from io import BytesIO
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
 
-from utils.constants import BASE_MARGIN, PAGE_NUMBER, PAGE_NUMBER_FONT, PAGE_SIZE, SPACER
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+
+from utils.constants import (
+    BASE_MARGIN,
+    PAGE_NUMBER,
+    PAGE_NUMBER_FONT,
+    PAGE_SIZE,
+    SPACER,
+)
 
 
 class ArticlePdfCreator:
@@ -16,19 +23,20 @@ class ArticlePdfCreator:
     def add_page_number(self, canvas, doc):
         canvas.saveState()
         canvas.setFont(
-            PAGE_NUMBER_FONT['TYPE'],
-            PAGE_NUMBER_FONT['SIZE'],
+            PAGE_NUMBER_FONT["TYPE"],
+            PAGE_NUMBER_FONT["SIZE"],
         )
-        canvas.drawCentredString(
-            PAGE_NUMBER['x'],
-            PAGE_NUMBER['y'],
-            str(doc.page)
-        )
+        canvas.drawCentredString(PAGE_NUMBER["x"], PAGE_NUMBER["y"], str(doc.page))
         canvas.restoreState()
 
     def build_body(self):
-        body = [Paragraph(paragraph['content'].replace('\n', '<br/>'), self.get_style(paragraph['style']))
-                for paragraph in self.content]
+        body = [
+            Paragraph(
+                paragraph["content"].replace("\n", "<br/>"),
+                self.get_style(paragraph["style"]),
+            )
+            for paragraph in self.content
+        ]
 
         return body
 
@@ -50,11 +58,11 @@ class ArticlePdfCreator:
             topMargin=BASE_MARGIN,
             leftMargin=BASE_MARGIN,
             rightMargin=BASE_MARGIN,
-            bottomMargin=BASE_MARGIN*2
+            bottomMargin=BASE_MARGIN * 2,
         )
 
-        header_style = self.get_style('Heading1')
-        meta_style = self.get_style('BodyText', {'fontSize': 11})
+        header_style = self.get_style("Heading1")
+        meta_style = self.get_style("BodyText", {"fontSize": 11})
 
         date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
         link_metadata = f'Source URL: <link href="{self.link}">{self.link}</link>'
@@ -64,8 +72,8 @@ class ArticlePdfCreator:
             Paragraph(self.author, meta_style) if self.author else None,
             Paragraph(date_metadata, meta_style),
             Paragraph(link_metadata, meta_style),
-            Spacer(SPACER['x'], SPACER['y']),
-            *self.build_body()
+            Spacer(SPACER["x"], SPACER["y"]),
+            *self.build_body(),
         ]
 
         flows = [item for item in raw_flows if item is not None]

@@ -11,33 +11,31 @@ class OfficerSerializer(serializers.Serializer):
     latest_rank = serializers.SerializerMethodField()
 
     def _get_all_events(self, obj):
-        if not hasattr(obj, 'all_events'):
+        if not hasattr(obj, "all_events"):
             all_officers = obj.person.officers.all()
 
             all_events = []
             for officer in all_officers:
                 all_events.extend(officer.events.all())
 
-            all_events.sort(key=lambda k: (
-                (k.year is None, -k.year if k.year is not None else None),
-                (k.month is None, -k.month if k.month is not None else None),
-                (k.day is None, -k.day if k.day is not None else None)
-            ))
-
-            setattr(
-                obj,
-                'all_events',
-                all_events
+            all_events.sort(
+                key=lambda k: (
+                    (k.year is None, -k.year if k.year is not None else None),
+                    (k.month is None, -k.month if k.month is not None else None),
+                    (k.day is None, -k.day if k.day is not None else None),
+                )
             )
+
+            setattr(obj, "all_events", all_events)
 
         return obj.all_events
 
     def get_badges(self, obj):
         events = self._get_all_events(obj)
 
-        events = list(dict.fromkeys([
-            event.badge_no for event in events if event.badge_no
-        ]))
+        events = list(
+            dict.fromkeys([event.badge_no for event in events if event.badge_no])
+        )
 
         return events
 
@@ -47,11 +45,10 @@ class OfficerSerializer(serializers.Serializer):
         all_events = self._get_all_events(obj)
 
         all_departments = {event.department for event in all_events}
-        raw_departments = list(dict.fromkeys([
-            canonical_dep,
-            *all_departments
-        ]))
-        departments = [department for department in raw_departments if department is not None]
+        raw_departments = list(dict.fromkeys([canonical_dep, *all_departments]))
+        departments = [
+            department for department in raw_departments if department is not None
+        ]
 
         return SimpleDepartmentSerializer(departments, many=True).data
 

@@ -3,12 +3,12 @@ from django.urls import reverse
 from rest_framework import status
 
 from complaints.factories import ComplaintFactory
+from departments.factories import DepartmentFactory
+from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory
 from officers.factories import OfficerFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
-from documents.factories import DocumentFactory
-from departments.factories import DepartmentFactory
 from use_of_forces.factories import UseOfForceFactory
 
 
@@ -35,15 +35,17 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
 
         UseOfForceFactory(department=department_4)
 
-        url = reverse('api:analytics-summary')
+        url = reverse("api:analytics-summary")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == ({
-            'documents_count': 8,
-            'officers_count': 5,
-            'departments_count': 6,
-            'news_articles_count': 10,
-        })
+        assert response.data == (
+            {
+                "documents_count": 8,
+                "officers_count": 5,
+                "departments_count": 6,
+                "news_articles_count": 10,
+            }
+        )
 
     def test_summary_with_related_officer(self):
         DocumentFactory.create_batch(7)
@@ -81,12 +83,14 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
 
         UseOfForceFactory(department=department_4)
 
-        url = reverse('api:analytics-summary')
+        url = reverse("api:analytics-summary")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == ({
-            'documents_count': 8,
-            'officers_count': 7,
-            'departments_count': 6,
-            'news_articles_count': 10,
-        })
+        assert response.data == (
+            {
+                "documents_count": 8,
+                "officers_count": 7,
+                "departments_count": 6,
+                "news_articles_count": 10,
+            }
+        )

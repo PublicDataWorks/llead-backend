@@ -6,7 +6,7 @@ class ESDoc(Document):
         self._index.create()
 
     def index_data(self, options={}):
-        parallel = options.get('parallel')
+        parallel = options.get("parallel")
         qs = self.get_indexing_queryset()
         self.update(qs, parallel=parallel)
 

@@ -3,10 +3,10 @@ import random
 import factory
 from faker import Faker
 
-from officers.models import Event
-from officers.factories.officer_factory import OfficerFactory
 from departments.factories import DepartmentFactory
 from officers.constants import EVENT_KINDS
+from officers.factories.officer_factory import OfficerFactory
+from officers.models import Event
 
 fake = Faker()
 

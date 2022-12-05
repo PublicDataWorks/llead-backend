@@ -20,13 +20,16 @@ class UseOfForce(TimeStampsModel):
     use_of_force_reason = models.CharField(max_length=255, null=True, blank=True)
 
     officers = models.ManyToManyField(
-        'officers.Officer',
-        through='use_of_forces.UseOfForceOfficer',
-        related_name='use_of_forces'
+        "officers.Officer",
+        through="use_of_forces.UseOfForceOfficer",
+        related_name="use_of_forces",
     )
     department = models.ForeignKey(
-        'departments.Department', on_delete=models.CASCADE, null=True, related_name='use_of_forces'
+        "departments.Department",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="use_of_forces",
     )
 
     def __str__(self):
-        return f'{self.id} - {self.uof_uid[:5]}'
+        return f"{self.id} - {self.uof_uid[:5]}"

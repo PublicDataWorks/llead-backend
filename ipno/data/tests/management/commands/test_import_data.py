@@ -6,43 +6,43 @@ from mock import patch
 
 class CreateInitialWRGLReposCommandTestCase(TestCase):
     def setUp(self):
-        patch('data.services.agency_importer.GoogleCloudService').start()
-        patch('data.services.document_importer.GoogleCloudService').start()
+        patch("data.services.agency_importer.GoogleCloudService").start()
+        patch("data.services.document_importer.GoogleCloudService").start()
 
-    @patch('django.core.cache.cache.clear')
-    @patch('utils.data_utils.compute_department_data_period')
-    @patch('utils.count_data.calculate_complaint_fraction')
-    @patch('utils.count_data.calculate_officer_fraction')
-    @patch('utils.count_data.count_complaints')
-    @patch('utils.search_index.rebuild_search_index')
-    @patch('data.services.event_importer.EventImporter.process')
-    @patch('data.services.complaint_importer.ComplaintImporter.process')
-    @patch('data.services.uof_importer.UofImporter.process')
-    @patch('data.services.uof_officer_importer.UofOfficerImporter.process')
-    @patch('data.services.uof_citizen_importer.UofCitizenImporter.process')
-    @patch('data.services.officer_importer.OfficerImporter.process')
-    @patch('data.services.document_importer.DocumentImporter.process')
-    @patch('data.services.person_importer.PersonImporter.process')
-    @patch('data.services.appeal_importer.AppealImporter.process')
-    @patch('data.services.agency_importer.AgencyImporter.process')
+    @patch("django.core.cache.cache.clear")
+    @patch("utils.data_utils.compute_department_data_period")
+    @patch("utils.count_data.calculate_complaint_fraction")
+    @patch("utils.count_data.calculate_officer_fraction")
+    @patch("utils.count_data.count_complaints")
+    @patch("utils.search_index.rebuild_search_index")
+    @patch("data.services.event_importer.EventImporter.process")
+    @patch("data.services.complaint_importer.ComplaintImporter.process")
+    @patch("data.services.uof_importer.UofImporter.process")
+    @patch("data.services.uof_officer_importer.UofOfficerImporter.process")
+    @patch("data.services.uof_citizen_importer.UofCitizenImporter.process")
+    @patch("data.services.officer_importer.OfficerImporter.process")
+    @patch("data.services.document_importer.DocumentImporter.process")
+    @patch("data.services.person_importer.PersonImporter.process")
+    @patch("data.services.appeal_importer.AppealImporter.process")
+    @patch("data.services.agency_importer.AgencyImporter.process")
     def test_call_command(
-            self,
-            agency_process_mock,
-            appeal_process_mock,
-            person_process_mock,
-            document_process_mock,
-            officer_process_mock,
-            uof_process_mock,
-            uof_officer_process_mock,
-            uof_citizen_process_mock,
-            complaint_process_mock,
-            event_process_mock,
-            rebuild_search_index_mock,
-            count_complaints_mock,
-            calculate_officer_fraction_mock,
-            calculate_complaint_fraction_mock,
-            compute_department_data_period_mock,
-            cache_clear_mock,
+        self,
+        agency_process_mock,
+        appeal_process_mock,
+        person_process_mock,
+        document_process_mock,
+        officer_process_mock,
+        uof_process_mock,
+        uof_officer_process_mock,
+        uof_citizen_process_mock,
+        complaint_process_mock,
+        event_process_mock,
+        rebuild_search_index_mock,
+        count_complaints_mock,
+        calculate_officer_fraction_mock,
+        calculate_complaint_fraction_mock,
+        compute_department_data_period_mock,
+        cache_clear_mock,
     ):
         agency_process_mock.return_value = True
         appeal_process_mock.return_value = True
@@ -54,7 +54,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         uof_citizen_process_mock.return_value = False
         complaint_process_mock.return_value = True
         event_process_mock.return_value = False
-        call_command('import_data')
+        call_command("import_data")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
@@ -73,40 +73,40 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
-    @patch('django.core.cache.cache.clear')
-    @patch('utils.data_utils.compute_department_data_period')
-    @patch('utils.count_data.calculate_complaint_fraction')
-    @patch('utils.count_data.calculate_officer_fraction')
-    @patch('utils.count_data.count_complaints')
-    @patch('utils.search_index.rebuild_search_index')
-    @patch('data.services.event_importer.EventImporter.process')
-    @patch('data.services.complaint_importer.ComplaintImporter.process')
-    @patch('data.services.uof_importer.UofImporter.process')
-    @patch('data.services.uof_officer_importer.UofOfficerImporter.process')
-    @patch('data.services.uof_citizen_importer.UofCitizenImporter.process')
-    @patch('data.services.officer_importer.OfficerImporter.process')
-    @patch('data.services.document_importer.DocumentImporter.process')
-    @patch('data.services.person_importer.PersonImporter.process')
-    @patch('data.services.appeal_importer.AppealImporter.process')
-    @patch('data.services.agency_importer.AgencyImporter.process')
+    @patch("django.core.cache.cache.clear")
+    @patch("utils.data_utils.compute_department_data_period")
+    @patch("utils.count_data.calculate_complaint_fraction")
+    @patch("utils.count_data.calculate_officer_fraction")
+    @patch("utils.count_data.count_complaints")
+    @patch("utils.search_index.rebuild_search_index")
+    @patch("data.services.event_importer.EventImporter.process")
+    @patch("data.services.complaint_importer.ComplaintImporter.process")
+    @patch("data.services.uof_importer.UofImporter.process")
+    @patch("data.services.uof_officer_importer.UofOfficerImporter.process")
+    @patch("data.services.uof_citizen_importer.UofCitizenImporter.process")
+    @patch("data.services.officer_importer.OfficerImporter.process")
+    @patch("data.services.document_importer.DocumentImporter.process")
+    @patch("data.services.person_importer.PersonImporter.process")
+    @patch("data.services.appeal_importer.AppealImporter.process")
+    @patch("data.services.agency_importer.AgencyImporter.process")
     def test_call_command_with_no_new_data(
-            self,
-            agency_process_mock,
-            appeal_process_mock,
-            person_process_mock,
-            document_process_mock,
-            officer_process_mock,
-            uof_process_mock,
-            uof_officer_process_mock,
-            uof_citizen_process_mock,
-            complaint_process_mock,
-            event_process_mock,
-            rebuild_search_index_mock,
-            count_complaints_mock,
-            calculate_officer_fraction_mock,
-            calculate_complaint_fraction_mock,
-            compute_department_data_period_mock,
-            cache_clear_mock,
+        self,
+        agency_process_mock,
+        appeal_process_mock,
+        person_process_mock,
+        document_process_mock,
+        officer_process_mock,
+        uof_process_mock,
+        uof_officer_process_mock,
+        uof_citizen_process_mock,
+        complaint_process_mock,
+        event_process_mock,
+        rebuild_search_index_mock,
+        count_complaints_mock,
+        calculate_officer_fraction_mock,
+        calculate_complaint_fraction_mock,
+        compute_department_data_period_mock,
+        cache_clear_mock,
     ):
         agency_process_mock.return_value = False
         appeal_process_mock.return_value = False
@@ -118,7 +118,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         uof_citizen_process_mock.return_value = False
         complaint_process_mock.return_value = False
         event_process_mock.return_value = False
-        call_command('import_data')
+        call_command("import_data")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()

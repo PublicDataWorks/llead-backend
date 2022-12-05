@@ -2,8 +2,8 @@ from django.test import TestCase
 
 from mock import Mock
 
-from search.serializers.es_serializers import DepartmentsESSerializer
 from departments.factories import DepartmentFactory
+from search.serializers.es_serializers import DepartmentsESSerializer
 
 
 class DepartmentsESSerializerTestCase(TestCase):
@@ -20,26 +20,26 @@ class DepartmentsESSerializerTestCase(TestCase):
         ]
         expected_result = [
             {
-                'id': department_2.slug,
-                'name': department_2.name,
-                'city': department_2.city,
-                'parish': department_2.parish,
-                'location_map_url': department_2.location_map_url,
+                "id": department_2.slug,
+                "name": department_2.name,
+                "city": department_2.city,
+                "parish": department_2.parish,
+                "location_map_url": department_2.location_map_url,
             },
             {
-                'id': department_1.slug,
-                'name': department_1.name,
-                'city': department_1.city,
-                'parish': department_1.parish,
-                'location_map_url': department_1.location_map_url,
+                "id": department_1.slug,
+                "name": department_1.name,
+                "city": department_1.city,
+                "parish": department_1.parish,
+                "location_map_url": department_1.location_map_url,
             },
             {
-                'id': department_3.slug,
-                'name': department_3.name,
-                'city': department_3.city,
-                'parish': department_3.parish,
-                'location_map_url': department_3.location_map_url,
-            }
+                "id": department_3.slug,
+                "name": department_3.name,
+                "city": department_3.city,
+                "parish": department_3.parish,
+                "location_map_url": department_3.location_map_url,
+            },
         ]
 
         result = DepartmentsESSerializer(docs).data

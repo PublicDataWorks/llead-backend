@@ -1,4 +1,4 @@
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 from django.test import TestCase
 
@@ -12,7 +12,7 @@ class CommandTestCase(TestCase):
     def setUp(self):
         self.command = Command()
 
-    @patch('tasks.management.commands.run_daily_tasks.call_command')
+    @patch("tasks.management.commands.run_daily_tasks.call_command")
     def test_handle(self, mock_call_command):
         task_1 = TaskFactory(task_type=DAILY_TASK, should_run=True)
         task_2 = TaskFactory(task_type=DAILY_TASK, should_run=True)
@@ -34,13 +34,14 @@ class CommandTestCase(TestCase):
         assert task_logs.first().finished_at
         assert not task_logs.first().error_message
 
-    @patch('tasks.management.commands.run_daily_tasks.logger.error')
-    @patch('tasks.management.commands.run_daily_tasks.call_command')
+    @patch("tasks.management.commands.run_daily_tasks.logger.error")
+    @patch("tasks.management.commands.run_daily_tasks.call_command")
     def test_handle_command_error(self, mock_call_command, mock_log_error):
         task = TaskFactory(task_type=DAILY_TASK, should_run=True)
 
         def mock_call_command_side_effect(command):
             raise Exception()
+
         mock_call_command.side_effect = mock_call_command_side_effect
 
         self.command.handle()

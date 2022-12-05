@@ -1,8 +1,13 @@
 import factory
-from faker import Faker
 from factory.django import DjangoModelFactory
+from faker import Faker
 
-from app_config.models import AppValueConfig, AppTextContent, FrontPageOrder, FrontPageCard
+from app_config.models import (
+    AppTextContent,
+    AppValueConfig,
+    FrontPageCard,
+    FrontPageOrder,
+)
 
 fake = Faker()
 

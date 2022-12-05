@@ -82,8 +82,8 @@ jobs:
           paths:
             - /home/circleci/.pyenv/versions/3.8.5/lib/python3.8/site-packages
       - run:
-          name: flake8
-          command: python -m flake8
+          name: Lint
+          command: bin/lint.sh
       - run:
           name: Tests
           command: python -m pytest --cov-report term --cov=ipno ipno

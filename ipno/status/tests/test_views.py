@@ -6,6 +6,6 @@ from rest_framework.test import APITestCase
 
 class StatusViewTestCase(APITestCase):
     def test_get(self):
-        url = reverse('status')
+        url = reverse("status")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK

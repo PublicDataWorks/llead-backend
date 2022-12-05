@@ -2,20 +2,26 @@ from django.test import TestCase
 
 from mock import Mock
 
-from people.factories import PersonFactory
-from search.serializers.es_serializers import OfficersESSerializer
-from officers.factories import OfficerFactory, EventFactory
 from departments.factories import DepartmentFactory
 from officers.constants import OFFICER_HIRE
+from officers.factories import EventFactory, OfficerFactory
+from people.factories import PersonFactory
+from search.serializers.es_serializers import OfficersESSerializer
 
 
 class OfficersESSerializerTestCase(TestCase):
     def test_serialize(self):
         department = DepartmentFactory()
 
-        officer_1 = OfficerFactory(first_name='Kenneth', last_name='Anderson', department=department)
-        officer_2 = OfficerFactory(first_name='David', last_name='Jonesworth', department=department)
-        officer_3 = OfficerFactory(first_name='Anthony', last_name='Davis', department=department)
+        officer_1 = OfficerFactory(
+            first_name="Kenneth", last_name="Anderson", department=department
+        )
+        officer_2 = OfficerFactory(
+            first_name="David", last_name="Jonesworth", department=department
+        )
+        officer_3 = OfficerFactory(
+            first_name="Anthony", last_name="Davis", department=department
+        )
         OfficerFactory()
 
         person_1 = PersonFactory(canonical_officer=officer_1)
@@ -32,7 +38,7 @@ class OfficersESSerializerTestCase(TestCase):
             officer=officer_1,
             department=department,
             kind=OFFICER_HIRE,
-            badge_no='12435',
+            badge_no="12435",
             year=2020,
             month=5,
             day=4,
@@ -101,40 +107,40 @@ class OfficersESSerializerTestCase(TestCase):
         ]
         expected_result = [
             {
-                'id': officer_2.id,
-                'name': 'David Jonesworth',
-                'badges': [],
-                'departments': [
+                "id": officer_2.id,
+                "name": "David Jonesworth",
+                "badges": [],
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'latest_rank': 'sergeant',
+                "latest_rank": "sergeant",
             },
             {
-                'id': officer_1.id,
-                'name': 'Kenneth Anderson',
-                'badges': ['12435'],
-                'departments': [
+                "id": officer_1.id,
+                "name": "Kenneth Anderson",
+                "badges": ["12435"],
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'latest_rank': 'senior',
+                "latest_rank": "senior",
             },
             {
-                'id': officer_3.id,
-                'name': 'Anthony Davis',
-                'badges': [],
-                'departments': [
+                "id": officer_3.id,
+                "name": "Anthony Davis",
+                "badges": [],
+                "departments": [
                     {
-                        'id': department.slug,
-                        'name': department.name,
+                        "id": department.slug,
+                        "name": department.name,
                     },
                 ],
-                'latest_rank': 'lieutenant',
+                "latest_rank": "lieutenant",
             },
         ]
 

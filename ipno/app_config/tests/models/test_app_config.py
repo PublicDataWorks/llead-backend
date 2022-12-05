@@ -5,5 +5,5 @@ from app_config.factories import AppValueConfig
 
 class AppConfigTestCase(TestCase):
     def test_str(selfs):
-        app_config = AppValueConfig(name='Name', value='Value')
-        assert str(app_config) == 'Name: Value'
+        app_config = AppValueConfig(name="Name", value="Value")
+        assert str(app_config) == "Name: Value"
