@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: keycloak
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "keycloak-ipno-ip"
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/issuer: "letsencrypt"
+    kubernetes.io/ingress.class: gce
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+spec:
+  tls:
+    - hosts:
+      - keycloak.llead.co
+      secretName: keycloak-cert
+  rules:
+  - host: keycloak.llead.co
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak
+            port:
+              number: 80

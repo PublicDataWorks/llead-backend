@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:19.0.1
+        args: ["start"]
+        env:
+        - name: KEYCLOAK_ADMIN
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-admin
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-admin-password
+        - name: KC_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-db-url
+        - name: KC_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-db-username
+        - name: KC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-db-password
+        - name: KC_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-conf
+              key: keycloak-host-name
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_DB
+          value: "postgres"
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /realms/master
+            port: 8080
+      - image: us.gcr.io/cloudsql-docker/gce-proxy:1.32.0-alpine
+        name: cloudsql-proxy
+        command: [ "/cloud_sql_proxy",
+                   "-instances=excellent-zoo-300106:us-central1:ipno-database-production=tcp:5432",
+                   "-verbose=false" ]
+      serviceAccountName: keycloak-ksa
