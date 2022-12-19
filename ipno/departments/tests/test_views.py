@@ -1,6 +1,5 @@
 from datetime import date, datetime
 from operator import itemgetter
-from re import findall
 from unittest.mock import patch
 
 from django.urls import reverse
@@ -11,7 +10,11 @@ import pytz
 
 from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from complaints.factories import ComplaintFactory
-from departments.factories import DepartmentFactory, WrglFileFactory
+from departments.factories import (
+    DepartmentFactory,
+    OfficerMovementFactory,
+    WrglFileFactory,
+)
 from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory, NewsArticleSourceFactory
 from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
@@ -20,7 +23,6 @@ from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
 from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
-from utils.parse_utils import parse_date
 from utils.search_index import rebuild_search_index
 
 
@@ -233,7 +235,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             "parish": department.parish,
             "address": department.address,
             "phone": department.phone,
-            "location_map_url": department.location_map_url,
+            "location": list(department.location),
             "officers_count": 3,
             "datasets_count": 3,
             "recent_datasets_count": 1,
@@ -404,8 +406,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         ]
 
         expected_previous = (
-            f"http://testserver/api/departments/{department.slug}/"
-            "search/?kind=documents&limit=1&q=keyword"
+            "http://testserver/api/departments/"
+            f"{department.slug}/search/?kind=documents&limit=1&q=keyword"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -599,7 +601,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             "parish": department.parish,
             "address": department.address,
             "phone": department.phone,
-            "location_map_url": department.location_map_url,
+            "location": list(department.location),
             "officers_count": 2,
             "datasets_count": 3,
             "recent_datasets_count": 1,
@@ -1751,10 +1753,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
             }
         ]
 
-        expected_previous = (
-            f"http://testserver/api/departments/{department.slug}"
-            "/search/?kind=officers&limit=1&q=Ray"
-        )
+        expected_previous = f"http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&q=Ray"
         expected_next = (
             f"http://testserver/api/departments/{department.slug}"
             "/search/?kind=officers&limit=1&offset=2&q=Ray"
@@ -1967,230 +1966,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         assert response.data["next"] == expected_next
 
     def test_migratory_list_success(self):
-        start_department = DepartmentFactory()
-        end_department = DepartmentFactory()
-        DepartmentFactory()
-
-        officer_1 = OfficerFactory()
-        person_1 = PersonFactory(canonical_officer=officer_1)
-        person_1.officers.add(officer_1)
-        person_1.save()
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=4,
-            day=5,
-            left_reason="Resignation",
-        )
-
-        event = EventFactory(
-            department=end_department,
-            officer=officer_1,
-            kind=OFFICER_HIRE,
-            year=2019,
-            month=6,
-            day=5,
-        )
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=UOF_OCCUR,
-            year=2019,
-            month=5,
-            day=8,
-        )
-
-        start_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(
-                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
-            )
-        )
-        end_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(r"[-+]?(?:\d*\.\d+|\d+)", end_department.location)
-        )
-
-        expected_result = {
-            "nodes": {
-                start_department.slug: {
-                    "name": start_department.name,
-                    "location": start_department_location,
-                },
-                end_department.slug: {
-                    "name": end_department.name,
-                    "location": end_department_location,
-                },
-            },
-            "graphs": [
-                {
-                    "start_node": start_department.slug,
-                    "end_node": end_department.slug,
-                    "start_location": start_department_location,
-                    "end_location": end_department_location,
-                    "year": 2019,
-                    "date": parse_date(event.year, event.month, event.day),
-                    "officer_name": officer_1.name,
-                    "officer_id": officer_1.id,
-                    "left_reason": "Resignation",
-                },
-            ],
-        }
-
-        response = self.client.get(reverse("api:departments-migratory"))
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == expected_result
-
-    def test_migratory_list_without_left_reason(self):
-        start_department = DepartmentFactory()
-        end_department = DepartmentFactory()
-        DepartmentFactory()
-
-        officer_1 = OfficerFactory()
-        person_1 = PersonFactory(canonical_officer=officer_1)
-        person_1.officers.add(officer_1)
-        person_1.save()
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=4,
-            day=5,
-        )
-
-        event = EventFactory(
-            department=end_department,
-            officer=officer_1,
-            kind=OFFICER_HIRE,
-            year=2019,
-            month=6,
-            day=5,
-        )
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=UOF_OCCUR,
-            year=2019,
-            month=5,
-            day=8,
-        )
-
-        start_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(
-                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
-            )
-        )
-        end_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(r"[-+]?(?:\d*\.\d+|\d+)", end_department.location)
-        )
-
-        expected_result = {
-            "nodes": {
-                start_department.slug: {
-                    "name": start_department.name,
-                    "location": start_department_location,
-                },
-                end_department.slug: {
-                    "name": end_department.name,
-                    "location": end_department_location,
-                },
-            },
-            "graphs": [
-                {
-                    "start_node": start_department.slug,
-                    "end_node": end_department.slug,
-                    "start_location": start_department_location,
-                    "end_location": end_department_location,
-                    "year": 2019,
-                    "date": parse_date(event.year, event.month, event.day),
-                    "officer_name": officer_1.name,
-                    "officer_id": officer_1.id,
-                    "left_reason": None,
-                },
-            ],
-        }
-
-        response = self.client.get(reverse("api:departments-migratory"))
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == expected_result
-
-    def test_migratory_list_empty(self):
-        start_department = DepartmentFactory()
-        end_department = DepartmentFactory()
-
-        officer_1 = OfficerFactory()
-        person_1 = PersonFactory(canonical_officer=officer_1)
-        person_1.officers.add(officer_1)
-        person_1.save()
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2018,
-            month=2,
-            day=3,
-        )
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=OFFICER_HIRE,
-            year=2018,
-            month=3,
-            day=3,
-        )
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=4,
-            day=5,
-        )
-
-        EventFactory(
-            department=end_department,
-            officer=officer_1,
-            kind=OFFICER_HIRE,
-            year=None,
-            month=None,
-            day=None,
-        )
-
-        EventFactory(
-            department=start_department,
-            officer=officer_1,
-            kind=UOF_OCCUR,
-            year=2019,
-            month=5,
-            day=8,
-        )
-
-        expected_result = {"nodes": {}, "graphs": []}
-
-        response = self.client.get(reverse("api:departments-migratory"))
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == expected_result
-
-    def test_migratory_list_with_no_department_location(self):
-        start_department = DepartmentFactory()
-        end_department1 = DepartmentFactory()
-        end_department2 = DepartmentFactory(location=None)
-        DepartmentFactory()
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
+        department_3 = DepartmentFactory()
 
         officer_1 = OfficerFactory()
         person_1 = PersonFactory(canonical_officer=officer_1)
@@ -2202,98 +1980,322 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_2.officers.add(officer_2)
         person_2.save()
 
-        EventFactory(
-            department=start_department,
+        officer_3 = OfficerFactory()
+        person_3 = PersonFactory(canonical_officer=officer_3)
+        person_3.officers.add(officer_3)
+        person_3.save()
+
+        officer_movement_1 = OfficerMovementFactory(
+            start_department=department_1,
+            end_department=department_2,
             officer=officer_1,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=4,
-            day=5,
-            left_reason="Resignation",
+            date=datetime(2021, 1, 2),
+        )
+        officer_movement_2 = OfficerMovementFactory(
+            start_department=department_2,
+            end_department=department_3,
+            officer=officer_2,
+            date=datetime(2021, 1, 1),
         )
 
-        event = EventFactory(
-            department=end_department1,
+        expected_result = {
+            "nodes": {
+                department_1.slug: {
+                    "name": department_1.name,
+                    "location": department_1.location,
+                },
+                department_2.slug: {
+                    "name": department_2.name,
+                    "location": department_2.location,
+                },
+                department_3.slug: {
+                    "name": department_3.name,
+                    "location": department_3.location,
+                },
+            },
+            "graphs": [
+                {
+                    "start_node": department_2.slug,
+                    "end_node": department_3.slug,
+                    "start_location": department_2.location,
+                    "end_location": department_3.location,
+                    "year": officer_movement_2.date.year,
+                    "date": officer_movement_2.date.strftime("%Y-%m-%d"),
+                    "officer_name": officer_2.name,
+                    "officer_id": officer_2.id,
+                    "left_reason": officer_movement_2.left_reason,
+                    "is_left": None,
+                },
+                {
+                    "start_node": department_1.slug,
+                    "end_node": department_2.slug,
+                    "start_location": department_1.location,
+                    "end_location": department_2.location,
+                    "year": officer_movement_1.date.year,
+                    "date": officer_movement_1.date.strftime("%Y-%m-%d"),
+                    "officer_name": officer_1.name,
+                    "officer_id": officer_1.id,
+                    "left_reason": officer_movement_1.left_reason,
+                    "is_left": None,
+                },
+            ],
+        }
+
+        response = self.client.get(reverse("api:departments-migratory"))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_empty(self):
+        expected_result = {"nodes": {}, "graphs": []}
+
+        response = self.client.get(reverse("api:departments-migratory"))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_list_with_no_department_location(self):
+        department_1 = DepartmentFactory()
+        department_2 = DepartmentFactory()
+        department_3 = DepartmentFactory(location=None)
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        officer_3 = OfficerFactory()
+        person_3 = PersonFactory(canonical_officer=officer_3)
+        person_3.officers.add(officer_3)
+        person_3.save()
+
+        officer_movement_1 = OfficerMovementFactory(
+            start_department=department_1,
+            end_department=department_2,
             officer=officer_1,
-            kind=OFFICER_HIRE,
-            year=2019,
-            month=6,
-            day=5,
+            date=datetime(2021, 1, 2),
         )
-
-        EventFactory(
-            department=start_department,
+        OfficerMovementFactory(
+            start_department=department_2,
+            end_department=department_3,
             officer=officer_2,
-            kind=OFFICER_LEFT,
-            year=2019,
-            month=5,
-            day=5,
+            date=datetime(2021, 1, 1),
         )
 
-        EventFactory(
-            department=end_department2,
-            officer=officer_2,
-            kind=OFFICER_HIRE,
-            year=2020,
-            month=6,
-            day=5,
-        )
+        expected_result = {
+            "nodes": {
+                department_1.slug: {
+                    "name": department_1.name,
+                    "location": department_1.location,
+                },
+                department_2.slug: {
+                    "name": department_2.name,
+                    "location": department_2.location,
+                },
+            },
+            "graphs": [
+                {
+                    "start_node": department_1.slug,
+                    "end_node": department_2.slug,
+                    "start_location": department_1.location,
+                    "end_location": department_2.location,
+                    "year": officer_movement_1.date.year,
+                    "date": officer_movement_1.date.strftime("%Y-%m-%d"),
+                    "officer_name": officer_1.name,
+                    "officer_id": officer_1.id,
+                    "left_reason": officer_movement_1.left_reason,
+                    "is_left": None,
+                },
+            ],
+        }
 
-        EventFactory(
-            department=start_department,
+        response = self.client.get(reverse("api:departments-migratory"))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_by_department_success(self):
+        start_department = DepartmentFactory()
+        department = DepartmentFactory()
+        end_department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        officer_3 = OfficerFactory()
+        person_3 = PersonFactory(canonical_officer=officer_3)
+        person_3.officers.add(officer_3)
+        person_3.save()
+
+        officer_movement_1 = OfficerMovementFactory(
+            start_department=start_department,
+            end_department=department,
             officer=officer_1,
-            kind=UOF_OCCUR,
-            year=2019,
-            month=5,
-            day=8,
+            date=datetime(2021, 1, 2),
         )
-
-        EventFactory(
-            department=start_department,
+        officer_movement_2 = OfficerMovementFactory(
+            start_department=department,
+            end_department=end_department,
             officer=officer_2,
-            kind=UOF_RECEIVE,
+            date=datetime(2021, 1, 1),
         )
-
-        start_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(
-                r"[-+]?(?:\d*\.\d+|\d+)", start_department.location
-            )
-        )
-        end_department_location = tuple(
-            float(coordinate)
-            for coordinate in findall(
-                r"[-+]?(?:\d*\.\d+|\d+)", end_department1.location
-            )
+        OfficerMovementFactory(
+            start_department=start_department,
+            end_department=end_department,
+            officer=officer_3,
         )
 
         expected_result = {
             "nodes": {
                 start_department.slug: {
                     "name": start_department.name,
-                    "location": start_department_location,
+                    "location": start_department.location,
                 },
-                end_department1.slug: {
-                    "name": end_department1.name,
-                    "location": end_department_location,
+                department.slug: {
+                    "name": department.name,
+                    "location": department.location,
+                },
+                end_department.slug: {
+                    "name": end_department.name,
+                    "location": end_department.location,
                 },
             },
             "graphs": [
                 {
+                    "start_node": department.slug,
+                    "end_node": end_department.slug,
+                    "start_location": department.location,
+                    "end_location": end_department.location,
+                    "year": officer_movement_2.date.year,
+                    "date": officer_movement_2.date.strftime("%Y-%m-%d"),
+                    "officer_name": officer_2.name,
+                    "officer_id": officer_2.id,
+                    "left_reason": officer_movement_2.left_reason,
+                    "is_left": True,
+                },
+                {
                     "start_node": start_department.slug,
-                    "end_node": end_department1.slug,
-                    "start_location": start_department_location,
-                    "end_location": end_department_location,
-                    "year": 2019,
-                    "date": parse_date(event.year, event.month, event.day),
+                    "end_node": department.slug,
+                    "start_location": start_department.location,
+                    "end_location": department.location,
+                    "year": officer_movement_1.date.year,
+                    "date": officer_movement_1.date.strftime("%Y-%m-%d"),
                     "officer_name": officer_1.name,
                     "officer_id": officer_1.id,
-                    "left_reason": "Resignation",
+                    "left_reason": officer_movement_1.left_reason,
+                    "is_left": False,
                 },
             ],
         }
 
-        response = self.client.get(reverse("api:departments-migratory"))
+        response = self.client.get(
+            reverse(
+                "api:departments-migratory-by-department",
+                kwargs={"pk": department.slug},
+            )
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_by_department_with_no_location(self):
+        start_department = DepartmentFactory(location=None)
+        department = DepartmentFactory()
+        end_department = DepartmentFactory()
+
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+        person_1.save()
+
+        officer_2 = OfficerFactory()
+        person_2 = PersonFactory(canonical_officer=officer_2)
+        person_2.officers.add(officer_2)
+        person_2.save()
+
+        officer_3 = OfficerFactory()
+        person_3 = PersonFactory(canonical_officer=officer_3)
+        person_3.officers.add(officer_3)
+        person_3.save()
+
+        OfficerMovementFactory(
+            start_department=start_department,
+            end_department=department,
+            officer=officer_1,
+            date=datetime(2021, 1, 2),
+        )
+        officer_movement_2 = OfficerMovementFactory(
+            start_department=department,
+            end_department=end_department,
+            officer=officer_2,
+            date=datetime(2021, 1, 1),
+        )
+        OfficerMovementFactory(
+            start_department=start_department,
+            end_department=end_department,
+            officer=officer_3,
+        )
+
+        expected_result = {
+            "nodes": {
+                department.slug: {
+                    "name": department.name,
+                    "location": department.location,
+                },
+                end_department.slug: {
+                    "name": end_department.name,
+                    "location": end_department.location,
+                },
+            },
+            "graphs": [
+                {
+                    "start_node": department.slug,
+                    "end_node": end_department.slug,
+                    "start_location": department.location,
+                    "end_location": end_department.location,
+                    "year": officer_movement_2.date.year,
+                    "date": officer_movement_2.date.strftime("%Y-%m-%d"),
+                    "officer_name": officer_2.name,
+                    "officer_id": officer_2.id,
+                    "left_reason": officer_movement_2.left_reason,
+                    "is_left": True,
+                },
+            ],
+        }
+
+        response = self.client.get(
+            reverse(
+                "api:departments-migratory-by-department",
+                kwargs={"pk": department.slug},
+            )
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_result
+
+    def test_migratory_by_department_empty(self):
+        department = DepartmentFactory()
+
+        expected_result = {"nodes": {}, "graphs": []}
+
+        response = self.client.get(
+            reverse(
+                "api:departments-migratory-by-department",
+                kwargs={"pk": department.slug},
+            )
+        )
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == expected_result
