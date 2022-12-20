@@ -1,6 +1,7 @@
 ---
 orbs:
-  gcp-gke: circleci/gcp-gke@1.1.0
+  gcp-cli: circleci/gcp-cli@3.0.1
+  gcp-gke: circleci/gcp-gke@2.0.0
 
 defaults:
   - &gcloud-env
@@ -127,10 +128,8 @@ jobs:
           command: |
             docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildtag)
             docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$DOCKER_PRETAG-latest
-      - gcp-gke/install
-      - gcp-gke/update-kubeconfig-with-credentials:
-          cluster: $GOOGLE_CLUSTER_NAME
-          perform-login: true
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin"
       - run:
           name: Push image
           command: |
@@ -141,18 +140,20 @@ jobs:
 
   django_migrate:
     description: Migrate database
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01
     environment: *gcloud-env
     steps:
       - run: *set-gcloud-service-key
       - run: *set-deploy-env
       - attach_workspace:
           at: /tmp/workspace
-      - gcp-gke/install
+      - checkout
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin kubectl"
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: $GOOGLE_CLUSTER_NAME
-          perform-login: true
-      - checkout
+          use_gke_cloud_auth_plugin: true
       - run:
           name: Start job
           command: |
@@ -160,17 +161,19 @@ jobs:
 
   django_collect_static:
     description: Collect static
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01
     environment: *gcloud-env
     steps:
       - run: *set-gcloud-service-key
       - run: *set-deploy-env
       - attach_workspace:
           at: /tmp/workspace
-      - gcp-gke/install
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin kubectl"
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: $GOOGLE_CLUSTER_NAME
-          perform-login: true
+          use_gke_cloud_auth_plugin: true
       - checkout
       - run:
           name: Collect static
@@ -179,7 +182,8 @@ jobs:
 
   deploy:
     description: Deploy application to Google Kubernetes Engine
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01
     environment: *gcloud-env
     steps:
       - checkout
@@ -187,10 +191,11 @@ jobs:
       - run: *set-deploy-env
       - attach_workspace:
           at: /tmp/workspace
-      - gcp-gke/install
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin kubectl"
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: $GOOGLE_CLUSTER_NAME
-          perform-login: true
+          use_gke_cloud_auth_plugin: true
       - run:
           name: Create initial project config
           command: |
