@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: celery-app
-          image: us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:backend-staging-latest
+          image: us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:${BACKEND_IMAGE_TAG}
           imagePullPolicy: Always
           resources:
             requests:
