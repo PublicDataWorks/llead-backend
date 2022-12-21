@@ -11,6 +11,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
 
     @patch("django.core.cache.cache.clear")
     @patch("utils.data_utils.compute_department_data_period")
+    @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
     @patch("utils.count_data.calculate_complaint_fraction")
     @patch("utils.count_data.calculate_officer_fraction")
     @patch("utils.count_data.count_complaints")
@@ -41,6 +42,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         count_complaints_mock,
         calculate_officer_fraction_mock,
         calculate_complaint_fraction_mock,
+        migrate_officer_movement_mock,
         compute_department_data_period_mock,
         cache_clear_mock,
     ):
@@ -70,11 +72,13 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         count_complaints_mock.assert_called()
         calculate_officer_fraction_mock.assert_called()
         calculate_complaint_fraction_mock.assert_called()
+        migrate_officer_movement_mock.assert_called()
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
     @patch("django.core.cache.cache.clear")
     @patch("utils.data_utils.compute_department_data_period")
+    @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
     @patch("utils.count_data.calculate_complaint_fraction")
     @patch("utils.count_data.calculate_officer_fraction")
     @patch("utils.count_data.count_complaints")
@@ -105,6 +109,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         count_complaints_mock,
         calculate_officer_fraction_mock,
         calculate_complaint_fraction_mock,
+        migrate_officer_movement_mock,
         compute_department_data_period_mock,
         cache_clear_mock,
     ):
@@ -134,5 +139,6 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         count_complaints_mock.assert_not_called()
         calculate_officer_fraction_mock.assert_not_called()
         calculate_complaint_fraction_mock.assert_not_called()
+        migrate_officer_movement_mock.assert_not_called()
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
