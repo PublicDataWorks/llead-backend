@@ -20,7 +20,7 @@ class DepartmentDetailsSerializer(serializers.Serializer):
     parish = serializers.CharField()
     phone = serializers.CharField()
     address = serializers.CharField()
-    location_map_url = serializers.CharField()
+    location = serializers.ListField()
 
     officers_count = serializers.SerializerMethodField()
     datasets_count = serializers.SerializerMethodField()

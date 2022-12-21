@@ -8,6 +8,7 @@ from data.services import (
     ComplaintImporter,
     DocumentImporter,
     EventImporter,
+    MigrateOfficerMovement,
     OfficerImporter,
     PersonImporter,
     UofCitizenImporter,
@@ -65,6 +66,9 @@ class Command(BaseCommand):
 
             print("Calculate complaint fraction")
             calculate_complaint_fraction()
+
+            print("Migrate officer movements")
+            MigrateOfficerMovement().process()
 
         if any(
             [

@@ -1,8 +1,8 @@
 from itertools import chain
 
-from django.db.models import BooleanField, Count, Prefetch, Sum
-from django.db.models.expressions import Case, F, Value, When
-from django.db.models.fields import IntegerField
+from django.db.models import Count, Prefetch, Q
+from django.db.models.expressions import Case, Value, When
+from django.db.models.fields import BooleanField
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from departments.constants import DEPARTMENTS_LIMIT
-from departments.models import Department
+from departments.models import Department, OfficerMovement
 from departments.serializers import (
-    DepartmentCoordinateSerializer,
     DepartmentDetailsSerializer,
     DepartmentDocumentSerializer,
     DepartmentNewsArticleSerializer,
     DepartmentOfficerSerializer,
+    OfficerMovementSerializer,
     WrglFileSerializer,
 )
 from departments.serializers.es_serializers import (
@@ -27,9 +27,7 @@ from departments.serializers.es_serializers import (
 )
 from documents.models import Document
 from news_articles.models import MatchedSentence, NewsArticle
-from officers.constants import OFFICER_HIRE, OFFICER_LEFT
-from officers.models import Event, Officer
-from people.models import Person
+from officers.models import Officer
 from search.queries import (
     DocumentsSearchQuery,
     NewsArticlesSearchQuery,
@@ -38,7 +36,6 @@ from search.queries import (
 from shared.serializers import DepartmentSerializer
 from utils.cache_utils import custom_cache
 from utils.es_pagination import ESPagination
-from utils.parse_utils import parse_date
 
 
 class DepartmentsViewSet(viewsets.ViewSet):
@@ -241,116 +238,23 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="migratory")
     @custom_cache
     def migratory(self, request):
-        have_left_hire_officers = Officer.objects.annotate(
-            left_count=Sum(
-                Case(
-                    When(events__kind=OFFICER_LEFT, then=1), output_field=IntegerField()
-                )
-            ),
-            hire_count=Sum(
-                Case(
-                    When(events__kind=OFFICER_HIRE, then=1), output_field=IntegerField()
-                )
-            ),
-        ).filter(left_count__gt=0, hire_count__gt=0)
-
-        people = (
-            Person.objects.prefetch_related(
-                "officers",
-                Prefetch(
-                    "officers__events",
-                    queryset=Event.objects.order_by(
-                        F("year").desc(nulls_last=True),
-                        F("month").desc(nulls_last=True),
-                        F("day").desc(nulls_last=True),
-                    )
-                    .filter(
-                        kind__in=[OFFICER_LEFT, OFFICER_HIRE],
-                        department__location__isnull=False,
-                    )
-                    .select_related("officer", "department"),
-                    to_attr="prefetch_hire_left_events",
-                ),
+        officer_movements = (
+            OfficerMovement.objects.select_related(
+                "start_department",
+                "end_department",
+                "officer",
             )
-            .filter(officers__in=have_left_hire_officers)
-            .distinct()
-        )
-        migrated_officers = []
-        graphs = []
-
-        migrated_department = set()
-
-        for person in people:
-            officers = person.officers.all()
-            hire_left_events = {}
-
-            for officer in officers:
-                hire_left_officer_events = officer.prefetch_hire_left_events
-                for event in hire_left_officer_events:
-                    event_date = parse_date(event.year, event.month, event.day)
-
-                    if (
-                        event_date
-                        and (event.officer.id, event_date, event.kind)
-                        not in hire_left_events
-                    ):
-                        hire_left_events[(event.officer.id, event_date, event.kind)] = (
-                            event_date,
-                            event,
-                        )
-
-            hire_left_dates = list(hire_left_events.values())
-            hire_left_dates.sort(key=lambda x: x[0])
-            lines = []
-
-            for index in range(0, len(hire_left_dates) - 1):
-                if (
-                    hire_left_dates[index][1].department
-                    != hire_left_dates[index + 1][1].department
-                    and hire_left_dates[index][1].kind == OFFICER_LEFT
-                    and hire_left_dates[index + 1][1].kind == OFFICER_HIRE
-                ):
-                    lines.append((hire_left_dates[index], hire_left_dates[index + 1]))
-
-            if len(lines) > 0:
-                migrated_officers.append(officers[0])
-                migratory_event = {}
-
-                for line in lines:
-                    migratory_event["start_node"] = line[0][1].department.slug
-                    migratory_event["end_node"] = line[1][1].department.slug
-                    migratory_event["start_location"] = line[0][1].department.location
-                    migratory_event["end_location"] = line[1][1].department.location
-                    migratory_event["year"] = line[1][1].year
-                    migratory_event["date"] = line[1][0]
-                    migratory_event["officer_name"] = line[0][1].officer.name
-                    migratory_event["officer_id"] = line[0][1].officer.id
-                    migratory_event["left_reason"] = line[0][1].left_reason
-                    graphs.append(migratory_event)
-
-                    migrated_department.add(line[0][1].department.slug)
-                    migrated_department.add(line[1][1].department.slug)
-
-        graphs.sort(key=lambda obj: obj["date"])
-
-        departments = (
-            Department.objects.filter(
-                slug__in=migrated_department,
-                location__isnull=False,
+            .filter(
+                start_department__location__isnull=False,
+                end_department__location__isnull=False,
             )
-            .order_by("slug")
-            .distinct()
+            .order_by(
+                "date",
+            )
         )
-        serialized_departments = DepartmentCoordinateSerializer(
-            departments, many=True
-        ).data
 
-        nodes = {}
-        for department in serialized_departments:
-            nodes[department["id"]] = {
-                "name": department["name"],
-                "location": department["location"],
-            }
+        graphs = OfficerMovementSerializer(officer_movements, many=True).data
+        nodes = self._get_nodes(officer_movements)
 
         return Response(
             {
@@ -358,3 +262,59 @@ class DepartmentsViewSet(viewsets.ViewSet):
                 "graphs": graphs,
             }
         )
+
+    @action(detail=True, methods=["get"], url_path="migratory-by-department")
+    @custom_cache
+    def migratory_by_department(self, request, pk):
+        department = get_object_or_404(Department, slug=pk)
+
+        officer_movements = (
+            OfficerMovement.objects.select_related(
+                "start_department",
+                "end_department",
+                "officer",
+            )
+            .filter(
+                Q(start_department__location__isnull=False),
+                Q(end_department__location__isnull=False),
+                Q(start_department=department) | Q(end_department=department),
+            )
+            .annotate(
+                is_left=Case(
+                    When(start_department=department, then=True),
+                    output_field=BooleanField(),
+                    default=False,
+                )
+            )
+            .order_by(
+                "date",
+            )
+        )
+
+        graphs = OfficerMovementSerializer(officer_movements, many=True).data
+        nodes = self._get_nodes(officer_movements)
+
+        return Response(
+            {
+                "nodes": nodes,
+                "graphs": graphs,
+            }
+        )
+
+    def _get_nodes(self, officer_movements):
+        start_departments = officer_movements.values_list(
+            "start_department__id", flat=True
+        )
+        end_departments = officer_movements.values_list("end_department__id", flat=True)
+        department_ids = list(set(chain(start_departments, end_departments)))
+        departments = Department.objects.filter(id__in=department_ids).order_by("slug")
+
+        nodes = {}
+
+        for department in departments:
+            nodes[department.slug] = {
+                "name": department.name,
+                "location": department.location,
+            }
+
+        return nodes
