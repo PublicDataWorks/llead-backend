@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 from django.conf import settings
 from django.test.testcases import TestCase, override_settings
 
-import pytest
 from mock import Mock, patch
+from structlog.testing import capture_logs
 
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.factories import WrglRepoFactory
@@ -56,10 +56,6 @@ class AgencyImporterTestCase(TestCase):
             self.agency7_data,
             self.agency7_dup_data,
         ]
-
-    @pytest.fixture(autouse=True)
-    def capfd(self, capfd):
-        self.capfd = capfd
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
     @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
@@ -137,8 +133,10 @@ class AgencyImporterTestCase(TestCase):
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         agency_importer.upload_file = mock_upload_file
 
-        result = agency_importer.process()
+        with capture_logs() as cap_logs:
+            result = agency_importer.process()
 
+        assert not cap_logs
         assert result
 
         import_log = ImportLog.objects.order_by("-created_at").last()
@@ -486,10 +484,9 @@ class AgencyImporterTestCase(TestCase):
         mock_upload_file.side_effect = ValueError
 
         agency_importer.upload_file = mock_upload_file
-        agency_importer.process()
 
-        out, err = self.capfd.readouterr()
+        with capture_logs() as cap_logs:
+            agency_importer.process()
 
-        expect_out = "Error when import department baton-rouge-pd:"
-
-        assert expect_out in out
+        assert cap_logs[0]["event"] == "Error when import department baton-rouge-pd: "
+        assert cap_logs[0]["log_level"] == "error"
