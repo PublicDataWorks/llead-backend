@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.conf import settings
 
+import structlog
 from tqdm import tqdm
 
 from data.constants import AGENCY_MODEL_NAME, MAP_IMAGES_SUB_DIR
@@ -10,6 +11,8 @@ from data.services import BaseImporter
 from departments.models import Department
 from utils.google_cloud import GoogleCloudService
 from utils.image_generator import generate_map_thumbnail
+
+logger = structlog.get_logger("IPNO")
 
 
 class AgencyImporter(BaseImporter):
@@ -76,7 +79,7 @@ class AgencyImporter(BaseImporter):
                 )
                 location_map_url = self.upload_file(upload_location, image)
             except ValueError as ex:
-                print(f"Error when import department {agency_slug}: {str(ex)}")
+                logger.error(f"Error when import department {agency_slug}: {str(ex)}")
 
         department_data = {
             "name": agency_name,

@@ -2,11 +2,14 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.text import slugify
 
+import structlog
 from tqdm import tqdm
 
 from news_articles.constants import NEWS_ARTICLE_CLOUD_SPACES
 from news_articles.models import NewsArticle
 from utils.google_cloud import GoogleCloudService
+
+logger = structlog.get_logger("IPNO")
 
 
 class Command(BaseCommand):
@@ -27,8 +30,7 @@ class Command(BaseCommand):
             file_path = self._get_gcs_path_from_url(raw_url)
 
             if not self.gcloud.is_object_exists(file_path):
-                print("invalid exist")
-                print(raw_url)
+                logger.error(f"invalid exist ${raw_url}")
                 return
 
             file_name = (
