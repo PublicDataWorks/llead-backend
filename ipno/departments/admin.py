@@ -6,7 +6,7 @@ from django.forms import Media
 from mapbox_location_field.models import AddressAutoHiddenField, LocationField
 from mapbox_location_field.widgets import AddressHiddenAdminInput, MapAdminInput
 
-from departments.models import Department, WrglFile
+from departments.models import Department, OfficerMovement, WrglFile
 from departments.tasks import rebuild_department_index
 from news_articles.models import MatchedSentence, NewsArticle
 
@@ -98,5 +98,10 @@ class WrglFileAdmin(ModelAdmin):
     )
 
 
+class OfficerMovementAdmin(ModelAdmin):
+    list_display = ("id", "start_department", "end_department", "officer")
+
+
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(WrglFile, WrglFileAdmin)
+admin.site.register(OfficerMovement, OfficerMovementAdmin)
