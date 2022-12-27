@@ -18,4 +18,5 @@ APP_TASKS = [
         "command": "run_news_articles_officers_matching",
         "task_type": DAILY_TASK,
     },
+    {"task_name": "Pre-warm APIs", "command": "pre_warm_api", "task_type": DAILY_TASK},
 ]

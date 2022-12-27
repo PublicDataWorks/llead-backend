@@ -21,6 +21,7 @@ DOCUMENTS_BUCKET_NAME = "llead-documents-staging"
 GC_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
 
 HOST = os.getenv("HOST", "https://staging.llead.co")
+SERVER_URL = os.getenv("SERVER_URL", "https://api-staging.llead.co")
 
 EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
 
