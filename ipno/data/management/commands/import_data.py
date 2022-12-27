@@ -2,6 +2,8 @@ from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.utils import timezone
 
+import structlog
+
 from data.services import (
     AgencyImporter,
     AppealImporter,
@@ -23,6 +25,8 @@ from utils.count_data import (
 )
 from utils.data_utils import compute_department_data_period
 from utils.search_index import rebuild_search_index
+
+logger = structlog.get_logger("IPNO")
 
 
 class Command(BaseCommand):
@@ -49,7 +53,7 @@ class Command(BaseCommand):
                 officer_imported,
             ]
         ):
-            print("Calculate officer fraction")
+            logger.info("Calculate officer fraction")
             calculate_officer_fraction()
 
         if any(
@@ -61,13 +65,13 @@ class Command(BaseCommand):
                 person_imported,
             ]
         ):
-            print("Counting complaints")
+            logger.info("Counting complaints")
             count_complaints()
 
-            print("Calculate complaint fraction")
+            logger.info("Calculate complaint fraction")
             calculate_complaint_fraction()
 
-            print("Migrate officer movements")
+            logger.info("Migrate officer movements")
             MigrateOfficerMovement().process()
 
         if any(
@@ -82,7 +86,7 @@ class Command(BaseCommand):
                 appeal_imported,
             ]
         ):
-            print("Counting department data period")
+            logger.info("Counting department data period")
             compute_department_data_period()
 
         if any(
@@ -99,8 +103,8 @@ class Command(BaseCommand):
                 appeal_imported,
             ]
         ):
-            print("Rebuilding search index")
+            logger.info("Rebuilding search index")
             rebuild_search_index()
 
-            print("Flushing cache table")
+            logger.info("Flushing cache table")
             cache.clear()
