@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ]; then
-  docker-compose run web python -m pytest --cov-report term --cov=ipno ipno/
+  docker-compose run --rm web python -m pytest --cov-report term --cov=ipno ipno/
 else
-  docker-compose run web python -m pytest $@
+  docker-compose run --rm web python -m pytest $@
 fi
