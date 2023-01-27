@@ -98,6 +98,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -141,12 +142,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django_db_geventpool.backends.postgresql_psycopg2",
         "NAME": env.str("POSTGRES_DB", "ipno"),
         "USER": env.str("POSTGRES_USER", "ipno"),
         "PASSWORD": env.str("POSTGRES_PASSWORD", "ipno"),
         "HOST": env.str("POSTGRES_HOST", "db"),
         "PORT": 5432,
+        "CONN_MAX_AGE": 0,
+        "OPTIONS": {"MAX_CONNS": 20, "REUSE_CONNS": 10},
     }
 }
 
