@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  db-test:
+    image: postgres:13.1
+    container_name: db-test
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    networks:
+      - db-test
+    logging:
+      driver: none
+
+  elasticsearch-itest:
+    container_name: elasticsearch-test
+    image: elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+    networks:
+      - elasticsearch-itest
+    logging:
+      driver: none
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: web-test
+    command: python ipno/manage.py runserver 0.0.0.0:9000
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.itest
+      - ELASTICSEARCH_HOST=elasticsearch-itest:9200
+    volumes:
+      - .:/code
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db-test
+      - elasticsearch-itest
+    networks:
+      - elasticsearch-itest
+      - db-test
+
+networks:
+  elasticsearch-itest:
+    driver: bridge
+  db-test:
+    driver: bridge

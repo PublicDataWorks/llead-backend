@@ -9,3 +9,4 @@ ipno/static
 secrets-*.yml
 venv/
 htmlcov/
+*.pgsql

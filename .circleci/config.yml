@@ -20,6 +20,7 @@ defaults:
   - &set-deploy-env
     name: Set deployment env
     command: |
+      echo 'export SLUG_BRANCH="${CIRCLE_BRANCH/\//-}"' >> $BASH_ENV
       if [ $CIRCLE_BRANCH == "main" ]
       then
         echo 'export DEPLOY_ENV=--production' >> $BASH_ENV
@@ -127,6 +128,7 @@ jobs:
           name: Tag image
           command: |
             docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildtag)
+            docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$SLUG_BRANCH
             docker tag ipno-backend us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$DOCKER_PRETAG-latest
       - gcp-cli/setup:
           components: "gke-gcloud-auth-plugin"
@@ -135,6 +137,7 @@ jobs:
           command: |
             gcloud auth configure-docker
             docker push us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$(cat buildtag)
+            docker push us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$SLUG_BRANCH
             docker push us.gcr.io/$GOOGLE_PROJECT_ID/ipno-backend:$DOCKER_PRETAG-latest
 
 
@@ -226,6 +229,9 @@ workflows:
                 - staging
                 - main
                 - develop
+      - push_image:
+          requires:
+            - test
 
   push_to_public:
     jobs:
@@ -234,9 +240,12 @@ workflows:
             branches:
               only:
                 - develop
-      - push_to_public:
+      - push_image:
           requires:
             - test
+      - push_to_public:
+          requires:
+            - push_image
 
   deploy_backend:
     jobs:
