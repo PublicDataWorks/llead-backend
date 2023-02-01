@@ -88,7 +88,11 @@ jobs:
           command: bin/lint.sh
       - run:
           name: Tests
-          command: python -m pytest --cov-report term --cov=ipno ipno
+          command: |
+            mkdir test-results
+            python -m pytest --cov-report term --cov=ipno ipno --junitxml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
       - run:
           name: Coveralls
           command: python -m coveralls
