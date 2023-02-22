@@ -7,7 +7,7 @@ from shared.queries.base_search_query import BaseSearchQuery
 
 class DepartmentsSearchQuery(BaseSearchQuery):
     document_klass = DepartmentESDoc
-    fields = ["name", "aliases"]
+    fields = ["agency_name", "aliases"]
     impact_factors = ["officer_fraction"]
 
     def query(self, order=None):

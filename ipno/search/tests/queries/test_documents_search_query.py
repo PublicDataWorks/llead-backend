@@ -89,8 +89,8 @@ class DocumentsSearchQueryTestCase(TestCase):
         document_4 = DocumentFactory(title="Document 4", text_content="Text content 4")
         document_5 = DocumentFactory(title="Document 5", text_content="Text content 5")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         for document in [document_1, document_2, document_5]:
             document.departments.add(department_1)

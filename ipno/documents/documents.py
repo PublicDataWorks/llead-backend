@@ -49,10 +49,10 @@ class DocumentESDoc(ESDoc):
         return [officer.badges for officer in instance.officers.all()]
 
     def prepare_department_names(self, instance):
-        return [department.name for department in instance.departments.all()]
+        return [department.agency_name for department in instance.departments.all()]
 
     def prepare_department_ids(self, instance):
         return [department.id for department in instance.departments.all()]
 
     def prepare_department_slugs(self, instance):
-        return [department.slug for department in instance.departments.all()]
+        return [department.agency_slug for department in instance.departments.all()]

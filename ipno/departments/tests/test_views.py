@@ -22,7 +22,7 @@ from officers.constants import OFFICER_HIRE, OFFICER_LEFT, UOF_OCCUR, UOF_RECEIV
 from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
-from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
+from use_of_forces.factories import UseOfForceFactory
 from utils.search_index import rebuild_search_index
 
 
@@ -49,22 +49,22 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_data = [
             {
-                "id": department_2.slug,
-                "name": department_2.name,
+                "id": department_2.agency_slug,
+                "name": department_2.agency_name,
                 "city": department_2.city,
                 "parish": department_2.parish,
                 "location_map_url": department_2.location_map_url,
             },
             {
-                "id": department_1.slug,
-                "name": department_1.name,
+                "id": department_1.agency_slug,
+                "name": department_1.agency_name,
                 "city": department_1.city,
                 "parish": department_1.parish,
                 "location_map_url": department_1.location_map_url,
             },
             {
-                "id": department_3.slug,
-                "name": department_3.name,
+                "id": department_3.agency_slug,
+                "name": department_3.agency_name,
                 "city": department_3.city,
                 "parish": department_3.parish,
                 "location_map_url": department_3.location_map_url,
@@ -229,8 +229,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_3.save()
 
         expected_result = {
-            "id": department.slug,
-            "name": department.name,
+            "id": department.agency_slug,
+            "name": department.agency_name,
             "city": department.city,
             "parish": department.parish,
             "address": department.address,
@@ -250,7 +250,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         }
 
         response = self.client.get(
-            reverse("api:departments-detail", kwargs={"pk": department.slug})
+            reverse("api:departments-detail", kwargs={"pk": department.agency_slug})
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -293,7 +293,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "keyword",
                 "kind": "documents",
@@ -311,8 +311,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "pages_count": document_2.pages_count,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "text_content": document_2.text_content,
@@ -328,8 +328,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "pages_count": document_3.pages_count,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "text_content": document_3.text_content,
@@ -376,7 +376,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "keyword",
                 "offset": 1,
@@ -396,8 +396,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "pages_count": document_2.pages_count,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "text_content": document_2.text_content,
@@ -407,7 +407,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_previous = (
             "http://testserver/api/departments/"
-            f"{department.slug}/search/?kind=documents&limit=1&q=keyword"
+            f"{department.agency_slug}/search/?kind=documents&limit=1&q=keyword"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -421,7 +421,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "keyword",
                 "kind": "documents",
@@ -595,8 +595,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_3.save()
 
         expected_result = {
-            "id": department.slug,
-            "name": department.name,
+            "id": department.agency_slug,
+            "name": department.agency_name,
             "city": department.city,
             "parish": department.parish,
             "address": department.address,
@@ -616,7 +616,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         }
 
         response = self.client.get(
-            reverse("api:departments-detail", kwargs={"pk": department.slug})
+            reverse("api:departments-detail", kwargs={"pk": department.agency_slug})
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -635,7 +635,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         wrgl_file_2 = WrglFileFactory(department=department, position=1)
 
         response = self.client.get(
-            reverse("api:departments-datasets", kwargs={"pk": department.slug})
+            reverse("api:departments-datasets", kwargs={"pk": department.agency_slug})
         )
 
         expected_result = [
@@ -692,13 +692,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.starred_officers.add(officer_2)
         department.save()
 
-        use_of_force_1 = UseOfForceFactory()
-        use_of_force_2 = UseOfForceFactory()
-        use_of_force_3 = UseOfForceFactory()
-
-        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_1)
-        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_2)
-        UseOfForceOfficerFactory(officer=officer_2, use_of_force=use_of_force_3)
+        use_of_force_1 = UseOfForceFactory(officer=officer_3)
+        use_of_force_2 = UseOfForceFactory(officer=officer_2)
+        use_of_force_3 = UseOfForceFactory(officer=officer_2)
 
         EventFactory(
             department=department,
@@ -822,7 +818,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         use_of_force_3.events.add(uof_incident_event_2)
 
         response = self.client.get(
-            reverse("api:departments-officers", kwargs={"pk": department.slug})
+            reverse("api:departments-officers", kwargs={"pk": department.agency_slug})
         )
 
         expected_result = [
@@ -834,8 +830,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["150", "200", "100", "250"],
                 "complaints_count": officer_2.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "senior",
             },
@@ -847,8 +843,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": [],
                 "complaints_count": officer_4.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "recruit",
             },
@@ -860,8 +856,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["123"],
                 "complaints_count": officer_3.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "sergeant",
             },
@@ -889,7 +885,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         department.save()
 
         response = self.client.get(
-            reverse("api:departments-officers", kwargs={"pk": department.slug})
+            reverse("api:departments-officers", kwargs={"pk": department.agency_slug})
         )
 
         expected_result = [
@@ -901,8 +897,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": [],
                 "complaints_count": starred_person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": None,
             },
@@ -914,8 +910,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": [],
                 "complaints_count": starred_person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": None,
             },
@@ -927,8 +923,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": [],
                 "complaints_count": starred_person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": None,
             },
@@ -1013,7 +1009,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence_3.save()
 
         response = self.client.get(
-            reverse("api:departments-news-articles", kwargs={"pk": department.slug})
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department.agency_slug}
+            )
         )
 
         expected_result = [
@@ -1099,7 +1097,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         matched_sentence.save()
 
         response = self.client.get(
-            reverse("api:departments-news-articles", kwargs={"pk": department.slug})
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department.agency_slug}
+            )
         )
 
         expected_result = [
@@ -1157,7 +1157,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document_3.departments.add(department)
 
         response = self.client.get(
-            reverse("api:departments-documents", kwargs={"pk": department.slug})
+            reverse("api:departments-documents", kwargs={"pk": department.agency_slug})
         )
 
         expected_result = [
@@ -1171,8 +1171,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": True,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1186,8 +1186,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": False,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1201,8 +1201,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": False,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1216,8 +1216,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": False,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1239,7 +1239,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         featured_document.departments.add(department)
 
         response = self.client.get(
-            reverse("api:departments-documents", kwargs={"pk": department.slug})
+            reverse("api:departments-documents", kwargs={"pk": department.agency_slug})
         )
 
         expected_result = [
@@ -1253,8 +1253,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": True,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1268,8 +1268,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": True,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1283,8 +1283,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "is_starred": True,
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     }
                 ],
             },
@@ -1340,7 +1340,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "Sean",
                 "kind": "officers",
@@ -1404,13 +1404,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5.officers.add(officer_6)
         person_5.save()
 
-        use_of_force_1 = UseOfForceFactory()
-        use_of_force_2 = UseOfForceFactory()
-        use_of_force_3 = UseOfForceFactory()
-
-        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
-        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
-        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
+        use_of_force_1 = UseOfForceFactory(officer=officer_5)
+        use_of_force_2 = UseOfForceFactory(officer=officer_3)
+        use_of_force_3 = UseOfForceFactory(officer=officer_4)
 
         EventFactory(
             department=department,
@@ -1527,7 +1523,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "Ray",
                 "kind": "officers",
@@ -1543,8 +1539,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["123", "200"],
                 "complaints_count": officer_3.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "sergeant",
             },
@@ -1556,8 +1552,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["200"],
                 "complaints_count": officer_4.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "recruit",
             },
@@ -1569,8 +1565,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["150", "100", "250"],
                 "complaints_count": officer_2.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "senior",
             },
@@ -1631,13 +1627,9 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         person_5.officers.add(officer_6)
         person_5.save()
 
-        use_of_force_1 = UseOfForceFactory()
-        use_of_force_2 = UseOfForceFactory()
-        use_of_force_3 = UseOfForceFactory()
-
-        UseOfForceOfficerFactory(officer=officer_5, use_of_force=use_of_force_1)
-        UseOfForceOfficerFactory(officer=officer_3, use_of_force=use_of_force_2)
-        UseOfForceOfficerFactory(officer=officer_4, use_of_force=use_of_force_3)
+        use_of_force_1 = UseOfForceFactory(officer=officer_5)
+        use_of_force_2 = UseOfForceFactory(officer=officer_3)
+        use_of_force_3 = UseOfForceFactory(officer=officer_4)
 
         EventFactory(
             department=department,
@@ -1728,7 +1720,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "Ray",
                 "kind": "officers",
@@ -1746,16 +1738,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                 "badges": ["200"],
                 "complaints_count": officer_4.person.all_complaints_count,
                 "department": {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 "latest_rank": "recruit",
             }
         ]
 
-        expected_previous = f"http://testserver/api/departments/{department.slug}/search/?kind=officers&limit=1&q=Ray"
+        expected_previous = (
+            f"http://testserver/api/departments/{department.agency_slug}"
+            "/search/?kind=officers&limit=1&q=Ray"
+        )
         expected_next = (
-            f"http://testserver/api/departments/{department.slug}"
+            f"http://testserver/api/departments/{department.agency_slug}"
             "/search/?kind=officers&limit=1&offset=2&q=Ray"
         )
 
@@ -1807,7 +1802,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "Sean",
                 "kind": "news_articles",
@@ -1861,7 +1856,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "keyword",
                 "kind": "news_articles",
@@ -1942,7 +1937,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         rebuild_search_index()
 
         response = self.client.get(
-            reverse("api:departments-search", kwargs={"pk": department.slug}),
+            reverse("api:departments-search", kwargs={"pk": department.agency_slug}),
             {
                 "q": "keyword",
                 "kind": "news_articles",
@@ -1952,11 +1947,11 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         )
 
         expected_previous = (
-            f"http://testserver/api/departments/{department.slug}"
+            f"http://testserver/api/departments/{department.agency_slug}"
             "/search/?kind=news_articles&limit=1&q=keyword"
         )
         expected_next = (
-            f"http://testserver/api/departments/{department.slug}"
+            f"http://testserver/api/departments/{department.agency_slug}"
             "/search/?kind=news_articles&limit=1&offset=2&q=keyword"
         )
 
@@ -2000,23 +1995,23 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_result = {
             "nodes": {
-                department_1.slug: {
-                    "name": department_1.name,
+                department_1.agency_slug: {
+                    "name": department_1.agency_name,
                     "location": department_1.location,
                 },
-                department_2.slug: {
-                    "name": department_2.name,
+                department_2.agency_slug: {
+                    "name": department_2.agency_name,
                     "location": department_2.location,
                 },
-                department_3.slug: {
-                    "name": department_3.name,
+                department_3.agency_slug: {
+                    "name": department_3.agency_name,
                     "location": department_3.location,
                 },
             },
             "graphs": [
                 {
-                    "start_node": department_2.slug,
-                    "end_node": department_3.slug,
+                    "start_node": department_2.agency_slug,
+                    "end_node": department_3.agency_slug,
                     "start_location": department_2.location,
                     "end_location": department_3.location,
                     "year": officer_movement_2.date.year,
@@ -2027,8 +2022,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     "is_left": None,
                 },
                 {
-                    "start_node": department_1.slug,
-                    "end_node": department_2.slug,
+                    "start_node": department_1.agency_slug,
+                    "end_node": department_2.agency_slug,
                     "start_location": department_1.location,
                     "end_location": department_2.location,
                     "year": officer_movement_1.date.year,
@@ -2089,19 +2084,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_result = {
             "nodes": {
-                department_1.slug: {
-                    "name": department_1.name,
+                department_1.agency_slug: {
+                    "name": department_1.agency_name,
                     "location": department_1.location,
                 },
-                department_2.slug: {
-                    "name": department_2.name,
+                department_2.agency_slug: {
+                    "name": department_2.agency_name,
                     "location": department_2.location,
                 },
             },
             "graphs": [
                 {
-                    "start_node": department_1.slug,
-                    "end_node": department_2.slug,
+                    "start_node": department_1.agency_slug,
+                    "end_node": department_2.agency_slug,
                     "start_location": department_1.location,
                     "end_location": department_2.location,
                     "year": officer_movement_1.date.year,
@@ -2159,23 +2154,23 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_result = {
             "nodes": {
-                start_department.slug: {
-                    "name": start_department.name,
+                start_department.agency_slug: {
+                    "name": start_department.agency_name,
                     "location": start_department.location,
                 },
-                department.slug: {
-                    "name": department.name,
+                department.agency_slug: {
+                    "name": department.agency_name,
                     "location": department.location,
                 },
-                end_department.slug: {
-                    "name": end_department.name,
+                end_department.agency_slug: {
+                    "name": end_department.agency_name,
                     "location": end_department.location,
                 },
             },
             "graphs": [
                 {
-                    "start_node": department.slug,
-                    "end_node": end_department.slug,
+                    "start_node": department.agency_slug,
+                    "end_node": end_department.agency_slug,
                     "start_location": department.location,
                     "end_location": end_department.location,
                     "year": officer_movement_2.date.year,
@@ -2186,8 +2181,8 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
                     "is_left": True,
                 },
                 {
-                    "start_node": start_department.slug,
-                    "end_node": department.slug,
+                    "start_node": start_department.agency_slug,
+                    "end_node": department.agency_slug,
                     "start_location": start_department.location,
                     "end_location": department.location,
                     "year": officer_movement_1.date.year,
@@ -2203,7 +2198,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         response = self.client.get(
             reverse(
                 "api:departments-migratory-by-department",
-                kwargs={"pk": department.slug},
+                kwargs={"pk": department.agency_slug},
             )
         )
 
@@ -2250,19 +2245,19 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
 
         expected_result = {
             "nodes": {
-                department.slug: {
-                    "name": department.name,
+                department.agency_slug: {
+                    "name": department.agency_name,
                     "location": department.location,
                 },
-                end_department.slug: {
-                    "name": end_department.name,
+                end_department.agency_slug: {
+                    "name": end_department.agency_name,
                     "location": end_department.location,
                 },
             },
             "graphs": [
                 {
-                    "start_node": department.slug,
-                    "end_node": end_department.slug,
+                    "start_node": department.agency_slug,
+                    "end_node": end_department.agency_slug,
                     "start_location": department.location,
                     "end_location": end_department.location,
                     "year": officer_movement_2.date.year,
@@ -2278,7 +2273,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         response = self.client.get(
             reverse(
                 "api:departments-migratory-by-department",
-                kwargs={"pk": department.slug},
+                kwargs={"pk": department.agency_slug},
             )
         )
 
@@ -2293,7 +2288,7 @@ class DepartmentsViewSetTestCase(AuthAPITestCase):
         response = self.client.get(
             reverse(
                 "api:departments-migratory-by-department",
-                kwargs={"pk": department.slug},
+                kwargs={"pk": department.agency_slug},
             )
         )
 

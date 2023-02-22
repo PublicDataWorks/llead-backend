@@ -1,7 +1,6 @@
 import traceback
 from datetime import datetime
 
-from django.conf import settings
 from django.utils.text import slugify
 
 import pytz
@@ -9,6 +8,7 @@ from tqdm import tqdm
 from wrgl import Repository
 
 from appeals.models import Appeal
+from complaints.models import Complaint
 from data.constants import (
     IMPORT_LOG_STATUS_ERROR,
     IMPORT_LOG_STATUS_FINISHED,
@@ -16,7 +16,6 @@ from data.constants import (
     IMPORT_LOG_STATUS_NO_NEW_DATA,
     IMPORT_LOG_STATUS_RUNNING,
     IMPORT_LOG_STATUS_STARTED,
-    WRGL_USER,
 )
 from data.models import ImportLog, WrglRepo
 from departments.models import Department
@@ -64,8 +63,8 @@ class BaseImporter(object):
 
     def get_department_mappings(self):
         slugify_mappings = {
-            department.slug: department.id
-            for department in Department.objects.only("id", "slug")
+            department.agency_slug: department.id
+            for department in Department.objects.only("id", "agency_slug")
         }
 
         return slugify_mappings
@@ -85,6 +84,12 @@ class BaseImporter(object):
         return {
             appeal.appeal_uid: appeal.id
             for appeal in Appeal.objects.only("id", "appeal_uid")
+        }
+
+    def get_complaint_mappings(self):
+        return {
+            complaint.allegation_uid: complaint.id
+            for complaint in Complaint.objects.only("id", "allegation_uid")
         }
 
     def process_wrgl_data(self, old_commit_hash):
@@ -202,10 +207,7 @@ class BaseImporter(object):
         import_log.save()
 
     def retrieve_wrgl_data(self, branch):
-        self.repo = Repository(
-            f"https://hub.wrgl.co/api/users/{WRGL_USER}/repos/data/",
-            settings.WRGL_API_KEY,
-        )
+        self.repo = Repository("https://wrgl.llead.co/")
 
         self.new_commit = self.repo.get_branch(branch)
 
@@ -230,7 +232,7 @@ class BaseImporter(object):
 
             self.retrieve_wrgl_data(wrgl_repo.repo_name)
 
-            commit_hash = self.new_commit.sum
+            commit_hash = wrgl_repo.latest_commit_hash
 
             if commit_hash:
                 current_hash = wrgl_repo.commit_hash
@@ -284,7 +286,7 @@ class BaseImporter(object):
                                     "finished_at": datetime.now(pytz.utc),
                                 },
                             )
-                    except Exception:
+                    except Exception as e:
                         self.update_import_log(
                             import_log,
                             {
@@ -296,6 +298,7 @@ class BaseImporter(object):
                                 ),
                             },
                         )
+                        raise e
                 else:
                     self.update_import_log(
                         import_log,

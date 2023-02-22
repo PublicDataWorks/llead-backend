@@ -9,45 +9,12 @@ from data.services.base_importer import BaseImporter
 
 class NewComplaintImporter(BaseImporter):
     data_model = COMPLAINT_MODEL_NAME
-    ATTRIBUTES = [
-        "allegation_uid",
-        "tracking_id",
-        "uid",
-        "case_number",
-        "allegation",
-        "investigation_status",
-        "assigned_department",
-        "assigned_division",
-        "traffic_stop",
-        "body_worn_camera_available",
-        "app_used",
-        "citizen_arrested",
-        "citizen",
-        "disposition",
-        "complainant_name",
-        "complainant_type",
-        "complainant_sex",
-        "complainant_race",
-        "action",
-        "initial_action",
-        "incident_type",
-        "supervisor_uid",
-        "supervisor_rank",
-        "badge_no",
-        "department_code",
-        "department_desc",
-        "employment_status",
-        "investigator",
-        "investigator_uid",
-        "investigator_rank",
-        "shift_supervisor",
-        "allegation_desc",
-        "investigating_department",
-        "referred_by",
-        "incident_location",
-        "disposition_desc",
-    ]
 
+    ATTRIBUTES = list(
+        {field.name for field in Complaint._meta.fields}
+        - Complaint.BASE_FIELDS
+        - Complaint.CUSTOM_FIELDS
+    )
     UPDATE_ATTRIBUTES = ATTRIBUTES
 
     def __init__(self):
@@ -56,12 +23,6 @@ class NewComplaintImporter(BaseImporter):
         self.new_allegation_uids = []
         self.delete_complaints_ids = []
         self.complaint_mappings = {}
-
-    def get_complaint_mappings(self):
-        return {
-            complaint.allegation_uid: complaint.id
-            for complaint in Complaint.objects.only("id", "allegation_uid")
-        }
 
     def update_relations(self, raw_data):
         saved_data = list(

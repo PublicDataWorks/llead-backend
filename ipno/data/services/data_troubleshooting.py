@@ -10,7 +10,7 @@ from data.models import WrglRepo
 from documents.models import Document
 from officers.models import Event, Officer
 from people.models import Person
-from use_of_forces.models import UseOfForce, UseOfForceCitizen, UseOfForceOfficer
+from use_of_forces.models import UseOfForce
 
 
 class DataTroubleshooting:
@@ -21,8 +21,6 @@ class DataTroubleshooting:
         "Event": Event,
         "Complaint": Complaint,
         "UseOfForce": UseOfForce,
-        "UseOfForceOfficer": UseOfForceOfficer,
-        "UseOfForceCitizen": UseOfForceCitizen,
         "Document": Document,
         "Person": Person,
         "Appeal": Appeal,

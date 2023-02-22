@@ -9,32 +9,12 @@ from data.services.base_importer import BaseImporter
 
 class ComplaintImporter(BaseImporter):
     data_model = COMPLAINT_MODEL_NAME
-    ATTRIBUTES = [
-        "allegation_uid",
-        "tracking_id",
-        "investigation_status",
-        "assigned_department",
-        "assigned_division",
-        "body_worn_camera_available",
-        "app_used",
-        "citizen_arrested",
-        "allegation",
-        "citizen",
-        "disposition",
-        "complainant_type",
-        "complainant_sex",
-        "complainant_race",
-        "action",
-        "incident_type",
-        "supervisor_uid",
-        "supervisor_rank",
-        "badge_no",
-        "department_code",
-        "department_desc",
-        "traffic_stop",
-        "allegation_desc",
-    ]
 
+    ATTRIBUTES = list(
+        {field.name for field in Complaint._meta.fields}
+        - Complaint.BASE_FIELDS
+        - Complaint.CUSTOM_FIELDS
+    )
     UPDATE_ATTRIBUTES = ATTRIBUTES
 
     def __init__(self):
@@ -43,12 +23,6 @@ class ComplaintImporter(BaseImporter):
         self.new_allegation_uids = []
         self.delete_complaints_ids = []
         self.complaint_mappings = {}
-
-    def get_complaint_mappings(self):
-        return {
-            complaint.allegation_uid: complaint.id
-            for complaint in Complaint.objects.only("id", "allegation_uid")
-        }
 
     def update_relations(self, raw_data):
         saved_data = list(

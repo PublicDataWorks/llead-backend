@@ -95,12 +95,12 @@ class OfficerSerializerTestCase(TestCase):
             "badges": ["12435", "67893", "5432"],
             "departments": [
                 {
-                    "id": department_2.slug,
-                    "name": department_2.name,
+                    "id": department_2.agency_slug,
+                    "name": department_2.agency_name,
                 },
                 {
-                    "id": department_1.slug,
-                    "name": department_1.name,
+                    "id": department_1.agency_slug,
+                    "name": department_1.agency_name,
                 },
             ],
             "latest_rank": "captain",

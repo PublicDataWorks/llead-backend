@@ -55,4 +55,4 @@ class NewsArticleESDoc(ESDoc):
         officers = Officer.objects.filter(person__officers__in=matched_officers)
         departments = Department.objects.filter(officers__in=officers).distinct()
 
-        return [department.slug for department in departments]
+        return [department.agency_slug for department in departments]

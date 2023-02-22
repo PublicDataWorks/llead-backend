@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from appeals.factories import AppealFactory
+from citizens.factory import CitizenFactory
 from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
@@ -41,11 +42,7 @@ from officers.serializers.officer_timeline_serializers import (
     BaseTimelineSerializer,
     NewsArticleTimelineSerializer,
 )
-from use_of_forces.factories import (
-    UseOfForceCitizenFactory,
-    UseOfForceFactory,
-    UseOfForceOfficerFactory,
-)
+from use_of_forces.factories import UseOfForceFactory
 
 
 class JoinedTimelineSerializerTestCase(TestCase):
@@ -63,7 +60,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "kind": JOINED_TIMELINE_KIND,
             "date": str(date(2018, 4, 8)),
             "year": 2018,
-            "department": event.department.name,
+            "department": event.department.agency_name,
         }
 
     def test_data_with_only_year(self):
@@ -80,7 +77,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "kind": JOINED_TIMELINE_KIND,
             "date": None,
             "year": 2018,
-            "department": event.department.name,
+            "department": event.department.agency_name,
         }
 
     def test_data_with_empty_date(self):
@@ -97,7 +94,7 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "kind": JOINED_TIMELINE_KIND,
             "date": None,
             "year": None,
-            "department": event.department.name,
+            "department": event.department.agency_name,
         }
 
 
@@ -116,7 +113,7 @@ class LeftTimelineSerializerTestCase(TestCase):
             "kind": LEFT_TIMELINE_KIND,
             "date": str(date(2018, 4, 8)),
             "year": 2018,
-            "department": event.department.name,
+            "department": event.department.agency_name,
         }
 
 
@@ -143,8 +140,6 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             "allegation_desc": complaint.allegation_desc,
             "action": complaint.action,
             "tracking_id": complaint.tracking_id,
-            "citizen_arrested": complaint.citizen_arrested,
-            "traffic_stop": complaint.traffic_stop,
         }
 
     def test_data_with_empty_date(self):
@@ -163,16 +158,13 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             "allegation_desc": complaint.allegation_desc,
             "action": complaint.action,
             "tracking_id": complaint.tracking_id,
-            "citizen_arrested": complaint.citizen_arrested,
-            "traffic_stop": complaint.traffic_stop,
         }
 
 
 class UseOfForceTimelineSerializerTestCase(TestCase):
     def test_data(self):
         use_of_force = UseOfForceFactory()
-        use_of_force_officer = UseOfForceOfficerFactory(use_of_force=use_of_force)
-        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
+        citizen = CitizenFactory(use_of_force=use_of_force)
         EventFactory(
             year=2019,
             month=5,
@@ -180,57 +172,56 @@ class UseOfForceTimelineSerializerTestCase(TestCase):
             use_of_force=use_of_force,
         )
 
-        result = UseOfForceTimelineSerializer(use_of_force_officer).data
+        result = UseOfForceTimelineSerializer(use_of_force).data
         assert result == {
-            "id": use_of_force_officer.id,
+            "id": use_of_force.id,
             "kind": UOF_TIMELINE_KIND,
             "date": str(date(2019, 5, 4)),
             "year": 2019,
-            "use_of_force_description": use_of_force_officer.use_of_force_description,
+            "use_of_force_description": use_of_force.use_of_force_description,
             "use_of_force_reason": use_of_force.use_of_force_reason,
             "disposition": use_of_force.disposition,
             "service_type": use_of_force.service_type,
             "citizen_information": [
-                str(use_of_force_citizen.citizen_age)
+                str(citizen.citizen_age)
                 + "-year-old "
-                + use_of_force_citizen.citizen_race
+                + citizen.citizen_race
                 + " "
-                + use_of_force_citizen.citizen_sex
+                + citizen.citizen_sex
             ],
             "tracking_id": use_of_force.tracking_id,
-            "citizen_arrested": [use_of_force_citizen.citizen_arrested],
-            "citizen_injured": [use_of_force_citizen.citizen_injured],
-            "citizen_hospitalized": [use_of_force_citizen.citizen_hospitalized],
-            "officer_injured": use_of_force_officer.officer_injured,
+            "citizen_arrested": [citizen.citizen_arrested],
+            "citizen_injured": [citizen.citizen_injured],
+            "citizen_hospitalized": [citizen.citizen_hospitalized],
+            "officer_injured": use_of_force.officer_injured,
         }
 
     def test_data_with_empty_date(self):
         use_of_force = UseOfForceFactory()
-        use_of_force_officer = UseOfForceOfficerFactory(use_of_force=use_of_force)
-        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
-        result = UseOfForceTimelineSerializer(use_of_force_officer).data
+        citizen = CitizenFactory(use_of_force=use_of_force)
+        result = UseOfForceTimelineSerializer(use_of_force).data
 
         assert result == {
-            "id": use_of_force_officer.id,
+            "id": use_of_force.id,
             "kind": UOF_TIMELINE_KIND,
             "date": None,
             "year": None,
-            "use_of_force_description": use_of_force_officer.use_of_force_description,
+            "use_of_force_description": use_of_force.use_of_force_description,
             "use_of_force_reason": use_of_force.use_of_force_reason,
             "disposition": use_of_force.disposition,
             "service_type": use_of_force.service_type,
             "citizen_information": [
-                str(use_of_force_citizen.citizen_age)
+                str(citizen.citizen_age)
                 + "-year-old "
-                + use_of_force_citizen.citizen_race
+                + citizen.citizen_race
                 + " "
-                + use_of_force_citizen.citizen_sex
+                + citizen.citizen_sex
             ],
             "tracking_id": use_of_force.tracking_id,
-            "citizen_arrested": [use_of_force_citizen.citizen_arrested],
-            "citizen_injured": [use_of_force_citizen.citizen_injured],
-            "citizen_hospitalized": [use_of_force_citizen.citizen_hospitalized],
-            "officer_injured": use_of_force_officer.officer_injured,
+            "citizen_arrested": [citizen.citizen_arrested],
+            "citizen_injured": [citizen.citizen_injured],
+            "citizen_hospitalized": [citizen.citizen_hospitalized],
+            "officer_injured": use_of_force.officer_injured,
         }
 
 
@@ -250,14 +241,11 @@ class AppealTimelineSerializerTestCase(TestCase):
             "kind": APPEAL_TIMELINE_KIND,
             "date": str(date(2019, 5, 4)),
             "year": 2019,
-            "docket_no": appeal.docket_no,
-            "counsel": appeal.counsel,
             "charging_supervisor": appeal.charging_supervisor,
             "appeal_disposition": appeal.appeal_disposition,
             "action_appealed": appeal.action_appealed,
-            "appealed": appeal.appealed,
             "motions": appeal.motions,
-            "department": appeal.department.name,
+            "department": appeal.department.agency_name,
         }
 
     def test_data_with_empty_date(self):
@@ -269,14 +257,11 @@ class AppealTimelineSerializerTestCase(TestCase):
             "kind": APPEAL_TIMELINE_KIND,
             "date": None,
             "year": None,
-            "docket_no": appeal.docket_no,
-            "counsel": appeal.counsel,
             "charging_supervisor": appeal.charging_supervisor,
             "appeal_disposition": appeal.appeal_disposition,
             "action_appealed": appeal.action_appealed,
-            "appealed": appeal.appealed,
             "motions": appeal.motions,
-            "department": appeal.department.name,
+            "department": appeal.department.agency_name,
         }
 
 
@@ -301,8 +286,8 @@ class DocumentTimelineSerializerTestCase(TestCase):
             "pages_count": document.pages_count,
             "departments": [
                 {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
             ],
         }
