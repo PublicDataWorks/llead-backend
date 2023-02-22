@@ -14,8 +14,8 @@ from utils.data_utils import format_data_period
 
 
 class DepartmentDetailsSerializer(serializers.Serializer):
-    id = serializers.CharField(source="slug")
-    name = serializers.CharField()
+    id = serializers.CharField(source="agency_slug")
+    name = serializers.CharField(source="agency_name")
     city = serializers.CharField()
     parish = serializers.CharField()
     phone = serializers.CharField()

@@ -26,7 +26,7 @@ from officers.serializers import (
     UnitChangeTimelineSerializer,
     UseOfForceTimelineSerializer,
 )
-from use_of_forces.models import UseOfForceOfficer
+from use_of_forces.models import UseOfForce
 from utils.data_utils import format_data_period, sort_items
 
 
@@ -82,10 +82,9 @@ class OfficerTimelineQuery(object):
 
     @property
     def _use_of_force_timeline(self):
-        use_of_force_officer_queryset = UseOfForceOfficer.objects.prefetch_related(
-            "use_of_force__uof_citizens",
-            "use_of_force__events",
-        ).filter(officer__in=self.all_officers)
+        use_of_force_officer_queryset = UseOfForce.objects.filter(
+            officer__in=self.all_officers
+        )
 
         return UseOfForceTimelineSerializer(
             use_of_force_officer_queryset, many=True

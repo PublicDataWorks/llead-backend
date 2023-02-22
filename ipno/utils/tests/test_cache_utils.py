@@ -72,7 +72,7 @@ class CacheUtilsTestCase(TestCase):
         mock_func_call.assert_called_once()
 
     def test_flush_news_article_related_caches_no_start_time(self):
-        department = DepartmentFactory(name="New Orleans PD")
+        department = DepartmentFactory(agency_name="New Orleans PD")
         DepartmentFactory()
         DepartmentFactory()
 
@@ -97,11 +97,13 @@ class CacheUtilsTestCase(TestCase):
             reverse("api:officers-timeline", kwargs={"pk": officer.id}), "Timeline"
         )
         cache.set(
-            reverse("api:departments-detail", kwargs={"pk": department.slug}),
+            reverse("api:departments-detail", kwargs={"pk": department.agency_slug}),
             "Department detail",
         )
         cache.set(
-            reverse("api:departments-news-articles", kwargs={"pk": department.slug}),
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department.agency_slug}
+            ),
             "Department article",
         )
         cache.set(reverse("api:officers-list"), "Officer list")
@@ -114,16 +116,18 @@ class CacheUtilsTestCase(TestCase):
             reverse("api:officers-timeline", kwargs={"pk": officer.id})
         )
         assert not cache.get(
-            reverse("api:departments-detail", kwargs={"pk": department.slug})
+            reverse("api:departments-detail", kwargs={"pk": department.agency_slug})
         )
         assert not cache.get(
-            reverse("api:departments-news-articles", kwargs={"pk": department.slug})
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department.agency_slug}
+            )
         )
         assert cache.get(reverse("api:officers-list"))
 
     def test_flush_news_article_related_caches_with_start_time(self):
-        department_1 = DepartmentFactory(name="Department 1")
-        department_2 = DepartmentFactory(name="Department 2")
+        department_1 = DepartmentFactory(agency_name="Department 1")
+        department_2 = DepartmentFactory(agency_name="Department 2")
         DepartmentFactory()
         DepartmentFactory()
 
@@ -161,19 +165,23 @@ class CacheUtilsTestCase(TestCase):
             "Timeline of officer 2",
         )
         cache.set(
-            reverse("api:departments-detail", kwargs={"pk": department_1.slug}),
+            reverse("api:departments-detail", kwargs={"pk": department_1.agency_slug}),
             "Department 1 detail",
         )
         cache.set(
-            reverse("api:departments-detail", kwargs={"pk": department_2.slug}),
+            reverse("api:departments-detail", kwargs={"pk": department_2.agency_slug}),
             "Department 2 detail",
         )
         cache.set(
-            reverse("api:departments-news-articles", kwargs={"pk": department_1.slug}),
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department_1.agency_slug}
+            ),
             "Department 1 article",
         )
         cache.set(
-            reverse("api:departments-news-articles", kwargs={"pk": department_2.slug}),
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department_2.agency_slug}
+            ),
             "Department 1 article",
         )
         cache.set(reverse("api:officers-list"), "Officer list")
@@ -188,16 +196,20 @@ class CacheUtilsTestCase(TestCase):
             reverse("api:officers-timeline", kwargs={"pk": officer_2.id})
         )
         assert not cache.get(
-            reverse("api:departments-detail", kwargs={"pk": department_2.slug})
+            reverse("api:departments-detail", kwargs={"pk": department_2.agency_slug})
         )
         assert not cache.get(
-            reverse("api:departments-news-articles", kwargs={"pk": department_2.slug})
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department_2.agency_slug}
+            )
         )
         assert cache.get(reverse("api:officers-timeline", kwargs={"pk": officer_1.id}))
         assert cache.get(
-            reverse("api:departments-detail", kwargs={"pk": department_1.slug})
+            reverse("api:departments-detail", kwargs={"pk": department_1.agency_slug})
         )
         assert cache.get(
-            reverse("api:departments-news-articles", kwargs={"pk": department_1.slug})
+            reverse(
+                "api:departments-news-articles", kwargs={"pk": department_1.agency_slug}
+            )
         )
         assert cache.get(reverse("api:officers-list"))

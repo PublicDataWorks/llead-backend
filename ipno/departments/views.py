@@ -42,7 +42,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @custom_cache
     def retrieve(self, request, pk):
         queryset = Department.objects.all()
-        department = get_object_or_404(queryset, slug=pk)
+        department = get_object_or_404(queryset, agency_slug=pk)
         serializer = DepartmentDetailsSerializer(department)
 
         return Response(serializer.data)
@@ -96,7 +96,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["get"], url_path="documents")
     @custom_cache
     def documents(self, request, pk):
-        department = get_object_or_404(Department, slug=pk)
+        department = get_object_or_404(Department, agency_slug=pk)
 
         starred_documents = (
             department.starred_documents.prefetch_related()
@@ -133,7 +133,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["get"], url_path="officers")
     @custom_cache
     def officers(self, request, pk):
-        department = get_object_or_404(Department, slug=pk)
+        department = get_object_or_404(Department, agency_slug=pk)
 
         other_prefetches = (Prefetch("department"),)
 
@@ -177,7 +177,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["get"], url_path="news_articles")
     @custom_cache
     def news_articles(self, request, pk):
-        department = get_object_or_404(Department, slug=pk)
+        department = get_object_or_404(Department, agency_slug=pk)
 
         starred_news_articles = (
             department.starred_news_articles.filter(is_hidden=False)
@@ -228,7 +228,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["get"], url_path="datasets")
     @custom_cache
     def datasets(self, request, pk):
-        department = get_object_or_404(Department, slug=pk)
+        department = get_object_or_404(Department, agency_slug=pk)
         wrgl_serializers = WrglFileSerializer(
             department.wrgl_files.order_by("position"), many=True
         )
@@ -266,7 +266,7 @@ class DepartmentsViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["get"], url_path="migratory-by-department")
     @custom_cache
     def migratory_by_department(self, request, pk):
-        department = get_object_or_404(Department, slug=pk)
+        department = get_object_or_404(Department, agency_slug=pk)
 
         officer_movements = (
             OfficerMovement.objects.select_related(
@@ -307,13 +307,15 @@ class DepartmentsViewSet(viewsets.ViewSet):
         )
         end_departments = officer_movements.values_list("end_department__id", flat=True)
         department_ids = list(set(chain(start_departments, end_departments)))
-        departments = Department.objects.filter(id__in=department_ids).order_by("slug")
+        departments = Department.objects.filter(id__in=department_ids).order_by(
+            "agency_slug"
+        )
 
         nodes = {}
 
         for department in departments:
-            nodes[department.slug] = {
-                "name": department.name,
+            nodes[department.agency_slug] = {
+                "name": department.agency_name,
                 "location": department.location,
             }
 

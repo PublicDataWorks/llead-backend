@@ -9,17 +9,12 @@ from data.services import BaseImporter
 
 class AppealImporter(BaseImporter):
     data_model = APPEAL_MODEL_NAME
-    ATTRIBUTES = [
-        "appeal_uid",
-        "docket_no",
-        "counsel",
-        "charging_supervisor",
-        "appeal_disposition",
-        "action_appealed",
-        "appealed",
-        "motions",
-    ]
 
+    ATTRIBUTES = list(
+        {field.name for field in Appeal._meta.fields}
+        - Appeal.BASE_FIELDS
+        - Appeal.CUSTOM_FIELDS
+    )
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["officer_id", "department_id"]
 
     def __init__(self):

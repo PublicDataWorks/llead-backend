@@ -13,8 +13,8 @@ class OfficerMovementSerializerTestCase(TestCase):
         result = OfficerMovementSerializer(officer_movement).data
 
         assert result == {
-            "start_node": officer_movement.start_department.slug,
-            "end_node": officer_movement.end_department.slug,
+            "start_node": officer_movement.start_department.agency_slug,
+            "end_node": officer_movement.end_department.agency_slug,
             "start_location": officer_movement.start_department.location,
             "end_location": officer_movement.end_department.location,
             "year": officer_movement.date.year,

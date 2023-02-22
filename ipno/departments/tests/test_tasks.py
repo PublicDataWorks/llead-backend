@@ -12,14 +12,14 @@ class DepartmentTaskTestCase(TestCase):
         app.conf.task_always_eager = True
 
     def test_rebuild_department_index_successfully(self):
-        department = DepartmentFactory(id=1, name="Micheal")
+        department = DepartmentFactory(id=1, agency_name="Micheal")
 
         rebuild_search_index()
 
-        department.name = "Alex"
+        department.agency_name = "Alex"
         department.save()
 
         rebuild_department_index(1)
 
         es_doc = DepartmentESDoc.get(id=1)
-        assert es_doc.name == "Alex"
+        assert es_doc.agency_name == "Alex"

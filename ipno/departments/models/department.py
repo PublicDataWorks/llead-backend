@@ -3,12 +3,23 @@ from django.db import models
 
 from mapbox_location_field.models import LocationField
 
-from utils.models import TimeStampsModel
+from utils.models import APITemplateModel, TimeStampsModel
 
 
-class Department(TimeStampsModel):
-    slug = models.CharField(max_length=255, unique=True, db_index=True)
-    name = models.CharField(max_length=255)
+class Department(TimeStampsModel, APITemplateModel):
+    CUSTOM_FIELDS = {
+        "city",
+        "parish",
+        "address",
+        "phone",
+        "location_map_url",
+        "data_period",
+        "aliases",
+        "officer_fraction",
+    }
+
+    agency_slug = models.CharField(max_length=255, unique=True, db_index=True)
+    agency_name = models.CharField(max_length=255)
     city = models.CharField(max_length=255, null=True, blank=True)
     parish = models.CharField(max_length=255, null=True, blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
@@ -40,4 +51,4 @@ class Department(TimeStampsModel):
     )
 
     def __str__(self):
-        return f"{self.name} - {self.id}"
+        return f"{self.agency_name} - {self.id}"

@@ -34,8 +34,8 @@ class DocumentSearchSerializerTestCase(TestCase):
             "pages_count": document.pages_count,
             "departments": [
                 {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
             ],
             "text_content": document.text_content,

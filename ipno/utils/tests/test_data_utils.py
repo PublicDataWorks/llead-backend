@@ -173,7 +173,7 @@ class DataTestCase(TestCase):
 
         compute_department_data_period()
 
-        result = Department.objects.get(slug__exact=department.slug)
+        result = Department.objects.get(agency_slug__exact=department.agency_slug)
 
         assert result.data_period == [
             1997,

@@ -12,8 +12,8 @@ from shared.serializers import DocumentWithTextContentSerializer
 class DocumentWithTextContentSerializerTestCase(TestCase):
     def test_data(self):
         document = DocumentFactory()
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
         document.departments.add(department_1, department_2)
 
         result = DocumentWithTextContentSerializer(document).data
@@ -30,12 +30,12 @@ class DocumentWithTextContentSerializerTestCase(TestCase):
             "text_content": document.text_content,
             "departments": [
                 {
-                    "id": department_1.slug,
-                    "name": department_1.name,
+                    "id": department_1.agency_slug,
+                    "name": department_1.agency_name,
                 },
                 {
-                    "id": department_2.slug,
-                    "name": department_2.name,
+                    "id": department_2.agency_slug,
+                    "name": department_2.agency_name,
                 },
             ],
         }

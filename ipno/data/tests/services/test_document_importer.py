@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test.testcases import TestCase, override_settings
 from django.utils.text import slugify
 
+import pytest
 from dropbox.exceptions import ApiError
 from mock import MagicMock, Mock, patch
 
@@ -204,15 +205,15 @@ class DocumentImporterTestCase(TestCase):
         ]
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_fail_dueto_dropbox_get_file_error(self):
+        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
+
         WrglRepoFactory(
             data_model=DocumentImporter.data_model,
             repo_name="document_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=commit_hash,
         )
-
-        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
 
         document_importer = DocumentImporter()
 
@@ -266,13 +267,15 @@ class DocumentImporterTestCase(TestCase):
         document_importer.ds = Mock(
             get_temporary_link_from_path=mock_get_temporary_link_from_path
         )
-
-        document_importer.process()
-        import_log = ImportLog.objects.order_by("-created_at").last()
-        assert import_log.data_model == "Document"
-        assert import_log.status == IMPORT_LOG_STATUS_ERROR
-        assert "Error downloading dropbox file from path:" in import_log.error_message
-        assert import_log.finished_at
+        with pytest.raises(Exception):
+            document_importer.process()
+            import_log = ImportLog.objects.order_by("-created_at").last()
+            assert import_log.data_model == "Document"
+            assert import_log.status == IMPORT_LOG_STATUS_ERROR
+            assert (
+                "Error downloading dropbox file from path:" in import_log.error_message
+            )
+            assert import_log.finished_at
 
     def test_upload_file_success(self):
         upload_location = "location"
@@ -340,13 +343,12 @@ class DocumentImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
     @patch("data.services.document_importer.requests.get")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     @patch(
         "data.services.document_importer.generate_from_blob", return_value="image_blob"
     )
     def test_process_successfully(self, generate_from_blob_mock, get_mock):
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid-1")
         officer_2 = OfficerFactory(uid="officer-uid-2")
@@ -387,13 +389,14 @@ class DocumentImporterTestCase(TestCase):
 
         assert Document.objects.count() == 3
 
+        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
+
         WrglRepoFactory(
             data_model=DocumentImporter.data_model,
             repo_name="document_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=commit_hash,
         )
-
-        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
 
         document_importer = DocumentImporter()
 
@@ -594,15 +597,14 @@ class DocumentImporterTestCase(TestCase):
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
     @patch("data.services.document_importer.requests.get")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     @patch(
         "data.services.document_importer.generate_from_blob", return_value="image_blob"
     )
     def test_process_successfully_with_columns_changed(
         self, generate_from_blob_mock, get_mock
     ):
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid-1")
         officer_2 = OfficerFactory(uid="officer-uid-2")
@@ -643,13 +645,14 @@ class DocumentImporterTestCase(TestCase):
 
         assert Document.objects.count() == 3
 
+        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
+
         WrglRepoFactory(
             data_model=DocumentImporter.data_model,
             repo_name="document_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=commit_hash,
         )
-
-        commit_hash = "87d27e0616d9ef342e1728f5533162a3"
 
         document_importer = DocumentImporter()
 

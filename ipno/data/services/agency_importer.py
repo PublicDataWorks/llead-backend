@@ -17,13 +17,13 @@ logger = structlog.get_logger("IPNO")
 
 class AgencyImporter(BaseImporter):
     data_model = AGENCY_MODEL_NAME
-    ATTRIBUTES = [
-        "agency_slug",
-        "agency_name",
-        "location",
-    ]
 
-    UPDATE_ATTRIBUTES = ["name", "location", "location_map_url"]
+    ATTRIBUTES = list(
+        {field.name for field in Department._meta.fields}
+        - Department.BASE_FIELDS
+        - Department.CUSTOM_FIELDS
+    )
+    UPDATE_ATTRIBUTES = ATTRIBUTES + ["location_map_url"]
 
     def __init__(self):
         self.gs = GoogleCloudService()
@@ -32,9 +32,9 @@ class AgencyImporter(BaseImporter):
         self.update_agency_attrs = []
         self.delete_agency_ids = []
         self.agency_mappings = {
-            agency.slug: agency
+            agency.agency_slug: agency
             for agency in Department.objects.only(
-                "id", "slug", "location", "location_map_url"
+                "id", "agency_slug", "location", "location_map_url"
             )
         }
 
@@ -82,8 +82,8 @@ class AgencyImporter(BaseImporter):
                 logger.error(f"Error when import department {agency_slug}: {str(ex)}")
 
         department_data = {
-            "name": agency_name,
-            "slug": agency_slug,
+            "agency_name": agency_name,
+            "agency_slug": agency_slug,
             "location": location,
             "location_map_url": location_map_url,
         }

@@ -4,7 +4,13 @@ from data.models import ImportLog, WrglRepo
 
 
 class WrglRepoAdmin(admin.ModelAdmin):
-    list_display = ("data_model", "repo_name", "commit_hash", "updated_at")
+    list_display = (
+        "data_model",
+        "repo_name",
+        "commit_hash",
+        "latest_commit_hash",
+        "updated_at",
+    )
 
     def has_add_permission(self, request, obj=None):
         return False  # pragma: no cover

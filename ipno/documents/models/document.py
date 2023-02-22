@@ -1,6 +1,6 @@
 from django.db import models
 
-from utils.models import TimeStampsModel
+from utils.models import APITemplateModel, TimeStampsModel
 
 
 class DocumentManager(models.Manager):
@@ -10,7 +10,16 @@ class DocumentManager(models.Manager):
         )
 
 
-class Document(TimeStampsModel):
+class Document(TimeStampsModel, APITemplateModel):
+    CUSTOM_FIELDS = {
+        "pages_count",
+        "document_type",
+        "url",
+        "preview_image_url",
+        "incident_date",
+        "text_content",
+    }
+
     docid = models.CharField(max_length=255, null=True, blank=True)
     pages_count = models.IntegerField(null=True, blank=True)
     pdf_db_path = models.CharField(max_length=255, null=True, blank=True)

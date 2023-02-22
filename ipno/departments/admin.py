@@ -12,10 +12,10 @@ from news_articles.models import MatchedSentence, NewsArticle
 
 
 class DepartmentAdmin(ModelAdmin):
-    list_display = ("id", "name", "aliases", "created_at", "updated_at")
+    list_display = ("id", "agency_name", "aliases", "created_at", "updated_at")
     search_fields = (
-        "slug",
-        "name",
+        "agency_slug",
+        "agency_name",
     )
     filter_horizontal = (
         "starred_officers",

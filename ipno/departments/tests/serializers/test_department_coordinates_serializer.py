@@ -10,7 +10,7 @@ class DepartmentCoodinateSerializerTestCase(TestCase):
 
         result = DepartmentCoordinateSerializer(department).data
         assert result == {
-            "id": department.slug,
-            "name": department.name,
+            "id": department.agency_slug,
+            "name": department.agency_name,
             "location": department.location,
         }

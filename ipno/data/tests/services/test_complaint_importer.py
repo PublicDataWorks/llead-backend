@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import Mock, patch
+from mock import Mock
 
 from complaints.factories import ComplaintFactory
 from complaints.models import Complaint
@@ -16,232 +16,51 @@ from officers.factories import OfficerFactory
 
 class ComplaintImporterTestCase(TestCase):
     def setUp(self):
-        self.header = [
-            "allegation_uid",
-            "uid",
-            "tracking_id",
-            "investigation_status",
-            "assigned_department",
-            "assigned_division",
-            "body_worn_camera_available",
-            "app_used",
-            "citizen_arrested",
-            "allegation",
-            "citizen",
-            "disposition",
-            "charges",
-            "complainant_name",
-            "complainant_type",
-            "complainant_sex",
-            "complainant_race",
-            "action",
-            "data_production_year",
-            "agency",
-            "incident_type",
-            "supervisor_uid",
-            "supervisor_rank",
-            "badge_no",
-            "department_code",
-            "department_desc",
-            "employment_status",
-            "traffic_stop",
-            "allegation_desc",
-        ]
+        complaint_1 = ComplaintFactory(
+            allegation_uid="complaint-uid1-allegation-uid1-charge-uid1",
+            uid="officer-uid1",
+            agency="",
+        )
+        complaint_2 = ComplaintFactory(
+            allegation_uid="complaint-uid1-allegation-uid1-charge-uid2",
+            uid="officer-uid-invalid",
+            agency="",
+        )
+        complaint_3 = ComplaintFactory(
+            allegation_uid="complaint-uid1", uid="officer-uid2", agency="baton-rouge-pd"
+        )
+        complaint_4 = ComplaintFactory(
+            allegation_uid="complaint-uid2-allegation-uid3",
+            uid="",
+            agency="new-orleans-pd",
+        )
+        complaint_5 = ComplaintFactory(
+            allegation_uid="complaint-uid3-charge-uid2",
+            uid="officer-uid3",
+            agency="baton-rouge-pd",
+        )
+        complaint_6 = ComplaintFactory(
+            allegation_uid="complaint-uid6-allegation-uid6-charge-uid2",
+            uid="",
+            agency="",
+        )
 
-        self.complaint1_data = [
-            "complaint-uid1-allegation-uid1-charge-uid1",
-            "officer-uid1",
-            "2018-018",
-            "administrative review",
-            "department",
-            "division",
-            "camera available",
-            "IAPro Windows",
-            "no",
-            "paragraph 02 - instructions from authoritative source",
-            "black female",
-            "sustained",
-            "3:22 violation of known laws - 56 violations",
-            "Chief Najolia ",
-            "internal",
-            "female",
-            "black",
-            "hold in abeyance",
-            "2016",
-            "",
-            "discourtesy",
-            "supervisor-uid1",
-            "assistant chief",
-            "HP-50",
-            "P10382",
-            "patrol 1st district",
-            "employment-status",
-            "yes",
-            "",
-        ]
-        self.complaint2_data = [
-            "complaint-uid1-allegation-uid1-charge-uid2",
-            "officer-uid-invalid",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "sustained",
-            "dereliction of duty - paragraph u",
-            "",
-            "civillian",
-            "female",
-            "black",
-            "1 day suspension without pay",
-            "2020",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "officer",
-            "",
-            "no",
-            "",
-        ]
-        self.complaint3_data = [
-            "complaint-uid1",
-            "officer-uid2",
-            "2015-2",
-            "complete",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "",
-            "",
-            "",
-            "female",
-            "hispanic",
-            "",
-            "2020",
-            "baton-rouge-pd",
-            "discourtesy",
-            "",
-            "",
-            "HP-50",
-            "",
-            "off-duty detail",
-            "",
-            "",
-            "",
-        ]
-        self.complaint4_data = [
-            "complaint-uid2-allegation-uid3",
-            "",
-            "2018-006",
-            "administrative review",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "3:20 use of force - 53 hard empty hand",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "2018",
-            "new-orleans-pd",
-            "",
-            "",
-            "",
-            "",
-            "P10252",
-            "patrol 2nd district",
-            "",
-            "",
-            "",
-        ]
-        self.complaint5_data = [
-            "complaint-uid3-charge-uid2",
-            "officer-uid3",
-            "2006-0639-D",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "paragraph 02 - instructions from authoritative source",
-            "rule 4: perf of duty",
-            "counseling",
-            (
-                "rule 4: perf of duty; paragraph 02 - instructions from authoritative"
-                " source"
-            ),
-            "",
-            "",
-            "",
-            "",
-            "",
-            "2020",
-            "baton-rouge-pd",
-            "rank initiated",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "yes",
-            "",
-        ]
-        self.complaint6_data = [
-            "complaint-uid6-allegation-uid6-charge-uid2",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "sustained",
-            "dereliction of duty - paragraph u",
-            "",
-            "civillian ",
-            "female",
-            "black",
-            "1 day suspension without pay",
-            "2020",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "no",
-            "",
-        ]
+        self.header = list(
+            {field.name for field in Complaint._meta.fields}
+            - Complaint.BASE_FIELDS
+            - Complaint.CUSTOM_FIELDS
+        )
 
-        self.complaint_importer = ComplaintImporter()
+        self.complaint1_data = [getattr(complaint_1, field) for field in self.header]
+        self.complaint2_data = [getattr(complaint_2, field) for field in self.header]
+        self.complaint3_data = [getattr(complaint_3, field) for field in self.header]
+        self.complaint4_data = [getattr(complaint_4, field) for field in self.header]
+        self.complaint5_data = [getattr(complaint_5, field) for field in self.header]
+        self.complaint6_data = [getattr(complaint_6, field) for field in self.header]
+
+        Complaint.objects.all().delete()
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")
@@ -249,8 +68,8 @@ class ComplaintImporterTestCase(TestCase):
         ComplaintFactory(allegation_uid="complaint-uid4")
         ComplaintFactory(allegation_uid="complaint-uid6-allegation-uid6-charge-uid2")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         OfficerFactory(uid="officer-uid2")
@@ -258,29 +77,32 @@ class ComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 5
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=ComplaintImporter.data_model,
             repo_name="complaint_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
 
-        hash = "3950bd17edfd805972781ef9fe2c6449"
+        complaint_importer = ComplaintImporter()
 
-        self.complaint_importer.branch = "main"
+        complaint_importer.branch = "main"
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
         mock_commit.sum = hash
 
-        self.complaint_importer.repo = Mock()
-        self.complaint_importer.new_commit = mock_commit
+        complaint_importer.repo = Mock()
+        complaint_importer.new_commit = mock_commit
 
-        self.complaint_importer.retrieve_wrgl_data = Mock()
+        complaint_importer.retrieve_wrgl_data = Mock()
 
-        self.complaint_importer.old_column_mappings = {
+        complaint_importer.old_column_mappings = {
             column: self.header.index(column) for column in self.header
         }
-        self.complaint_importer.column_mappings = {
+        complaint_importer.column_mappings = {
             column: self.header.index(column) for column in self.header
         }
 
@@ -296,9 +118,9 @@ class ComplaintImporterTestCase(TestCase):
             ],
         }
 
-        self.complaint_importer.process_wrgl_data = Mock(return_value=processed_data)
+        complaint_importer.process_wrgl_data = Mock(return_value=processed_data)
 
-        self.complaint_importer.process()
+        complaint_importer.process()
 
         import_log = ImportLog.objects.order_by("-created_at").last()
         assert import_log.data_model == ComplaintImporter.data_model
@@ -312,11 +134,11 @@ class ComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 6
 
-        self.complaint_importer.retrieve_wrgl_data.assert_called_with("complaint_repo")
+        complaint_importer.retrieve_wrgl_data.assert_called_with("complaint_repo")
 
-        self.header.extend(["department_ids", "officer_ids"])
-        self.complaint_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
+        check_columns = self.header + ["department_ids", "officer_ids"]
+        check_columns_mappings = {
+            column: check_columns.index(column) for column in check_columns
         }
 
         expected_complaint1_data = self.complaint1_data.copy()
@@ -348,62 +170,30 @@ class ComplaintImporterTestCase(TestCase):
 
         for complaint_data in expected_complaints_data:
             complaint = Complaint.objects.filter(
-                allegation_uid=complaint_data[
-                    self.complaint_importer.column_mappings["allegation_uid"]
-                ]
-                if complaint_data[
-                    self.complaint_importer.column_mappings["allegation_uid"]
-                ]
+                allegation_uid=complaint_data[check_columns_mappings["allegation_uid"]]
+                if complaint_data[check_columns_mappings["allegation_uid"]]
                 else None
             ).first()
             assert complaint
-            field_attrs = [
-                "tracking_id",
-                "investigation_status",
-                "assigned_department",
-                "assigned_division",
-                "body_worn_camera_available",
-                "app_used",
-                "citizen_arrested",
-                "allegation",
-                "citizen",
-                "disposition",
-                "complainant_type",
-                "complainant_sex",
-                "complainant_race",
-                "action",
-                "incident_type",
-                "supervisor_uid",
-                "supervisor_rank",
-                "badge_no",
-                "department_code",
-                "department_desc",
-                "traffic_stop",
-                "allegation_desc",
-            ]
+            field_attrs = self.header
 
             for attr in field_attrs:
                 assert getattr(complaint, attr) == (
-                    complaint_data[self.complaint_importer.column_mappings[attr]]
-                    if complaint_data[self.complaint_importer.column_mappings[attr]]
+                    complaint_data[check_columns_mappings[attr]]
+                    if complaint_data[check_columns_mappings[attr]]
                     else None
                 )
 
             assert (
                 list(complaint.departments.values_list("id", flat=True))
-                == complaint_data[
-                    self.complaint_importer.column_mappings["department_ids"]
-                ]
+                == complaint_data[check_columns_mappings["department_ids"]]
             )
             assert (
                 list(complaint.officers.values_list("id", flat=True))
-                == complaint_data[
-                    self.complaint_importer.column_mappings["officer_ids"]
-                ]
+                == complaint_data[check_columns_mappings["officer_ids"]]
             )
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_with_column_changed(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")
@@ -411,8 +201,8 @@ class ComplaintImporterTestCase(TestCase):
         ComplaintFactory(allegation_uid="complaint-uid4")
         ComplaintFactory(allegation_uid="complaint-uid6-allegation-uid6-charge-uid2")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         OfficerFactory(uid="officer-uid2")
@@ -420,37 +210,42 @@ class ComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 5
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=ComplaintImporter.data_model,
             repo_name="complaint_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
 
-        hash = "3950bd17edfd805972781ef9fe2c6449"
+        complaint_importer = ComplaintImporter()
 
-        self.complaint_importer.branch = "main"
+        complaint_importer.branch = "main"
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
         mock_commit.sum = hash
 
-        self.complaint_importer.repo = Mock()
-        self.complaint_importer.new_commit = mock_commit
+        complaint_importer.repo = Mock()
+        complaint_importer.new_commit = mock_commit
 
-        self.complaint_importer.retrieve_wrgl_data = Mock()
+        complaint_importer.retrieve_wrgl_data = Mock()
 
-        old_columns = self.header[0:4] + self.header[5:]
-        self.complaint_importer.old_column_mappings = {
+        deleted_index = self.header.index("disposition")
+        old_columns = self.header[0:deleted_index] + self.header[deleted_index + 1 :]
+        complaint_importer.old_column_mappings = {
             column: old_columns.index(column) for column in old_columns
         }
-        self.complaint_importer.column_mappings = {
+        complaint_importer.column_mappings = {
             column: self.header.index(column) for column in self.header
         }
 
         processed_data = {
             "added_rows": [self.complaint4_data, self.complaint5_data],
             "deleted_rows": [
-                self.complaint3_data[0:4] + self.complaint3_data[5:],
+                self.complaint3_data[0:deleted_index]
+                + self.complaint3_data[deleted_index + 1 :],
             ],
             "updated_rows": [
                 self.complaint1_data,
@@ -459,8 +254,8 @@ class ComplaintImporterTestCase(TestCase):
             ],
         }
 
-        self.complaint_importer.process_wrgl_data = Mock(return_value=processed_data)
-        self.complaint_importer.process()
+        complaint_importer.process_wrgl_data = Mock(return_value=processed_data)
+        complaint_importer.process()
 
         import_log = ImportLog.objects.order_by("-created_at").last()
         assert import_log.data_model == ComplaintImporter.data_model
@@ -474,11 +269,11 @@ class ComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 6
 
-        self.complaint_importer.retrieve_wrgl_data.assert_called_with("complaint_repo")
+        complaint_importer.retrieve_wrgl_data.assert_called_with("complaint_repo")
 
-        self.header.extend(["department_ids", "officer_ids"])
-        self.complaint_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
+        check_columns = self.header + ["department_ids", "officer_ids"]
+        check_columns_mappings = {
+            column: check_columns.index(column) for column in check_columns
         }
 
         expected_complaint1_data = self.complaint1_data.copy()
@@ -510,68 +305,39 @@ class ComplaintImporterTestCase(TestCase):
 
         for complaint_data in expected_complaints_data:
             complaint = Complaint.objects.filter(
-                allegation_uid=complaint_data[
-                    self.complaint_importer.column_mappings["allegation_uid"]
-                ]
-                if complaint_data[
-                    self.complaint_importer.column_mappings["allegation_uid"]
-                ]
+                allegation_uid=complaint_data[check_columns_mappings["allegation_uid"]]
+                if complaint_data[check_columns_mappings["allegation_uid"]]
                 else None
             ).first()
             assert complaint
-            field_attrs = [
-                "tracking_id",
-                "investigation_status",
-                "assigned_department",
-                "assigned_division",
-                "body_worn_camera_available",
-                "app_used",
-                "citizen_arrested",
-                "allegation",
-                "citizen",
-                "disposition",
-                "complainant_type",
-                "complainant_sex",
-                "complainant_race",
-                "action",
-                "incident_type",
-                "supervisor_uid",
-                "supervisor_rank",
-                "badge_no",
-                "department_code",
-                "department_desc",
-                "traffic_stop",
-                "allegation_desc",
-            ]
+            field_attrs = self.header
 
             for attr in field_attrs:
                 assert getattr(complaint, attr) == (
-                    complaint_data[self.complaint_importer.column_mappings[attr]]
-                    if complaint_data[self.complaint_importer.column_mappings[attr]]
+                    complaint_data[check_columns_mappings[attr]]
+                    if complaint_data[check_columns_mappings[attr]]
                     else None
                 )
 
             assert (
                 list(complaint.departments.values_list("id", flat=True))
-                == complaint_data[
-                    self.complaint_importer.column_mappings["department_ids"]
-                ]
+                == complaint_data[check_columns_mappings["department_ids"]]
             )
             assert (
                 list(complaint.officers.values_list("id", flat=True))
-                == complaint_data[
-                    self.complaint_importer.column_mappings["officer_ids"]
-                ]
+                == complaint_data[check_columns_mappings["officer_ids"]]
             )
 
     def test_handle_record_data_with_duplicate_uid(self):
-        self.complaint_importer.new_allegation_uids = ["allegation-uid"]
+        complaint_importer = ComplaintImporter()
 
-        self.complaint_importer.parse_row_data = Mock()
-        self.complaint_importer.parse_row_data.return_value = {
+        complaint_importer.new_allegation_uids = ["allegation-uid"]
+
+        complaint_importer.parse_row_data = Mock()
+        complaint_importer.parse_row_data.return_value = {
             "allegation_uid": "allegation-uid",
         }
 
-        self.complaint_importer.handle_record_data("row")
+        complaint_importer.handle_record_data("row")
 
-        assert self.complaint_importer.new_allegation_uids == ["allegation-uid"]
+        assert complaint_importer.new_allegation_uids == ["allegation-uid"]
