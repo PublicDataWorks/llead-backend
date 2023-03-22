@@ -204,7 +204,6 @@ class DocumentImporterTestCase(TestCase):
             "unknown",
         ]
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_fail_dueto_dropbox_get_file_error(self):
         commit_hash = "87d27e0616d9ef342e1728f5533162a3"
 
@@ -341,7 +340,6 @@ class DocumentImporterTestCase(TestCase):
 
         assert download_url is None
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     @patch("data.services.document_importer.requests.get")
     @patch(
         "data.services.document_importer.generate_from_blob", return_value="image_blob"
@@ -595,7 +593,6 @@ class DocumentImporterTestCase(TestCase):
 
         assert mock_upload_file.call_count == 6
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     @patch("data.services.document_importer.requests.get")
     @patch(
         "data.services.document_importer.generate_from_blob", return_value="image_blob"

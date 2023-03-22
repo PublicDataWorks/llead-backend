@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -60,7 +60,6 @@ class ComplaintImporterTestCase(TestCase):
 
         Complaint.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")
@@ -193,7 +192,6 @@ class ComplaintImporterTestCase(TestCase):
                 == complaint_data[check_columns_mappings["officer_ids"]]
             )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_column_changed(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")

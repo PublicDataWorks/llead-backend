@@ -2,7 +2,7 @@ from csv import DictWriter
 from io import BytesIO, StringIO
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 import pytest
 from mock import Mock, patch
@@ -63,7 +63,6 @@ class BaseImporterTestCase(TestCase):
         assert import_log.error_message == "Cannot find Wrgl Repo!"
         assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_invalid_wrgl_repo_name(self):
         WrglRepoFactory(data_model=TEST_MODEL_NAME, repo_name="test_repo_name")
 
@@ -91,7 +90,6 @@ class BaseImporterTestCase(TestCase):
         )
         assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_no_new_commit(self):
         hash = "3950bd17edfd805972781ef9fe2c6449"
 
@@ -124,7 +122,6 @@ class BaseImporterTestCase(TestCase):
         assert not import_log.error_message
         assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_error_while_processing_data(self):
         hash = "3950bd17edfd805972781ef9fe2c6449"
 
@@ -160,7 +157,6 @@ class BaseImporterTestCase(TestCase):
             assert "Error occurs while importing data!" in import_log.error_message
             assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_no_new_data(self):
         hash = "3950bd17edfd805972781ef9fe2c6449"
 
@@ -208,7 +204,6 @@ class BaseImporterTestCase(TestCase):
         assert not import_log.error_message
         assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         hash = "3950bd17edfd805972781ef9fe2c6449"
 
@@ -264,7 +259,6 @@ class BaseImporterTestCase(TestCase):
         assert not import_log.error_message
         assert import_log.finished_at
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_without_current_commit_hash(self):
         hash = "3950bd17edfd805972781ef9fe2c6449"
 

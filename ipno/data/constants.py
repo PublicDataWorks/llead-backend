@@ -1,5 +1,3 @@
-WRGL_USER = "ipno"
-
 OFFICER_MODEL_NAME = "Officer"
 AGENCY_MODEL_NAME = "Department"
 EVENT_MODEL_NAME = "Event"

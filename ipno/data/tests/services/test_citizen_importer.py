@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -70,7 +70,6 @@ class CitizenImporterTestCase(TestCase):
 
         Citizen.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         department_1 = DepartmentFactory(agency_name="New Orleans PD")
         department_2 = DepartmentFactory(agency_name="New Orleans SO")
@@ -242,7 +241,6 @@ class CitizenImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_columns_changed(self):
         department_1 = DepartmentFactory(agency_name="New Orleans PD")
         department_2 = DepartmentFactory(agency_name="New Orleans SO")
