@@ -7,10 +7,11 @@ from wrgl import Repository
 
 
 class WrglGenerator:
-    def create_wrgl_commit(self, repo_name, message, csv_pks, csv_file, branch="main"):
+    def create_wrgl_commit(self, message, csv_pks, csv_file, branch):
         repo = Repository(
-            f"https://hub.wrgl.co/api/users/{settings.WRGL_USER}/repos/{repo_name}/",
-            settings.WRGL_API_KEY,
+            "https://wrgl.llead.co/",
+            settings.WRGL_CLIENT_ID,
+            settings.WRGL_CLIENT_SECRET,
         )
 
         result = repo.commit(

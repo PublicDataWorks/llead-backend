@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -62,7 +62,6 @@ class OfficerImporterTestCase(TestCase):
 
         Officer.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         OfficerFactory(
             uid="uid_1",
@@ -204,7 +203,6 @@ class OfficerImporterTestCase(TestCase):
 
         assert result == expected_result
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_columns_changed(self):
         OfficerFactory(
             uid="uid_1",
@@ -335,7 +333,6 @@ class OfficerImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_update_officer_name_successfully(self):
         OfficerFactory(
             uid="uid_1",
