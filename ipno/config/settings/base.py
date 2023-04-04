@@ -292,3 +292,5 @@ ENVIRONMENT = os.environ.get("DJANGO_SETTINGS_MODULE").split(".")[-1]
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "")
+
+SCHEMA_BUCKET_NAME = "llead-schema"
