@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -64,7 +64,6 @@ class AppealImporterTestCase(TestCase):
         ]
         Appeal.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         AppealFactory(appeal_uid="appeal_uid1")
         AppealFactory(appeal_uid="appeal_uid2")
@@ -185,7 +184,6 @@ class AppealImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_columns_changed(self):
         AppealFactory(appeal_uid="appeal_uid1")
         AppealFactory(appeal_uid="appeal_uid2")

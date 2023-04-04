@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -61,7 +61,6 @@ class NewComplaintImporterTestCase(TestCase):
         self.new_complaint_importer = NewComplaintImporter()
         Complaint.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")

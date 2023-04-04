@@ -1,6 +1,7 @@
 import traceback
 from datetime import datetime
 
+from django.conf import settings
 from django.utils.text import slugify
 
 import pytz
@@ -207,7 +208,11 @@ class BaseImporter(object):
         import_log.save()
 
     def retrieve_wrgl_data(self, branch):
-        self.repo = Repository("https://wrgl.llead.co/")
+        self.repo = Repository(
+            "https://wrgl.llead.co/",
+            settings.WRGL_CLIENT_ID,
+            settings.WRGL_CLIENT_SECRET,
+        )
 
         self.new_commit = self.repo.get_branch(branch)
 

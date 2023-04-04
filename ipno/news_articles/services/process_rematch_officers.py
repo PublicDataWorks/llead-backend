@@ -97,7 +97,6 @@ class ProcessRematchOfficers:
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                "data",
                 f"+ {len(self.officers)} officer(s)",
                 ["uid", "newsarticle_id"],
                 gzexcel,

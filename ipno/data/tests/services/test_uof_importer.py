@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -57,7 +57,6 @@ class UofImporterTestCase(TestCase):
 
         UseOfForce.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         UseOfForceFactory(uof_uid="uof_uid_1")
         UseOfForceFactory(uof_uid="uof_uid_2")
@@ -178,7 +177,6 @@ class UofImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_columns_changed(self):
         UseOfForceFactory(uof_uid="uof_uid_1")
         UseOfForceFactory(uof_uid="uof_uid_2")

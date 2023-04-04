@@ -218,8 +218,6 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-WRGL_API_KEY = env.str("WRGL_API_KEY", None)
-
 DROPBOX_APP_KEY = env.str("DROPBOX_APP_KEY", None)
 DROPBOX_APP_SECRET = env.str("DROPBOX_APP_SECRET", None)
 DROPBOX_REFRESH_TOKEN = env.str("DROPBOX_REFRESH_TOKEN", "")
@@ -232,7 +230,8 @@ FEEDBACK_TO_EMAIL = os.getenv("FEEDBACK_TO_EMAIL")
 
 SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 
-WRGL_USER = os.getenv("WRGL_USER", "")
+WRGL_CLIENT_ID = env.str("WRGL_CLIENT_ID", "ipno-github")
+WRGL_CLIENT_SECRET = env.str("WRGL_CLIENT_SECRET", None)
 NEWS_ARTICLE_WRGL_REPO = "news_article"
 NEWS_ARTICLE_OFFICER_WRGL_REPO = "news_article_officer"
 

@@ -29,6 +29,5 @@ ANYMAIL = {
     "SENDINBLUE_API_KEY": os.getenv("SENDINBLUE_API_KEY", ""),
 }
 
-WRGL_USER = os.getenv("WRGL_USER", "ipno")
 NEWS_ARTICLE_WRGL_REPO = "news_article_staging"
 NEWS_ARTICLE_OFFICER_WRGL_REPO = "news_article_officer_staging"

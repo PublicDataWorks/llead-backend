@@ -227,7 +227,6 @@ class ProcessMatchingArticle:
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                "data",
                 f"+ {len(self.latest_keywords)} keyword(s)",
                 ["uid", "newsarticle_id"],
                 gzexcel,

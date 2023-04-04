@@ -101,18 +101,17 @@ class ProcessRematchOfficersTestCase(TestCase):
             mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
         )
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "data"
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == "+ 1 officer(s)"
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == [
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "+ 1 officer(s)"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == [
             "uid",
             "newsarticle_id",
         ]
         assert (
-            self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid
+            self.pro.wrgl.create_wrgl_commit.call_args[0][2].first().uid
             == data.first().uid
         )
         assert (
-            self.pro.wrgl.create_wrgl_commit.call_args[0][4] == "news_article_officer"
+            self.pro.wrgl.create_wrgl_commit.call_args[0][3] == "news_article_officer"
         )
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
@@ -222,18 +221,17 @@ class ProcessRematchOfficersTestCase(TestCase):
             mock_generate_csv_file.call_args[0][1] == NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
         )
 
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "data"
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == "+ 1 officer(s)"
-        assert self.pro.wrgl.create_wrgl_commit.call_args[0][2] == [
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][0] == "+ 1 officer(s)"
+        assert self.pro.wrgl.create_wrgl_commit.call_args[0][1] == [
             "uid",
             "newsarticle_id",
         ]
         assert (
-            self.pro.wrgl.create_wrgl_commit.call_args[0][3].first().uid
+            self.pro.wrgl.create_wrgl_commit.call_args[0][2].first().uid
             == data.first().uid
         )
         assert (
-            self.pro.wrgl.create_wrgl_commit.call_args[0][4] == "news_article_officer"
+            self.pro.wrgl.create_wrgl_commit.call_args[0][3] == "news_article_officer"
         )
 
         news_wrgl = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
