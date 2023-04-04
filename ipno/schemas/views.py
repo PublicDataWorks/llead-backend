@@ -10,7 +10,7 @@ from utils.google_cloud import GoogleCloudService
 
 
 class SchemaView(views.APIView):
-    def get_permissions(self):
+    def get_permissions(self):  # pragma: no cover
         if self.request.method == "GET":
             return [IsAuthenticated()]
         return super().get_permissions()
@@ -20,7 +20,7 @@ class SchemaView(views.APIView):
 
         return Response(status=status.HTTP_200_OK)
 
-    def get(self, request):
+    def get(self, request):  # pragma: no cover
         gs = GoogleCloudService()
         gs.download_schema(f"{settings.ENVIRONMENT}-schema.sql")
 

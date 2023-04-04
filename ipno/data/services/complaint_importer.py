@@ -78,20 +78,6 @@ class ComplaintImporter(BaseImporter):
                         department_id = department_mappings[agency]
 
                         department_relation_ids[complaint_id] = department_id
-
-        for row in tqdm(saved_data, desc="Update complaints' relations"):
-            officer_uid = row[self.column_mappings["uid"]]
-            agency = row[self.column_mappings["agency"]]
-            complaint_data = self.parse_row_data(row, self.column_mappings)
-
-            if officer_uid or agency:
-                allegation_uid = complaint_data.get("allegation_uid")
-
-                complaint_id = complaint_mappings.get(allegation_uid)
-
-                if complaint_id:
-                    modified_complaints_ids.append(complaint_id)
-
         department_relations = [
             DepartmentRelation(complaint_id=complaint_id, department_id=department_id)
             for complaint_id, department_id in department_relation_ids.items()
