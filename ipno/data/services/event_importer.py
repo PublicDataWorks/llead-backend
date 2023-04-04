@@ -12,38 +12,17 @@ class EventImporter(BaseImporter):
     data_model = EVENT_MODEL_NAME
     WRGL_OFFSET_BATCH_SIZE = 750
 
-    ATTRIBUTES = [
-        "event_uid",
-        "kind",
-        "time",
-        "raw_date",
-        "allegation_uid",
-        "appeal_uid",
-        "badge_no",
-        "employee_id",
-        "department_code",
-        "department_desc",
-        "division_desc",
-        "sub_division_a_desc",
-        "sub_division_b_desc",
-        "current_supervisor",
-        "employee_class",
-        "rank_code",
-        "rank_desc",
-        "sworn",
-        "officer_inactive",
-        "employee_type",
-        "salary",
-        "salary_freq",
-        "award",
-        "award_comments",
-        "left_reason",
-    ]
     INT_ATTRIBUTES = [
         "year",
         "month",
         "day",
     ]
+    ATTRIBUTES = list(
+        {field.name for field in Event._meta.fields}
+        - Event.BASE_FIELDS
+        - Event.CUSTOM_FIELDS
+        - set(INT_ATTRIBUTES)
+    )
     UPDATE_ATTRIBUTES = (
         ATTRIBUTES
         + INT_ATTRIBUTES

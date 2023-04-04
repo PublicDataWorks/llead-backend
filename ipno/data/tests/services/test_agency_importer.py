@@ -58,35 +58,35 @@ class AgencyImporterTestCase(TestCase):
         ]
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         DepartmentFactory(
-            name="New Orleans PD",
+            agency_name="New Orleans PD",
             location=(-91.9623327, 30.9842977),
             location_map_url="new-orleans-pd-url",
         )
         DepartmentFactory(
-            name="New Orleans Parish Sheriff's Office",
-            slug="new-orleans-so",
+            agency_name="New Orleans Parish Sheriff's Office",
+            agency_slug="new-orleans-so",
         )
-        DepartmentFactory(name="Kenner PD")
+        DepartmentFactory(agency_name="Kenner PD")
         DepartmentFactory(
-            name="Bossier Parish SO",
-            slug="bossier-so",
+            agency_name="Bossier Parish SO",
+            agency_slug="bossier-so",
             location=(-90.2640043, 30.006161),
             location_map_url=None,
         )
-        DepartmentFactory(name="Louisiana State PD")
+        DepartmentFactory(agency_name="Louisiana State PD")
 
         assert Department.objects.count() == 5
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         WrglRepoFactory(
             data_model=AgencyImporter.data_model,
             repo_name="agency_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         agency_importer = AgencyImporter()
 
@@ -153,7 +153,7 @@ class AgencyImporterTestCase(TestCase):
 
         agency_importer.retrieve_wrgl_data.assert_called_with("agency_repo")
 
-        check_columns = self.header + ["slug", "name"]
+        check_columns = self.header + ["agency_slug", "agency_name"]
         check_columns_mappings = {
             column: check_columns.index(column) for column in check_columns
         }
@@ -187,12 +187,12 @@ class AgencyImporterTestCase(TestCase):
 
         for agency_data in expected_agencies_data:
             agency = Department.objects.filter(
-                slug=agency_data[check_columns_mappings["agency_slug"]]
+                agency_slug=agency_data[check_columns_mappings["agency_slug"]]
             ).first()
             assert agency
             field_attrs = [
-                "slug",
-                "name",
+                "agency_slug",
+                "agency_name",
                 "location",
             ]
 
@@ -205,37 +205,37 @@ class AgencyImporterTestCase(TestCase):
                     assert getattr(agency, attr) == raw_data
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_with_columns_changed(self):
         DepartmentFactory(
-            name="New Orleans PD",
+            agency_name="New Orleans PD",
             location=(-91.9623327, 30.9842977),
             location_map_url="new-orleans-pd-url",
         )
         DepartmentFactory(
-            name="New Orleans Parish Sheriff's Office",
-            slug="new-orleans-so",
+            agency_name="New Orleans Parish Sheriff's Office",
+            agency_slug="new-orleans-so",
         )
         DepartmentFactory(
-            name="Kenner PD",
+            agency_name="Kenner PD",
         )
         DepartmentFactory(
-            name="Bossier Parish SO",
-            slug="bossier-so",
+            agency_name="Bossier Parish SO",
+            agency_slug="bossier-so",
             location=(-90.2640043, 30.006161),
             location_map_url=None,
         )
-        DepartmentFactory(name="Louisiana State PD")
+        DepartmentFactory(agency_name="Louisiana State PD")
 
         assert Department.objects.count() == 5
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         WrglRepoFactory(
             data_model=AgencyImporter.data_model,
             repo_name="agency_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         agency_importer = AgencyImporter()
 
@@ -300,7 +300,7 @@ class AgencyImporterTestCase(TestCase):
 
         agency_importer.retrieve_wrgl_data.assert_called_with("agency_repo")
 
-        check_columns = self.header + ["slug", "name"]
+        check_columns = self.header + ["agency_slug", "agency_name"]
         check_columns_mappings = {
             column: check_columns.index(column) for column in check_columns
         }
@@ -334,12 +334,12 @@ class AgencyImporterTestCase(TestCase):
 
         for agency_data in expected_agencies_data:
             agency = Department.objects.filter(
-                slug=agency_data[check_columns_mappings["agency_slug"]]
+                agency_slug=agency_data[check_columns_mappings["agency_slug"]]
             ).first()
             assert agency
             field_attrs = [
-                "slug",
-                "name",
+                "agency_slug",
+                "agency_name",
                 "location",
             ]
 
@@ -352,13 +352,14 @@ class AgencyImporterTestCase(TestCase):
                     assert getattr(agency, attr) == raw_data
 
     def test_delete_non_existed_agency(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=AgencyImporter.data_model,
             repo_name="agency_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         agency_importer = AgencyImporter()
 
@@ -442,13 +443,14 @@ class AgencyImporterTestCase(TestCase):
         assert department_image_url is None
 
     def test_raise_exception_when_updating_location(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=AgencyImporter.data_model,
             repo_name="agency_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         agency_importer = AgencyImporter()
 

@@ -90,6 +90,8 @@ LOCAL_APPS = (
     "appeals",
     "feedbacks",
     "historical_data",
+    "schemas",
+    "citizens",
 )
 
 AUTH_USER_MODEL = "authentication.User"
@@ -286,3 +288,8 @@ if USE_SENTINEL_REDIS:
         "master_name": REDIS_SENTINEL_MASTER_NAME,
         "sentinel_kwargs": {"password": REDIS_SENTINEL_PASSWORD},
     }
+
+ENVIRONMENT = os.environ.get("DJANGO_SETTINGS_MODULE").split(".")[-1]
+
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN", "")
+SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "")

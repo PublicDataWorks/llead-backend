@@ -21,5 +21,3 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     tracking_id = factory.LazyFunction(
         lambda: f"{random.randint(1000, 9999)}-{random.randint(100, 999)}"
     )
-    citizen_arrested = factory.LazyFunction(lambda: fake.word())
-    traffic_stop = factory.LazyFunction(lambda: fake.word())

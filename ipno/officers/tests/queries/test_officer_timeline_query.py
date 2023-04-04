@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from appeals.factories import AppealFactory
+from citizens.factory import CitizenFactory
 from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
@@ -41,11 +42,7 @@ from officers.constants import (
 from officers.factories import EventFactory, OfficerFactory
 from officers.queries import OfficerTimelineQuery
 from people.factories import PersonFactory
-from use_of_forces.factories import (
-    UseOfForceCitizenFactory,
-    UseOfForceFactory,
-    UseOfForceOfficerFactory,
-)
+from use_of_forces.factories import UseOfForceFactory
 
 
 class OfficerTimelineQueryTestCase(TestCase):
@@ -153,11 +150,9 @@ class OfficerTimelineQueryTestCase(TestCase):
         matched_sentence_1.officers.add(officer)
         matched_sentence_2.officers.add(officer)
 
-        use_of_force = UseOfForceFactory()
-        use_of_force_officer = UseOfForceOfficerFactory(
-            officer=officer, use_of_force=use_of_force
-        )
-        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
+        use_of_force = UseOfForceFactory(officer=officer)
+
+        citizen = CitizenFactory(use_of_force=use_of_force)
         EventFactory(
             kind=UOF_RECEIVE,
             year=2019,
@@ -186,8 +181,6 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_2.allegation_desc,
                 "action": complaint_2.action,
                 "tracking_id": complaint_2.tracking_id,
-                "citizen_arrested": complaint_2.citizen_arrested,
-                "traffic_stop": complaint_2.traffic_stop,
             },
             {
                 "kind": RANK_CHANGE_TIMELINE_KIND,
@@ -209,7 +202,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "kind": JOINED_TIMELINE_KIND,
                 "date": str(date(2018, 4, 8)),
                 "year": 2018,
-                "department": department_1.name,
+                "department": department_1.agency_name,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -224,8 +217,8 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "pages_count": document_1.pages_count,
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     },
                 ],
             },
@@ -257,30 +250,28 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_1.allegation_desc,
                 "action": complaint_1.action,
                 "tracking_id": complaint_1.tracking_id,
-                "citizen_arrested": complaint_1.citizen_arrested,
-                "traffic_stop": complaint_1.traffic_stop,
             },
             {
-                "id": use_of_force_officer.id,
+                "id": use_of_force.id,
                 "kind": UOF_TIMELINE_KIND,
                 "date": str(date(2019, 5, 5)),
                 "year": 2019,
-                "use_of_force_description": use_of_force_officer.use_of_force_description,
+                "use_of_force_description": use_of_force.use_of_force_description,
                 "use_of_force_reason": use_of_force.use_of_force_reason,
                 "disposition": use_of_force.disposition,
                 "service_type": use_of_force.service_type,
                 "citizen_information": [
-                    str(use_of_force_citizen.citizen_age)
+                    str(citizen.citizen_age)
                     + "-year-old "
-                    + use_of_force_citizen.citizen_race
+                    + citizen.citizen_race
                     + " "
-                    + use_of_force_citizen.citizen_sex
+                    + citizen.citizen_sex
                 ],
                 "tracking_id": use_of_force.tracking_id,
-                "citizen_arrested": [use_of_force_citizen.citizen_arrested],
-                "citizen_injured": [use_of_force_citizen.citizen_injured],
-                "citizen_hospitalized": [use_of_force_citizen.citizen_hospitalized],
-                "officer_injured": use_of_force_officer.officer_injured,
+                "citizen_arrested": [citizen.citizen_arrested],
+                "citizen_injured": [citizen.citizen_injured],
+                "citizen_hospitalized": [citizen.citizen_hospitalized],
+                "officer_injured": use_of_force.officer_injured,
             },
             {
                 "id": appeal.id,
@@ -289,12 +280,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "year": 2019,
                 "action_appealed": appeal.action_appealed,
                 "appeal_disposition": appeal.appeal_disposition,
-                "appealed": appeal.appealed,
                 "charging_supervisor": appeal.charging_supervisor,
-                "counsel": appeal.counsel,
-                "docket_no": appeal.docket_no,
                 "motions": appeal.motions,
-                "department": appeal.department.name,
+                "department": appeal.department.agency_name,
             },
             {
                 "kind": SALARY_CHANGE_TIMELINE_KIND,
@@ -307,13 +295,13 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "kind": LEFT_TIMELINE_KIND,
                 "date": str(date(2020, 4, 8)),
                 "year": 2020,
-                "department": department_1.name,
+                "department": department_1.agency_name,
             },
             {
                 "kind": JOINED_TIMELINE_KIND,
                 "date": str(date(2020, 5, 9)),
                 "year": 2020,
-                "department": department_2.name,
+                "department": department_2.agency_name,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -900,11 +888,9 @@ class OfficerTimelineQueryTestCase(TestCase):
         matched_sentence_1.officers.add(officer)
         matched_sentence_2.officers.add(officer)
 
-        use_of_force = UseOfForceFactory()
-        use_of_force_officer = UseOfForceOfficerFactory(
-            officer=officer, use_of_force=use_of_force
-        )
-        use_of_force_citizen = UseOfForceCitizenFactory(use_of_force=use_of_force)
+        use_of_force = UseOfForceFactory(officer=officer)
+
+        citizen = CitizenFactory(use_of_force=use_of_force)
         EventFactory(
             kind=UOF_RECEIVE,
             year=2019,
@@ -933,8 +919,6 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_2.allegation_desc,
                 "action": complaint_2.action,
                 "tracking_id": complaint_2.tracking_id,
-                "citizen_arrested": complaint_2.citizen_arrested,
-                "traffic_stop": complaint_2.traffic_stop,
             },
             {
                 "kind": RANK_CHANGE_TIMELINE_KIND,
@@ -956,7 +940,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "kind": JOINED_TIMELINE_KIND,
                 "date": str(date(2018, 4, 8)),
                 "year": 2018,
-                "department": department_1.name,
+                "department": department_1.agency_name,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -971,8 +955,8 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "pages_count": document_1.pages_count,
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     },
                 ],
             },
@@ -1004,30 +988,28 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_1.allegation_desc,
                 "action": complaint_1.action,
                 "tracking_id": complaint_1.tracking_id,
-                "citizen_arrested": complaint_1.citizen_arrested,
-                "traffic_stop": complaint_1.traffic_stop,
             },
             {
-                "id": use_of_force_officer.id,
+                "id": use_of_force.id,
                 "kind": UOF_TIMELINE_KIND,
                 "date": str(date(2019, 5, 5)),
                 "year": 2019,
-                "use_of_force_description": use_of_force_officer.use_of_force_description,
+                "use_of_force_description": use_of_force.use_of_force_description,
                 "use_of_force_reason": use_of_force.use_of_force_reason,
                 "disposition": use_of_force.disposition,
                 "service_type": use_of_force.service_type,
                 "citizen_information": [
-                    str(use_of_force_citizen.citizen_age)
+                    str(citizen.citizen_age)
                     + "-year-old "
-                    + use_of_force_citizen.citizen_race
+                    + citizen.citizen_race
                     + " "
-                    + use_of_force_citizen.citizen_sex
+                    + citizen.citizen_sex
                 ],
                 "tracking_id": use_of_force.tracking_id,
-                "citizen_arrested": [use_of_force_citizen.citizen_arrested],
-                "citizen_injured": [use_of_force_citizen.citizen_injured],
-                "citizen_hospitalized": [use_of_force_citizen.citizen_hospitalized],
-                "officer_injured": use_of_force_officer.officer_injured,
+                "citizen_arrested": [citizen.citizen_arrested],
+                "citizen_injured": [citizen.citizen_injured],
+                "citizen_hospitalized": [citizen.citizen_hospitalized],
+                "officer_injured": use_of_force.officer_injured,
             },
             {
                 "id": appeal.id,
@@ -1036,12 +1018,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "year": 2019,
                 "action_appealed": appeal.action_appealed,
                 "appeal_disposition": appeal.appeal_disposition,
-                "appealed": appeal.appealed,
                 "charging_supervisor": appeal.charging_supervisor,
-                "counsel": appeal.counsel,
-                "docket_no": appeal.docket_no,
                 "motions": appeal.motions,
-                "department": appeal.department.name,
+                "department": appeal.department.agency_name,
             },
             {
                 "kind": SALARY_CHANGE_TIMELINE_KIND,
@@ -1054,13 +1033,13 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "kind": LEFT_TIMELINE_KIND,
                 "date": str(date(2020, 4, 8)),
                 "year": 2020,
-                "department": department_1.name,
+                "department": department_1.agency_name,
             },
             {
                 "kind": JOINED_TIMELINE_KIND,
                 "date": str(date(2020, 5, 9)),
                 "year": 2020,
-                "department": department_2.name,
+                "department": department_2.agency_name,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -1118,19 +1097,12 @@ class OfficerTimelineQueryTestCase(TestCase):
         complaint_5.officers.add(officer)
         complaint_6.officers.add(officer)
 
-        uof_1 = UseOfForceFactory()
-        uof_2 = UseOfForceFactory()
-        uof_3 = UseOfForceFactory()
-        uof_4 = UseOfForceFactory()
-        uof_5 = UseOfForceFactory()
-        uof_6 = UseOfForceFactory()
-
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_1)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_2)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_3)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_4)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_5)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_6)
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_2 = UseOfForceFactory(officer=officer)
+        uof_3 = UseOfForceFactory(officer=officer)
+        uof_4 = UseOfForceFactory(officer=officer)
+        uof_5 = UseOfForceFactory(officer=officer)
+        uof_6 = UseOfForceFactory(officer=officer)
 
         uof_receive_event = EventFactory(
             kind=UOF_RECEIVE,
@@ -1280,19 +1252,12 @@ class OfficerTimelineQueryTestCase(TestCase):
         complaint_5.officers.add(officer)
         complaint_6.officers.add(officer)
 
-        uof_1 = UseOfForceFactory()
-        uof_2 = UseOfForceFactory()
-        uof_3 = UseOfForceFactory()
-        uof_4 = UseOfForceFactory()
-        uof_5 = UseOfForceFactory()
-        uof_6 = UseOfForceFactory()
-
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_1)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_2)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_3)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_4)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_5)
-        UseOfForceOfficerFactory(officer=officer, use_of_force=uof_6)
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_2 = UseOfForceFactory(officer=officer)
+        uof_3 = UseOfForceFactory(officer=officer)
+        uof_4 = UseOfForceFactory(officer=officer)
+        uof_5 = UseOfForceFactory(officer=officer)
+        uof_6 = UseOfForceFactory(officer=officer)
 
         uof_receive_event = EventFactory(
             kind=UOF_RECEIVE,

@@ -7,3 +7,10 @@ class TimeStampsModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class APITemplateModel(models.Model):
+    BASE_FIELDS = {"id", "created_at", "updated_at"}
+
+    class Meta:
+        abstract = True

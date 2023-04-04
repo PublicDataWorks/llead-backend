@@ -103,6 +103,16 @@ spec:
                 secretKeyRef:
                   name: celery
                   key: sentinel-password
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack
+                  key: slack-bot-token
+            - name: SLACK_CHANNEL
+              valueFrom:
+                secretKeyRef:
+                  name: slack
+                  key: slack-channel
             - name: FROM_EMAIL
               valueFrom:
                 configMapKeyRef:

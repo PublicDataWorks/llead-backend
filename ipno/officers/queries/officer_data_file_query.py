@@ -1,14 +1,15 @@
 from io import BytesIO as IO
 
-from django.db.models import F
-
 import pandas as pd
 
+from citizens.models import Citizen
 from complaints.models import Complaint
 from documents.models import Document
 from officers.constants import (
     OFFICER_CAREER_KINDS,
     OFFICER_CAREER_SHEET,
+    OFFICER_CITIZEN_FIELDS,
+    OFFICER_CITIZEN_SHEET,
     OFFICER_COMPLAINT_FIELDS,
     OFFICER_COMPLAINT_SHEET,
     OFFICER_DOC_FIELDS,
@@ -17,15 +18,11 @@ from officers.constants import (
     OFFICER_INCIDENT_SHEET,
     OFFICER_PROFILE_FIELDS,
     OFFICER_PROFILE_SHEET,
-    OFFICER_UOF_CITIZEN_FIELDS,
-    OFFICER_UOF_CITIZEN_SHEET,
     OFFICER_UOF_FIELDS,
-    OFFICER_UOF_OFFICER_FIELDS,
-    OFFICER_UOF_OFFICER_SHEET,
     OFFICER_UOF_SHEET,
 )
 from officers.models import Event
-from use_of_forces.models import UseOfForce, UseOfForceCitizen, UseOfForceOfficer
+from use_of_forces.models import UseOfForce
 
 
 class OfficerDatafileQuery(object):
@@ -45,11 +42,6 @@ class OfficerDatafileQuery(object):
     def _generate_officer_incident_sheet(self):
         incidents = (
             Event.objects.filter(officer__in=self.all_officers)
-            .annotate(
-                agency=F("department__name"),
-                uid=F("officer__uid"),
-                uof_uid=F("use_of_force__uof_uid"),
-            )
             .exclude(kind__in=OFFICER_CAREER_KINDS)
             .values(*OFFICER_INCIDENT_FIELDS)
         )
@@ -57,52 +49,32 @@ class OfficerDatafileQuery(object):
         return pd.DataFrame(incidents)
 
     def _generate_officer_complaint_sheet(self):
-        complaints = (
-            Complaint.objects.filter(officers__in=self.all_officers)
-            .annotate(
-                agency=F("departments__name"),
-            )
-            .values(*OFFICER_COMPLAINT_FIELDS)
+        complaints = Complaint.objects.filter(officers__in=self.all_officers).values(
+            *OFFICER_COMPLAINT_FIELDS
         )
 
         return pd.DataFrame(complaints)
 
     def _generate_officer_uof_sheet(self):
-        uof_officers = UseOfForceOfficer.objects.filter(officer__in=self.all_officers)
-        uof = UseOfForce.objects.filter(uof_officers__in=uof_officers).values(
+        uofs = UseOfForce.objects.filter(officer__in=self.all_officers).values(
             *OFFICER_UOF_FIELDS
         )
 
-        return pd.DataFrame(uof)
+        return pd.DataFrame(uofs)
 
-    def _generate_officer_uof_officer_sheet(self):
-        uof_officer = UseOfForceOfficer.objects.filter(
-            officer__in=self.all_officers
-        ).values(*OFFICER_UOF_OFFICER_FIELDS)
+    def _generate_officer_citizen_sheet(self):
+        uofs = UseOfForce.objects.filter(officer__in=self.all_officers)
 
-        return pd.DataFrame(uof_officer)
-
-    def _generate_officer_uof_citizen_sheet(self):
-        uof_officers = UseOfForceOfficer.objects.filter(officer__in=self.all_officers)
-        uofs = UseOfForce.objects.filter(uof_officers__in=uof_officers)
-        uof_citizen = UseOfForceCitizen.objects.filter(use_of_force__in=uofs).values(
-            *OFFICER_UOF_CITIZEN_FIELDS
+        citizens = Citizen.objects.filter(use_of_force__in=uofs).values(
+            *OFFICER_CITIZEN_FIELDS
         )
 
-        return pd.DataFrame(uof_citizen)
+        return pd.DataFrame(citizens)
 
     def _generate_officer_career_sheet(self):
-        career = (
-            Event.objects.filter(
-                officer__in=self.all_officers, kind__in=OFFICER_CAREER_KINDS
-            )
-            .annotate(
-                agency=F("department__name"),
-                uid=F("officer__uid"),
-                uof_uid=F("use_of_force__uof_uid"),
-            )
-            .values(*OFFICER_INCIDENT_FIELDS)
-        )
+        career = Event.objects.filter(
+            officer__in=self.all_officers, kind__in=OFFICER_CAREER_KINDS
+        ).values(*OFFICER_INCIDENT_FIELDS)
 
         return pd.DataFrame(career)
 
@@ -126,8 +98,7 @@ class OfficerDatafileQuery(object):
         df_incident = self._generate_officer_incident_sheet()
         df_complaint = self._generate_officer_complaint_sheet()
         df_uof = self._generate_officer_uof_sheet()
-        df_uof_officer = self._generate_officer_uof_officer_sheet()
-        df_uof_citizen = self._generate_officer_uof_citizen_sheet()
+        df_citizen = self._generate_officer_citizen_sheet()
         df_career = self._generate_officer_career_sheet()
         df_doc = self._generate_officer_doc_sheet()
 
@@ -136,8 +107,7 @@ class OfficerDatafileQuery(object):
             OFFICER_INCIDENT_SHEET: df_incident,
             OFFICER_COMPLAINT_SHEET: df_complaint,
             OFFICER_UOF_SHEET: df_uof,
-            OFFICER_UOF_OFFICER_SHEET: df_uof_officer,
-            OFFICER_UOF_CITIZEN_SHEET: df_uof_citizen,
+            OFFICER_CITIZEN_SHEET: df_citizen,
             OFFICER_CAREER_SHEET: df_career,
             OFFICER_DOC_SHEET: df_doc,
         }

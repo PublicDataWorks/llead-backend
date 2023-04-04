@@ -25,14 +25,14 @@ class Command(BaseCommand):
                     image = generate_map_thumbnail(location[0], location[1])
                     current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
                     upload_location = (
-                        f"{MAP_IMAGES_SUB_DIR}/{current_time}-{dep.slug}.png"
+                        f"{MAP_IMAGES_SUB_DIR}/{current_time}-{dep.agency_slug}.png"
                     )
                     gs.upload_file_from_string(upload_location, image, "image/png")
                     dep.location_map_url = f"{settings.GC_PATH}{upload_location}"
                 except ValueError as ex:
                     logger.error(
                         f"Error when update department map, at department {dep.id},"
-                        f" {dep.slug}: {str(ex)}"
+                        f" {dep.agency_slug}: {str(ex)}"
                     )
 
         Department.objects.bulk_update(deps, ["location_map_url"])

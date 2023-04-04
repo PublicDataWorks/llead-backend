@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase, override_settings
 
+import pytest
 from mock import Mock, patch
 from pytest import raises
 
@@ -63,7 +64,6 @@ class BaseImporterTestCase(TestCase):
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_invalid_wrgl_repo_name(self):
         WrglRepoFactory(data_model=TEST_MODEL_NAME, repo_name="test_repo_name")
 
@@ -92,15 +92,15 @@ class BaseImporterTestCase(TestCase):
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_no_new_commit(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name="test_repo_name",
             commit_hash="3950bd17edfd805972781ef9fe2c6449",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.tbi.branch = "main"
 
@@ -125,15 +125,15 @@ class BaseImporterTestCase(TestCase):
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_error_while_processing_data(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name="test_repo_name",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.tbi.branch = "main"
 
@@ -148,24 +148,27 @@ class BaseImporterTestCase(TestCase):
 
         self.tbi.import_data = Exception()
 
-        assert not self.tbi.process()
+        with pytest.raises(Exception):
+            assert not self.tbi.process()
 
-        assert self.tbi.retrieve_wrgl_data("test_repo_name")
+            assert self.tbi.retrieve_wrgl_data("test_repo_name")
 
-        import_log = ImportLog.objects.order_by("-created_at").last()
-        assert import_log.data_model == TEST_MODEL_NAME
-        assert import_log.status == IMPORT_LOG_STATUS_ERROR
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
-        assert "Error occurs while importing data!" in import_log.error_message
-        assert import_log.finished_at
+            import_log = ImportLog.objects.order_by("-created_at").last()
+            assert import_log.data_model == TEST_MODEL_NAME
+            assert import_log.status == IMPORT_LOG_STATUS_ERROR
+            assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+            assert "Error occurs while importing data!" in import_log.error_message
+            assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_no_new_data(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name="test_repo_name",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
 
         import_data_result = {
@@ -173,8 +176,6 @@ class BaseImporterTestCase(TestCase):
             "updated_rows": 0,
             "deleted_rows": 1,
         }
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.tbi.branch = "main"
 
@@ -208,12 +209,14 @@ class BaseImporterTestCase(TestCase):
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=TEST_MODEL_NAME,
             repo_name="test_repo_name",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
 
         import_data_result = {
@@ -221,8 +224,6 @@ class BaseImporterTestCase(TestCase):
             "updated_rows": 0,
             "deleted_rows": 1,
         }
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.tbi.branch = "main"
 
@@ -264,10 +265,14 @@ class BaseImporterTestCase(TestCase):
         assert import_log.finished_at
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_without_current_commit_hash(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
-            data_model=TEST_MODEL_NAME, repo_name="test_repo_name", commit_hash=""
+            data_model=TEST_MODEL_NAME,
+            repo_name="test_repo_name",
+            commit_hash="",
+            latest_commit_hash=hash,
         )
 
         import_data_result = {
@@ -275,8 +280,6 @@ class BaseImporterTestCase(TestCase):
             "updated_rows": 0,
             "deleted_rows": 0,
         }
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.tbi.branch = "main"
 
@@ -341,14 +344,14 @@ class BaseImporterTestCase(TestCase):
             BaseImporter().import_data([])
 
     def test_department_mappings(self):
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         mappings = BaseImporter().get_department_mappings()
 
         expected_mappings = {
-            department_1.slug: department_1.id,
-            department_2.slug: department_2.id,
+            department_1.agency_slug: department_1.id,
+            department_2.agency_slug: department_2.id,
         }
         assert mappings == expected_mappings
 

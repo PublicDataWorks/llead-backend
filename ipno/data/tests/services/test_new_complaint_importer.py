@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase, override_settings
 
-from mock import Mock, patch
+from mock import Mock
 
 from complaints.factories import ComplaintFactory
 from complaints.models import Complaint
@@ -16,236 +16,52 @@ from officers.factories import OfficerFactory
 
 class NewComplaintImporterTestCase(TestCase):
     def setUp(self):
-        self.header = [
-            "allegation_uid",
-            "uid",
-            "tracking_id",
-            "investigation_status",
-            "assigned_department",
-            "assigned_division",
-            "body_worn_camera_available",
-            "app_used",
-            "citizen_arrested",
-            "allegation",
-            "allegation_desc",
-            "citizen",
-            "disposition",
-            "complainant_name",
-            "complainant_type",
-            "complainant_sex",
-            "complainant_race",
-            "initial_action",
-            "action",
-            "data_production_year",
-            "agency",
-            "incident_type",
-            "supervisor_uid",
-            "supervisor_rank",
-            "badge_no",
-            "department_code",
-            "department_desc",
-            "rank_desc",
-            "employment_status",
-            "traffic_stop",
-        ]
+        complaint_1 = ComplaintFactory(
+            allegation_uid="complaint-uid1-allegation-uid1-charge-uid1",
+            uid="officer-uid1",
+            agency="",
+        )
+        complaint_2 = ComplaintFactory(
+            allegation_uid="complaint-uid1-allegation-uid1-charge-uid2",
+            uid="officer-uid-invalid",
+            agency="",
+        )
+        complaint_3 = ComplaintFactory(
+            allegation_uid="complaint-uid1", uid="officer-uid2", agency="baton-rouge-pd"
+        )
+        complaint_4 = ComplaintFactory(
+            allegation_uid="complaint-uid2-allegation-uid3",
+            uid="",
+            agency="new-orleans-pd",
+        )
+        complaint_5 = ComplaintFactory(
+            allegation_uid="complaint-uid3-charge-uid2",
+            uid="officer-uid3",
+            agency="baton-rouge-pd",
+        )
+        complaint_6 = ComplaintFactory(
+            allegation_uid="complaint-uid6-allegation-uid6-charge-uid2",
+            uid="",
+            agency="",
+        )
 
-        self.complaint1_data = [
-            "complaint-uid1-allegation-uid1-charge-uid1",
-            "officer-uid1",
-            "2018-018",
-            "administrative review",
-            "department",
-            "division",
-            "camera available",
-            "IAPro Windows",
-            "no",
-            "paragraph 02 - instructions from authoritative source",
-            "rule 4: perf of duty",
-            "black female",
-            "sustained",
-            "Chief Najolia ",
-            "internal",
-            "female",
-            "black",
-            "none",
-            "hold in abeyance",
-            "2016",
-            "",
-            "discourtesy",
-            "supervisor-uid1",
-            "assistant chief",
-            "HP-50",
-            "P10382",
-            "patrol 1st district",
-            "sergeant",
-            "employment-status",
-            "yes",
-        ]
-        self.complaint2_data = [
-            "complaint-uid1-allegation-uid1-charge-uid2",
-            "officer-uid-invalid",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "sustained",
-            "",
-            "civillian ",
-            "female",
-            "black",
-            "",
-            "1 day suspension without pay",
-            "2020",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "officer",
-            "",
-            "no",
-        ]
-        self.complaint3_data = [
-            "complaint-uid1",
-            "officer-uid2",
-            "2015-2",
-            "complete",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "",
-            "",
-            "female",
-            "hispanic",
-            "none",
-            "",
-            "2020",
-            "baton-rouge-pd",
-            "discourtesy",
-            "",
-            "",
-            "HP-50",
-            "",
-            "off-duty detail",
-            "police officer 2-a",
-            "",
-            "",
-        ]
-        self.complaint4_data = [
-            "complaint-uid2-allegation-uid3",
-            "",
-            "2018-006",
-            "administrative review",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "not sustained",
-            "2018",
-            "new-orleans-pd",
-            "",
-            "",
-            "",
-            "",
-            "P10252",
-            "patrol 2nd district",
-            "",
-            "",
-            "",
-        ]
-        self.complaint5_data = [
-            "complaint-uid3-charge-uid2",
-            "officer-uid3",
-            "2006-0639-D",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "paragraph 02 - instructions from authoritative source",
-            "rule 4: perf of duty",
-            "",
-            "counseling",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "2020",
-            "baton-rouge-pd",
-            "rank initiated",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "yes",
-        ]
-        self.complaint6_data = [
-            "complaint-uid6-allegation-uid6-charge-uid2",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "sustained",
-            "",
-            "civillian ",
-            "female",
-            "black",
-            "",
-            "1 day suspension without pay",
-            "2020",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "officer",
-            "",
-            "no",
-        ]
+        self.header = list(
+            {field.name for field in Complaint._meta.fields}
+            - Complaint.BASE_FIELDS
+            - Complaint.CUSTOM_FIELDS
+        )
+
+        self.complaint1_data = [getattr(complaint_1, field) for field in self.header]
+        self.complaint2_data = [getattr(complaint_2, field) for field in self.header]
+        self.complaint3_data = [getattr(complaint_3, field) for field in self.header]
+        self.complaint4_data = [getattr(complaint_4, field) for field in self.header]
+        self.complaint5_data = [getattr(complaint_5, field) for field in self.header]
+        self.complaint6_data = [getattr(complaint_6, field) for field in self.header]
 
         self.new_complaint_importer = NewComplaintImporter()
+        Complaint.objects.all().delete()
 
     @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid1")
         ComplaintFactory(allegation_uid="complaint-uid1-allegation-uid1-charge-uid2")
@@ -253,8 +69,8 @@ class NewComplaintImporterTestCase(TestCase):
         ComplaintFactory(allegation_uid="complaint-uid4")
         ComplaintFactory(allegation_uid="complaint-uid6-allegation-uid6-charge-uid2")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         OfficerFactory(uid="officer-uid2")
@@ -262,13 +78,14 @@ class NewComplaintImporterTestCase(TestCase):
 
         assert Complaint.objects.count() == 5
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=NewComplaintImporter.data_model,
             repo_name="complaint_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.new_complaint_importer.branch = "main"
 
@@ -323,9 +140,9 @@ class NewComplaintImporterTestCase(TestCase):
             "complaint_repo"
         )
 
-        self.header.extend(["department_ids", "officer_ids"])
-        self.new_complaint_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
+        check_columns = self.header + ["department_ids", "officer_ids"]
+        check_columns_mappings = {
+            column: check_columns.index(column) for column in check_columns
         }
 
         expected_complaint1_data = self.complaint1_data.copy()
@@ -357,63 +174,27 @@ class NewComplaintImporterTestCase(TestCase):
 
         for complaint_data in expected_complaints_data:
             complaint = Complaint.objects.filter(
-                allegation_uid=complaint_data[
-                    self.new_complaint_importer.column_mappings["allegation_uid"]
-                ]
-                if complaint_data[
-                    self.new_complaint_importer.column_mappings["allegation_uid"]
-                ]
+                allegation_uid=complaint_data[check_columns_mappings["allegation_uid"]]
+                if complaint_data[check_columns_mappings["allegation_uid"]]
                 else None
             ).first()
             assert complaint
-            field_attrs = [
-                "allegation_uid",
-                "tracking_id",
-                "uid",
-                "allegation",
-                "investigation_status",
-                "assigned_department",
-                "assigned_division",
-                "traffic_stop",
-                "body_worn_camera_available",
-                "app_used",
-                "citizen_arrested",
-                "citizen",
-                "disposition",
-                "complainant_name",
-                "complainant_type",
-                "complainant_sex",
-                "complainant_race",
-                "action",
-                "initial_action",
-                "incident_type",
-                "supervisor_uid",
-                "supervisor_rank",
-                "badge_no",
-                "department_code",
-                "department_desc",
-                "employment_status",
-                "allegation_desc",
-            ]
+            field_attrs = self.header
 
             for attr in field_attrs:
                 assert getattr(complaint, attr) == (
-                    complaint_data[self.new_complaint_importer.column_mappings[attr]]
-                    if complaint_data[self.new_complaint_importer.column_mappings[attr]]
+                    complaint_data[check_columns_mappings[attr]]
+                    if complaint_data[check_columns_mappings[attr]]
                     else None
                 )
 
             assert (
                 list(complaint.departments.values_list("id", flat=True))
-                == complaint_data[
-                    self.new_complaint_importer.column_mappings["department_ids"]
-                ]
+                == complaint_data[check_columns_mappings["department_ids"]]
             )
             assert (
                 list(complaint.officers.values_list("id", flat=True))
-                == complaint_data[
-                    self.new_complaint_importer.column_mappings["officer_ids"]
-                ]
+                == complaint_data[check_columns_mappings["officer_ids"]]
             )
 
     def test_handle_record_data_with_duplicate_uid(self):

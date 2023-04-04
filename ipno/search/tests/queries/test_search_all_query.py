@@ -23,9 +23,9 @@ class OfficersSearchQueryTestCase(TestCase):
                 "offset": 0,
             }
         )
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        department_2 = DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        department_2 = DepartmentFactory(agency_name="Orleans keywo PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -90,15 +90,15 @@ class OfficersSearchQueryTestCase(TestCase):
             "agencies": {
                 "results": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                         "city": department_1.city,
                         "parish": department_1.parish,
                         "location_map_url": department_1.location_map_url,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                         "city": department_2.city,
                         "parish": department_2.parish,
                         "location_map_url": department_2.location_map_url,
@@ -116,8 +116,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -148,8 +148,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -207,9 +207,9 @@ class OfficersSearchQueryTestCase(TestCase):
             },
             build_absolute_uri=Mock(return_value="http://testserver/api/search/"),
         )
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        DepartmentFactory(agency_name="Orleans keywo PD")
 
         officer = OfficerFactory(first_name="Kenneth", last_name="Anderson")
         person = PersonFactory(canonical_officer=officer)
@@ -295,9 +295,9 @@ class OfficersSearchQueryTestCase(TestCase):
                 "offset": 0,
             }
         )
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        department_2 = DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        department_2 = DepartmentFactory(agency_name="Orleans keywo PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -373,15 +373,15 @@ class OfficersSearchQueryTestCase(TestCase):
             "agencies": {
                 "results": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                         "city": department_1.city,
                         "parish": department_1.parish,
                         "location_map_url": department_1.location_map_url,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                         "city": department_2.city,
                         "parish": department_2.parish,
                         "location_map_url": department_2.location_map_url,
@@ -399,8 +399,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -424,8 +424,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -476,14 +476,14 @@ class OfficersSearchQueryTestCase(TestCase):
         assert result == expected_data
 
     def test_query_with_specified_department(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
 
         request = Mock(
             query_params={
                 "limit": 2,
                 "offset": 0,
-                "department": department_1.slug,
+                "department": department_1.agency_slug,
             }
         )
 
@@ -562,8 +562,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                         "latest_rank": "senior",
@@ -587,8 +587,8 @@ class OfficersSearchQueryTestCase(TestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -618,7 +618,7 @@ class OfficersSearchQueryTestCase(TestCase):
         }
 
         result = SearchAllQuery(request).search(
-            "keywo", None, department=department_1.slug
+            "keywo", None, department=department_1.agency_slug
         )
 
         for search_key, items in result.items():
