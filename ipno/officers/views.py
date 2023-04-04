@@ -93,7 +93,7 @@ class OfficersViewSet(viewsets.ViewSet):
                 use_of_forces__disposition__isnull=False,
                 use_of_forces__service_type__isnull=False,
                 use_of_forces__tracking_id__isnull=False,
-                use_of_forces__uof_citizens__isnull=False,
+                use_of_forces__citizens__isnull=False,
             )
             .first()
             .id

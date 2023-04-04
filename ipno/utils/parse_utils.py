@@ -15,6 +15,6 @@ def parse_date(year, month, day):
 
 def parse_int(value):
     try:
-        return int(value)
+        return int(float(value))
     except ValueError:
         return None

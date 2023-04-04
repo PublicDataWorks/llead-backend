@@ -8,16 +8,22 @@ from data.services.base_importer import BaseImporter
 class CitizenImporter(BaseImporter):
     data_model = CITIZEN_MODEL_NAME
 
+    INT_ATTRIBUTES = [
+        "citizen_age",
+    ]
+
     ATTRIBUTES = list(
         {field.name for field in Citizen._meta.fields}
         - Citizen.BASE_FIELDS
         - Citizen.CUSTOM_FIELDS
+        - set(INT_ATTRIBUTES)
     )
-    UPDATE_ATTRIBUTES = ATTRIBUTES + [
-        "use_of_force_id",
-        "complaint_id",
-        "department_id",
-    ]
+
+    UPDATE_ATTRIBUTES = (
+        ATTRIBUTES
+        + INT_ATTRIBUTES
+        + ["use_of_force_id", "complaint_id", "department_id"]
+    )
 
     def __init__(self):
         self.new_citizens_attrs = []

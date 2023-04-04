@@ -32,7 +32,9 @@ class Event(TimeStampsModel, APITemplateModel):
     rank_code = models.CharField(max_length=255, null=True, blank=True)
     rank_desc = models.CharField(max_length=255, null=True, blank=True)
     salary = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=2)
-    overtime_annual_total = models.CharField(max_length=255, null=True, blank=True)
+    overtime_annual_total = models.DecimalField(
+        null=True, blank=True, max_digits=8, decimal_places=2
+    )
     salary_freq = models.CharField(max_length=255, null=True, blank=True)
     left_reason = models.CharField(max_length=255, null=True, blank=True)
     uid = models.CharField(max_length=255, null=True, blank=True)

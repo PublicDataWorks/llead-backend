@@ -303,7 +303,8 @@ class CitizenImporterTestCase(TestCase):
 
         citizen_importer.retrieve_wrgl_data = Mock()
 
-        old_columns = self.header[0:7] + self.header[8:]
+        deleted_index = self.header.index("citizen_hospitalized")
+        old_columns = self.header[0:deleted_index] + self.header[deleted_index + 1 :]
         citizen_importer.old_column_mappings = {
             column: old_columns.index(column) for column in old_columns
         }
@@ -318,7 +319,8 @@ class CitizenImporterTestCase(TestCase):
                 self.citizen_5_dup_data,
             ],
             "deleted_rows": [
-                self.citizen_3_data[0:7] + self.citizen_3_data[8:],
+                self.citizen_3_data[0:deleted_index]
+                + self.citizen_3_data[deleted_index + 1 :],
             ],
             "updated_rows": [
                 self.citizen_1_data,
