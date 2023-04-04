@@ -27,3 +27,10 @@ class GoogleCloudService:
 
         self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)
+
+    def download_schema(self, file_url):
+        bucket = Client().bucket(settings.SCHEMA_BUCKET_NAME)
+        self.bucket = bucket
+
+        blob = self.bucket.blob(file_url)
+        blob.download_to_filename("./schema.sql")
