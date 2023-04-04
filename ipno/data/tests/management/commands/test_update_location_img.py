@@ -42,7 +42,7 @@ class UpdateLocationImageCommandTestCase(TestCase):
         with capture_logs() as cap_logs:
             call_command("update_location_img")
 
-        upload_location = f"{MAP_IMAGES_SUB_DIR}/{current_time}-{dep.slug}.png"
+        upload_location = f"{MAP_IMAGES_SUB_DIR}/{current_time}-{dep.agency_slug}.png"
         mock_gcs_object.upload_file_from_string.assert_called_with(
             upload_location, "generated-image", "image/png"
         )
@@ -55,6 +55,6 @@ class UpdateLocationImageCommandTestCase(TestCase):
         assert (
             cap_logs[0]["event"]
             == f"Error when update department map, at department {dep_3.id},"
-            f" {dep_3.slug}: Invalid lng -150.2050293"
+            f" {dep_3.agency_slug}: Invalid lng -150.2050293"
         )
         assert cap_logs[0]["log_level"] == "error"

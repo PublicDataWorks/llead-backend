@@ -251,7 +251,7 @@ class OfficersSearchQueryTestCase(TestCase):
 
         rebuild_search_index()
 
-        result = OfficersSearchQuery("Davi", department=department.slug).search()
+        result = OfficersSearchQuery("Davi", department=department.agency_slug).search()
         officer_ids = [item["id"] for item in result]
 
         assert officer_ids == [officer_3.id, officer_1.id]

@@ -12,8 +12,8 @@ class DepartmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Department
 
-    name = factory.Sequence(lambda n: f"{fake.city()}{n}")
-    slug = factory.LazyAttribute(lambda d: slugify(d.name))
+    agency_name = factory.Sequence(lambda n: f"{fake.city()}{n}")
+    agency_slug = factory.LazyAttribute(lambda d: slugify(d.agency_name))
     address = factory.LazyFunction(lambda: fake.address())
     phone = factory.LazyFunction(lambda: fake.phone_number())
     location = factory.LazyFunction(

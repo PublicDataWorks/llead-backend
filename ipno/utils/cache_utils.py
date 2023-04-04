@@ -42,9 +42,11 @@ def flush_news_article_related_caches(start_time=None):
         delete_cache("api:officers-timeline", url_kwargs={"pk": officer.id})
 
     for department in departments:
-        delete_cache("api:departments-detail", url_kwargs={"pk": department.slug})
         delete_cache(
-            "api:departments-news-articles", url_kwargs={"pk": department.slug}
+            "api:departments-detail", url_kwargs={"pk": department.agency_slug}
+        )
+        delete_cache(
+            "api:departments-news-articles", url_kwargs={"pk": department.agency_slug}
         )
 
 

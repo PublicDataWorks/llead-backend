@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 
 class OfficerMovementSerializer(serializers.Serializer):
-    start_node = serializers.CharField(source="start_department.slug")
-    end_node = serializers.CharField(source="end_department.slug")
+    start_node = serializers.CharField(source="start_department.agency_slug")
+    end_node = serializers.CharField(source="end_department.agency_slug")
     start_location = serializers.SerializerMethodField()
     end_location = serializers.SerializerMethodField()
     year = serializers.SerializerMethodField()

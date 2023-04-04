@@ -75,7 +75,7 @@ class OfficersViewSet(viewsets.ViewSet):
 
     @test_util_api
     @action(detail=False, methods=["get"], url_path="testing-officer-timelines")
-    def testing_officer_timelines(self, request):
+    def testing_officer_timelines(self, request):  # pragma: no cover
         complaint_timeline_officer_id = (
             Officer.objects.filter(
                 complaints__allegation__isnull=False,

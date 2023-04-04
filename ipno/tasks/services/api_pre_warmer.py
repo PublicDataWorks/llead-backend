@@ -41,11 +41,13 @@ class APIPreWarmer:
         return error_messages
 
     def pre_warm_department_api(self):
-        departments = Department.objects.filter(slug__isnull=False)
+        departments = Department.objects.filter(agency_slug__isnull=False)
 
         error_messages = []
         for department in tqdm(departments, desc="Pre-warming department page APIs"):
-            department_detail_api = self.url + "departments/" + department.slug + "/"
+            department_detail_api = (
+                self.url + "departments/" + department.agency_slug + "/"
+            )
             officer_api = department_detail_api + "officers/"
             document_api = department_detail_api + "documents/"
             news_article_api = department_detail_api + "news_articles/"
