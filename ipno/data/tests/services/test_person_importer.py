@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock
 
@@ -49,7 +49,6 @@ class PersonImporterTestCase(TestCase):
         self.officer3 = OfficerFactory(uid="0007884f101d1661937abb130664d2d2")
         self.officer4 = OfficerFactory(uid="0007f3f6802b9fa493622d4a23edc00b")
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         updating_person = PersonFactory()
         updating_person.person_id = "1"

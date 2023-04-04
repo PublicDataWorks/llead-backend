@@ -2,7 +2,7 @@ from ast import literal_eval
 from unittest.mock import MagicMock
 
 from django.conf import settings
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
 from mock import Mock, patch
 from structlog.testing import capture_logs
@@ -57,7 +57,6 @@ class AgencyImporterTestCase(TestCase):
             self.agency7_dup_data,
         ]
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully(self):
         DepartmentFactory(
             agency_name="New Orleans PD",
@@ -204,7 +203,6 @@ class AgencyImporterTestCase(TestCase):
                 else:
                     assert getattr(agency, attr) == raw_data
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
     def test_process_successfully_with_columns_changed(self):
         DepartmentFactory(
             agency_name="New Orleans PD",
