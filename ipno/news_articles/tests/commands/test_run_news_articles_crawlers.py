@@ -171,7 +171,6 @@ class CommandTestCase(TestCase):
 
         called_create_wrgl_similarity = [
             call(
-                "data",
                 "+ 1 object(s)",
                 ["id"],
                 news,
@@ -234,7 +233,6 @@ class CommandTestCase(TestCase):
 
         called_create_wrgl_similarity = [
             call(
-                "data",
                 "+ 1 object(s)",
                 ["id"],
                 news,

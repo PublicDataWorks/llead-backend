@@ -1,13 +1,9 @@
 from collections import defaultdict
 
-from django.conf import settings
-from django.db.models import F, Q
+from django.db.models import Q
 
 from tqdm import tqdm
 
-from data.constants import NEWS_ARTICLE_OFFICER_MODEL_NAME
-from data.models import WrglRepo
-from news_articles.constants import NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
 from news_articles.models import ExcludeOfficer, MatchedSentence
 from officers.models import Officer
 from utils.nlp import NLP
@@ -70,10 +66,12 @@ class ProcessRematchOfficers:
                 matched_sentence.excluded_officers.add(*exclude_matched_officers_obj)
                 matched_sentence.save()
 
-            return self.commit_data_to_wrgl()
+            # return self.commit_data_to_wrgl()
 
         return False
 
+    # TODO: Uncomment if WRGL is consistent
+    """
     def commit_data_to_wrgl(self):
         MatchedSentenceOfficer = MatchedSentence.officers.through
         data = (
@@ -97,7 +95,6 @@ class ProcessRematchOfficers:
             gzexcel = self.wrgl.generate_csv_file(data, columns)
 
             result = self.wrgl.create_wrgl_commit(
-                "data",
                 f"+ {len(self.officers)} officer(s)",
                 ["uid", "newsarticle_id"],
                 gzexcel,
@@ -112,3 +109,4 @@ class ProcessRematchOfficers:
                 wrgl_repo.save()
 
         return count_updated_objects > 0
+    """

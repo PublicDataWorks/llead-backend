@@ -24,7 +24,7 @@ else
         shift
     fi
 
-    docker-compose run web ipno/manage.py $@
+    docker-compose run --rm web ipno/manage.py $@
     exit 0
 fi
 

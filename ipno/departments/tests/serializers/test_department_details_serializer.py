@@ -172,8 +172,8 @@ class DepartmentDetailsSerializerTestCase(TestCase):
 
         result = DepartmentDetailsSerializer(department).data
         assert result == {
-            "id": department.slug,
-            "name": department.name,
+            "id": department.agency_slug,
+            "name": department.agency_name,
             "city": department.city,
             "parish": department.parish,
             "phone": department.phone,
@@ -374,8 +374,8 @@ class DepartmentDetailsSerializerTestCase(TestCase):
 
         result = DepartmentDetailsSerializer(department).data
         assert result == {
-            "id": department.slug,
-            "name": department.name,
+            "id": department.agency_slug,
+            "name": department.agency_name,
             "city": department.city,
             "parish": department.parish,
             "address": department.address,

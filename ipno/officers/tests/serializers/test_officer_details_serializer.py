@@ -131,8 +131,8 @@ class OfficerDetailsSerializerTestCase(TestCase):
             "sex": "male",
             "departments": [
                 {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 }
             ],
             "salary": "57000.14",
@@ -395,12 +395,12 @@ class OfficerDetailsSerializerTestCase(TestCase):
             "sex": "male",
             "departments": [
                 {
-                    "id": department.slug,
-                    "name": department.name,
+                    "id": department.agency_slug,
+                    "name": department.agency_name,
                 },
                 {
-                    "id": related_department.slug,
-                    "name": related_department.name,
+                    "id": related_department.agency_slug,
+                    "name": related_department.agency_name,
                 },
             ],
             "salary": "57000.14",

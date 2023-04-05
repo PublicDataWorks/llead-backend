@@ -43,8 +43,8 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
                 "pages_count": document_2.pages_count,
                 "departments": [
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                     }
                 ],
             },
@@ -58,8 +58,8 @@ class DocumentsViewSetTestCase(AuthAPITestCase):
                 "pages_count": document_1.pages_count,
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     }
                 ],
             },

@@ -1,5 +1,3 @@
-from itertools import chain
-
 from tqdm import tqdm
 
 from data.constants import USE_OF_FORCE_MODEL_NAME
@@ -9,24 +7,13 @@ from use_of_forces.models import UseOfForce
 
 class UofImporter(BaseImporter):
     data_model = USE_OF_FORCE_MODEL_NAME
-    ATTRIBUTES = [
-        "uof_uid",
-        "tracking_id",
-        "investigation_status",
-        "service_type",
-        "light_condition",
-        "weather_condition",
-        "shift_time",
-        "disposition",
-        "division",
-        "division_level",
-        "unit",
-        "originating_bureau",
-        "agency",
-        "use_of_force_reason",
-    ]
 
-    UPDATE_ATTRIBUTES = ATTRIBUTES + ["department_id"]
+    ATTRIBUTES = list(
+        {field.name for field in UseOfForce._meta.fields}
+        - UseOfForce.BASE_FIELDS
+        - UseOfForce.CUSTOM_FIELDS
+    )
+    UPDATE_ATTRIBUTES = ATTRIBUTES + ["department_id", "officer_id"]
 
     def __init__(self):
         self.new_uofs_attrs = []
@@ -39,11 +26,14 @@ class UofImporter(BaseImporter):
 
     def handle_record_data(self, row):
         agency = row[self.column_mappings["agency"]]
+        officer_uid = row[self.column_mappings["uid"]]
         uof_data = self.parse_row_data(row, self.column_mappings)
 
         uof_uid = uof_data["uof_uid"]
         department_id = self.department_mappings[agency]
         uof_data["department_id"] = department_id
+        officer_id = self.officer_mappings[officer_uid]
+        uof_data["officer_id"] = officer_id
 
         uof_id = self.uof_mappings.get(uof_uid)
 
@@ -55,29 +45,8 @@ class UofImporter(BaseImporter):
             self.new_uofs_attrs.append(uof_data)
 
     def import_data(self, data):
-        saved_data = list(
-            chain(
-                data.get("added_rows", []),
-                data.get("updated_rows", []),
-            )
-        )
-        deleted_data = data.get("deleted_rows", [])
-
         self.officer_mappings = self.get_officer_mappings()
-        agencies = {
-            row[self.column_mappings["agency"]]
-            for row in saved_data
-            if row[self.column_mappings["agency"]]
-        }
-        agencies.update(
-            [
-                row[self.old_column_mappings["agency"]]
-                for row in deleted_data
-                if row[self.old_column_mappings["agency"]]
-            ]
-        )
         self.department_mappings = self.get_department_mappings()
-
         self.uof_mappings = self.get_uof_mappings()
 
         for row in tqdm(data.get("added_rows"), desc="Create new uofs"):

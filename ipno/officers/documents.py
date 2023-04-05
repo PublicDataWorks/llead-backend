@@ -43,7 +43,7 @@ class OfficerESDoc(ESDoc):
     complaint_fraction = fields.FloatField()
 
     def prepare_department_name(self, instance):
-        return instance.department.name if instance.department else None
+        return instance.department.agency_name if instance.department else None
 
     def prepare_department_slug(self, instance):
-        return instance.department.slug if instance.department else None
+        return instance.department.agency_slug if instance.department else None

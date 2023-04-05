@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import Mock
 
 from appeals.factories import AppealFactory
 from appeals.models import Appeal
@@ -16,79 +16,42 @@ from officers.factories import OfficerFactory
 
 class AppealImporterTestCase(TestCase):
     def setUp(self):
-        self.header = [
-            "appeal_uid",
-            "docket_no",
-            "uid",
-            "counsel",
-            "charging_supervisor",
-            "appeal_disposition",
-            "action_appealed",
-            "appealed",
-            "agency",
-            "motions",
-        ]
-        self.appeal1_data = [
-            "appeal_uid1",
-            "00-10",
-            "officer-uid1",
-            "Dirks",
-            "Paul Fontenot",
-            "appeal upheld",
-            "suspension",
-            "Yes",
-            "new-orleans-pd",
-            "amicable settlement",
-        ]
-        self.appeal2_data = [
-            "appeal_uid2",
-            "07-06",
-            "officer-uid-invalid",
-            "Falcon",
-            "",
-            "appeal withdrawn",
-            "dismissed",
-            "Yes - denied",
-            "new-orleans-pd",
-            "motion for summary disposition",
-        ]
-        self.appeal3_data = [
-            "appeal_uid3",
-            "07-08",
-            "officer-uid2",
-            "Floyd",
-            "Michael D. Edmonson",
-            "appeal dismissed/denied",
-            "letter of reprimand",
-            "",
-            "baton-rouge-pd",
-            "motion to dismiss appeal/failure to prosecute",
-        ]
-        self.appeal4_data = [
-            "appeal_uid4",
-            "11-11",
-            "",
-            "Floyd",
-            "Terry C. Landry",
-            "amicable settlement",
-            "termination",
-            "No",
-            "new-orleans-pd",
-            "motion to enforce judgement",
-        ]
-        self.appeal5_data = [
-            "appeal_uid5",
-            "12-05",
-            "officer-uid3",
-            "None",
-            "Stanley Griffin",
-            "denied",
-            "transfer",
-            "",
-            "baton-rouge-pd",
-            "motion to enforce decision",
-        ]
+        appeal_1 = AppealFactory(
+            appeal_uid="appeal_uid1",
+            uid="officer-uid1",
+            agency="new-orleans-pd",
+        )
+        appeal_2 = AppealFactory(
+            appeal_uid="appeal_uid2",
+            uid="officer-uid-invalid",
+            agency="new-orleans-pd",
+        )
+        appeal_3 = AppealFactory(
+            appeal_uid="appeal_uid3",
+            uid="officer-uid2",
+            agency="baton-rouge-pd",
+        )
+        appeal_4 = AppealFactory(
+            appeal_uid="appeal_uid4",
+            uid="",
+            agency="new-orleans-pd",
+        )
+        appeal_5 = AppealFactory(
+            appeal_uid="appeal_uid5",
+            uid="officer-uid3",
+            agency="baton-rouge-pd",
+        )
 
+        self.header = list(
+            {field.name for field in Appeal._meta.fields}
+            - Appeal.BASE_FIELDS
+            - Appeal.CUSTOM_FIELDS
+        )
+        self.appeal1_data = [getattr(appeal_1, field) for field in self.header]
+        self.appeal2_data = [getattr(appeal_2, field) for field in self.header]
+        self.appeal3_data = [getattr(appeal_3, field) for field in self.header]
+        self.appeal4_data = [getattr(appeal_4, field) for field in self.header]
+        self.appeal5_data = [getattr(appeal_5, field) for field in self.header]
         self.appeal5_dup_data = self.appeal5_data.copy()
 
         self.appeals_data = [
@@ -99,16 +62,15 @@ class AppealImporterTestCase(TestCase):
             self.appeal5_data,
             self.appeal5_dup_data,
         ]
+        Appeal.objects.all().delete()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         AppealFactory(appeal_uid="appeal_uid1")
         AppealFactory(appeal_uid="appeal_uid2")
         AppealFactory(appeal_uid="appeal_uid3")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         OfficerFactory(uid="officer-uid2")
@@ -116,13 +78,14 @@ class AppealImporterTestCase(TestCase):
 
         assert Appeal.objects.count() == 3
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=AppealImporter.data_model,
             repo_name="appeal_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         appeal_importer = AppealImporter()
 
@@ -212,18 +175,7 @@ class AppealImporterTestCase(TestCase):
                 appeal_uid=appeal_data[check_columns_mappings["appeal_uid"]]
             ).first()
             assert appeal
-            field_attrs = [
-                "department_id",
-                "officer_id",
-                "appeal_uid",
-                "docket_no",
-                "counsel",
-                "charging_supervisor",
-                "appeal_disposition",
-                "action_appealed",
-                "appealed",
-                "motions",
-            ]
+            field_attrs = check_columns
 
             for attr in field_attrs:
                 assert getattr(appeal, attr) == (
@@ -232,15 +184,13 @@ class AppealImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_with_columns_changed(self):
         AppealFactory(appeal_uid="appeal_uid1")
         AppealFactory(appeal_uid="appeal_uid2")
         AppealFactory(appeal_uid="appeal_uid3")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         OfficerFactory(uid="officer-uid2")
@@ -248,13 +198,14 @@ class AppealImporterTestCase(TestCase):
 
         assert Appeal.objects.count() == 3
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=AppealImporter.data_model,
             repo_name="appeal_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         appeal_importer = AppealImporter()
 
@@ -345,18 +296,7 @@ class AppealImporterTestCase(TestCase):
                 appeal_uid=appeal_data[check_columns_mappings["appeal_uid"]]
             ).first()
             assert appeal
-            field_attrs = [
-                "department_id",
-                "officer_id",
-                "appeal_uid",
-                "docket_no",
-                "counsel",
-                "charging_supervisor",
-                "appeal_disposition",
-                "action_appealed",
-                "appealed",
-                "motions",
-            ]
+            field_attrs = check_columns
 
             for attr in field_attrs:
                 assert getattr(appeal, attr) == (
@@ -366,14 +306,16 @@ class AppealImporterTestCase(TestCase):
                 )
 
     def test_delete_non_existed_uof(self):
-        DepartmentFactory(name="Baton Rouge PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=AppealImporter.data_model,
             repo_name="uof_appeal",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         appeal_importer = AppealImporter()
 

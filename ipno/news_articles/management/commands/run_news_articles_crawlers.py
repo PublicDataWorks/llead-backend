@@ -123,7 +123,6 @@ class Command(BaseCommand):
 
             if count_updated_objects:
                 result = self.wrgl.create_wrgl_commit(
-                    "data",
                     f"+ {count_updated_objects} object(s)",
                     ["id"],
                     csv_file,

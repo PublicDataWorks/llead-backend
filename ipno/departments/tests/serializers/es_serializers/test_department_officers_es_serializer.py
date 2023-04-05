@@ -7,7 +7,7 @@ from departments.serializers.es_serializers import DepartmentOfficersESSerialize
 from officers.constants import OFFICER_HIRE, UOF_RECEIVE
 from officers.factories import EventFactory, OfficerFactory
 from people.factories import PersonFactory
-from use_of_forces.factories import UseOfForceFactory, UseOfForceOfficerFactory
+from use_of_forces.factories import UseOfForceFactory
 
 
 class OfficersESSerializerTestCase(TestCase):
@@ -36,11 +36,7 @@ class OfficersESSerializerTestCase(TestCase):
             month=8,
             day=20,
         )
-        uof_1 = UseOfForceFactory()
-        UseOfForceOfficerFactory(
-            officer=officer_1,
-            use_of_force=uof_1,
-        )
+        uof_1 = UseOfForceFactory(officer=officer_1)
         uof_1.events.add(uof_receive_event_1)
 
         uof_receive_event_2 = EventFactory(
@@ -51,8 +47,7 @@ class OfficersESSerializerTestCase(TestCase):
             month=5,
             day=12,
         )
-        uof_2 = UseOfForceFactory()
-        UseOfForceOfficerFactory(officer=officer_1, use_of_force=uof_2)
+        uof_2 = UseOfForceFactory(officer=officer_1)
         uof_2.events.add(uof_receive_event_2)
 
         EventFactory(
@@ -100,8 +95,8 @@ class OfficersESSerializerTestCase(TestCase):
                 "use_of_forces_count": 2,
                 "complaints_count": 5,
                 "department": {
-                    "id": department_1.slug,
-                    "name": department_1.name,
+                    "id": department_1.agency_slug,
+                    "name": department_1.agency_name,
                 },
                 "latest_rank": "senior",
             }

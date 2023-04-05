@@ -1,9 +1,9 @@
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import Mock
 
 from appeals.factories import AppealFactory
 from complaints.factories import ComplaintFactory
@@ -19,223 +19,69 @@ from use_of_forces.factories import UseOfForceFactory
 
 class EventImporterTestCase(TestCase):
     def setUp(self):
-        self.header = [
-            "event_uid",
-            "kind",
-            "year",
-            "month",
-            "day",
-            "time",
-            "raw_date",
-            "uid",
-            "allegation_uid",
-            "appeal_uid",
-            "uof_uid",
-            "agency",
-            "badge_no",
-            "employee_id",
-            "department_code",
-            "department_desc",
-            "division_desc",
-            "sub_division_a_desc",
-            "sub_division_b_desc",
-            "current_supervisor",
-            "employee_class",
-            "rank_code",
-            "rank_desc",
-            "sworn",
-            "officer_inactive",
-            "employee_type",
-            "years_employed",
-            "salary",
-            "salary_freq",
-            "award",
-            "award_comments",
-            "left_reason",
-        ]
-        self.event1_data = [
-            "event-uid1",
-            "event_pay_effective",
-            "2017",
-            "12",
-            "5",
-            "01:00",
-            "2017-12-05",
-            "officer-uid1",
-            "complaint-uid1",
-            "appeal-uid1",
-            "",
-            "new-orleans-pd",
-            "2592",
-            "75774",
-            "5060",
-            "police-special operations",
-            "Seventh District",
-            "Staff",
-            "School Crossing Guards",
-            "current-supervisor-uid",
-            "",
-            "405470",
-            "school crossing guard",
-            "sworn",
-            "active",
-            "commissioned",
-            "24",
-            "27866.59",
-            "yearly",
-            "award",
-            "award comments",
-            "Retirement",
-        ]
-        self.event2_data = [
-            "event-uid2",
-            "event_rank",
-            "2008",
-            "",
-            "",
-            "",
-            "",
-            "officer-uid-invalid",
-            "",
-            "",
-            "uof-uid1",
-            "new-orleans-pd",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "5005",
-            "police event",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        ]
-        self.event3_data = [
-            "event-uid3",
-            "event_pay_effective",
-            "2009",
-            "",
-            "",
-            "",
-            "",
-            "officer-uid2",
-            "",
-            "",
-            "uof-uid2",
-            "baton-rouge-pd",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "67708.85",
-            "yearly",
-            "",
-            "",
-            "",
-        ]
-        self.event4_data = [
-            "event-uid4",
-            "event_pay_effective",
-            "2011",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "new-orleans-pd",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "86832.27",
-            "yearly",
-            "",
-            "",
-            "",
-        ]
-        self.event5_data = [
-            "event-uid5",
-            "event_pc_12_qualification",
-            "2019",
-            "11",
-            "5",
-            "",
-            "2019-11-05",
-            "officer-uid3",
-            "complaint-uid2",
-            "",
-            "",
-            "baton-rouge-pd",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        ]
+        event_1 = EventFactory(
+            event_uid="event-uid1",
+            agency="new-orleans-pd",
+            uid="officer-uid1",
+            allegation_uid="complaint-uid1",
+            appeal_uid="appeal-uid1",
+            uof_uid="",
+        )
+        event_2 = EventFactory(
+            event_uid="event-uid2",
+            agency="new-orleans-pd",
+            uid="officer-uid-invalid",
+            allegation_uid="",
+            appeal_uid="",
+            uof_uid="uof-uid1",
+        )
+        event_3 = EventFactory(
+            event_uid="event-uid3",
+            agency="baton-rouge-pd",
+            uid="officer-uid2",
+            allegation_uid="",
+            appeal_uid="",
+            uof_uid="uof-uid2",
+        )
+        event_4 = EventFactory(
+            event_uid="event-uid4",
+            agency="new-orleans-pd",
+            uid="",
+            allegation_uid="",
+            appeal_uid="",
+            uof_uid="",
+        )
+        event_5 = EventFactory(
+            event_uid="event-uid5",
+            agency="baton-rouge-pd",
+            uid="officer-uid3",
+            allegation_uid="complaint-uid2",
+            appeal_uid="",
+            uof_uid="",
+        )
 
+        self.header = list(
+            {field.name for field in Event._meta.fields}
+            - Event.BASE_FIELDS
+            - Event.CUSTOM_FIELDS
+        )
+        self.event1_data = [getattr(event_1, field) for field in self.header]
+        self.event2_data = [getattr(event_2, field) for field in self.header]
+        self.event3_data = [getattr(event_3, field) for field in self.header]
+        self.event4_data = [getattr(event_4, field) for field in self.header]
+        self.event5_data = [getattr(event_5, field) for field in self.header]
+
+        Event.objects.all().delete()
         self.event_importer = EventImporter()
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         EventFactory(event_uid="event-uid1")
         EventFactory(event_uid="event-uid2")
         EventFactory(event_uid="event-uid3")
         EventFactory(event_uid="event-uid6")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         officer_2 = OfficerFactory(uid="officer-uid2")
@@ -252,13 +98,14 @@ class EventImporterTestCase(TestCase):
 
         assert Event.objects.count() == 4
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=EventImporter.data_model,
             repo_name="event_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.event_importer.branch = "main"
 
@@ -369,33 +216,26 @@ class EventImporterTestCase(TestCase):
             ).first()
             assert event
             field_attrs = [
-                "department_id",
-                "officer_id",
-                "use_of_force_id",
-                "kind",
-                "time",
-                "raw_date",
-                "allegation_uid",
-                "appeal_uid",
-                "badge_no",
-                "employee_id",
-                "department_code",
-                "department_desc",
-                "division_desc",
-                "sub_division_a_desc",
-                "sub_division_b_desc",
-                "current_supervisor",
-                "employee_class",
-                "rank_code",
-                "rank_desc",
-                "sworn",
-                "officer_inactive",
-                "employee_type",
-                "salary_freq",
-                "award",
-                "award_comments",
+                "agency",
                 "left_reason",
+                "uof_uid",
+                "time",
+                "appeal_uid",
+                "kind",
+                "rank_desc",
+                "division_desc",
+                "department_desc",
+                "allegation_uid",
+                "rank_code",
+                "salary_freq",
+                "department_code",
+                "badge_no",
+                "overtime_annual_total",
+                "uid",
+                "event_uid",
+                "raw_date",
             ]
+
             integer_field_attrs = [
                 "year",
                 "month",
@@ -433,16 +273,14 @@ class EventImporterTestCase(TestCase):
                 == event_data[check_column_mappings["complaint_ids"]]
             )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_with_columns_changed(self):
         EventFactory(event_uid="event-uid1")
         EventFactory(event_uid="event-uid2")
         EventFactory(event_uid="event-uid3")
         EventFactory(event_uid="event-uid6")
 
-        department_1 = DepartmentFactory(name="New Orleans PD")
-        department_2 = DepartmentFactory(name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans PD")
+        department_2 = DepartmentFactory(agency_name="Baton Rouge PD")
 
         officer_1 = OfficerFactory(uid="officer-uid1")
         officer_2 = OfficerFactory(uid="officer-uid2")
@@ -459,13 +297,14 @@ class EventImporterTestCase(TestCase):
 
         assert Event.objects.count() == 4
 
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=EventImporter.data_model,
             repo_name="event_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         self.event_importer.branch = "main"
 
@@ -478,7 +317,8 @@ class EventImporterTestCase(TestCase):
 
         self.event_importer.retrieve_wrgl_data = Mock()
 
-        old_columns = self.header[0:14] + self.header[15:]
+        deleted_index = self.header.index("department_desc")
+        old_columns = self.header[0:deleted_index] + self.header[deleted_index + 1 :]
         self.event_importer.old_column_mappings = {
             column: old_columns.index(column) for column in old_columns
         }
@@ -489,7 +329,8 @@ class EventImporterTestCase(TestCase):
         processed_data = {
             "added_rows": [self.event4_data, self.event5_data],
             "deleted_rows": [
-                self.event3_data[0:14] + self.event3_data[15:],
+                self.event3_data[0:deleted_index]
+                + self.event3_data[deleted_index + 1 :],
             ],
             "updated_rows": [
                 self.event1_data,
@@ -577,32 +418,24 @@ class EventImporterTestCase(TestCase):
             ).first()
             assert event
             field_attrs = [
-                "department_id",
-                "officer_id",
-                "use_of_force_id",
-                "kind",
-                "time",
-                "raw_date",
-                "allegation_uid",
-                "appeal_uid",
-                "badge_no",
-                "employee_id",
-                "department_code",
-                "department_desc",
-                "division_desc",
-                "sub_division_a_desc",
-                "sub_division_b_desc",
-                "current_supervisor",
-                "employee_class",
-                "rank_code",
-                "rank_desc",
-                "sworn",
-                "officer_inactive",
-                "employee_type",
-                "salary_freq",
-                "award",
-                "award_comments",
+                "agency",
                 "left_reason",
+                "uof_uid",
+                "time",
+                "appeal_uid",
+                "kind",
+                "rank_desc",
+                "division_desc",
+                "department_desc",
+                "allegation_uid",
+                "rank_code",
+                "salary_freq",
+                "department_code",
+                "badge_no",
+                "overtime_annual_total",
+                "uid",
+                "event_uid",
+                "raw_date",
             ]
             integer_field_attrs = [
                 "year",
@@ -642,7 +475,7 @@ class EventImporterTestCase(TestCase):
             )
 
     def test_handle_record_data_with_duplicate_uid(self):
-        DepartmentFactory(name="New Orleans PD")
+        DepartmentFactory(agency_name="New Orleans PD")
         self.event_importer.department_mappings = (
             self.event_importer.get_department_mappings()
         )
@@ -653,49 +486,25 @@ class EventImporterTestCase(TestCase):
             column: self.header.index(column) for column in self.header
         }
 
-        event = [
-            "event-uid",
-            "event_pay_effective",
-            "2017",
-            "12",
-            "5",
-            "01:00",
-            "2017-12-05",
-            "officer-uid1",
-            "complaint-uid1",
-            "appeal-uid1",
-            "",
-            "new-orleans-pd",
-            "2592",
-            "75774",
-            "5060",
-            "police-special operations",
-            "Seventh District",
-            "Staff",
-            "School Crossing Guards",
-            "current-supervisor-uid",
-            "",
-            "405470",
-            "school crossing guard",
-            "full-time",
-            "sworn",
-            "active",
-            "commissioned",
-            "24",
-            "27866.59",
-            "yearly",
-            "award",
-            "award comments",
-        ]
+        event = EventFactory(
+            event_uid="event-uid",
+            agency="new-orleans-pd",
+            uid="officer-uid1",
+            allegation_uid="complaint-uid1",
+            appeal_uid="appeal-uid1",
+            uof_uid="",
+        )
+
+        event_data = [getattr(event, field) for field in self.header]
 
         self.event_importer.new_event_uids = ["event-uid"]
 
-        self.event_importer.handle_record_data(event)
+        self.event_importer.handle_record_data(event_data)
 
         assert self.event_importer.new_event_uids == ["event-uid"]
 
     def test_delete_row_with_non_exist_uid(self):
-        department = DepartmentFactory(name="New Orleans PD")
+        department = DepartmentFactory(agency_name="New Orleans PD")
 
         EventFactory(department=department)
         self.event_importer.old_column_mappings = {

@@ -62,7 +62,7 @@ class HistoricalDataViewSet(ViewSet):
             for recent_item in recent_items:
                 ids_type_mapping[recent_item["type"]].append(recent_item["id"])
 
-            departments = Department.objects.filter(slug__in=department_ids)
+            departments = Department.objects.filter(agency_slug__in=department_ids)
             officers = Officer.objects.prefetch_events().filter(id__in=officer_ids)
             documents = Document.objects.prefetch_departments().filter(
                 id__in=document_ids
@@ -74,7 +74,7 @@ class HistoricalDataViewSet(ViewSet):
             recent_objects_mapping = {
                 RECENT_DEPARTMENT_TYPE: {
                     "query": {
-                        department.slug: department for department in departments
+                        department.agency_slug: department for department in departments
                     },
                     "serializer": DepartmentSerializer,
                 },

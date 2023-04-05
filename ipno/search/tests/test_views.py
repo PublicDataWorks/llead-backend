@@ -18,9 +18,9 @@ from utils.search_index import rebuild_search_index
 
 class SearchViewSetTestCase(AuthAPITestCase):
     def test_list_success(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        department_2 = DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        department_2 = DepartmentFactory(agency_name="Orleans keywo PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -80,15 +80,15 @@ class SearchViewSetTestCase(AuthAPITestCase):
             "agencies": {
                 "results": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                         "city": department_1.city,
                         "parish": department_1.parish,
                         "location_map_url": department_1.location_map_url,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                         "city": department_2.city,
                         "parish": department_2.parish,
                         "location_map_url": department_2.location_map_url,
@@ -106,8 +106,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -138,8 +138,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -202,9 +202,9 @@ class SearchViewSetTestCase(AuthAPITestCase):
         assert data == expected_data
 
     def test_list_success_with_doc_type_pagination(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        DepartmentFactory(agency_name="Orleans keywo PD")
 
         officer = OfficerFactory(first_name="Kenneth", last_name="Anderson")
         person = PersonFactory(canonical_officer=officer)
@@ -277,9 +277,9 @@ class SearchViewSetTestCase(AuthAPITestCase):
         assert data == expected_data
 
     def test_list_success_with_wrong_doc_type(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        department_2 = DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        department_2 = DepartmentFactory(agency_name="Orleans keywo PD")
 
         officer = OfficerFactory(first_name="Kenneth", last_name="Anderson")
         person = PersonFactory(canonical_officer=officer)
@@ -329,15 +329,15 @@ class SearchViewSetTestCase(AuthAPITestCase):
             "agencies": {
                 "results": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                         "city": department_1.city,
                         "parish": department_1.parish,
                         "location_map_url": department_1.location_map_url,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                         "city": department_2.city,
                         "parish": department_2.parish,
                         "location_map_url": department_2.location_map_url,
@@ -355,8 +355,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -387,8 +387,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -425,9 +425,9 @@ class SearchViewSetTestCase(AuthAPITestCase):
         assert data == expected_data
 
     def test_list_success_with_related_officer(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
-        department_2 = DepartmentFactory(name="Orleans keywo PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
+        department_2 = DepartmentFactory(agency_name="Orleans keywo PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -486,15 +486,15 @@ class SearchViewSetTestCase(AuthAPITestCase):
             "agencies": {
                 "results": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                         "city": department_1.city,
                         "parish": department_1.parish,
                         "location_map_url": department_1.location_map_url,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                         "city": department_2.city,
                         "parish": department_2.parish,
                         "location_map_url": department_2.location_map_url,
@@ -512,8 +512,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -537,8 +537,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -601,8 +601,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
         assert data == expected_data
 
     def test_list_success_with_specified_department(self):
-        DepartmentFactory(name="Baton Rouge PD")
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -671,8 +671,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "badges": ["12435"],
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             }
                         ],
                         "latest_rank": "senior",
@@ -696,8 +696,8 @@ class SearchViewSetTestCase(AuthAPITestCase):
                         "text_content_highlight": None,
                         "departments": [
                             {
-                                "id": department_1.slug,
-                                "name": department_1.name,
+                                "id": department_1.agency_slug,
+                                "name": department_1.agency_name,
                             },
                         ],
                     },
@@ -730,7 +730,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
             reverse("api:search-list"),
             {
                 "q": "keywo",
-                "department": department_1.slug,
+                "department": department_1.agency_slug,
             },
         )
         assert response.status_code == status.HTTP_200_OK
@@ -743,7 +743,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
         assert data == expected_data
 
     def test_search_articles_in_specific_department(self):
-        department_1 = DepartmentFactory(name="New Orleans keyword PD")
+        department_1 = DepartmentFactory(agency_name="New Orleans keyword PD")
 
         OfficerFactory(first_name="Kenneth", last_name="Anderson")
         officer_1 = OfficerFactory(
@@ -817,7 +817,7 @@ class SearchViewSetTestCase(AuthAPITestCase):
             {
                 "q": "keywo",
                 "doc_type": "articles",
-                "department": department_1.slug,
+                "department": department_1.agency_slug,
             },
         )
         assert response.status_code == status.HTTP_200_OK

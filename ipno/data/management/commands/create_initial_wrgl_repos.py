@@ -12,3 +12,6 @@ class Command(BaseCommand):
             ).first()
             if not wrgl_repo_object:
                 WrglRepo.objects.create(**wrgl_repo)
+
+        repos = [repo["repo_name"] for repo in WRGL_REPOS_DEFAULT]
+        WrglRepo.objects.exclude(repo_name__in=repos).delete()
