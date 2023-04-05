@@ -46,9 +46,11 @@ class CountComplaintsTestCase(TestCase):
 
 class CalculateOfficerFractionTestCase(TestCase):
     def test_calculate_officer_fraction(self):
-        department_1 = DepartmentFactory(name="Orleans PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
-        department_3 = DepartmentFactory(name="New Orleans Parish Sheriff Office")
+        department_1 = DepartmentFactory(agency_name="Orleans PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
+        department_3 = DepartmentFactory(
+            agency_name="New Orleans Parish Sheriff Office"
+        )
 
         department_1_officers = OfficerFactory.create_batch(45)
         department_2_officers = OfficerFactory.create_batch(180)

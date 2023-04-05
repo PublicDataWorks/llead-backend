@@ -7,15 +7,14 @@ import structlog
 from data.services import (
     AgencyImporter,
     AppealImporter,
+    CitizenImporter,
     ComplaintImporter,
     DocumentImporter,
     EventImporter,
     MigrateOfficerMovement,
     OfficerImporter,
     PersonImporter,
-    UofCitizenImporter,
     UofImporter,
-    UofOfficerImporter,
 )
 from news_articles.services import ProcessRematchOfficers
 from utils.count_data import (
@@ -37,8 +36,7 @@ class Command(BaseCommand):
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
         uof_imported = UofImporter().process()
-        uof_officer_imported = UofOfficerImporter().process()
-        uof_citizen_imported = UofCitizenImporter().process()
+        citizen_imported = CitizenImporter().process()
 
         appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
@@ -79,8 +77,7 @@ class Command(BaseCommand):
                 agency_imported,
                 officer_imported,
                 uof_imported,
-                uof_officer_imported,
-                uof_citizen_imported,
+                citizen_imported,
                 complaint_imported,
                 event_imported,
                 appeal_imported,
@@ -94,8 +91,7 @@ class Command(BaseCommand):
                 agency_imported,
                 officer_imported,
                 uof_imported,
-                uof_officer_imported,
-                uof_citizen_imported,
+                citizen_imported,
                 complaint_imported,
                 event_imported,
                 document_imported,

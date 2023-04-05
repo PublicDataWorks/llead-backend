@@ -22,28 +22,20 @@ BATCH_SIZE = 1000
 
 class DocumentImporter(BaseImporter):
     data_model = DOCUMENT_MODEL_NAME
-    ATTRIBUTES = [
-        "docid",
-        "hrg_no",
-        "matched_uid",
-        "pdf_db_path",
-        "pdf_db_content_hash",
-        "txt_db_id",
-        "txt_db_content_hash",
-        "accused",
-        "title",
-        "hrg_type",
-        "dt_source",
-        "hrg_text",
-        "pdf_db_id",
-        "txt_db_path",
-    ]
+
     SLUG_ATTRIBUTES = ["agency"]
     INT_ATTRIBUTES = [
         "year",
         "month",
         "day",
     ]
+    ATTRIBUTES = list(
+        {field.name for field in Document._meta.fields}
+        - Document.BASE_FIELDS
+        - Document.CUSTOM_FIELDS
+        - set(SLUG_ATTRIBUTES)
+        - set(INT_ATTRIBUTES)
+    )
     UPDATE_ATTRIBUTES = (
         ATTRIBUTES
         + INT_ATTRIBUTES

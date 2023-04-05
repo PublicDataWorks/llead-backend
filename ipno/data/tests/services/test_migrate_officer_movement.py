@@ -11,7 +11,16 @@ from utils.parse_utils import parse_date
 
 class MigrateOfficerMovementTestCase(TestCase):
     def test_process_successfully(self):
-        OfficerMovementFactory()
+        old_start_department = DepartmentFactory()
+        old_end_department = DepartmentFactory()
+        old_officer = OfficerFactory()
+
+        OfficerMovementFactory(
+            start_department=old_start_department,
+            end_department=old_end_department,
+            officer=old_officer,
+        )
+
         start_department = DepartmentFactory()
         end_department_1 = DepartmentFactory()
         end_department_2 = DepartmentFactory(location=None)
@@ -79,7 +88,6 @@ class MigrateOfficerMovementTestCase(TestCase):
         assert officer_movement.left_reason == "Resignation"
 
     def test_migrate_with_no_movements(self):
-        OfficerMovementFactory()
         start_department = DepartmentFactory()
 
         officer_1 = OfficerFactory()

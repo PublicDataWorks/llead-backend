@@ -5,12 +5,11 @@ from wrgl import Repository
 
 from appeals.models import Appeal
 from complaints.models import Complaint
-from data.constants import WRGL_USER
 from data.models import WrglRepo
 from documents.models import Document
 from officers.models import Event, Officer
 from people.models import Person
-from use_of_forces.models import UseOfForce, UseOfForceCitizen, UseOfForceOfficer
+from use_of_forces.models import UseOfForce
 
 
 class DataTroubleshooting:
@@ -21,8 +20,6 @@ class DataTroubleshooting:
         "Event": Event,
         "Complaint": Complaint,
         "UseOfForce": UseOfForce,
-        "UseOfForceOfficer": UseOfForceOfficer,
-        "UseOfForceCitizen": UseOfForceCitizen,
         "Document": Document,
         "Person": Person,
         "Appeal": Appeal,
@@ -36,8 +33,9 @@ class DataTroubleshooting:
 
     def retrieve_wrgl_data(self, branch):
         self.repo = Repository(
-            f"https://hub.wrgl.co/api/users/{WRGL_USER}/repos/data/",
-            settings.WRGL_API_KEY,
+            "https://wrgl.llead.co/",
+            settings.WRGL_CLIENT_ID,
+            settings.WRGL_CLIENT_SECRET,
         )
 
         self.new_commit = self.repo.get_branch(branch)

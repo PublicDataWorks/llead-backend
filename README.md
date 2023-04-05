@@ -1,11 +1,14 @@
-# Development
+# LLEAD - Backend
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/EastAgile/IPNO-backend.svg?style=shield&circle-token=4a420ad01a2dfb1ea735bd7410166066be803afb)](https://app.circleci.com/pipelines/github/EastAgile/IPNO-backend)
+[![Coverage Status](https://coveralls.io/repos/github/EastAgile/IPNO-backend/badge.svg?branch=develop&t=QpfiJP)](https://coveralls.io/github/EastAgile/IPNO-backend?branch=develop)
 
 ## Prerequisites
-
 - [Docker](https://www.docker.com/products/docker-desktop): Development environment, better install latest version.
-- (Optional) Pycharm and virtual environment `venv`
+- [Pycharm](https://www.jetbrains.com/pycharm/download/) as the best IDE for DJango framework.
+- [Pyenv](https://github.com/pyenv/pyenv) setup python version and `venv` as well. (Python 3.8.12 work very well).
 
-## Local run
+## Quick start
 - Create .env file from .env.example template and update environment variables.
 - `bin/dev.sh` - build package inside Docker environment (and for your `venv` as well).
 - `bin/manage.sh migrate` migrate your database migrations.
@@ -31,14 +34,13 @@
   - Run a specific test  `bin/test.sh file_path::class_name::function_name`
     - ex: `bin/test.sh ipno/documents/tests/test_views.py::DocumentsViewSetTestCase::test_retrieve`
 
-## Local running with Fluent bit logging:
-- Follow the step in local run with option `--logging`: `bin/manage.sh --logging`
-- Run `docker-compose -f docker-compose-logging.yml up `
-
 ## Automatically push code to `llead-backend` repository
-- The pushing code process is performed by `CircleCI` which is setup in `config.yml` file  
+- The pushing code process is performed by `CircleCI` which is configured in `config.yml` file  
 
 ## Docs
 - [Set up ingress tls](docs/setup-ingress-tls.md)
 - [Circleci](docs/circleci.md)
-- [Set up logging](docs/logging.md)
+- [Matching officer](docs/maching-officer.md)
+- [Set up redis](docs/setup-redis.md)
+- [Setup integration tests](docs/e2e.md)
+- [Handle heavy tasks](docs/handle-heavy-tasks.md)

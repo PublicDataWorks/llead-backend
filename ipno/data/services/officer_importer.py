@@ -1,5 +1,3 @@
-from itertools import chain
-
 from tqdm import tqdm
 
 from data.constants import OFFICER_MODEL_NAME
@@ -9,15 +7,7 @@ from officers.models import Officer
 
 class OfficerImporter(BaseImporter):
     data_model = OFFICER_MODEL_NAME
-    ATTRIBUTES = [
-        "uid",
-        "last_name",
-        "middle_name",
-        "first_name",
-        "race",
-        "sex",
-        "agency",
-    ]
+
     INT_ATTRIBUTES = [
         "birth_year",
         "birth_month",
@@ -26,6 +16,12 @@ class OfficerImporter(BaseImporter):
     UPDATE_ONLY_ATTRIBUTES = [
         "is_name_changed",
     ]
+    ATTRIBUTES = list(
+        {field.name for field in Officer._meta.fields}
+        - Officer.BASE_FIELDS
+        - Officer.CUSTOM_FIELDS
+        - set(INT_ATTRIBUTES)
+    )
     UPDATE_ATTRIBUTES = (
         ATTRIBUTES + INT_ATTRIBUTES + UPDATE_ONLY_ATTRIBUTES + ["department_id"]
     )
@@ -77,26 +73,6 @@ class OfficerImporter(BaseImporter):
             self.new_officers_atrs.append(officer_data)
 
     def import_data(self, data):
-        saved_data = list(
-            chain(
-                data.get("added_rows", []),
-                data.get("updated_rows", []),
-            )
-        )
-        deleted_data = data.get("deleted_rows", [])
-
-        agencies = {
-            row[self.column_mappings["agency"]]
-            for row in saved_data
-            if row[self.column_mappings["agency"]]
-        }
-        agencies.update(
-            [
-                row[self.old_column_mappings["agency"]]
-                for row in deleted_data
-                if row[self.old_column_mappings["agency"]]
-            ]
-        )
         self.department_mappings = self.get_department_mappings()
 
         self.officer_mappings = self.get_officer_mappings()

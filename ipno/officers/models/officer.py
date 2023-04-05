@@ -4,7 +4,7 @@ from django.db.models import F, Prefetch
 from django.utils.functional import cached_property
 
 from officers.models.event import Event
-from utils.models import TimeStampsModel
+from utils.models import APITemplateModel, TimeStampsModel
 
 
 class OfficerManager(models.Manager):
@@ -22,7 +22,15 @@ class OfficerManager(models.Manager):
         )
 
 
-class Officer(TimeStampsModel):
+class Officer(TimeStampsModel, APITemplateModel):
+    CUSTOM_FIELDS = {
+        "aliases",
+        "complaint_fraction",
+        "is_name_changed",
+        "department",
+        "person",
+    }
+
     uid = models.CharField(max_length=255, unique=True, db_index=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)

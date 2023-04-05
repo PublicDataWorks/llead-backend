@@ -18,8 +18,6 @@ class DocumentFactory(factory.django.DjangoModelFactory):
     matched_uid = factory.LazyFunction(lambda: fake.uuid4())
     pdf_db_path = factory.LazyFunction(lambda: fake.file_path(extension="pdf"))
     pdf_db_content_hash = factory.LazyFunction(lambda: fake.md5())
-    txt_db_id = factory.LazyFunction(lambda: fake.uuid4())
-    txt_db_content_hash = factory.LazyFunction(lambda: fake.md5())
     title = factory.LazyFunction(lambda: fake.sentence())
     document_type = factory.LazyFunction(lambda: fake.file_extension())
     url = factory.LazyFunction(lambda: fake.file_path(extension="pdf"))

@@ -12,14 +12,14 @@ from shared.serializers.es_serializers import DocumentsESSerializer
 
 
 class DocumentsESSerializerTestCase(TestCase):
-    def test_serialize(self):
+    def test_serializer(self):
         document_1 = DocumentFactory(incident_date=date(2020, 5, 4))
         document_2 = DocumentFactory()
         document_3 = DocumentFactory()
         DocumentFactory()
 
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         document_1.departments.add(department_1, department_2)
 
@@ -58,12 +58,12 @@ class DocumentsESSerializerTestCase(TestCase):
                 "text_content_highlight": "<em>text</em> content",
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     },
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                     },
                 ],
             },

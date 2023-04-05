@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import Mock
 
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.factories import WrglRepoFactory
@@ -49,8 +49,6 @@ class PersonImporterTestCase(TestCase):
         self.officer3 = OfficerFactory(uid="0007884f101d1661937abb130664d2d2")
         self.officer4 = OfficerFactory(uid="0007f3f6802b9fa493622d4a23edc00b")
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully(self):
         updating_person = PersonFactory()
         updating_person.person_id = "1"
@@ -64,13 +62,14 @@ class PersonImporterTestCase(TestCase):
         deleting_person.officers.add(self.officer2)
         deleting_person.save()
 
+        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=PersonImporter.data_model,
             repo_name="person_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=commit_hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         person_importer = PersonImporter()
 
@@ -166,13 +165,14 @@ class PersonImporterTestCase(TestCase):
         )
 
     def test_delete_non_existed_person(self):
+        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=PersonImporter.data_model,
             repo_name="person_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=commit_hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         person_importer = PersonImporter()
 

@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, Mock, patch
 
-from django.conf import settings
 from django.test import TestCase, override_settings
 
 from news_articles.constants import NEWS_ARTICLE_WRGL_COLUMNS
@@ -40,24 +39,24 @@ class WrglGeneratorTestCase(TestCase):
         mock_close.assert_called()
         assert result == "buffer"
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
+    @override_settings(WRGL_CLIENT_ID="test-id")
+    @override_settings(WRGL_CLIENT_SECRET="test-secret")
     @patch("utils.wrgl_generator.Repository")
     def test_create_wrgl_commit(self, mock_Repository):
         mock_repo = MagicMock()
         mock_repo.commit.return_value = "response"
         mock_Repository.return_value = mock_repo
 
-        repo_name = "test"
-
         result = self.wrgl_generator.create_wrgl_commit(
-            "test", "message", ["id"], b"buffer"
+            "message", ["id"], b"buffer", "test-branch"
         )
 
         mock_Repository.assert_called_with(
-            f"https://hub.wrgl.co/api/users/{settings.WRGL_USER}/repos/{repo_name}/",
-            "wrgl-api-key",
+            "https://wrgl.llead.co/",
+            "test-id",
+            "test-secret",
         )
-        assert mock_repo.commit.call_args[1].get("branch") == "main"
+        assert mock_repo.commit.call_args[1].get("branch") == "test-branch"
         assert mock_repo.commit.call_args[1].get("message") == "message"
         assert mock_repo.commit.call_args[1].get("primary_key") == ["id"]
         assert result == "response"

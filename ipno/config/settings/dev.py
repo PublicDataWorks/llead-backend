@@ -49,6 +49,7 @@ GC_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 HOST = os.getenv("HOST", "localhost:8080")
+SERVER_URL = os.getenv("SERVER_URL", "web:8000")
 
 FLUENT_PYTHON_LOG_FILE = "/var/log/python.log"
 

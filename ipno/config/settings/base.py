@@ -90,6 +90,8 @@ LOCAL_APPS = (
     "appeals",
     "feedbacks",
     "historical_data",
+    "schemas",
+    "citizens",
 )
 
 AUTH_USER_MODEL = "authentication.User"
@@ -98,6 +100,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -141,12 +144,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django_db_geventpool.backends.postgresql_psycopg2",
         "NAME": env.str("POSTGRES_DB", "ipno"),
         "USER": env.str("POSTGRES_USER", "ipno"),
         "PASSWORD": env.str("POSTGRES_PASSWORD", "ipno"),
         "HOST": env.str("POSTGRES_HOST", "db"),
         "PORT": 5432,
+        "CONN_MAX_AGE": 0,
+        "OPTIONS": {"MAX_CONNS": 20, "REUSE_CONNS": 10},
     }
 }
 
@@ -213,8 +218,6 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-WRGL_API_KEY = env.str("WRGL_API_KEY", None)
-
 DROPBOX_APP_KEY = env.str("DROPBOX_APP_KEY", None)
 DROPBOX_APP_SECRET = env.str("DROPBOX_APP_SECRET", None)
 DROPBOX_REFRESH_TOKEN = env.str("DROPBOX_REFRESH_TOKEN", "")
@@ -227,7 +230,8 @@ FEEDBACK_TO_EMAIL = os.getenv("FEEDBACK_TO_EMAIL")
 
 SENDINBLUE_API_URL = "https://api.sendinblue.com/v3/"
 
-WRGL_USER = os.getenv("WRGL_USER", "")
+WRGL_CLIENT_ID = env.str("WRGL_CLIENT_ID", "ipno-github")
+WRGL_CLIENT_SECRET = env.str("WRGL_CLIENT_SECRET", None)
 NEWS_ARTICLE_WRGL_REPO = "news_article"
 NEWS_ARTICLE_OFFICER_WRGL_REPO = "news_article_officer"
 
@@ -283,3 +287,10 @@ if USE_SENTINEL_REDIS:
         "master_name": REDIS_SENTINEL_MASTER_NAME,
         "sentinel_kwargs": {"password": REDIS_SENTINEL_PASSWORD},
     }
+
+ENVIRONMENT = os.environ.get("DJANGO_SETTINGS_MODULE").split(".")[-1]
+
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN", "")
+SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "")
+
+SCHEMA_BUCKET_NAME = "llead-schema"

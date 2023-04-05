@@ -66,11 +66,16 @@ spec:
                     secretKeyRef:
                       name: elasticsearch
                       key: host
-                - name: WRGL_API_KEY
+                - name: WRGL_CLIENT_ID
                   valueFrom:
                     secretKeyRef:
                       name: wrgl
-                      key: api-key
+                      key: client-id
+                - name: WRGL_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: wrgl
+                      key: client-secret
                 - name: DROPBOX_APP_KEY
                   valueFrom:
                     secretKeyRef:
@@ -111,6 +116,16 @@ spec:
                     secretKeyRef:
                       name: celery
                       key: sentinel-password
+                - name: SLACK_BOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: slack
+                      key: slack-bot-token
+                - name: SLACK_CHANNEL
+                  valueFrom:
+                    secretKeyRef:
+                      name: slack
+                      key: slack-channel
                 - name: FROM_EMAIL
                   valueFrom:
                     configMapKeyRef:

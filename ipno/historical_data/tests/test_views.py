@@ -26,8 +26,8 @@ from test_utils.auth_api_test_case import AuthAPITestCase
 
 class HistoricalDataViewSetTestCase(AuthAPITestCase):
     def test_recent_items(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(
             first_name="David", last_name="Jonesworth", department=department_2
@@ -77,9 +77,9 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.agency_slug},
             {
                 "type": RECENT_DEPARTMENT_TYPE,
                 "id": "falsy-slug",
@@ -108,15 +108,15 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 "pages_count": document.pages_count,
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     }
                 ],
                 "type": RECENT_DOCUMENT_TYPE,
             },
             {
-                "id": department_1.slug,
-                "name": department_1.name,
+                "id": department_1.agency_slug,
+                "name": department_1.agency_name,
                 "city": department_1.city,
                 "parish": department_1.parish,
                 "location_map_url": department_1.location_map_url,
@@ -128,16 +128,16 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 "badges": ["12435"],
                 "departments": [
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                     }
                 ],
                 "latest_rank": "senior",
                 "type": RECENT_OFFICER_TYPE,
             },
             {
-                "id": department_2.slug,
-                "name": department_2.name,
+                "id": department_2.agency_slug,
+                "name": department_2.agency_name,
                 "city": department_2.city,
                 "parish": department_2.parish,
                 "location_map_url": department_2.location_map_url,
@@ -167,8 +167,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == []
 
     def test_update_new_recent_items(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         EventFactory(
@@ -186,14 +186,14 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         old_recent_item = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
 
         self.user.recent_items = old_recent_item
         self.user.save()
 
-        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.slug}
+        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.agency_slug}
 
         response = self.auth_client.post(
             reverse("api:historical-data-recent-items"), data, format="json"
@@ -210,8 +210,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert user.recent_items == [data, *old_recent_item]
 
     def test_update_existed_recent_items(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         EventFactory(
@@ -229,14 +229,14 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         old_recent_item = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
 
         self.user.recent_items = old_recent_item
         self.user.save()
 
-        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug}
+        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug}
 
         response = self.auth_client.post(
             reverse("api:historical-data-recent-items"), data, format="json"
@@ -251,7 +251,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert result == expected_data
         assert user.recent_items == [
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
@@ -314,7 +314,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert user.recent_queries == ["query 1", "query 2"]
 
     def test_delete_recent_officer_successfully(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -326,7 +326,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -351,7 +351,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
         assert user.recent_items == [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
                 "id": news_article.id,
@@ -359,7 +359,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
 
     def test_delete_recent_department_successfully(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -371,7 +371,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -380,7 +380,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
         self.user.save()
 
-        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug}
+        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug}
 
         delete_url = reverse("api:historical-data-recent-items")
         params = urlencode(data)
@@ -404,7 +404,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
 
     def test_delete_recent_document_successfully(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -416,7 +416,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -440,7 +440,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert result == expected_data
         assert user.recent_items == [
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -449,7 +449,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
 
     def test_delete_recent_news_article_successfully(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -461,7 +461,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -489,13 +489,13 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
         assert user.recent_items == [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
 
     def test_not_delete_non_existed_item(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
@@ -508,7 +508,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -517,7 +517,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
         self.user.save()
 
-        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.slug}
+        data = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.agency_slug}
 
         delete_url = reverse("api:historical-data-recent-items")
         params = urlencode(data)
@@ -532,7 +532,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
 
     def test_delete_without_item_type(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -544,7 +544,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -553,7 +553,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         ]
         self.user.save()
 
-        data = {"id": department.slug}
+        data = {"id": department.agency_slug}
 
         delete_url = reverse("api:historical-data-recent-items")
         params = urlencode(data)
@@ -568,7 +568,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
 
     def test_delete_without_item_id(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -580,7 +580,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -604,7 +604,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
 
     def test_not_delete_department_with_digit_item_id(self):
-        department = DepartmentFactory(name="Baton Rouge PD")
+        department = DepartmentFactory(agency_name="Baton Rouge PD")
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         source = NewsArticleSourceFactory(source_display_name="dummy")
         news_article = NewsArticleFactory(
@@ -616,7 +616,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         self.user.recent_items = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
             {
                 "type": RECENT_NEWS_ARTICLE_TYPE,
@@ -640,8 +640,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
 
     def test_recent_items_of_anonymous_user(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(
             first_name="David", last_name="Jonesworth", department=department_2
@@ -696,7 +696,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             )
         with freeze_time("2021-09-02 9:00:00"):
             AnonymousItemFactory(
-                item_id=department_1.slug,
+                item_id=department_1.agency_slug,
                 item_type=RECENT_DEPARTMENT_TYPE,
             )
         with freeze_time("2021-09-01 9:00:00"):
@@ -706,7 +706,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             )
         with freeze_time("2021-09-06 11:00:00"):
             AnonymousItemFactory(
-                item_id=department_2.slug,
+                item_id=department_2.agency_slug,
                 item_type=RECENT_DEPARTMENT_TYPE,
             )
         with freeze_time("2021-09-05 8:00:00"):
@@ -729,8 +729,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         expected_data = [
             {
-                "id": department_2.slug,
-                "name": department_2.name,
+                "id": department_2.agency_slug,
+                "name": department_2.agency_name,
                 "city": department_2.city,
                 "parish": department_2.parish,
                 "location_map_url": department_2.location_map_url,
@@ -755,15 +755,15 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 "pages_count": document.pages_count,
                 "departments": [
                     {
-                        "id": department_1.slug,
-                        "name": department_1.name,
+                        "id": department_1.agency_slug,
+                        "name": department_1.agency_name,
                     }
                 ],
                 "type": RECENT_DOCUMENT_TYPE,
             },
             {
-                "id": department_1.slug,
-                "name": department_1.name,
+                "id": department_1.agency_slug,
+                "name": department_1.agency_name,
                 "city": department_1.city,
                 "parish": department_1.parish,
                 "location_map_url": department_1.location_map_url,
@@ -775,8 +775,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                 "badges": ["12435"],
                 "departments": [
                     {
-                        "id": department_2.slug,
-                        "name": department_2.name,
+                        "id": department_2.agency_slug,
+                        "name": department_2.agency_name,
                     }
                 ],
                 "latest_rank": "senior",
@@ -789,8 +789,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert result == expected_data
 
     def test_update_anonymous_user_recent_items_existed(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         EventFactory(
@@ -808,7 +808,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         old_recent_item = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
 
@@ -821,7 +821,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         current_latest_item = AnonymousItem.objects.order_by("-last_visited").first()
 
-        new_item = {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug}
+        new_item = {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug}
 
         assert current_latest_item.item_id == str(old_recent_item[2]["id"])
         assert current_latest_item.item_type == old_recent_item[2]["type"]
@@ -840,8 +840,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert latest_item.item_type == new_item["type"]
 
     def test_update_anonymous_user_recent_items_not_existed(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(first_name="David", last_name="Jonesworth")
         EventFactory(
@@ -859,7 +859,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
 
         old_recent_item = [
             {"type": RECENT_DOCUMENT_TYPE, "id": document.id},
-            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.slug},
+            {"type": RECENT_DEPARTMENT_TYPE, "id": department_1.agency_slug},
             {"type": RECENT_OFFICER_TYPE, "id": officer.id},
         ]
 
@@ -870,7 +870,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
                     item_type=item["type"],
                 )
 
-        new_item = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.slug}
+        new_item = {"type": RECENT_DEPARTMENT_TYPE, "id": department_2.agency_slug}
 
         response = self.client.post(
             reverse("api:historical-data-recent-items"), new_item, format="json"
@@ -886,8 +886,8 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
         assert latest_item.item_type == new_item["type"]
 
     def test_not_delete_if_anonymous_user(self):
-        department_1 = DepartmentFactory(name="Baton Rouge PD")
-        department_2 = DepartmentFactory(name="New Orleans PD")
+        department_1 = DepartmentFactory(agency_name="Baton Rouge PD")
+        department_2 = DepartmentFactory(agency_name="New Orleans PD")
 
         officer = OfficerFactory(
             first_name="David", last_name="Jonesworth", department=department_2
@@ -942,7 +942,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             )
         with freeze_time("2021-09-02 9:00:00"):
             AnonymousItemFactory(
-                item_id=department_1.slug,
+                item_id=department_1.agency_slug,
                 item_type=RECENT_DEPARTMENT_TYPE,
             )
         with freeze_time("2021-09-01 9:00:00"):
@@ -952,7 +952,7 @@ class HistoricalDataViewSetTestCase(AuthAPITestCase):
             )
         with freeze_time("2021-09-06 11:00:00"):
             AnonymousItemFactory(
-                item_id=department_2.slug,
+                item_id=department_2.agency_slug,
                 item_type=RECENT_DEPARTMENT_TYPE,
             )
         with freeze_time("2021-09-05 8:00:00"):

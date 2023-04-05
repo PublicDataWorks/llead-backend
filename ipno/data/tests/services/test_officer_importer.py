@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
-from django.test.testcases import TestCase, override_settings
+from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import Mock
 
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.factories import WrglRepoFactory
@@ -15,138 +15,81 @@ from officers.models import Officer
 
 class OfficerImporterTestCase(TestCase):
     def setUp(self):
-        self.header = [
-            "uid",
-            "last_name",
-            "middle_name",
-            "first_name",
-            "birth_year",
-            "birth_month",
-            "birth_day",
-            "race",
-            "sex",
-            "agency",
-        ]
-        self.officer1_data = [
-            "uid1",
-            "Sanchez",
-            "C",
-            "Emile",
-            "1938",
-            "",
-            "",
-            "white",
-            "male",
-            "new-orleans-pd",
-        ]
-        self.officer2_data = [
-            "uid2",
-            "Monaco",
-            "P",
-            "Anthony",
-            "1964",
-            "12",
-            "4",
-            "black / african american",
-            "female",
-            "louisiana-state-pd",
-        ]
-        self.officer3_data = [
-            "uid3",
-            "Maier",
-            "",
-            "Joel",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "new-orleans-pd",
-        ]
-        self.officer4_data = [
-            "uid4",
-            "Poindexter",
-            "A",
-            "Sylvia",
-            "1973",
-            "",
-            "",
-            "",
-            "male",
-            "new-orleans-so",
-        ]
-        self.officer5_data = [
-            "uid5",
-            "Bull",
-            "",
-            "Edward",
-            "",
-            "",
-            "",
-            "",
-            "male",
-            "baton-rouge-pd",
-        ]
-        self.officer5_dup_data = [
-            "uid5",
-            "Bull",
-            "",
-            "Edward",
-            "",
-            "",
-            "",
-            "",
-            "male",
-            "jefferson-so",
-        ]
-        self.officer6_data = [
-            "uid6",
-            "Officer",
-            "",
-            "Deleted",
-            "",
-            "",
-            "",
-            "",
-            "male",
-            "lafayette-pd",
-        ]
-        DepartmentFactory(name="New Orleans PD")
-        DepartmentFactory(name="Louisiana State PD")
-        DepartmentFactory(name="New Orleans SO")
-        DepartmentFactory(name="Baton Rouge PD")
-        DepartmentFactory(name="Jefferson SO")
-        DepartmentFactory(name="Lafayette PD")
+        officer_1 = OfficerFactory(
+            uid="uid_1",
+            agency="new-orleans-pd",
+            first_name="Emile",
+            last_name="Sanchez",
+        )
+        officer_2 = OfficerFactory(
+            uid="uid_2",
+            agency="louisiana-state-pd",
+            first_name="Anthony",
+            last_name="Monaco",
+        )
+        officer_3 = OfficerFactory(
+            uid="uid_3",
+            agency="new-orleans-pd",
+            first_name="Joel",
+            last_name="Maier",
+        )
+        officer_4 = OfficerFactory(
+            uid="uid_4",
+            agency="new-orleans-so",
+        )
+        officer_5 = OfficerFactory(uid="uid_5", agency="baton-rouge-pd")
+        officer_6 = OfficerFactory(uid="uid_6", agency="lafayette-pd")
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
+        self.header = list(
+            {field.name for field in Officer._meta.fields}
+            - Officer.BASE_FIELDS
+            - Officer.CUSTOM_FIELDS
+        )
+        self.officer1_data = [getattr(officer_1, field) for field in self.header]
+        self.officer2_data = [getattr(officer_2, field) for field in self.header]
+        self.officer3_data = [getattr(officer_3, field) for field in self.header]
+        self.officer4_data = [getattr(officer_4, field) for field in self.header]
+        self.officer5_data = [getattr(officer_5, field) for field in self.header]
+        self.officer6_data = [getattr(officer_6, field) for field in self.header]
+        self.officer5_dup_data = self.officer5_data.copy()
+
+        DepartmentFactory(agency_name="New Orleans PD")
+        DepartmentFactory(agency_name="Louisiana State PD")
+        DepartmentFactory(agency_name="New Orleans SO")
+        DepartmentFactory(agency_name="Baton Rouge PD")
+        DepartmentFactory(agency_name="Jefferson SO")
+        DepartmentFactory(agency_name="Lafayette PD")
+
+        Officer.objects.all().delete()
+
     def test_process_successfully(self):
         OfficerFactory(
-            uid="uid1",
+            uid="uid_1",
             first_name="Emile",
             last_name="Sanchez",
         )
         OfficerFactory(
-            uid="uid2",
+            uid="uid_2",
             first_name="Anthony",
             last_name="Monaco",
         )
         OfficerFactory(
-            uid="uid3",
+            uid="uid_3",
             first_name="Joel",
             last_name="Maier",
         )
-        OfficerFactory(uid="uid6")
+        OfficerFactory(uid="uid_6")
 
         assert Officer.objects.count() == 4
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         WrglRepoFactory(
             data_model=OfficerImporter.data_model,
             repo_name="officer_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         officer_importer = OfficerImporter()
 
@@ -154,7 +97,7 @@ class OfficerImporterTestCase(TestCase):
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
+        mock_commit.sum = hash
 
         officer_importer.repo = Mock()
         officer_importer.new_commit = mock_commit
@@ -260,35 +203,34 @@ class OfficerImporterTestCase(TestCase):
 
         assert result == expected_result
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_successfully_with_columns_changed(self):
         OfficerFactory(
-            uid="uid1",
+            uid="uid_1",
             first_name="Emile",
             last_name="Sanchez",
         )
         OfficerFactory(
-            uid="uid2",
+            uid="uid_2",
             first_name="Anthony",
             last_name="Monaco",
         )
         OfficerFactory(
-            uid="uid3",
+            uid="uid_3",
             first_name="Joel",
             last_name="Maier",
         )
-        OfficerFactory(uid="uid6")
+        OfficerFactory(uid="uid_6")
 
         assert Officer.objects.count() == 4
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         WrglRepoFactory(
             data_model=OfficerImporter.data_model,
             repo_name="officer_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         officer_importer = OfficerImporter()
 
@@ -296,14 +238,15 @@ class OfficerImporterTestCase(TestCase):
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
+        mock_commit.sum = hash
 
         officer_importer.repo = Mock()
         officer_importer.new_commit = mock_commit
 
         officer_importer.retrieve_wrgl_data = Mock()
 
-        old_columns = self.header[0:4] + self.header[5:]
+        deleted_index = self.header.index("birth_year")
+        old_columns = self.header[0:deleted_index] + self.header[deleted_index + 1 :]
         officer_importer.old_column_mappings = {
             column: old_columns.index(column) for column in old_columns
         }
@@ -318,7 +261,8 @@ class OfficerImporterTestCase(TestCase):
                 self.officer5_dup_data,
             ],
             "deleted_rows": [
-                self.officer6_data[0:4] + self.officer6_data[5:],
+                self.officer6_data[0:deleted_index]
+                + self.officer6_data[deleted_index + 1 :],
             ],
             "updated_rows": [
                 self.officer1_data,
@@ -389,45 +333,44 @@ class OfficerImporterTestCase(TestCase):
                     else None
                 )
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.base_importer.WRGL_USER", "wrgl_user")
     def test_process_update_officer_name_successfully(self):
         OfficerFactory(
-            uid="uid1",
+            uid="uid_1",
             first_name="Emile",
             last_name="Sanchez",
             is_name_changed=False,
         )
         OfficerFactory(
-            uid="uid2",
+            uid="uid_2",
             first_name="Anthony",
             last_name="Monac",
             is_name_changed=False,
         )
         OfficerFactory(
-            uid="uid3",
+            uid="uid_3",
             first_name="Maier",
             last_name="Joe",
             is_name_changed=False,
         )
-        OfficerFactory(uid="uid6")
+        OfficerFactory(uid="uid_6")
 
         assert Officer.objects.count() == 4
+
+        hash = "3950bd17edfd805972781ef9fe2c6449"
 
         WrglRepoFactory(
             data_model=OfficerImporter.data_model,
             repo_name="officer_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         officer_importer = OfficerImporter()
         officer_importer.branch = "main"
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
+        mock_commit.sum = hash
 
         officer_importer.repo = Mock()
         officer_importer.new_commit = mock_commit
@@ -521,24 +464,25 @@ class OfficerImporterTestCase(TestCase):
         updated_officers = set(
             Officer.objects.filter(is_name_changed=True).values_list("uid", flat=True)
         )
-        expected_uids = ["uid2", "uid3"]
+        expected_uids = ["uid_2", "uid_3"]
         assert updated_officers == set(expected_uids)
 
     def test_delete_not_exist_officer(self):
+        hash = "3950bd17edfd805972781ef9fe2c6449"
+
         WrglRepoFactory(
             data_model=OfficerImporter.data_model,
             repo_name="officer_repo",
             commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
+            latest_commit_hash=hash,
         )
-
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
 
         officer_importer = OfficerImporter()
         officer_importer.branch = "main"
 
         mock_commit = MagicMock()
         mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
+        mock_commit.sum = hash
 
         officer_importer.repo = Mock()
         officer_importer.new_commit = mock_commit

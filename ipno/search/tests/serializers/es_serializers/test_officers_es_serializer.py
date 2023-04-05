@@ -112,8 +112,8 @@ class OfficersESSerializerTestCase(TestCase):
                 "badges": [],
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "latest_rank": "sergeant",
@@ -124,8 +124,8 @@ class OfficersESSerializerTestCase(TestCase):
                 "badges": ["12435"],
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "latest_rank": "senior",
@@ -136,8 +136,8 @@ class OfficersESSerializerTestCase(TestCase):
                 "badges": [],
                 "departments": [
                     {
-                        "id": department.slug,
-                        "name": department.name,
+                        "id": department.agency_slug,
+                        "name": department.agency_name,
                     },
                 ],
                 "latest_rank": "lieutenant",

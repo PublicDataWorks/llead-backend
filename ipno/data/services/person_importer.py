@@ -15,7 +15,6 @@ class PersonImporter(BaseImporter):
         "canonical_officer_uid",
         "person_id",
     ]
-
     UPDATE_ATTRIBUTES = [
         "canonical_officer_id",
         "person_id",

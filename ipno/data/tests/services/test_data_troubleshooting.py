@@ -59,8 +59,8 @@ class DataTroubleshootingCase(TestCase):
         ]
         self.officer_5 = ["uid5", "Bull", "", "Edward", "", "", "", "", "male"]
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.data_troubleshooting.WRGL_USER", "wrgl_user")
+    @override_settings(WRGL_CLIENT_ID="test-id")
+    @override_settings(WRGL_CLIENT_SECRET="test-secret")
     def test_data_troubleshooting_with_default_input(self):
         data_model = "Officer"
         OfficerFactory(uid="uid1")
@@ -113,8 +113,8 @@ class DataTroubleshootingCase(TestCase):
         assert Officer.objects.get(uid="uid4").sex == "male"
         assert Officer.objects.get(uid="uid5").sex == "male"
 
-    @override_settings(WRGL_API_KEY="wrgl-api-key")
-    @patch("data.services.data_troubleshooting.WRGL_USER", "wrgl_user")
+    @override_settings(WRGL_CLIENT_ID="test-id")
+    @override_settings(WRGL_CLIENT_SECRET="test-secret")
     def test_data_troubleshooting(self):
         data_model = "Officer"
         OfficerFactory(uid="uid1")

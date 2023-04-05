@@ -8,7 +8,7 @@ django-elasticsearch-dsl==7.1.4
 gunicorn==20.0.4
 django-storages[google]==1.11.1
 djangorestframework-simplejwt==4.6.0
-Markdown==3.3.7
+Markdown==3.3.4
 martor==1.6.13
 tqdm==4.57.0
 dropbox==11.9.0
@@ -27,7 +27,7 @@ textdistance==4.2.1
 django-admin-sortable==2.2.4
 django-admin-sortable2==1.0
 PyJWT==2.1.0
-wrgl==0.12.0
+wrgl==0.13.4
 django-mapbox-location-field==2.0.0
 gevent==21.12.0
 psycogreen==1.0.2
@@ -38,3 +38,6 @@ google-cloud-logging==3.2.5
 redis==4.3.4
 celery[redis]==5.2.7
 django-celery-results==2.4.0
+cryptography==38.0.4
+django-db-geventpool==4.0.1
+slack_sdk==3.19.5
