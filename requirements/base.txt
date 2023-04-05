@@ -38,6 +38,6 @@ google-cloud-logging==3.2.5
 redis==4.3.4
 celery[redis]==5.2.7
 django-celery-results==2.4.0
-cryptography==38.0.4
+cryptography==39.0.1
 django-db-geventpool==4.0.1
 slack_sdk==3.19.5
