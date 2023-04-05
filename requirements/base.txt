@@ -35,7 +35,7 @@ Pillow==9.2.0
 structlog==22.1.0
 django-structlog==3.0.1
 google-cloud-logging==3.2.5
-redis==4.3.4
+redis==4.4.4
 celery[redis]==5.2.7
 django-celery-results==2.4.0
 cryptography==38.0.4
