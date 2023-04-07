@@ -29,13 +29,14 @@ class OfficerDetailsSerializer(serializers.Serializer):
     termination_count = serializers.SerializerMethodField()
     latest_rank = serializers.SerializerMethodField()
 
-    @property
-    def _termination_left_reason(self):
-        return set(
-            Event.objects.filter(left_reason__icontains="terminat").values_list(
-                "left_reason", flat=True
-            )
-        )
+    def _termination_left_reason(self, obj):
+        if not hasattr(obj, "termination"):
+            termination = Event.objects.filter(
+                left_reason__icontains="terminat"
+            ).values_list("left_reason", flat=True)
+            setattr(obj, "termination", set(termination))
+
+        return obj.termination
 
     def _get_person_officers(self, obj):
         if not hasattr(obj, "person_officers"):
@@ -87,7 +88,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return events
 
     def get_departments(self, obj):
-        canonical_dep = obj.department
+        canonical_dep = obj.person.canonical_officer.department
 
         all_events = self._get_all_events(obj)
 
@@ -160,14 +161,9 @@ class OfficerDetailsSerializer(serializers.Serializer):
 
     def get_termination_count(self, obj):
         all_events = self._get_all_events(obj)
+        terminations = self._termination_left_reason(obj)
 
-        return len(
-            [
-                event
-                for event in all_events
-                if event.left_reason in self._termination_left_reason
-            ]
-        )
+        return len([event for event in all_events if event.left_reason in terminations])
 
     def get_latest_rank(self, obj):
         events = self._get_all_events(obj)

@@ -40,11 +40,12 @@ class OfficersViewSet(viewsets.ViewSet):
         serializer = OfficerSerializer(officers, many=True)
         return Response(serializer.data)
 
-    @custom_cache
+    # @custom_cache
     def retrieve(self, request, pk):
-        person = get_object_or_404(Officer, id=pk).person
+        get_object_or_404(Officer, id=pk)
 
-        canonical_officer = Officer.objects.filter(person=person).prefetch_related(
+        optimized_officer = Officer.objects.filter(id=pk).prefetch_related(
+            "person__canonical_officer",
             "person__officers__documents",
             "person__officers__matched_sentences",
             "person__officers__events__department",
@@ -57,7 +58,7 @@ class OfficersViewSet(viewsets.ViewSet):
                 to_attr="sustained_complaints",
             ),
         )[0]
-        serializer = OfficerDetailsSerializer(canonical_officer)
+        serializer = OfficerDetailsSerializer(optimized_officer)
 
         return Response(serializer.data)
 
