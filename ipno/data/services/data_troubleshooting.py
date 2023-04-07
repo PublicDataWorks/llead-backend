@@ -63,7 +63,13 @@ class DataTroubleshooting:
             updated_object = self.model.objects.get(**kwargs)
 
             for field in self.updated_fields:
-                setattr(updated_object, field, row[self.column_mappings[field]])
+                setattr(
+                    updated_object,
+                    field,
+                    row[self.column_mappings[field]]
+                    if row[self.column_mappings[field]]
+                    else None,
+                )
 
             updated_objects.append(updated_object)
 

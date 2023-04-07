@@ -1,14 +1,21 @@
 from datetime import date
 
+from django.db.models import Prefetch
 from django.test import TestCase
 
+from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from complaints.factories import ComplaintFactory
+from complaints.models import Complaint
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
-from officers.constants import ALLEGATION_CREATE, COMPLAINT_RECEIVE
+from news_articles.factories import NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
+from officers.constants import ALLEGATION_CREATE, COMPLAINT_RECEIVE, UOF_OCCUR
 from officers.factories import EventFactory, OfficerFactory
+from officers.models import Officer
 from officers.serializers import OfficerDetailsSerializer
 from people.factories import PersonFactory
+from use_of_forces.factories import UseOfForceFactory
 
 
 class OfficerDetailsSerializerTestCase(TestCase):
@@ -23,7 +30,10 @@ class OfficerDetailsSerializerTestCase(TestCase):
             sex="male",
             department=department,
         )
-        person = PersonFactory(canonical_officer=officer)
+        person = PersonFactory(
+            canonical_officer=officer,
+            all_complaints_count=2,
+        )
         person.officers.add(officer)
         person.save()
 
@@ -64,16 +74,16 @@ class OfficerDetailsSerializerTestCase(TestCase):
             department=None,
         )
 
-        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4), year=2016)
         document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
-        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4), year=2018)
 
         document_1.officers.add(officer)
         document_2.officers.add(officer)
         document_3.officers.add(officer)
 
         complaint_1 = ComplaintFactory()
-        complaint_2 = ComplaintFactory()
+        complaint_2 = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
 
         complaint_1.officers.add(officer)
         complaint_2.officers.add(officer)
@@ -120,6 +130,85 @@ class OfficerDetailsSerializerTestCase(TestCase):
             month=None,
             day=None,
         )
+        complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2019,
+            month=None,
+            day=None,
+        )
+        sustained_complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        complaint_1.events.add(complaint_event)
+        complaint_2.events.add(sustained_complaint_event)
+
+        article_1 = NewsArticleFactory(published_date=date(2020, 5, 4))
+        matched_sentence_1 = MatchedSentenceFactory(article=article_1)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_1.save()
+        article_2 = NewsArticleFactory(published_date=date(2021, 5, 4))
+        matched_sentence_2 = MatchedSentenceFactory(article=article_2)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_2.save()
+
+        uof_incident_event_1 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_1.events.add(uof_incident_event_1)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="terminated",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="involuntary termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination|arrest",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="resigned",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            award="commendation",
+        )
+
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
@@ -140,6 +229,13 @@ class OfficerDetailsSerializerTestCase(TestCase):
             "documents_count": 3,
             "complaints_count": 2,
             "latest_rank": "captain",
+            "articles_count": 2,
+            "articles_documents_years": [2016, 2018, 2020, 2021],
+            "sustained_complaints_count": 1,
+            "complaints_year_count": 2,
+            "incident_force_count": 1,
+            "termination_count": 4,
+            "award_count": 1,
         }
 
     def test_salary_fields(self):
@@ -172,6 +268,20 @@ class OfficerDetailsSerializerTestCase(TestCase):
             month=3,
             day=6,
         )
+
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
 
         result = OfficerDetailsSerializer(officer).data
         assert result["salary"] == "57000.14"
@@ -208,6 +318,20 @@ class OfficerDetailsSerializerTestCase(TestCase):
             day=6,
         )
 
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
+
         result = OfficerDetailsSerializer(officer).data
         assert result["salary"] is None
         assert result["salary_freq"] is None
@@ -243,6 +367,20 @@ class OfficerDetailsSerializerTestCase(TestCase):
             day=6,
         )
 
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
+
         result = OfficerDetailsSerializer(officer).data
         assert result["salary"] is None
         assert result["salary_freq"] is None
@@ -255,23 +393,49 @@ class OfficerDetailsSerializerTestCase(TestCase):
             race="white",
             sex="male",
         )
-        person = PersonFactory(canonical_officer=officer)
+        person = PersonFactory(
+            canonical_officer=officer,
+            all_complaints_count=2,
+        )
         person.officers.add(officer)
         person.save()
 
-        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
-        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4), year=2016)
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4), year=2017)
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4), year=2018)
 
         document_1.officers.add(officer)
         document_2.officers.add(officer)
         document_3.officers.add(officer)
 
         complaint_1 = ComplaintFactory()
-        complaint_2 = ComplaintFactory()
+        complaint_2 = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
 
         complaint_1.officers.add(officer)
         complaint_2.officers.add(officer)
+
+        article_1 = NewsArticleFactory(published_date=date(2020, 5, 4))
+        matched_sentence_1 = MatchedSentenceFactory(article=article_1)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_1.save()
+        article_2 = NewsArticleFactory(published_date=date(2021, 5, 4))
+        matched_sentence_2 = MatchedSentenceFactory(article=article_2)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_2.save()
+
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
@@ -287,9 +451,16 @@ class OfficerDetailsSerializerTestCase(TestCase):
             "documents_count": 3,
             "complaints_count": 2,
             "latest_rank": None,
+            "articles_count": 2,
+            "articles_documents_years": [2016, 2017, 2018, 2020, 2021],
+            "sustained_complaints_count": 1,
+            "complaints_year_count": 0,
+            "incident_force_count": 0,
+            "termination_count": 0,
+            "award_count": 0,
         }
 
-    def test_data_with_related_officer_departments_and_badges(self):
+    def test_data_with_related_officer(self):
         department = DepartmentFactory()
         related_department = DepartmentFactory()
 
@@ -301,7 +472,10 @@ class OfficerDetailsSerializerTestCase(TestCase):
             sex="male",
             department=department,
         )
-        person = PersonFactory(canonical_officer=officer)
+        person = PersonFactory(
+            canonical_officer=officer,
+            all_complaints_count=2,
+        )
         related_officer = OfficerFactory(department=related_department)
         person.officers.add(officer)
         person.officers.add(related_officer)
@@ -352,19 +526,19 @@ class OfficerDetailsSerializerTestCase(TestCase):
             department=related_department,
         )
 
-        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4), year=2016)
         document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
-        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4), year=2018)
 
         document_1.officers.add(officer)
         document_2.officers.add(officer)
-        document_3.officers.add(officer)
+        document_3.officers.add(related_officer)
 
         complaint_1 = ComplaintFactory()
-        complaint_2 = ComplaintFactory()
+        complaint_2 = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
 
         complaint_1.officers.add(officer)
-        complaint_2.officers.add(officer)
+        complaint_2.officers.add(related_officer)
 
         EventFactory(
             officer=officer,
@@ -384,6 +558,99 @@ class OfficerDetailsSerializerTestCase(TestCase):
             day=4,
             department=None,
         )
+        complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2019,
+            month=None,
+            day=None,
+        )
+        sustained_complaint_event = EventFactory(
+            department=department,
+            officer=related_officer,
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        complaint_1.events.add(complaint_event)
+        complaint_2.events.add(sustained_complaint_event)
+
+        article_1 = NewsArticleFactory(published_date=date(2020, 5, 4))
+        matched_sentence_1 = MatchedSentenceFactory(article=article_1)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_1.save()
+        article_2 = NewsArticleFactory(published_date=date(2021, 5, 4))
+        matched_sentence_2 = MatchedSentenceFactory(article=article_2)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_2.save()
+
+        uof_incident_event_1 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_1 = UseOfForceFactory(officer=officer)
+
+        uof_incident_event_2 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_2 = UseOfForceFactory(officer=related_officer)
+
+        uof_1.events.add(uof_incident_event_1)
+        uof_2.events.add(uof_incident_event_2)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="terminated",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="involuntary termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination|arrest",
+        )
+        EventFactory(
+            department=department,
+            officer=related_officer,
+            left_reason="resigned",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            award="commendation 1",
+        )
+        EventFactory(
+            department=department,
+            officer=related_officer,
+            award="commendation 2",
+        )
+
+        officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
 
         result = OfficerDetailsSerializer(officer).data
         assert result == {
@@ -408,4 +675,11 @@ class OfficerDetailsSerializerTestCase(TestCase):
             "documents_count": 3,
             "complaints_count": 2,
             "latest_rank": None,
+            "articles_count": 2,
+            "articles_documents_years": [2016, 2018, 2020, 2021],
+            "sustained_complaints_count": 1,
+            "complaints_year_count": 2,
+            "incident_force_count": 2,
+            "termination_count": 4,
+            "award_count": 2,
         }

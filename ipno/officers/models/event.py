@@ -37,6 +37,7 @@ class Event(TimeStampsModel, APITemplateModel):
     )
     salary_freq = models.CharField(max_length=255, null=True, blank=True)
     left_reason = models.CharField(max_length=255, null=True, blank=True)
+    award = models.CharField(max_length=255, null=True, blank=True)
     uid = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
     uof_uid = models.CharField(max_length=255, null=True, blank=True)
