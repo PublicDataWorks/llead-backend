@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -7,6 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
+from complaints.models import Complaint
 from officers.constants import (
     OFFICER_DEPT,
     OFFICER_HIRE,
@@ -40,10 +42,22 @@ class OfficersViewSet(viewsets.ViewSet):
 
     @custom_cache
     def retrieve(self, request, pk):
-        officer = get_object_or_404(
-            Officer.objects.prefetch_related("person__canonical_officer"), id=pk
-        )
-        serializer = OfficerDetailsSerializer(officer.person.canonical_officer)
+        person = get_object_or_404(Officer, id=pk).person
+
+        canonical_officer = Officer.objects.filter(person=person).prefetch_related(
+            "person__officers__documents",
+            "person__officers__matched_sentences",
+            "person__officers__events__department",
+            "person__officers__events__complaints",
+            Prefetch(
+                "person__officers__complaints",
+                queryset=Complaint.objects.filter(
+                    disposition=ALLEGATION_DISPOSITION_SUSTAINED
+                ),
+                to_attr="sustained_complaints",
+            ),
+        )[0]
+        serializer = OfficerDetailsSerializer(canonical_officer)
 
         return Response(serializer.data)
 

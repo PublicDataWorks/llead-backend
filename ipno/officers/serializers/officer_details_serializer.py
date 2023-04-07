@@ -1,5 +1,9 @@
 from rest_framework import serializers
 
+from documents.models import Document
+from news_articles.models import MatchedSentence, NewsArticle
+from officers.constants import UOF_OCCUR
+from officers.models import Event
 from shared.serializers import SimpleDepartmentSerializer
 
 
@@ -15,8 +19,23 @@ class OfficerDetailsSerializer(serializers.Serializer):
     salary = serializers.SerializerMethodField()
     salary_freq = serializers.SerializerMethodField()
     documents_count = serializers.SerializerMethodField()
+    award_count = serializers.SerializerMethodField()
+    articles_count = serializers.SerializerMethodField()
+    articles_documents_years = serializers.SerializerMethodField()
     complaints_count = serializers.SerializerMethodField()
+    sustained_complaints_count = serializers.SerializerMethodField()
+    complaints_year_count = serializers.SerializerMethodField()
+    incident_force_count = serializers.SerializerMethodField()
+    termination_count = serializers.SerializerMethodField()
     latest_rank = serializers.SerializerMethodField()
+
+    @property
+    def _termination_left_reason(self):
+        return set(
+            Event.objects.filter(left_reason__icontains="terminat").values_list(
+                "left_reason", flat=True
+            )
+        )
 
     def _get_person_officers(self, obj):
         if not hasattr(obj, "person_officers"):
@@ -68,7 +87,7 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return events
 
     def get_departments(self, obj):
-        canonical_dep = obj.person.canonical_officer.department
+        canonical_dep = obj.department
 
         all_events = self._get_all_events(obj)
 
@@ -94,10 +113,61 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return salary_event.salary_freq if salary_event else None
 
     def get_documents_count(self, obj):
-        return obj.documents.count()
+        officers = self._get_person_officers(obj)
+
+        return sum([obj.documents.count() for obj in officers])
+
+    def get_articles_count(self, obj):
+        officers = self._get_person_officers(obj)
+        matched_sentences = []
+
+        for officer in officers:
+            if officer.matched_sentences.count() > 0:
+                matched_sentences.extend(officer.matched_sentences.all())
+
+        return (
+            NewsArticle.objects.filter(matched_sentences__in=matched_sentences)
+            .distinct()
+            .count()
+        )
 
     def get_complaints_count(self, obj):
-        return obj.complaints.count()
+        return obj.person.all_complaints_count
+
+    def get_sustained_complaints_count(self, obj):
+        officers = self._get_person_officers(obj)
+
+        return sum([len(officer.sustained_complaints) for officer in officers])
+
+    def get_complaints_year_count(self, obj):
+        all_events = self._get_all_events(obj)
+        years = [
+            event.year
+            for event in all_events
+            if event.year and event.complaints.count() > 0
+        ]
+
+        return years[0] - years[-1] if len(years) > 1 else len(years)
+
+    def get_incident_force_count(self, obj):
+        all_events = self._get_all_events(obj)
+
+        incident_forces = [
+            event.kind for event in all_events if event.kind == UOF_OCCUR
+        ]
+
+        return len(incident_forces)
+
+    def get_termination_count(self, obj):
+        all_events = self._get_all_events(obj)
+
+        return len(
+            [
+                event
+                for event in all_events
+                if event.left_reason in self._termination_left_reason
+            ]
+        )
 
     def get_latest_rank(self, obj):
         events = self._get_all_events(obj)
@@ -105,3 +175,30 @@ class OfficerDetailsSerializer(serializers.Serializer):
         rank_events = [rank for rank in events if rank.rank_desc]
 
         return rank_events[0].rank_desc if rank_events else None
+
+    def get_articles_documents_years(self, obj):
+        officers = self._get_person_officers(obj)
+        years = []
+
+        matched_sentences = MatchedSentence.objects.filter(officers__in=officers)
+        articles = NewsArticle.objects.filter(matched_sentences__in=matched_sentences)
+        if articles:
+            articles_dates = articles.values_list("published_date", flat=True)
+            articles_years = [date.year for date in articles_dates]
+            years.extend(articles_years)
+
+        documents = Document.objects.filter(officers__in=officers)
+        if documents:
+            documents_years = documents.filter(year__isnull=False).values_list(
+                "year", flat=True
+            )
+            years.extend(list(documents_years))
+
+        return sorted(list(set(years)))
+
+    def get_award_count(self, obj):
+        events = self._get_all_events(obj)
+
+        awards = [event.award for event in events if event.award]
+
+        return len(awards)

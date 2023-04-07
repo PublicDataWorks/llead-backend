@@ -9,6 +9,7 @@ from rest_framework import status
 import pandas as pd
 
 from citizens.factory import CitizenFactory
+from complaints.constants import ALLEGATION_DISPOSITION_SUSTAINED
 from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
@@ -30,6 +31,7 @@ from officers.constants import (
     RANK_CHANGE_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
+    UOF_OCCUR,
     UOF_RECEIVE,
     UOF_TIMELINE_KIND,
 )
@@ -162,7 +164,7 @@ class OfficersViewSetTestCase(AuthAPITestCase):
     def test_retrieve_success(self):
         department = DepartmentFactory()
 
-        person = PersonFactory()
+        person = PersonFactory(all_complaints_count=2)
         related_officer = OfficerFactory()
         officer = OfficerFactory(
             first_name="David",
@@ -213,19 +215,85 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             department=None,
         )
 
-        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
-        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4), year=2016)
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4), year=2017)
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4), year=2018)
 
         document_1.officers.add(officer)
         document_2.officers.add(officer)
         document_3.officers.add(officer)
 
         complaint_1 = ComplaintFactory()
-        complaint_2 = ComplaintFactory()
+        complaint_2 = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
 
         complaint_1.officers.add(officer)
         complaint_2.officers.add(officer)
+
+        complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2019,
+            month=None,
+            day=None,
+        )
+        sustained_complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        complaint_1.events.add(complaint_event)
+        complaint_2.events.add(sustained_complaint_event)
+
+        article_1 = NewsArticleFactory(published_date=date(2020, 5, 4))
+        matched_sentence_1 = MatchedSentenceFactory(article=article_1)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_1.save()
+        article_2 = NewsArticleFactory(published_date=date(2021, 5, 4))
+        matched_sentence_2 = MatchedSentenceFactory(article=article_2)
+        matched_sentence_2.officers.add(officer)
+        matched_sentence_2.save()
+
+        uof_incident_event_1 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_1.events.add(uof_incident_event_1)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="terminated",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="involuntary termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination|arrest",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="resigned",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            award="commendation",
+        )
 
         EventFactory(
             officer=officer,
@@ -271,7 +339,14 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             "salary": "57000.00",
             "salary_freq": "yearly",
             "documents_count": 3,
+            "articles_count": 2,
+            "articles_documents_years": [2016, 2017, 2018, 2020, 2021],
             "complaints_count": 2,
+            "sustained_complaints_count": 1,
+            "complaints_year_count": 2,
+            "incident_force_count": 1,
+            "termination_count": 4,
+            "award_count": 1,
         }
 
         response = self.client.get(
@@ -602,11 +677,11 @@ class OfficersViewSetTestCase(AuthAPITestCase):
         assert response["Content-Disposition"] == expected_content_disposition
         pd.testing.assert_frame_equal(xlsx_data, data)
 
-    def test_retrieve_success_with_related_officer_departments_and_badges(self):
+    def test_retrieve_success_with_related_officer(self):
         department = DepartmentFactory()
         related_department = DepartmentFactory()
 
-        person = PersonFactory()
+        person = PersonFactory(all_complaints_count=2)
         related_officer = OfficerFactory(department=related_department)
         officer = OfficerFactory(
             first_name="David",
@@ -665,19 +740,19 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             department=related_department,
         )
 
-        document_1 = DocumentFactory(incident_date=date(2016, 5, 4))
-        document_2 = DocumentFactory(incident_date=date(2017, 5, 4))
-        document_3 = DocumentFactory(incident_date=date(2018, 5, 4))
+        document_1 = DocumentFactory(incident_date=date(2016, 5, 4), year=2016)
+        document_2 = DocumentFactory(incident_date=date(2017, 5, 4), year=2017)
+        document_3 = DocumentFactory(incident_date=date(2018, 5, 4), year=2018)
 
         document_1.officers.add(officer)
         document_2.officers.add(officer)
-        document_3.officers.add(officer)
+        document_3.officers.add(related_officer)
 
         complaint_1 = ComplaintFactory()
-        complaint_2 = ComplaintFactory()
+        complaint_2 = ComplaintFactory(disposition=ALLEGATION_DISPOSITION_SUSTAINED)
 
         complaint_1.officers.add(officer)
-        complaint_2.officers.add(officer)
+        complaint_2.officers.add(related_officer)
 
         EventFactory(
             officer=officer,
@@ -706,6 +781,84 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             day=5,
         )
 
+        complaint_event = EventFactory(
+            department=department,
+            officer=officer,
+            year=2019,
+            month=None,
+            day=None,
+        )
+        sustained_complaint_event = EventFactory(
+            department=department,
+            officer=related_officer,
+            year=2021,
+            month=None,
+            day=None,
+        )
+
+        complaint_1.events.add(complaint_event)
+        complaint_2.events.add(sustained_complaint_event)
+
+        article_1 = NewsArticleFactory(published_date=date(2020, 5, 4))
+        matched_sentence_1 = MatchedSentenceFactory(article=article_1)
+        matched_sentence_1.officers.add(officer)
+        matched_sentence_1.save()
+        article_2 = NewsArticleFactory(published_date=date(2021, 5, 4))
+        matched_sentence_2 = MatchedSentenceFactory(article=article_2)
+        matched_sentence_2.officers.add(related_officer)
+        matched_sentence_2.save()
+
+        uof_incident_event_1 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_1 = UseOfForceFactory(officer=officer)
+        uof_incident_event_2 = EventFactory(
+            department=department,
+            officer=officer,
+            kind=UOF_OCCUR,
+        )
+        uof_2 = UseOfForceFactory(officer=related_officer)
+        uof_1.events.add(uof_incident_event_1)
+        uof_2.events.add(uof_incident_event_2)
+
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="terminated",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="involuntary termination",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            left_reason="termination|arrest",
+        )
+        EventFactory(
+            department=department,
+            officer=related_officer,
+            left_reason="resigned",
+        )
+        EventFactory(
+            department=department,
+            officer=officer,
+            award="commendation 1",
+        )
+        EventFactory(
+            department=department,
+            officer=related_officer,
+            award="commendation 2",
+        )
+
         expected_result = {
             "id": officer.id,
             "name": "David Jonesworth",
@@ -728,6 +881,13 @@ class OfficersViewSetTestCase(AuthAPITestCase):
             "salary_freq": "yearly",
             "documents_count": 3,
             "complaints_count": 2,
+            "articles_count": 2,
+            "articles_documents_years": [2016, 2017, 2018, 2020, 2021],
+            "sustained_complaints_count": 1,
+            "complaints_year_count": 2,
+            "incident_force_count": 2,
+            "termination_count": 4,
+            "award_count": 2,
         }
 
         response = self.client.get(
