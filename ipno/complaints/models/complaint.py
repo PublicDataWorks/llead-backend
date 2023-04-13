@@ -15,6 +15,7 @@ class Complaint(TimeStampsModel, APITemplateModel):
     disposition = models.CharField(max_length=255, null=True, blank=True)
     action = models.CharField(max_length=255, null=True, blank=True)
     allegation_desc = models.TextField(null=True, blank=True)
+    coaccusal = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
 
     officers = models.ManyToManyField(

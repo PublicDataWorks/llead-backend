@@ -181,6 +181,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_2.allegation_desc,
                 "action": complaint_2.action,
                 "tracking_id": complaint_2.tracking_id,
+                "associated_officers": [],
             },
             {
                 "kind": RANK_CHANGE_TIMELINE_KIND,
@@ -203,6 +204,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "date": str(date(2018, 4, 8)),
                 "year": 2018,
                 "department": department_1.agency_name,
+                "left_department": None,
+                "left_date": None,
+                "left_reason": None,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -250,6 +254,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_1.allegation_desc,
                 "action": complaint_1.action,
                 "tracking_id": complaint_1.tracking_id,
+                "associated_officers": [],
             },
             {
                 "id": use_of_force.id,
@@ -302,6 +307,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "date": str(date(2020, 5, 9)),
                 "year": 2020,
                 "department": department_2.agency_name,
+                "left_department": None,
+                "left_date": None,
+                "left_reason": None,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -919,6 +927,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_2.allegation_desc,
                 "action": complaint_2.action,
                 "tracking_id": complaint_2.tracking_id,
+                "associated_officers": [],
             },
             {
                 "kind": RANK_CHANGE_TIMELINE_KIND,
@@ -941,6 +950,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "date": str(date(2018, 4, 8)),
                 "year": 2018,
                 "department": department_1.agency_name,
+                "left_department": None,
+                "left_date": None,
+                "left_reason": None,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,
@@ -988,6 +1000,7 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "allegation_desc": complaint_1.allegation_desc,
                 "action": complaint_1.action,
                 "tracking_id": complaint_1.tracking_id,
+                "associated_officers": [],
             },
             {
                 "id": use_of_force.id,
@@ -1040,6 +1053,9 @@ class OfficerTimelineQueryTestCase(TestCase):
                 "date": str(date(2020, 5, 9)),
                 "year": 2020,
                 "department": department_2.agency_name,
+                "left_department": None,
+                "left_date": None,
+                "left_reason": None,
             },
             {
                 "kind": DOCUMENT_TIMELINE_KIND,

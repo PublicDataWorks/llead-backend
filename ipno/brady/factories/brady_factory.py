@@ -3,22 +3,20 @@ import random
 import factory
 from faker import Faker
 
-from complaints.models import Complaint
+from brady.models import Brady
 
 fake = Faker()
 
 
-class ComplaintFactory(factory.django.DjangoModelFactory):
+class BradyFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Complaint
+        model = Brady
 
-    allegation_uid = factory.LazyFunction(lambda: fake.uuid4())
+    brady_uid = factory.LazyFunction(lambda: fake.uuid4())
     uid = factory.LazyFunction(lambda: fake.uuid4())
     disposition = factory.LazyFunction(lambda: fake.word())
     action = factory.LazyFunction(lambda: fake.word())
-    allegation = factory.LazyFunction(lambda: fake.word())
     allegation_desc = factory.LazyFunction(lambda: fake.word())
-    coaccusal = factory.LazyFunction(lambda: fake.word())
-    tracking_id = factory.LazyFunction(
+    tracking_id_og = factory.LazyFunction(
         lambda: f"{random.randint(1000, 9999)}-{random.randint(100, 999)}"
     )

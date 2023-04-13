@@ -10,6 +10,7 @@ DOCUMENT_MODEL_NAME = "Document"
 NEWS_ARTICLE_MODEL_NAME = "NewsArticle"
 NEWS_ARTICLE_OFFICER_MODEL_NAME = "NewsArticleOfficer"
 PERSON_MODEL_NAME = "Person"
+BRADY_MODEL_NAME = "Brady"
 WRGL_REPOS_DEFAULT = [
     {
         "repo_name": "agency-reference-list",
@@ -54,6 +55,10 @@ WRGL_REPOS_DEFAULT = [
     {
         "repo_name": "appeal-hearing",
         "data_model": APPEAL_MODEL_NAME,
+    },
+    {
+        "repo_name": "brady",
+        "data_model": BRADY_MODEL_NAME,
     },
 ]
 

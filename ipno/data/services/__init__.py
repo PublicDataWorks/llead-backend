@@ -1,6 +1,7 @@
 from .base_importer import BaseImporter  # isort: skip
 from .agency_importer import AgencyImporter
 from .appeal_importer import AppealImporter
+from .brady_importer import BradyImporter
 from .citizen_importer import CitizenImporter
 from .complaint_importer import ComplaintImporter
 from .data_troubleshooting import DataTroubleshooting
@@ -26,4 +27,5 @@ __all__ = [
     "DataTroubleshooting",
     "AgencyImporter",
     "MigrateOfficerMovement",
+    "BradyImporter",
 ]

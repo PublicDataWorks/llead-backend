@@ -40,7 +40,7 @@ class OfficersViewSet(viewsets.ViewSet):
         serializer = OfficerSerializer(officers, many=True)
         return Response(serializer.data)
 
-    # @custom_cache
+    @custom_cache
     def retrieve(self, request, pk):
         get_object_or_404(Officer, id=pk)
 
