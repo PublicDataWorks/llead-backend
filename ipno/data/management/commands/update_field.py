@@ -6,5 +6,7 @@ from data.services import DataTroubleshooting
 class Command(BaseCommand):
     def handle(self, *args, **options):
         DataTroubleshooting(
-            data_model="Event", updated_fields=("award",), table_id="event_uid"
+            data_model="Complaint",
+            updated_fields=("coaccusal",),
+            table_id="allegation_uid",
         ).process()

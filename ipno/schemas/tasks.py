@@ -18,6 +18,7 @@ SCHEMA_MAPPING = {
     "person": "person",
     "use-of-force": "useofforce",
     "citizens": "citizen",
+    "brady": "brady",
 }
 
 

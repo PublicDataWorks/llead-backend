@@ -3,6 +3,7 @@ from django.test import TestCase
 from mock import patch
 
 from appeals.models import Appeal
+from brady.models import Brady
 from citizens.models import Citizen
 from complaints.models import Complaint
 from data.factories import WrglRepoFactory
@@ -65,6 +66,11 @@ class SchemaTasksTestCase(TestCase):
             - base_fields
             - Citizen.CUSTOM_FIELDS
         )
+        brady_fixed_fields = (
+            {field.name for field in Brady._meta.fields}
+            - base_fields
+            - Brady.CUSTOM_FIELDS
+        )
 
         expected_schemas = {
             "document": document_fixed_fields,
@@ -76,6 +82,7 @@ class SchemaTasksTestCase(TestCase):
             "person": person_fixed_fields,
             "appeal": appeal_fixed_fields,
             "citizen": citizen_fixed_fields,
+            "brady": brady_fixed_fields,
         }
 
         result = get_schemas()
