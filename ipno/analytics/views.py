@@ -15,7 +15,10 @@ class AnalyticsViewSet(ViewSet):
     def summary(self, request):
         summary_data = {
             "documents_count": Document.objects.count(),
-            "news_articles_count": NewsArticle.objects.count(),
+            "news_articles_count": NewsArticle.objects.filter(
+                matched_sentences__officers__isnull=False,
+                is_hidden=False,
+            ).count(),
             "officers_count": Officer.objects.filter(
                 canonical_person__isnull=False
             ).count(),
