@@ -19,6 +19,7 @@ SCHEMA_MAPPING = {
     "use-of-force": "useofforce",
     "citizens": "citizen",
     "brady": "brady",
+    "news_article_classification": "newsarticleclassification",
 }
 
 

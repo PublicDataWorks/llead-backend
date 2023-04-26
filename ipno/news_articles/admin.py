@@ -9,6 +9,7 @@ from news_articles.models import (
     MatchedSentence,
     MatchingKeyword,
     NewsArticle,
+    NewsArticleClassification,
     NewsArticleSource,
 )
 
@@ -169,6 +170,10 @@ class NewsArticleSourceAdmin(ModelAdmin):
         return False  # pragma: no cover
 
 
+class NewsArticleClassificationAdmin(ModelAdmin):
+    list_display = ("article_id", "score", "relevant")
+
+
 class MatchingKeywordAdmin(ModelAdmin):
     list_display = ("keywords", "ran_at", "status")
     readonly_fields = ("ran_at",)
@@ -222,5 +227,6 @@ admin.site.register(CrawledPost, CrawledPostAdmin)
 admin.site.register(CrawlerLog, CrawlerLogAdmin)
 admin.site.register(CrawlerError, CrawlerErrorAdmin)
 admin.site.register(NewsArticleSource, NewsArticleSourceAdmin)
+admin.site.register(NewsArticleClassification, NewsArticleClassificationAdmin)
 admin.site.register(MatchingKeyword, MatchingKeywordAdmin)
 admin.site.register(ExcludeOfficer, ExcludeOfficerAdmin)
