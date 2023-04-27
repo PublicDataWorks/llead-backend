@@ -35,7 +35,6 @@ def flush_news_article_related_caches(start_time=None):
     officers = Officer.objects.filter(matched_sentences__in=matched_sentences)
     departments = Department.objects.filter(officers__in=officers).distinct()
 
-    delete_cache("api:news-articles-list")
     delete_cache("api:analytics-summary")
 
     for officer in officers:
