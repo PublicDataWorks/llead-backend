@@ -109,7 +109,7 @@ class DataTroubleshootingCase(TestCase):
 
         assert Officer.objects.get(uid="uid1").sex == "male"
         assert Officer.objects.get(uid="uid2").sex == "female"
-        assert Officer.objects.get(uid="uid3").sex == ""
+        assert not Officer.objects.get(uid="uid3").sex
         assert Officer.objects.get(uid="uid4").sex == "male"
         assert Officer.objects.get(uid="uid5").sex == "male"
 
@@ -171,9 +171,9 @@ class DataTroubleshootingCase(TestCase):
 
         assert Officer.objects.get(uid="uid1").race == "white"
         assert Officer.objects.get(uid="uid2").race == "black / african american"
-        assert Officer.objects.get(uid="uid3").race == ""
-        assert Officer.objects.get(uid="uid4").race == ""
-        assert Officer.objects.get(uid="uid5").race == ""
+        assert not Officer.objects.get(uid="uid3").race
+        assert not Officer.objects.get(uid="uid4").race
+        assert not Officer.objects.get(uid="uid5").race
 
     @patch("data.services.data_troubleshooting.Repository")
     def test_retrieve_wrgl_data(self, mock_repository):
