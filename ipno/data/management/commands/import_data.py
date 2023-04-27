@@ -7,6 +7,7 @@ import structlog
 from data.services import (
     AgencyImporter,
     AppealImporter,
+    BradyImporter,
     CitizenImporter,
     ComplaintImporter,
     DocumentImporter,
@@ -35,6 +36,7 @@ class Command(BaseCommand):
         agency_imported = AgencyImporter().process()
         officer_imported = OfficerImporter().process()
         complaint_imported = ComplaintImporter().process()
+        brady_imported = BradyImporter().process()
         uof_imported = UofImporter().process()
         citizen_imported = CitizenImporter().process()
 
@@ -81,6 +83,7 @@ class Command(BaseCommand):
                 complaint_imported,
                 event_imported,
                 appeal_imported,
+                brady_imported,
             ]
         ):
             logger.info("Counting department data period")
@@ -97,6 +100,7 @@ class Command(BaseCommand):
                 document_imported,
                 person_imported,
                 appeal_imported,
+                brady_imported,
             ]
         ):
             logger.info("Rebuilding search index")

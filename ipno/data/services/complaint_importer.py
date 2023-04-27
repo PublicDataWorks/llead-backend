@@ -138,4 +138,5 @@ class ComplaintImporter(BaseImporter):
             self.delete_complaints_ids,
         )
         self.update_relations(data)
+
         return import_result
