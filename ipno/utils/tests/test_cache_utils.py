@@ -110,7 +110,6 @@ class CacheUtilsTestCase(TestCase):
 
         flush_news_article_related_caches()
 
-        assert not cache.get(reverse("api:news-articles-list"))
         assert not cache.get(reverse("api:analytics-summary"))
         assert not cache.get(
             reverse("api:officers-timeline", kwargs={"pk": officer.id})
@@ -154,7 +153,6 @@ class CacheUtilsTestCase(TestCase):
             matched_sentence_2 = MatchedSentenceFactory(article=news_article)
             matched_sentence_2.officers.add(officer_2)
 
-        cache.set(reverse("api:news-articles-list"), "News article list")
         cache.set(reverse("api:analytics-summary"), "Summary")
         cache.set(
             reverse("api:officers-timeline", kwargs={"pk": officer_1.id}),

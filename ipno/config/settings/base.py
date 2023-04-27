@@ -92,6 +92,8 @@ LOCAL_APPS = (
     "historical_data",
     "schemas",
     "citizens",
+    "brady",
+    "findings",
 )
 
 AUTH_USER_MODEL = "authentication.User"
@@ -194,6 +196,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATIC_ROOT = str(APPS_DIR("static"))
+
+MEDIA_URL = "/findings/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "findings")
 
 # Rest Framework
 REST_FRAMEWORK = {

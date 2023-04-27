@@ -6,6 +6,7 @@ from complaints.factories import ComplaintFactory
 from departments.factories import DepartmentFactory
 from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory
+from news_articles.factories.matched_sentence_factory import MatchedSentenceFactory
 from officers.factories import OfficerFactory
 from people.factories import PersonFactory
 from test_utils.auth_api_test_case import AuthAPITestCase
@@ -17,6 +18,22 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
         DocumentFactory.create_batch(7)
         NewsArticleFactory.create_batch(10)
         PersonFactory.create_batch(5)
+
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+
+        news_article_1 = NewsArticleFactory()
+        news_article_2 = NewsArticleFactory()
+        news_article_3 = NewsArticleFactory(is_hidden=True)
+
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_1.officers.add(officer_1)
+
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_2.officers.add(officer_2)
+
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_3.officers.add(officer_2)
 
         department_1 = DepartmentFactory()
         department_2 = DepartmentFactory()
@@ -43,7 +60,7 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
                 "documents_count": 8,
                 "officers_count": 5,
                 "departments_count": 6,
-                "news_articles_count": 10,
+                "news_articles_count": 2,
             }
         )
 
@@ -83,6 +100,19 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
 
         UseOfForceFactory(department=department_4)
 
+        news_article_1 = NewsArticleFactory()
+        news_article_2 = NewsArticleFactory()
+        news_article_3 = NewsArticleFactory(is_hidden=True)
+
+        matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
+        matched_sentence_1.officers.add(officer)
+
+        matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
+        matched_sentence_2.officers.add(officer)
+
+        matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
+        matched_sentence_3.officers.add(officer)
+
         url = reverse("api:analytics-summary")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -91,6 +121,6 @@ class AnalyticsViewSetTestCase(AuthAPITestCase):
                 "documents_count": 8,
                 "officers_count": 7,
                 "departments_count": 6,
-                "news_articles_count": 10,
+                "news_articles_count": 2,
             }
         )

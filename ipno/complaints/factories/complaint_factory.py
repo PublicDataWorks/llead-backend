@@ -18,6 +18,7 @@ class ComplaintFactory(factory.django.DjangoModelFactory):
     action = factory.LazyFunction(lambda: fake.word())
     allegation = factory.LazyFunction(lambda: fake.word())
     allegation_desc = factory.LazyFunction(lambda: fake.word())
+    coaccusal = factory.LazyFunction(lambda: fake.word())
     tracking_id = factory.LazyFunction(
         lambda: f"{random.randint(1000, 9999)}-{random.randint(100, 999)}"
     )
