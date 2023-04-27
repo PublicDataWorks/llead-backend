@@ -10,6 +10,7 @@ class Event(TimeStampsModel, APITemplateModel):
         "department",
         "use_of_force",
         "appeal",
+        "brady",
     }
 
     EventKind = models.TextChoices("EventKind", EVENT_KINDS)
@@ -41,6 +42,7 @@ class Event(TimeStampsModel, APITemplateModel):
     uid = models.CharField(max_length=255, null=True, blank=True)
     agency = models.CharField(max_length=255, null=True, blank=True)
     uof_uid = models.CharField(max_length=255, null=True, blank=True)
+    brady_uid = models.CharField(max_length=255, null=True, blank=True)
 
     officer = models.ForeignKey(
         "officers.Officer", on_delete=models.CASCADE, null=True, related_name="events"
@@ -61,6 +63,13 @@ class Event(TimeStampsModel, APITemplateModel):
     )
     appeal = models.ForeignKey(
         "appeals.Appeal",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="events",
+    )
+    brady = models.ForeignKey(
+        "brady.Brady",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

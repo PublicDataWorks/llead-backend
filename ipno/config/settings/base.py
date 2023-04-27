@@ -92,6 +92,7 @@ LOCAL_APPS = (
     "historical_data",
     "schemas",
     "citizens",
+    "brady",
 )
 
 AUTH_USER_MODEL = "authentication.User"

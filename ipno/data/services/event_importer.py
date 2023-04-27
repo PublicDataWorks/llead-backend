@@ -26,12 +26,7 @@ class EventImporter(BaseImporter):
     UPDATE_ATTRIBUTES = (
         ATTRIBUTES
         + INT_ATTRIBUTES
-        + [
-            "officer_id",
-            "department_id",
-            "use_of_force_id",
-            "appeal_id",
-        ]
+        + ["officer_id", "department_id", "use_of_force_id", "appeal_id", "brady_id"]
     )
 
     def __init__(self):
@@ -44,6 +39,7 @@ class EventImporter(BaseImporter):
         self.event_mappings = {}
         self.uof_mappings = {}
         self.appeal_mappings = {}
+        self.brady_mappings = {}
 
     def get_event_mappings(self):
         return {
@@ -79,10 +75,12 @@ class EventImporter(BaseImporter):
         officer_uid = row[self.column_mappings["uid"]]
         uof_uid = row[self.column_mappings["uof_uid"]]
         appeal_uid = row[self.column_mappings["appeal_uid"]]
+        brady_uid = row[self.column_mappings["brady_uid"]]
 
         officer_id = self.officer_mappings.get(officer_uid)
         uof_id = self.uof_mappings.get(uof_uid)
         appeal_id = self.appeal_mappings.get(appeal_uid)
+        brady_id = self.brady_mappings.get(brady_uid)
 
         event_data = self.parse_row_data(row, self.column_mappings)
         department_id = self.department_mappings[agency]
@@ -91,6 +89,7 @@ class EventImporter(BaseImporter):
         event_data["use_of_force_id"] = uof_id
         event_data["appeal_id"] = appeal_id
         event_data["officer_id"] = officer_id
+        event_data["brady_id"] = brady_id
 
         event_id = self.event_mappings.get(event_uid)
 
@@ -128,6 +127,7 @@ class EventImporter(BaseImporter):
         self.event_mappings = self.get_event_mappings()
         self.uof_mappings = self.get_uof_mappings()
         self.appeal_mappings = self.get_appeal_mappings()
+        self.brady_mappings = self.get_brady_mappings()
 
         for row in tqdm(data.get("added_rows"), desc="Create new events"):
             self.handle_record_data(row)
