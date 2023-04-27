@@ -3,30 +3,41 @@ from datetime import date
 from django.test import TestCase
 
 from appeals.factories import AppealFactory
+from brady.factories.brady_factory import BradyFactory
 from citizens.factory import CitizenFactory
 from complaints.factories import ComplaintFactory
-from departments.factories import DepartmentFactory
+from departments.factories import DepartmentFactory, OfficerMovementFactory
 from documents.factories import DocumentFactory
 from news_articles.factories import NewsArticleFactory
 from officers.constants import (
     APPEAL_TIMELINE_KIND,
+    BRADY_LIST,
+    BRADY_LIST_TIMELINE_KIND,
     COMPLAINT_RECEIVE,
     COMPLAINT_TIMELINE_KIND,
     DOCUMENT_TIMELINE_KIND,
+    FIREARM_CERTIFICATION_TIMELINE_KIND,
     JOINED_TIMELINE_KIND,
     LEFT_TIMELINE_KIND,
     NEWS_ARTICLE_TIMELINE_KIND,
     OFFICER_DEPT,
     OFFICER_HIRE,
     OFFICER_LEFT,
+    OFFICER_LEVEL_1_CERT,
     OFFICER_PAY_EFFECTIVE,
+    OFFICER_PC_12_QUALIFICATION,
+    OFFICER_POST_DECERTIFICATION,
     OFFICER_RANK,
+    PC_12_QUALIFICATION_TIMELINE_KIND,
+    POST_DECERTIFICATION_TIMELINE_KIND,
     RANK_CHANGE_TIMELINE_KIND,
+    RESIGNED_TIMELINE_KIND,
     SALARY_CHANGE_TIMELINE_KIND,
+    TERMINATED_TIMELINE_KIND,
     UNIT_CHANGE_TIMELINE_KIND,
     UOF_TIMELINE_KIND,
 )
-from officers.factories import EventFactory
+from officers.factories import EventFactory, OfficerFactory
 from officers.serializers import (
     ComplaintTimelineSerializer,
     DocumentTimelineSerializer,
@@ -40,14 +51,44 @@ from officers.serializers import (
 from officers.serializers.officer_timeline_serializers import (
     AppealTimelineSerializer,
     BaseTimelineSerializer,
+    BradyTimelineSerializer,
+    FirearmTimelineSerializer,
     NewsArticleTimelineSerializer,
+    PC12QualificationTimelineSerializer,
+    PostDecertificationTimelineSerializer,
+    ResignLeftTimelineSerializer,
+    TerminatedLeftTimelineSerializer,
 )
+from people.factories import PersonFactory
 from use_of_forces.factories import UseOfForceFactory
 
 
 class JoinedTimelineSerializerTestCase(TestCase):
     def test_data(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+
+        officer_movement = OfficerMovementFactory(
+            start_department=start_department,
+            end_department=end_department,
+            officer=officer_1,
+        )
+
+        EventFactory(
+            officer=officer_1,
+            department=start_department,
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=1,
+            day=8,
+        )
+
         event = EventFactory(
+            officer=officer_1,
+            department=end_department,
             kind=OFFICER_HIRE,
             year=2018,
             month=4,
@@ -60,11 +101,37 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "kind": JOINED_TIMELINE_KIND,
             "date": str(date(2018, 4, 8)),
             "year": 2018,
-            "department": event.department.agency_name,
+            "department": end_department.agency_name,
+            "left_department": start_department.agency_name,
+            "left_date": str(date(2018, 1, 8)),
+            "left_reason": officer_movement.left_reason,
         }
 
     def test_data_with_only_year(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+
+        officer_movement = OfficerMovementFactory(
+            start_department=start_department,
+            end_department=end_department,
+            officer=officer_1,
+        )
+
+        EventFactory(
+            officer=officer_1,
+            department=start_department,
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=1,
+            day=8,
+        )
+
         event = EventFactory(
+            officer=officer_1,
+            department=end_department,
             kind=OFFICER_HIRE,
             year=2018,
             month=None,
@@ -78,10 +145,36 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "date": None,
             "year": 2018,
             "department": event.department.agency_name,
+            "left_department": start_department.agency_name,
+            "left_date": str(date(2018, 1, 8)),
+            "left_reason": officer_movement.left_reason,
         }
 
     def test_data_with_empty_date(self):
+        start_department = DepartmentFactory()
+        end_department = DepartmentFactory()
+        officer_1 = OfficerFactory()
+        person_1 = PersonFactory(canonical_officer=officer_1)
+        person_1.officers.add(officer_1)
+
+        officer_movement = OfficerMovementFactory(
+            start_department=start_department,
+            end_department=end_department,
+            officer=officer_1,
+        )
+
+        EventFactory(
+            officer=officer_1,
+            department=start_department,
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=1,
+            day=8,
+        )
+
         event = EventFactory(
+            officer=officer_1,
+            department=end_department,
             kind=OFFICER_HIRE,
             year=None,
             month=None,
@@ -95,6 +188,9 @@ class JoinedTimelineSerializerTestCase(TestCase):
             "date": None,
             "year": None,
             "department": event.department.agency_name,
+            "left_department": start_department.agency_name,
+            "left_date": str(date(2018, 1, 8)),
+            "left_reason": officer_movement.left_reason,
         }
 
 
@@ -117,9 +213,59 @@ class LeftTimelineSerializerTestCase(TestCase):
         }
 
 
+class TerminatedTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=4,
+            day=8,
+        )
+
+        result = TerminatedLeftTimelineSerializer(event).data
+
+        assert result == {
+            "kind": TERMINATED_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+            "department": event.department.agency_name,
+        }
+
+
+class ResignTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_LEFT,
+            year=2018,
+            month=4,
+            day=8,
+        )
+
+        result = ResignLeftTimelineSerializer(event).data
+
+        assert result == {
+            "kind": RESIGNED_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+            "department": event.department.agency_name,
+        }
+
+
 class ComplaintTimelineSerializerTestCase(TestCase):
     def test_data(self):
-        complaint = ComplaintFactory()
+        officer_1 = OfficerFactory()
+        officer_2 = OfficerFactory()
+        officer_3 = OfficerFactory()
+
+        complaint = ComplaintFactory(tracking_id="0bef1fd2445c53343f9928085acaa34d")
+        complaint.officers.add(officer_1)
+
+        other_complaint = ComplaintFactory(
+            tracking_id="0bef1fd2445c53343f9928085acaa34d"
+        )
+        other_complaint.officers.add(officer_2)
+        other_complaint.officers.add(officer_3)
+
         event = EventFactory(
             kind=COMPLAINT_RECEIVE,
             year=2019,
@@ -140,6 +286,16 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             "allegation_desc": complaint.allegation_desc,
             "action": complaint.action,
             "tracking_id": complaint.tracking_id,
+            "associated_officers": [
+                {
+                    "id": officer_2.id,
+                    "name": officer_2.name,
+                },
+                {
+                    "id": officer_3.id,
+                    "name": officer_3.name,
+                },
+            ],
         }
 
     def test_data_with_empty_date(self):
@@ -158,6 +314,7 @@ class ComplaintTimelineSerializerTestCase(TestCase):
             "allegation_desc": complaint.allegation_desc,
             "action": complaint.action,
             "tracking_id": complaint.tracking_id,
+            "associated_officers": [],
         }
 
 
@@ -385,3 +542,131 @@ class BaseTimelineSerializerTestCase(TestCase):
         news_article = NewsArticleFactory()
         with self.assertRaises(NotImplementedError):
             BaseTimelineSerializer(news_article).get_kind(news_article.source)
+
+
+class PostDecertificationTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_POST_DECERTIFICATION,
+            year=2018,
+            month=4,
+            day=8,
+        )
+        complaint = ComplaintFactory()
+        complaint.events.add(event)
+
+        result = PostDecertificationTimelineSerializer(event).data
+
+        assert result == {
+            "id": event.id,
+            "kind": POST_DECERTIFICATION_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+            "department": event.department.agency_name,
+            "allegations": [complaint.allegation],
+        }
+
+
+class FirearmTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_LEVEL_1_CERT,
+            year=2018,
+            month=4,
+            day=8,
+        )
+
+        result = FirearmTimelineSerializer(event).data
+
+        assert result == {
+            "kind": FIREARM_CERTIFICATION_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+        }
+
+
+class PC12QualificationTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        event = EventFactory(
+            kind=OFFICER_PC_12_QUALIFICATION,
+            year=2018,
+            month=4,
+            day=8,
+        )
+
+        result = PC12QualificationTimelineSerializer(event).data
+
+        assert result == {
+            "kind": PC_12_QUALIFICATION_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+        }
+
+
+class BradyTimelineSerializerTestCase(TestCase):
+    def test_data(self):
+        officer = OfficerFactory()
+        department = DepartmentFactory()
+        source_department = DepartmentFactory()
+        charging_agency = DepartmentFactory()
+
+        brady = BradyFactory(
+            department=department,
+            source_agency=source_department.agency_slug,
+            charging_agency=charging_agency.agency_slug,
+            officer=officer,
+        )
+
+        EventFactory(
+            department=department,
+            kind=BRADY_LIST,
+            year=2018,
+            month=4,
+            day=8,
+            brady=brady,
+        )
+
+        result = BradyTimelineSerializer(brady).data
+
+        assert result == {
+            "id": brady.id,
+            "kind": BRADY_LIST_TIMELINE_KIND,
+            "date": str(date(2018, 4, 8)),
+            "year": 2018,
+            "department": department.agency_name,
+            "source_department": source_department.agency_name,
+            "allegation_desc": brady.allegation_desc,
+            "action": brady.action,
+            "disposition": brady.disposition,
+            "charging_department": charging_agency.agency_name,
+            "tracking_id_og": brady.tracking_id_og,
+        }
+
+    def test_data_with_empty_date(self):
+        officer = OfficerFactory()
+        department = DepartmentFactory()
+        source_department = DepartmentFactory()
+        charging_agency = DepartmentFactory()
+
+        brady = BradyFactory(
+            department=department,
+            source_agency=source_department.agency_slug,
+            charging_agency=charging_agency.agency_slug,
+            officer=officer,
+        )
+
+        result = BradyTimelineSerializer(brady).data
+
+        assert result == {
+            "id": brady.id,
+            "kind": BRADY_LIST_TIMELINE_KIND,
+            "date": None,
+            "year": None,
+            "department": department.agency_name,
+            "source_department": source_department.agency_name,
+            "allegation_desc": brady.allegation_desc,
+            "action": brady.action,
+            "disposition": brady.disposition,
+            "charging_department": charging_agency.agency_name,
+            "tracking_id_og": brady.tracking_id_og,
+        }

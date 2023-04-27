@@ -9,6 +9,7 @@ from tqdm import tqdm
 from wrgl import Repository
 
 from appeals.models import Appeal
+from brady.models import Brady
 from complaints.models import Complaint
 from data.constants import (
     IMPORT_LOG_STATUS_ERROR,
@@ -91,6 +92,11 @@ class BaseImporter(object):
         return {
             complaint.allegation_uid: complaint.id
             for complaint in Complaint.objects.only("id", "allegation_uid")
+        }
+
+    def get_brady_mappings(self):
+        return {
+            brady.brady_uid: brady.id for brady in Brady.objects.only("id", "brady_uid")
         }
 
     def process_wrgl_data(self, old_commit_hash):

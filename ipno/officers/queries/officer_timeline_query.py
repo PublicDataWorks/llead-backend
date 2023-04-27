@@ -1,16 +1,21 @@
 from django.db.models import Prefetch, Q
 
 from appeals.models import Appeal
+from brady.models import Brady
 from complaints.models import Complaint
 from departments.models import Department
 from documents.models import Document
 from news_articles.models import MatchedSentence, NewsArticle
 from officers.constants import (
+    BRADY_LIST,
     COMPLAINT_ALL_EVENTS,
     OFFICER_DEPT,
     OFFICER_HIRE,
     OFFICER_LEFT,
+    OFFICER_LEVEL_1_CERT,
     OFFICER_PAY_EFFECTIVE,
+    OFFICER_PC_12_QUALIFICATION,
+    OFFICER_POST_DECERTIFICATION,
     OFFICER_RANK,
 )
 from officers.models import Event
@@ -26,6 +31,14 @@ from officers.serializers import (
     UnitChangeTimelineSerializer,
     UseOfForceTimelineSerializer,
 )
+from officers.serializers.officer_timeline_serializers import (
+    BradyTimelineSerializer,
+    FirearmTimelineSerializer,
+    PC12QualificationTimelineSerializer,
+    PostDecertificationTimelineSerializer,
+    ResignLeftTimelineSerializer,
+    TerminatedLeftTimelineSerializer,
+)
 from use_of_forces.models import UseOfForce
 from utils.data_utils import format_data_period, sort_items
 
@@ -33,6 +46,19 @@ from utils.data_utils import format_data_period, sort_items
 class OfficerTimelineQuery(object):
     def __init__(self, officer):
         self.all_officers = officer.person.officers.all()
+        self.termination_left_reasons = set(
+            Event.objects.filter(left_reason__icontains="terminat").values_list(
+                "left_reason", flat=True
+            )
+        )
+        self.resign_left_reasons = set(
+            Event.objects.filter(left_reason__icontains="resign").values_list(
+                "left_reason", flat=True
+            )
+        )
+        self.popular_left_reasons = (
+            self.termination_left_reasons | self.resign_left_reasons
+        )
 
     @staticmethod
     def _filter_event_changes(events, compared_fields):
@@ -109,12 +135,36 @@ class OfficerTimelineQuery(object):
 
     @property
     def _left_timeline(self):
-        left_timeline_query = Event.objects.select_related("department").filter(
-            kind=OFFICER_LEFT,
-            officer__in=self.all_officers,
+        left_timeline_query = (
+            Event.objects.select_related("department")
+            .filter(
+                kind=OFFICER_LEFT,
+                officer__in=self.all_officers,
+            )
+            .exclude(left_reason__in=self.popular_left_reasons)
         )
 
         return LeftTimelineSerializer(left_timeline_query, many=True).data
+
+    @property
+    def _terminated_left_timeline(self):
+        left_timeline_query = Event.objects.select_related("department").filter(
+            kind=OFFICER_LEFT,
+            officer__in=self.all_officers,
+            left_reason__in=self.termination_left_reasons,
+        )
+
+        return TerminatedLeftTimelineSerializer(left_timeline_query, many=True).data
+
+    @property
+    def _resign_left_timeline(self):
+        left_timeline_query = Event.objects.select_related("department").filter(
+            kind=OFFICER_LEFT,
+            officer__in=self.all_officers,
+            left_reason__in=self.resign_left_reasons,
+        )
+
+        return ResignLeftTimelineSerializer(left_timeline_query, many=True).data
 
     @property
     def _document_timeline(self):
@@ -179,6 +229,46 @@ class OfficerTimelineQuery(object):
 
         return UnitChangeTimelineSerializer(unit_changes, many=True).data
 
+    @property
+    def _post_decertification_timeline(self):
+        post_decertification_timeline_query = Event.objects.filter(
+            kind=OFFICER_POST_DECERTIFICATION,
+            officer__in=self.all_officers,
+        )
+
+        return PostDecertificationTimelineSerializer(
+            post_decertification_timeline_query, many=True
+        ).data
+
+    @property
+    def _firearm_timeline(self):
+        firearm_timeline_query = Event.objects.filter(
+            kind=OFFICER_LEVEL_1_CERT,
+            officer__in=self.all_officers,
+        )
+
+        return FirearmTimelineSerializer(firearm_timeline_query, many=True).data
+
+    @property
+    def _pc_12_qualification_timeline(self):
+        pc_12_qualification_timeline_query = Event.objects.filter(
+            kind=OFFICER_PC_12_QUALIFICATION,
+            officer__in=self.all_officers,
+        )
+
+        return PC12QualificationTimelineSerializer(
+            pc_12_qualification_timeline_query, many=True
+        ).data
+
+    @property
+    def _brady_list_timeline(self):
+        brady_list_timeline_query = Brady.objects.filter(
+            officer__in=self.all_officers,
+            events__kind=BRADY_LIST,
+        ).prefetch_related("events", "department")
+
+        return BradyTimelineSerializer(brady_list_timeline_query, many=True).data
+
     def _get_timeline_period(self, timeline):
         officer_timeline_period = sorted(
             list(set([i["year"] for i in timeline if i["year"]]))
@@ -213,12 +303,18 @@ class OfficerTimelineQuery(object):
             period_only_items
             + self._join_timeline
             + self._left_timeline
+            + self._terminated_left_timeline
+            + self._resign_left_timeline
             + self._document_timeline
             + self._salary_change_timeline
             + self._rank_change_timeline
             + self._unit_change_timeline
             + self._news_aticle_timeline
             + self._appeal_timeline
+            + self._post_decertification_timeline
+            + self._firearm_timeline
+            + self._pc_12_qualification_timeline
+            + self._brady_list_timeline
         )
 
         timeline_period = self._get_timeline_period(period_only_items)
