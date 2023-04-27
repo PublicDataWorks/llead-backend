@@ -9,6 +9,11 @@ APP_CONFIG = [
         "value": "30",
         "description": "Number of analytic recent days",
     },
+    {
+        "name": "NEWS_ARTICLE_THRESHOLD",
+        "value": "0.5",
+        "description": "The threshold for news article classification",
+    },
 ]
 
 APP_TEXT_CONTENTS = [
