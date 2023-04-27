@@ -18,7 +18,10 @@ class NewsArticlesViewSet(viewsets.ViewSet):
         if not request.user.is_anonymous and request.user.is_admin:
             news_articles = (
                 NewsArticle.objects.select_related("source")
-                .filter(matched_sentences__officers__isnull=False, is_hidden=False)
+                .filter(
+                    is_hidden=False,
+                    news_article_classifications__isnull=False,
+                )
                 .order_by(
                     "-published_date",
                 )
@@ -33,7 +36,6 @@ class NewsArticlesViewSet(viewsets.ViewSet):
                 NewsArticle.objects.select_related("source")
                 .prefetch_related("news_article_classifications")
                 .filter(
-                    matched_sentences__officers__isnull=False,
                     is_hidden=False,
                     news_article_classifications__score__gte=threshold,
                     news_article_classifications__relevant="relevant",
