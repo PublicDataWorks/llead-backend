@@ -7,6 +7,7 @@ import structlog
 from data.services import (
     AgencyImporter,
     AppealImporter,
+    ArticleClassificationImporter,
     BradyImporter,
     CitizenImporter,
     ComplaintImporter,
@@ -35,6 +36,7 @@ class Command(BaseCommand):
 
         agency_imported = AgencyImporter().process()
         officer_imported = OfficerImporter().process()
+        article_classification_imported = ArticleClassificationImporter().process()
         complaint_imported = ComplaintImporter().process()
         brady_imported = BradyImporter().process()
         uof_imported = UofImporter().process()
