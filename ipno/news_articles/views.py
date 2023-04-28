@@ -20,6 +20,7 @@ class NewsArticlesViewSet(viewsets.ViewSet):
             news_articles = (
                 NewsArticle.objects.select_related("source")
                 .filter(
+                    matched_sentences__officers__isnull=False,
                     is_hidden=False,
                 )
                 .order_by(
@@ -36,6 +37,7 @@ class NewsArticlesViewSet(viewsets.ViewSet):
                 NewsArticle.objects.select_related("source")
                 .prefetch_related("news_article_classifications")
                 .filter(
+                    Q(matched_sentences__officers__isnull=False),
                     Q(is_hidden=False),
                     Q(news_article_classifications__isnull=True)
                     | Q(news_article_classifications__score__gte=threshold),
