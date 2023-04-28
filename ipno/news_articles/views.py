@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
@@ -20,7 +21,6 @@ class NewsArticlesViewSet(viewsets.ViewSet):
                 NewsArticle.objects.select_related("source")
                 .filter(
                     is_hidden=False,
-                    news_article_classifications__isnull=False,
                 )
                 .order_by(
                     "-published_date",
@@ -36,9 +36,9 @@ class NewsArticlesViewSet(viewsets.ViewSet):
                 NewsArticle.objects.select_related("source")
                 .prefetch_related("news_article_classifications")
                 .filter(
-                    is_hidden=False,
-                    news_article_classifications__score__gte=threshold,
-                    news_article_classifications__relevant="relevant",
+                    Q(is_hidden=False),
+                    Q(news_article_classifications__isnull=True)
+                    | Q(news_article_classifications__score__gte=threshold),
                 )
                 .order_by(
                     "-published_date",
