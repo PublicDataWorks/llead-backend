@@ -41,13 +41,16 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         )
         news_article_4 = NewsArticleFactory(source=source)
         news_article_5 = NewsArticleFactory(source=source)
+        news_article_6 = NewsArticleFactory(
+            source=source,
+            published_date=news_article_1.published_date - datetime.timedelta(days=2),
+        )
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
         matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
         matched_sentence_4 = MatchedSentenceFactory(article=news_article_4)
         matched_sentence_5 = MatchedSentenceFactory(article=news_article_5)
-        NewsArticleFactory()
         matched_sentence_1.officers.add(officer)
         matched_sentence_1.save()
         matched_sentence_2.officers.add(officer)
@@ -59,12 +62,6 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         matched_sentence_5.officers.add(officer)
         matched_sentence_5.save()
 
-        NewsArticleClassificationFactory(
-            article_id=news_article_1.id,
-            news_article=news_article_1,
-            score=0.6,
-            relevant="relevant",
-        )
         NewsArticleClassificationFactory(
             article_id=news_article_2.id,
             news_article=news_article_2,
@@ -104,6 +101,14 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 "source_name": source.source_display_name,
                 "author": news_article_2.author,
             },
+            {
+                "id": news_article_6.id,
+                "date": str(news_article_6.published_date),
+                "title": news_article_6.title,
+                "url": news_article_6.url,
+                "source_name": source.source_display_name,
+                "author": news_article_6.author,
+            },
         ]
 
         assert response.data == expected_data
@@ -136,13 +141,16 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
             source=source,
             published_date=news_article_1.published_date - datetime.timedelta(days=5),
         )
+        news_article_6 = NewsArticleFactory(
+            source=source,
+            published_date=news_article_1.published_date - datetime.timedelta(days=7),
+        )
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
         matched_sentence_3 = MatchedSentenceFactory(article=news_article_3)
         matched_sentence_4 = MatchedSentenceFactory(article=news_article_4)
         matched_sentence_5 = MatchedSentenceFactory(article=news_article_5)
-        NewsArticleFactory()
         matched_sentence_1.officers.add(officer)
         matched_sentence_1.save()
         matched_sentence_2.officers.add(officer)
@@ -154,12 +162,6 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         matched_sentence_5.officers.add(officer)
         matched_sentence_5.save()
 
-        NewsArticleClassificationFactory(
-            article_id=news_article_1.id,
-            news_article=news_article_1,
-            score=0.6,
-            relevant="relevant",
-        )
         NewsArticleClassificationFactory(
             article_id=news_article_2.id,
             news_article=news_article_2,
@@ -214,6 +216,14 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 "url": news_article_5.url,
                 "source_name": source.source_display_name,
                 "author": news_article_5.author,
+            },
+            {
+                "id": news_article_6.id,
+                "date": str(news_article_6.published_date),
+                "title": news_article_6.title,
+                "url": news_article_6.url,
+                "source_name": source.source_display_name,
+                "author": news_article_6.author,
             },
         ]
 
