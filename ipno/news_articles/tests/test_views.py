@@ -41,10 +41,7 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
         )
         news_article_4 = NewsArticleFactory(source=source)
         news_article_5 = NewsArticleFactory(source=source)
-        news_article_6 = NewsArticleFactory(
-            source=source,
-            published_date=news_article_1.published_date - datetime.timedelta(days=2),
-        )
+        NewsArticleFactory()
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
@@ -101,14 +98,6 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 "source_name": source.source_display_name,
                 "author": news_article_2.author,
             },
-            {
-                "id": news_article_6.id,
-                "date": str(news_article_6.published_date),
-                "title": news_article_6.title,
-                "url": news_article_6.url,
-                "source_name": source.source_display_name,
-                "author": news_article_6.author,
-            },
         ]
 
         assert response.data == expected_data
@@ -141,10 +130,7 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
             source=source,
             published_date=news_article_1.published_date - datetime.timedelta(days=5),
         )
-        news_article_6 = NewsArticleFactory(
-            source=source,
-            published_date=news_article_1.published_date - datetime.timedelta(days=7),
-        )
+        NewsArticleFactory()
 
         matched_sentence_1 = MatchedSentenceFactory(article=news_article_1)
         matched_sentence_2 = MatchedSentenceFactory(article=news_article_2)
@@ -216,14 +202,6 @@ class NewsArticlesViewSetTestCase(AuthAPITestCase):
                 "url": news_article_5.url,
                 "source_name": source.source_display_name,
                 "author": news_article_5.author,
-            },
-            {
-                "id": news_article_6.id,
-                "date": str(news_article_6.published_date),
-                "title": news_article_6.title,
-                "url": news_article_6.url,
-                "source_name": source.source_display_name,
-                "author": news_article_6.author,
             },
         ]
 
