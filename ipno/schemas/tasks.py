@@ -1,12 +1,10 @@
 from django.conf import settings
 
 import requests
-from celery import shared_task
 
 from data.models import WrglRepo
 from utils.models import APITemplateModel
 from utils.slack_notification import notify_slack
-from utils.task_utils import run_task
 
 SCHEMA_MAPPING = {
     "agency-reference-list": "department",
@@ -62,8 +60,6 @@ def check_fields(schema_name, fixed_fields):
     return commit_hash, missing_fixed_fields, unused_fields
 
 
-@run_task
-@shared_task
 def validate_schemas():
     schemas = get_schemas()[0]
     latest_commit_hashes = {}
@@ -109,3 +105,5 @@ def validate_schemas():
         message += "".join(unused_msgs)
 
     notify_slack(message)
+
+    return not err_msgs
