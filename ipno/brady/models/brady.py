@@ -6,7 +6,7 @@ from utils.models import APITemplateModel, TimeStampsModel
 class Brady(TimeStampsModel, APITemplateModel):
     CUSTOM_FIELDS = {"officer", "source_department", "department"}
 
-    brady_uid = models.CharField(max_length=255)
+    brady_uid = models.CharField(max_length=255, unique=True, db_index=True)
     uid = models.CharField(max_length=255)
     disposition = models.CharField(max_length=255, null=True, blank=True)
     action = models.CharField(max_length=255, null=True, blank=True)
