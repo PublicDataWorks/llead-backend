@@ -128,13 +128,15 @@ class SchemaTasksTestCase(TestCase):
             latest_commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
         )
 
-        validate_schemas()
+        is_validating_success = validate_schemas()
         wrgl_repo.refresh_from_db()
 
         mock_notify_slack.assert_called_with(
             "====================\nResult after schema validation in *`TEST`*"
             " environment,\n\n*Required fields are validated successfully!*\n\n"
         )
+
+        assert is_validating_success
         assert wrgl_repo.latest_commit_hash == "test_sum"
 
     @patch("schemas.tasks.check_fields")
@@ -152,7 +154,7 @@ class SchemaTasksTestCase(TestCase):
             latest_commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
         )
 
-        validate_schemas()
+        is_validating_success = validate_schemas()
         wrgl_repo.refresh_from_db()
 
         mock_notify_slack.assert_called_with(
@@ -161,6 +163,8 @@ class SchemaTasksTestCase(TestCase):
             " successfully!*\n\n\n_*(Warning) Unused fields:*_\n\n>- Unused fields in"
             " table `agency-reference-list`: unused_field\n"
         )
+
+        assert is_validating_success
         assert wrgl_repo.latest_commit_hash == "test_sum"
 
     @patch("schemas.tasks.check_fields")
@@ -180,7 +184,7 @@ class SchemaTasksTestCase(TestCase):
             latest_commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
         )
 
-        validate_schemas()
+        is_validating_success = validate_schemas()
         wrgl_repo.refresh_from_db()
 
         mock_notify_slack.assert_called_with(
@@ -188,6 +192,8 @@ class SchemaTasksTestCase(TestCase):
             " environment,\n\n*ERROR happened*\n\n>- Missing required fields in table"
             " `agency-reference-list`: *required_field*\n"
         )
+
+        assert not is_validating_success
         assert wrgl_repo.latest_commit_hash == "bf56dded0b1c4b57f425acb75d48e68c"
 
     @patch("schemas.tasks.check_fields")
@@ -209,7 +215,7 @@ class SchemaTasksTestCase(TestCase):
             latest_commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
         )
 
-        validate_schemas()
+        is_validating_success = validate_schemas()
         wrgl_repo.refresh_from_db()
 
         mock_notify_slack.assert_called_with(
@@ -219,4 +225,6 @@ class SchemaTasksTestCase(TestCase):
             " fields:*_\n\n>- Unused fields in table `agency-reference-list`:"
             " unused_field\n"
         )
+
+        assert not is_validating_success
         assert wrgl_repo.latest_commit_hash == "bf56dded0b1c4b57f425acb75d48e68c"
