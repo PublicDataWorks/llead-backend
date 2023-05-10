@@ -19,6 +19,7 @@ from data.services import (
     UofImporter,
 )
 from news_articles.services import ProcessRematchOfficers
+from schemas.tasks import validate_schemas
 from utils.count_data import (
     calculate_complaint_fraction,
     calculate_officer_fraction,
@@ -32,6 +33,12 @@ logger = structlog.get_logger("IPNO")
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        is_validating_success = validate_schemas()
+
+        if not is_validating_success:
+            logger.error("Schema validation failed")
+            return
+
         start_time = timezone.now()
 
         agency_imported = AgencyImporter().process()
