@@ -25,8 +25,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch("data.services.person_importer.PersonImporter.process")
     @patch("data.services.appeal_importer.AppealImporter.process")
     @patch("data.services.agency_importer.AgencyImporter.process")
+    @patch("schemas.tasks.validate_schemas", return_value=True)
     def test_call_command(
         self,
+        _,
         agency_process_mock,
         appeal_process_mock,
         person_process_mock,
@@ -88,8 +90,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch("data.services.person_importer.PersonImporter.process")
     @patch("data.services.appeal_importer.AppealImporter.process")
     @patch("data.services.agency_importer.AgencyImporter.process")
+    @patch("schemas.tasks.validate_schemas", return_value=True)
     def test_call_command_with_no_new_data(
         self,
+        _,
         agency_process_mock,
         appeal_process_mock,
         person_process_mock,
@@ -127,6 +131,62 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         citizen_process_mock.assert_called()
         complaint_process_mock.assert_called()
         event_process_mock.assert_called()
+        rebuild_search_index_mock.assert_not_called()
+        count_complaints_mock.assert_not_called()
+        calculate_officer_fraction_mock.assert_not_called()
+        calculate_complaint_fraction_mock.assert_not_called()
+        migrate_officer_movement_mock.assert_not_called()
+        compute_department_data_period_mock.assert_not_called()
+        cache_clear_mock.assert_not_called()
+
+    @patch("django.core.cache.cache.clear")
+    @patch("utils.data_utils.compute_department_data_period")
+    @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
+    @patch("utils.count_data.calculate_complaint_fraction")
+    @patch("utils.count_data.calculate_officer_fraction")
+    @patch("utils.count_data.count_complaints")
+    @patch("utils.search_index.rebuild_search_index")
+    @patch("data.services.event_importer.EventImporter.process")
+    @patch("data.services.complaint_importer.ComplaintImporter.process")
+    @patch("data.services.uof_importer.UofImporter.process")
+    @patch("data.services.citizen_importer.CitizenImporter.process")
+    @patch("data.services.officer_importer.OfficerImporter.process")
+    @patch("data.services.document_importer.DocumentImporter.process")
+    @patch("data.services.person_importer.PersonImporter.process")
+    @patch("data.services.appeal_importer.AppealImporter.process")
+    @patch("data.services.agency_importer.AgencyImporter.process")
+    @patch("data.management.commands.import_data.validate_schemas", return_value=False)
+    def test_call_command_with_fail_validating(
+        self,
+        _,
+        agency_process_mock,
+        appeal_process_mock,
+        person_process_mock,
+        document_process_mock,
+        officer_process_mock,
+        uof_process_mock,
+        citizen_process_mock,
+        complaint_process_mock,
+        event_process_mock,
+        rebuild_search_index_mock,
+        count_complaints_mock,
+        calculate_officer_fraction_mock,
+        calculate_complaint_fraction_mock,
+        migrate_officer_movement_mock,
+        compute_department_data_period_mock,
+        cache_clear_mock,
+    ):
+        call_command("import_data")
+
+        agency_process_mock.assert_not_called()
+        appeal_process_mock.assert_not_called()
+        person_process_mock.assert_not_called()
+        document_process_mock.assert_not_called()
+        officer_process_mock.assert_not_called()
+        uof_process_mock.assert_not_called()
+        citizen_process_mock.assert_not_called()
+        complaint_process_mock.assert_not_called()
+        event_process_mock.assert_not_called()
         rebuild_search_index_mock.assert_not_called()
         count_complaints_mock.assert_not_called()
         calculate_officer_fraction_mock.assert_not_called()
