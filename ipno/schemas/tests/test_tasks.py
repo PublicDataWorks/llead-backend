@@ -13,6 +13,7 @@ from news_articles.models import NewsArticleClassification
 from officers.constants import EVENT_KINDS
 from officers.models import Event, Officer
 from people.models import Person
+from post_officer_history.models import PostOfficerHistory
 from schemas.tasks import check_fields, get_schemas, validate_schemas
 from use_of_forces.models import UseOfForce
 from utils.models import APITemplateModel
@@ -77,6 +78,11 @@ class SchemaTasksTestCase(TestCase):
             - base_fields
             - NewsArticleClassification.CUSTOM_FIELDS
         )
+        post_officer_history_fixed_fields = (
+            {field.name for field in PostOfficerHistory._meta.fields}
+            - base_fields
+            - PostOfficerHistory.CUSTOM_FIELDS
+        )
 
         expected_schemas = {
             "document": document_fixed_fields,
@@ -90,6 +96,7 @@ class SchemaTasksTestCase(TestCase):
             "citizen": citizen_fixed_fields,
             "brady": brady_fixed_fields,
             "newsarticleclassification": article_classification_fixed_fields,
+            "postofficerhistory": post_officer_history_fixed_fields,
         }
 
         result = get_schemas()
