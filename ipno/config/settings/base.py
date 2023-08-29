@@ -94,6 +94,7 @@ LOCAL_APPS = (
     "citizens",
     "brady",
     "findings",
+    "post_officer_history",
 )
 
 AUTH_USER_MODEL = "authentication.User"

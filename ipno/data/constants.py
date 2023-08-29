@@ -12,6 +12,7 @@ NEWS_ARTICLE_OFFICER_MODEL_NAME = "NewsArticleOfficer"
 NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME = "NewsArticleClassification"
 PERSON_MODEL_NAME = "Person"
 BRADY_MODEL_NAME = "Brady"
+POST_OFFICE_HISTORY_MODEL_NAME = "PostOfficeHistory"
 WRGL_REPOS_DEFAULT = [
     {
         "repo_name": "agency-reference-list",
@@ -64,6 +65,10 @@ WRGL_REPOS_DEFAULT = [
     {
         "repo_name": "news_article_classification",
         "data_model": NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    },
+    {
+        "repo_name": "post-officer-history",
+        "data_model": POST_OFFICE_HISTORY_MODEL_NAME,
     },
 ]
 
