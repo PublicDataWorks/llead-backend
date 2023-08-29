@@ -41,7 +41,11 @@ def calculate_complaint_fraction():
     )
 
     for officer in tqdm(all_officers, desc="Update complaint fraction"):
-        fraction = officer.person.all_complaints_count / max_complaint_count
+        fraction = (
+            officer.person.all_complaints_count / max_complaint_count
+            if officer.person
+            else 0
+        )
 
         officer.complaint_fraction = fraction
         officer.save()
