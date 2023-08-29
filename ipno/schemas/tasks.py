@@ -18,6 +18,7 @@ SCHEMA_MAPPING = {
     "citizens": "citizen",
     "brady": "brady",
     "news_article_classification": "newsarticleclassification",
+    "post-officer-history": "postofficerhistory",
 }
 
 

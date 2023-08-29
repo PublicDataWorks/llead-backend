@@ -12,6 +12,7 @@ from .migrate_officer_movement import MigrateOfficerMovement
 from .new_complaint_importer import NewComplaintImporter
 from .officer_importer import OfficerImporter
 from .person_importer import PersonImporter
+from .post_officer_history_importer import PostOfficerHistoryImporter
 from .uof_importer import UofImporter
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "MigrateOfficerMovement",
     "BradyImporter",
     "ArticleClassificationImporter",
+    "PostOfficerHistoryImporter",
 ]
