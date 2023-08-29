@@ -19,6 +19,7 @@ class OfficerInlineAdmin(admin.TabularInline):
 class PersonAdmin(ModelAdmin):
     inlines = [OfficerInlineAdmin]
     list_display = ("person_id", "canonical_officer", "all_complaints_count")
+    search_fields = ("person_id",)
     raw_id_fields = ("canonical_officer",)
 
 

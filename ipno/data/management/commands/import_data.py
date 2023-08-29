@@ -16,6 +16,7 @@ from data.services import (
     MigrateOfficerMovement,
     OfficerImporter,
     PersonImporter,
+    PostOfficerHistoryImporter,
     UofImporter,
 )
 from news_articles.services import ProcessRematchOfficers
@@ -52,6 +53,7 @@ class Command(BaseCommand):
         appeal_imported = AppealImporter().process()
         event_imported = EventImporter().process()
         document_imported = DocumentImporter().process()
+        post_officer_history_imported = PostOfficerHistoryImporter().process()
         person_imported = PersonImporter().process()
 
         ProcessRematchOfficers(start_time).process()
@@ -72,6 +74,7 @@ class Command(BaseCommand):
                 complaint_imported,
                 event_imported,
                 person_imported,
+                post_officer_history_imported,
             ]
         ):
             logger.info("Counting complaints")
