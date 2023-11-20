@@ -75,7 +75,7 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
         published_date = response.meta.get("published_date")
 
         content_paragraphs = response.css(
-            'div[itemprop="articleBody"] p *::text'
+            'div[itemprop="articleBody"] p'
         ).getall()
 
         paragraphs = self.parse_paragraphs(content_paragraphs)
