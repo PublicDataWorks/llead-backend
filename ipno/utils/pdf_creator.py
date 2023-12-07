@@ -1,8 +1,8 @@
 from io import BytesIO
 
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
-from reportlab.lib.pagesizes import letter
 
 from utils.constants import (
     BASE_MARGIN,
