@@ -71,7 +71,11 @@ class ArticlePdfCreator:
             header_style = self.get_style("Heading1")
             meta_style = self.get_style("BodyText", {"fontSize": 11})
 
-            date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
+            try:
+                date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
+            except AttributeError:
+                date_metadata = f"Date: {self.date}"
+
             link_metadata = f'Source URL: <link href="{self.link}">{self.link}</link>'
 
             raw_flows = [
