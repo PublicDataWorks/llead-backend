@@ -9,6 +9,8 @@ COPY policy.xml /etc/ImageMagick-6/policy.xml
 WORKDIR /code
 ADD requirements /code/requirements
 
+RUN pip install -U pip setuptools
+
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements/dev.txt
 
 RUN python -m spacy download en_core_web_sm
