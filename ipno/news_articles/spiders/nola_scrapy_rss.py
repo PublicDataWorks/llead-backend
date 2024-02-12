@@ -74,9 +74,8 @@ class NolaScrapyRssSpider(ScrapyRssSpider):
         author = response.meta.get("author")
         published_date = response.meta.get("published_date")
 
-        content_paragraphs = response.css(
-            'div[itemprop="articleBody"]>:not(meta):not(div)'
-        ).getall()
+        content_paragraphs = response.css('div[itemprop="articleBody"] p').getall()
+
         paragraphs = self.parse_paragraphs(content_paragraphs)
 
         save_crawled_post = True
