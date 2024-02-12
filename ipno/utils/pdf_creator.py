@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
@@ -52,39 +53,53 @@ class ArticlePdfCreator:
     def build_pdf(self):
         pdf_buffer = BytesIO()
 
-        pdf_builder = SimpleDocTemplate(
-            pdf_buffer,
-            pagesize=PAGE_SIZE,
-            topMargin=BASE_MARGIN,
-            leftMargin=BASE_MARGIN,
-            rightMargin=BASE_MARGIN,
-            bottomMargin=BASE_MARGIN * 2,
-        )
+        try:
+            pagesize = PAGE_SIZE
+        except NameError:
+            pagesize = letter
 
-        header_style = self.get_style("Heading1")
-        meta_style = self.get_style("BodyText", {"fontSize": 11})
+        try:
+            pdf_builder = SimpleDocTemplate(
+                pdf_buffer,
+                pagesize=pagesize,
+                topMargin=BASE_MARGIN,
+                leftMargin=BASE_MARGIN,
+                rightMargin=BASE_MARGIN,
+                bottomMargin=BASE_MARGIN * 2,
+            )
 
-        date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
-        link_metadata = f'Source URL: <link href="{self.link}">{self.link}</link>'
+            header_style = self.get_style("Heading1")
+            meta_style = self.get_style("BodyText", {"fontSize": 11})
 
-        raw_flows = [
-            Paragraph(self.title, header_style),
-            Paragraph(self.author, meta_style) if self.author else None,
-            Paragraph(date_metadata, meta_style),
-            Paragraph(link_metadata, meta_style),
-            Spacer(SPACER["x"], SPACER["y"]),
-            *self.build_body(),
-        ]
+            try:
+                date_metadata = f'Date: {self.date.strftime("%m/%d/%Y")}'
+            except AttributeError:
+                date_metadata = f"Date: {self.date}"
 
-        flows = [item for item in raw_flows if item is not None]
+            link_metadata = f'Source URL: <link href="{self.link}">{self.link}</link>'
 
-        pdf_builder.multiBuild(
-            flows,
-            onFirstPage=self.add_page_number,
-            onLaterPages=self.add_page_number,
-        )
+            raw_flows = [
+                Paragraph(self.title, header_style),
+                Paragraph(self.author, meta_style) if self.author else None,
+                Paragraph(date_metadata, meta_style),
+                Paragraph(link_metadata, meta_style),
+                Spacer(SPACER["x"], SPACER["y"]),
+                *self.build_body(),
+            ]
 
-        pdf_value = pdf_buffer.getvalue()
-        pdf_buffer.close()
+            flows = [item for item in raw_flows if item is not None]
+
+            pdf_builder.multiBuild(
+                flows,
+                onFirstPage=self.add_page_number,
+                onLaterPages=self.add_page_number,
+            )
+
+            pdf_value = pdf_buffer.getvalue()
+            pdf_buffer.close()
+
+        except Exception as e:
+            print(f"Error creating PDF: {e}")
+            return None
 
         return pdf_value
