@@ -62,21 +62,15 @@ class Command(BaseCommand):
             [
                 agency_imported,
                 officer_imported,
-            ]
-        ):
-            logger.info("Calculate officer fraction")
-            calculate_officer_fraction()
-
-        if any(
-            [
-                agency_imported,
-                officer_imported,
                 complaint_imported,
                 event_imported,
                 person_imported,
                 post_officer_history_imported,
             ]
         ):
+            logger.info("Calculate officer fraction")
+            calculate_officer_fraction()
+
             logger.info("Counting complaints")
             count_complaints()
 
