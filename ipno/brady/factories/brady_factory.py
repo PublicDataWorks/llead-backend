@@ -20,3 +20,4 @@ class BradyFactory(factory.django.DjangoModelFactory):
     tracking_id_og = factory.LazyFunction(
         lambda: f"{random.randint(1000, 9999)}-{random.randint(100, 999)}"
     )
+    charging_agency = factory.LazyFunction(lambda: fake.word())
