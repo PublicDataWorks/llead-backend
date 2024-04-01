@@ -1,10 +1,12 @@
 import pandas as pd
 
+from appeals.models.appeal import Appeal
 from brady.models import Brady
 from citizens.models.citizen import Citizen
 from complaints.models.complaint import Complaint
 from data.constants import (
     AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
     BRADY_MODEL_NAME,
     CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
@@ -39,6 +41,8 @@ class DataReconciliation:
             return UseOfForce
         if model_name == CITIZEN_MODEL_NAME:
             return Citizen
+        if model_name == APPEAL_MODEL_NAME:
+            return Appeal
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -56,6 +60,8 @@ class DataReconciliation:
             return "uof_uid"
         if self.model_name == CITIZEN_MODEL_NAME:
             return "citizen_uid"
+        if self.model_name == APPEAL_MODEL_NAME:
+            return "appeal_uid"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
