@@ -8,8 +8,10 @@ from data.constants import (
     COMPLAINT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
 )
 from departments.models.department import Department
+from use_of_forces.models.use_of_force import UseOfForce
 from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.models.officer import Officer
 
@@ -31,6 +33,8 @@ class DataReconciliation:
             return NewsArticleClassification
         if model_name == COMPLAINT_MODEL_NAME:
             return Complaint
+        if model_name == USE_OF_FORCE_MODEL_NAME:
+            return UseOfForce
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -44,6 +48,8 @@ class DataReconciliation:
             return "article_id"
         if self.model_name == COMPLAINT_MODEL_NAME:
             return "allegation_uid"
+        if self.model_name == USE_OF_FORCE_MODEL_NAME:
+            return "uof_uid"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )

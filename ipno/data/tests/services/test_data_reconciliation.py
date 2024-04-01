@@ -13,6 +13,7 @@ from data.constants import (
     COMPLAINT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
 )
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
@@ -23,6 +24,8 @@ from news_articles.factories.news_article_classification_factory import (
 from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.factories.officer_factory import OfficerFactory
 from officers.models.officer import Officer
+from use_of_forces.factories.use_of_force_factory import UseOfForceFactory
+from use_of_forces.models.use_of_force import UseOfForce
 
 
 class DataReconciliationTestCaseBase(ABC):
@@ -192,3 +195,24 @@ class AllegationDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
 
     def create_db_instance(self, id):
         return self.Factory.create(allegation_uid=id)
+
+
+class UseOfForceDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = (
+            "./ipno/data/tests/services/test_data/data_use_of_force.csv"
+        )
+        self.fields = [
+            field.name
+            for field in UseOfForce._meta.fields
+            if field.name not in UseOfForce.BASE_FIELDS
+            and field.name not in UseOfForce.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            USE_OF_FORCE_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = UseOfForceFactory
+        self.index_column_name = "uof_uid"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(uof_uid=id)
