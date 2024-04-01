@@ -5,9 +5,12 @@ from django.test import TestCase
 
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
+from complaints.factories.complaint_factory import ComplaintFactory
+from complaints.models.complaint import Complaint
 from data.constants import (
     AGENCY_MODEL_NAME,
     BRADY_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
 )
@@ -44,14 +47,16 @@ class DataReconciliationTestCaseBase(ABC):
 
             reader_list = list(reader)
             headers = reader_list[0]
-            content = reader_list[1:]  # Skip the header row
+            # FIXME: Ideally, we don't need to store this
+            self.content = reader_list[1:]  # Skip the header row
 
-        inclued_idx = [i for i, j in enumerate(headers) if j in self.fields]
+        included_idx = [i for i, j in enumerate(headers) if j in self.fields]
 
         self.csv_data = []
+        self.index_column = headers.index(self.index_column_name) or 0
 
-        for c in content:
-            self.csv_data.append([str(c[i]) for i in inclued_idx])
+        for c in self.content:
+            self.csv_data.append([str(c[i]) for i in included_idx])
 
     def test_detect_added_rows_sucessfully(self):
         output = self.data_reconciliation.reconcile_data()
@@ -77,7 +82,7 @@ class DataReconciliationTestCaseBase(ABC):
         }
 
     def test_detect_updated_rows_successfully(self):
-        self.create_db_instance(self.csv_data[0][0])
+        self.create_db_instance(self.content[0][self.index_column])
 
         output = self.data_reconciliation.reconcile_data()
 
@@ -101,6 +106,7 @@ class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
             BRADY_MODEL_NAME, self.csv_file_path
         )
         self.Factory = BradyFactory
+        self.index_column_name = "brady_uid"
 
     def create_db_instance(self, id):
         return self.Factory.create(
@@ -121,6 +127,7 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
             AGENCY_MODEL_NAME, self.csv_file_path
         )
         self.Factory = DepartmentFactory
+        self.index_column_name = "agency_slug"
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
@@ -139,6 +146,7 @@ class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
             OFFICER_MODEL_NAME, self.csv_file_path
         )
         self.Factory = OfficerFactory
+        self.index_column_name = "uid"
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
@@ -161,6 +169,26 @@ class ArticleClassificationDataReconciliationTestCase(
             NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME, self.csv_file_path
         )
         self.Factory = NewsArticleClassificationFactory
+        self.index_column_name = "article_id"
 
     def create_db_instance(self, id):
         return self.Factory.create(article_id=id)
+
+
+class AllegationDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_allegation.csv"
+        self.fields = [
+            field.name
+            for field in Complaint._meta.fields
+            if field.name not in Complaint.BASE_FIELDS
+            and field.name not in Complaint.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            COMPLAINT_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = ComplaintFactory
+        self.index_column_name = "allegation_uid"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(allegation_uid=id)
