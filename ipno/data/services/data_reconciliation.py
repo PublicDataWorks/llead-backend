@@ -2,6 +2,7 @@ import pandas as pd
 
 from brady.models import Brady
 from departments.models.department import Department
+from officers.models.officer import Officer
 
 
 class DataReconciliation:
@@ -15,6 +16,8 @@ class DataReconciliation:
             return Brady
         if model_name == "department":
             return Department
+        if model_name == "officer":
+            return Officer
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -22,6 +25,8 @@ class DataReconciliation:
             return "brady_uid"
         if self.model_name == "department":
             return "agency_slug"
+        if self.model_name == "officer":
+            return "uid"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
@@ -41,7 +46,7 @@ class DataReconciliation:
         columns = self._get_columns()
         idx_column = self._get_index_colum()
 
-        df_csv = pd.read_csv(self.csv_file_path, usecols=columns).fillna("")
+        df_csv = pd.read_csv(self.csv_file_path, usecols=columns).fillna("").astype(str)
 
         queryset = self._get_queryset()
         df_db = pd.DataFrame(list(queryset), columns=columns).fillna("")
