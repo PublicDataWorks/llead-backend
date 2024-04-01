@@ -20,6 +20,7 @@ from data.constants import (
     EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
     POST_OFFICE_HISTORY_MODEL_NAME,
     USE_OF_FORCE_MODEL_NAME,
 )
@@ -34,6 +35,8 @@ from officers.factories.event_factory import EventFactory
 from officers.factories.officer_factory import OfficerFactory
 from officers.models.event import Event
 from officers.models.officer import Officer
+from people.factories.person_factory import PersonFactory
+from people.models.person import Person
 from post_officer_history.factories.post_officer_history_factory import (
     PostOfficerHistoryFactory,
 )
@@ -310,3 +313,22 @@ class PostOfficerHistoryDataReconciliationTestCase(
 
     def create_db_instance(self, id):
         return self.Factory.create(history_id=id)
+
+
+class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_person.csv"
+        self.fields = [
+            field.name
+            for field in Person._meta.fields
+            if field.name not in Person.BASE_FIELDS
+            and field.name not in Person.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            PERSON_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = PersonFactory
+        self.index_column_name = "person_id"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(person_id=id)
