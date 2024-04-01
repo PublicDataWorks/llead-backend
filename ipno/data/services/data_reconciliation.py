@@ -1,13 +1,15 @@
 import pandas as pd
 
 from brady.models import Brady
-from departments.models.department import Department
-from ipno.data.constants import (
+from complaints.models.complaint import Complaint
+from data.constants import (
     AGENCY_MODEL_NAME,
     BRADY_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
 )
+from departments.models.department import Department
 from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.models.officer import Officer
 
@@ -27,6 +29,8 @@ class DataReconciliation:
             return Officer
         if model_name == NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME:
             return NewsArticleClassification
+        if model_name == COMPLAINT_MODEL_NAME:
+            return Complaint
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -38,6 +42,8 @@ class DataReconciliation:
             return "uid"
         if self.model_name == NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME:
             return "article_id"
+        if self.model_name == COMPLAINT_MODEL_NAME:
+            return "allegation_uid"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
