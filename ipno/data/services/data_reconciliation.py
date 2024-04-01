@@ -13,12 +13,14 @@ from data.constants import (
     EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
     USE_OF_FORCE_MODEL_NAME,
 )
 from departments.models.department import Department
 from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.models.event import Event
 from officers.models.officer import Officer
+from post_officer_history.models.post_officer_history import PostOfficerHistory
 from use_of_forces.models.use_of_force import UseOfForce
 
 
@@ -47,6 +49,8 @@ class DataReconciliation:
             return Appeal
         if model_name == EVENT_MODEL_NAME:
             return Event
+        if model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            return PostOfficerHistory
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -68,6 +72,8 @@ class DataReconciliation:
             return "appeal_uid"
         if self.model_name == EVENT_MODEL_NAME:
             return "event_uid"
+        if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            return "history_id"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
@@ -118,9 +124,11 @@ class DataReconciliation:
         diff_masks = []
 
         # Iterate over the columns and create boolean masks for each comparison
-        for i in range(1, len(columns)):
-            col_x = columns[i] + "_x"
-            col_y = columns[i] + "_y"
+        for col in columns:
+            if col == idx_column:
+                continue
+            col_x = col + "_x"
+            col_y = col + "_y"
             diff_mask = (df_all[col_x] != df_all[col_y]) & merge_mask
             diff_masks.append(diff_mask)
 
