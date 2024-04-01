@@ -17,17 +17,15 @@ from data.constants import (
     BRADY_MODEL_NAME,
     CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
-    DOCUMENT_MODEL_NAME,
     EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
     USE_OF_FORCE_MODEL_NAME,
 )
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
-from documents.factories.document_factory import DocumentFactory
-from documents.models.document import Document
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
@@ -36,6 +34,10 @@ from officers.factories.event_factory import EventFactory
 from officers.factories.officer_factory import OfficerFactory
 from officers.models.event import Event
 from officers.models.officer import Officer
+from post_officer_history.factories.post_officer_history_factory import (
+    PostOfficerHistoryFactory,
+)
+from post_officer_history.models.post_officer_history import PostOfficerHistory
 from use_of_forces.factories.use_of_force_factory import UseOfForceFactory
 from use_of_forces.models.use_of_force import UseOfForce
 
@@ -285,3 +287,26 @@ class EventDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
 
     def create_db_instance(self, id):
         return self.Factory.create(event_uid=id)
+
+
+class PostOfficerHistoryDataReconciliationTestCase(
+    DataReconciliationTestCaseBase, TestCase
+):
+    def prepare_data(self):
+        self.csv_file_path = (
+            "./ipno/data/tests/services/test_data/data_post_officer_history.csv"
+        )
+        self.fields = [
+            field.name
+            for field in PostOfficerHistory._meta.fields
+            if field.name not in PostOfficerHistory.BASE_FIELDS
+            and field.name not in PostOfficerHistory.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            POST_OFFICE_HISTORY_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = PostOfficerHistoryFactory
+        self.index_column_name = "history_id"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(history_id=id)
