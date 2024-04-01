@@ -1,6 +1,7 @@
 import pandas as pd
 
 from brady.models import Brady
+from departments.models.department import Department
 
 
 class DataReconciliation:
@@ -12,13 +13,17 @@ class DataReconciliation:
     def _get_model_class(self, model_name):
         if model_name == "brady":
             return Brady
-        raise ValueError(f"Data reconcilliation does not support model: {model_name}")
+        if model_name == "department":
+            return Department
+        raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
         if self.model_name == "brady":
             return "brady_uid"
+        if self.model_name == "department":
+            return "agency_slug"
         raise ValueError(
-            f"Data reconcilliation does not support model: {self.model_name}"
+            f"Data reconciliation does not support model: {self.model_name}"
         )
 
     def _get_columns(self):

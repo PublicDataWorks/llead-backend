@@ -5,6 +5,8 @@ from django.test import TestCase
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
 from data.services.data_reconciliation import DataReconciliation
+from departments.factories.department_factory import DepartmentFactory
+from departments.models.department import Department
 
 
 class DataReconciliationTestCaseBase(ABC):
@@ -119,3 +121,41 @@ class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
         return self.Factory.create(
             brady_uid=id,
         )
+
+
+class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def setUp(self):
+        self.csv_data = [
+            [
+                "29th-judicial-district-court-da",
+                "29th Judicial District Court District Attorney's Office",
+                "30.9842977, -91.9623327",
+            ],
+            ["2nd-da", "2nd District Attorney's Office", "30.9842977, -91.9623327"],
+            [
+                "east-baton-rouge-da",
+                "East Baton Rouge District Attorney's Office",
+                "30.4459984, -91.1879553",
+            ],
+            [
+                "webster-coroners-office",
+                "Webster Coroners Office",
+                "32.6138621, -93.2889402",
+            ],
+        ]
+
+        self.fields = [
+            field.name
+            for field in Department._meta.fields
+            if field.name not in Department.BASE_FIELDS
+            and field.name not in Department.CUSTOM_FIELDS
+        ]
+
+        self.data_reconciliation = DataReconciliation(
+            "department", "./ipno/data/tests/services/test_data/data_agency.csv"
+        )
+
+        self.Factory = DepartmentFactory
+
+    def create_db_instance(self, id):
+        return self.Factory.create(agency_slug=id)
