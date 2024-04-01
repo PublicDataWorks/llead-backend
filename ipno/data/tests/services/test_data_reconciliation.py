@@ -17,6 +17,8 @@ from data.constants import (
     BRADY_MODEL_NAME,
     CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
     USE_OF_FORCE_MODEL_NAME,
@@ -24,11 +26,15 @@ from data.constants import (
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
+from documents.factories.document_factory import DocumentFactory
+from documents.models.document import Document
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
 from news_articles.models.news_article_classification import NewsArticleClassification
+from officers.factories.event_factory import EventFactory
 from officers.factories.officer_factory import OfficerFactory
+from officers.models.event import Event
 from officers.models.officer import Officer
 from use_of_forces.factories.use_of_force_factory import UseOfForceFactory
 from use_of_forces.models.use_of_force import UseOfForce
@@ -260,3 +266,22 @@ class AppealDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
 
     def create_db_instance(self, id):
         return self.Factory.create(appeal_uid=id)
+
+
+class EventDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_event.csv"
+        self.fields = [
+            field.name
+            for field in Event._meta.fields
+            if field.name not in Event.BASE_FIELDS
+            and field.name not in Event.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            EVENT_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = EventFactory
+        self.index_column_name = "event_uid"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(event_uid=id)
