@@ -5,11 +5,14 @@ from django.test import TestCase
 
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
+from citizens.factory.citizen_factory import CitizenFactory
+from citizens.models.citizen import Citizen
 from complaints.factories.complaint_factory import ComplaintFactory
 from complaints.models.complaint import Complaint
 from data.constants import (
     AGENCY_MODEL_NAME,
     BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
@@ -216,3 +219,22 @@ class UseOfForceDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
 
     def create_db_instance(self, id):
         return self.Factory.create(uof_uid=id)
+
+
+class CitizenDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_citizen.csv"
+        self.fields = [
+            field.name
+            for field in Citizen._meta.fields
+            if field.name not in Citizen.BASE_FIELDS
+            and field.name not in Citizen.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            CITIZEN_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = CitizenFactory
+        self.index_column_name = "citizen_uid"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(citizen_uid=id)
