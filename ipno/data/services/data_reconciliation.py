@@ -13,6 +13,7 @@ from data.constants import (
     EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
     POST_OFFICE_HISTORY_MODEL_NAME,
     USE_OF_FORCE_MODEL_NAME,
 )
@@ -20,6 +21,7 @@ from departments.models.department import Department
 from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.models.event import Event
 from officers.models.officer import Officer
+from people.models.person import Person
 from post_officer_history.models.post_officer_history import PostOfficerHistory
 from use_of_forces.models.use_of_force import UseOfForce
 
@@ -51,6 +53,8 @@ class DataReconciliation:
             return Event
         if model_name == POST_OFFICE_HISTORY_MODEL_NAME:
             return PostOfficerHistory
+        if model_name == PERSON_MODEL_NAME:
+            return Person
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
@@ -74,6 +78,8 @@ class DataReconciliation:
             return "event_uid"
         if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
             return "history_id"
+        if self.model_name == PERSON_MODEL_NAME:
+            return "person_id"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
