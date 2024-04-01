@@ -2,31 +2,43 @@ import pandas as pd
 
 from brady.models import Brady
 
-DB_COLUMNS_MAP = {
-    "brady_brady": {
-        "columns": [
+
+class DataReconciliation:
+    def __init__(self, model_name, csv_file_path):
+        self.model_name = model_name
+        self.model_class = self._get_model_class(model_name)
+        self.csv_file_path = csv_file_path
+
+    def _get_model_class(self, model_name):
+        if model_name == "brady":
+            return Brady
+        raise ValueError(f"Data reconcilliation does not support model: {model_name}")
+
+    def _get_index_colum(self):
+        if self.model_name == "brady":
+            return "brady_uid"
+        raise ValueError(
+            f"Data reconcilliation does not support model: {self.model_name}"
+        )
+
+    def _get_columns(self):
+        return [
             field.name
-            for field in Brady._meta.fields
-            if field.name not in Brady.BASE_FIELDS
-            and field.name not in Brady.CUSTOM_FIELDS
-        ],
-        "idx_column": "brady_uid",
-    },
-}
+            for field in self.model_class._meta.fields
+            if field.name not in self.model_class.BASE_FIELDS
+            and field.name not in self.model_class.CUSTOM_FIELDS
+        ]
 
+    def _get_queryset(self):
+        return self.model_class.objects.all().values()
 
-class DataReconcilliation:
-    def reconcile_data(self, table_name, csv_file_name):
-        columns = DB_COLUMNS_MAP[table_name]["columns"]
-        idx_column = DB_COLUMNS_MAP[table_name]["idx_column"]
+    def reconcile_data(self):
+        columns = self._get_columns()
+        idx_column = self._get_index_colum()
 
-        # TODO: Remove hard-coded values
-        df_csv = pd.read_csv(
-            f"./ipno/data/tests/services/test_data/{csv_file_name}", usecols=columns
-        ).fillna("")
+        df_csv = pd.read_csv(self.csv_file_path, usecols=columns).fillna("")
 
-        # TODO: Remove hard-coded values
-        queryset = Brady.objects.all().values()
+        queryset = self._get_queryset()
         df_db = pd.DataFrame(list(queryset), columns=columns).fillna("")
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_column)
