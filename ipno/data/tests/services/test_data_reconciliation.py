@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 
 from django.test import TestCase
 
+from appeals.factories.appeal_factory import AppealFactory
+from appeals.models.appeal import Appeal
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
 from citizens.factory.citizen_factory import CitizenFactory
@@ -11,6 +13,7 @@ from complaints.factories.complaint_factory import ComplaintFactory
 from complaints.models.complaint import Complaint
 from data.constants import (
     AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
     BRADY_MODEL_NAME,
     CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
@@ -238,3 +241,22 @@ class CitizenDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
 
     def create_db_instance(self, id):
         return self.Factory.create(citizen_uid=id)
+
+
+class AppealDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_appeal.csv"
+        self.fields = [
+            field.name
+            for field in Appeal._meta.fields
+            if field.name not in Appeal.BASE_FIELDS
+            and field.name not in Appeal.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            APPEAL_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = AppealFactory
+        self.index_column_name = "appeal_uid"
+
+    def create_db_instance(self, id):
+        return self.Factory.create(appeal_uid=id)
