@@ -1,15 +1,57 @@
+from abc import ABC, abstractmethod
+
 from django.test import TestCase
 
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
-from data.services.data_reconciliation import DataReconcilliation
-from departments.factories.department_factory import DepartmentFactory
-from officers.factories.officer_factory import OfficerFactory
+from data.services.data_reconciliation import DataReconciliation
 
 
-class DataReconcilliationTestCase(TestCase):
+class DataReconciliationTestCaseBase(ABC):
+    @abstractmethod
     def setUp(self):
-        self.data_reconciliation = DataReconcilliation()
+        pass
+
+    @abstractmethod
+    def create_db_instance(self, id):
+        pass
+
+    def test_detect_added_rows_sucessfully(self):
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data,
+            "deleted_rows": [],
+            "updated_rows": [],
+        }
+
+    def test_detect_deleted_rows_sucessfully(self):
+        existed_instance = self.Factory()
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data,
+            "deleted_rows": [
+                [getattr(existed_instance, field) for field in self.fields]
+            ],
+            "updated_rows": [],
+        }
+
+    def test_detect_updated_rows_successfully(self):
+        self.create_db_instance(self.csv_data[0][0])
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [self.csv_data[0]],
+        }
+
+
+class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def setUp(self):
         self.csv_data = [
             [
                 "0673e24f8b24bd667957bf5e1026ee75",
@@ -67,50 +109,13 @@ class DataReconcilliationTestCase(TestCase):
             and field.name not in Brady.CUSTOM_FIELDS
         ]
 
-    def test_detect_added_rows_sucessfully(self):
-        output = self.data_reconciliation.reconcile_data(
-            "brady_brady",
-            "data_brady.csv",
+        self.data_reconciliation = DataReconciliation(
+            "brady", "./ipno/data/tests/services/test_data/data_brady.csv"
         )
 
-        assert output == {
-            "added_rows": self.csv_data,
-            "deleted_rows": [],
-            "updated_rows": [],
-        }
+        self.Factory = BradyFactory
 
-    def test_detect_deleted_rows_sucessfully(self):
-        current_brady = BradyFactory(
-            department=DepartmentFactory(), officer=OfficerFactory()
+    def create_db_instance(self, id):
+        return self.Factory.create(
+            brady_uid=id,
         )
-
-        output = self.data_reconciliation.reconcile_data(
-            "brady_brady",
-            "data_brady.csv",
-        )
-
-        assert output == {
-            "added_rows": self.csv_data,
-            "deleted_rows": [
-                [getattr(current_brady, field) for field in self.fields]
-            ],
-            "updated_rows": [],
-        }
-
-    def test_detect_updated_rows_successfully(self):
-        BradyFactory.create(
-            brady_uid=self.csv_data[0][0],
-            department=DepartmentFactory(),
-            officer=OfficerFactory(),
-        )
-
-        output = self.data_reconciliation.reconcile_data(
-            "brady_brady",
-            "data_brady.csv",
-        )
-
-        assert output == {
-            "added_rows": self.csv_data[1:],
-            "deleted_rows": [],
-            "updated_rows": [self.csv_data[0]],
-        }
