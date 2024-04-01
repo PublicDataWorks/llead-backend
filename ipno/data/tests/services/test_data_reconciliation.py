@@ -7,6 +7,8 @@ from brady.models.brady import Brady
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
+from officers.factories.officer_factory import OfficerFactory
+from officers.models.officer import Officer
 
 
 class DataReconciliationTestCaseBase(ABC):
@@ -29,13 +31,14 @@ class DataReconciliationTestCaseBase(ABC):
 
     def test_detect_deleted_rows_sucessfully(self):
         existed_instance = self.Factory()
+        existed_instance.refresh_from_db()
 
         output = self.data_reconciliation.reconcile_data()
 
         assert output == {
             "added_rows": self.csv_data,
             "deleted_rows": [
-                [getattr(existed_instance, field) for field in self.fields]
+                [getattr(existed_instance, field) or "" for field in self.fields]
             ],
             "updated_rows": [],
         }
@@ -159,3 +162,85 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
+
+
+class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
+    def setUp(self):
+        self.csv_data = [
+            [
+                "0001fecd10206530e6dc7891eb1848f1",
+                "Matey",
+                "L",
+                "Melissa",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "new-orleans-harbor-pd",
+            ],
+            [
+                "0004c9b5caefdae69b2908a773c15425",
+                "Bell",
+                "",
+                "Damon",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "tulane-university-pd",
+            ],
+            [
+                "00060e9b48e51424bc0d2e06da389186",
+                "Allen",
+                "A",
+                "Kirk",
+                "1959.0",
+                "",
+                "",
+                "Black",
+                "Male",
+                "new-orleans-pd",
+            ],
+            [
+                "000d203f126752c445440a3b1e8c280c",
+                "Gongre ",
+                "L",
+                "Rick",
+                "1953.0",
+                "",
+                "",
+                "",
+                "",
+                "plaquemines-so",
+            ],
+            [
+                "000dbb5607763c33ef12c61a33e3c7a3",
+                "Perriott",
+                "",
+                "Jonas",
+                "1980.0",
+                "1.0",
+                "31.0",
+                "",
+                "",
+                "new-orleans-pd",
+            ],
+        ]
+
+        self.fields = [
+            field.name
+            for field in Officer._meta.fields
+            if field.name not in Officer.BASE_FIELDS
+            and field.name not in Officer.CUSTOM_FIELDS
+        ]
+
+        self.data_reconciliation = DataReconciliation(
+            "officer", "./ipno/data/tests/services/test_data/data_personnel.csv"
+        )
+
+        self.Factory = OfficerFactory
+
+    def create_db_instance(self, id):
+        return self.Factory.create(uid=id)
