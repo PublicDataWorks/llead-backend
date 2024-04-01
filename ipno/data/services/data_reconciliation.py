@@ -2,6 +2,13 @@ import pandas as pd
 
 from brady.models import Brady
 from departments.models.department import Department
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+)
+from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.models.officer import Officer
 
 
@@ -12,21 +19,25 @@ class DataReconciliation:
         self.csv_file_path = csv_file_path
 
     def _get_model_class(self, model_name):
-        if model_name == "brady":
+        if model_name == BRADY_MODEL_NAME:
             return Brady
-        if model_name == "department":
+        if model_name == AGENCY_MODEL_NAME:
             return Department
-        if model_name == "officer":
+        if model_name == OFFICER_MODEL_NAME:
             return Officer
+        if model_name == NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME:
+            return NewsArticleClassification
         raise ValueError(f"Data reconciliation does not support model: {model_name}")
 
     def _get_index_colum(self):
-        if self.model_name == "brady":
+        if self.model_name == BRADY_MODEL_NAME:
             return "brady_uid"
-        if self.model_name == "department":
+        if self.model_name == AGENCY_MODEL_NAME:
             return "agency_slug"
-        if self.model_name == "officer":
+        if self.model_name == OFFICER_MODEL_NAME:
             return "uid"
+        if self.model_name == NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME:
+            return "article_id"
         raise ValueError(
             f"Data reconciliation does not support model: {self.model_name}"
         )
@@ -46,10 +57,12 @@ class DataReconciliation:
         columns = self._get_columns()
         idx_column = self._get_index_colum()
 
-        df_csv = pd.read_csv(self.csv_file_path, usecols=columns).fillna("").astype(str)
+        df_csv = pd.read_csv(
+            self.csv_file_path, usecols=columns, dtype="string", keep_default_na=False
+        ).fillna("")
 
         queryset = self._get_queryset()
-        df_db = pd.DataFrame(list(queryset), columns=columns).fillna("")
+        df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna("")
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_column)
         df_all.iloc[:, :-1].fillna("", inplace=True)

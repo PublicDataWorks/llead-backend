@@ -5,9 +5,19 @@ from django.test import TestCase
 
 from brady.factories.brady_factory import BradyFactory
 from brady.models.brady import Brady
+from data.constants import (
+    AGENCY_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+)
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
+from news_articles.factories.news_article_classification_factory import (
+    NewsArticleClassificationFactory,
+)
+from news_articles.models.news_article_classification import NewsArticleClassification
 from officers.factories.officer_factory import OfficerFactory
 from officers.models.officer import Officer
 
@@ -41,7 +51,7 @@ class DataReconciliationTestCaseBase(ABC):
         self.csv_data = []
 
         for c in content:
-            self.csv_data.append([c[i] for i in inclued_idx])
+            self.csv_data.append([str(c[i]) for i in inclued_idx])
 
     def test_detect_added_rows_sucessfully(self):
         output = self.data_reconciliation.reconcile_data()
@@ -61,7 +71,7 @@ class DataReconciliationTestCaseBase(ABC):
         assert output == {
             "added_rows": self.csv_data,
             "deleted_rows": [
-                [getattr(existed_instance, field) or "" for field in self.fields]
+                [str(getattr(existed_instance, field) or "") for field in self.fields]
             ],
             "updated_rows": [],
         }
@@ -87,7 +97,9 @@ class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
             if field.name not in Brady.BASE_FIELDS
             and field.name not in Brady.CUSTOM_FIELDS
         ]
-        self.data_reconciliation = DataReconciliation("brady", self.csv_file_path)
+        self.data_reconciliation = DataReconciliation(
+            BRADY_MODEL_NAME, self.csv_file_path
+        )
         self.Factory = BradyFactory
 
     def create_db_instance(self, id):
@@ -105,7 +117,9 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
             if field.name not in Department.BASE_FIELDS
             and field.name not in Department.CUSTOM_FIELDS
         ]
-        self.data_reconciliation = DataReconciliation("department", self.csv_file_path)
+        self.data_reconciliation = DataReconciliation(
+            AGENCY_MODEL_NAME, self.csv_file_path
+        )
         self.Factory = DepartmentFactory
 
     def create_db_instance(self, id):
@@ -121,8 +135,32 @@ class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
             if field.name not in Officer.BASE_FIELDS
             and field.name not in Officer.CUSTOM_FIELDS
         ]
-        self.data_reconciliation = DataReconciliation("officer", self.csv_file_path)
+        self.data_reconciliation = DataReconciliation(
+            OFFICER_MODEL_NAME, self.csv_file_path
+        )
         self.Factory = OfficerFactory
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
+
+
+class ArticleClassificationDataReconciliationTestCase(
+    DataReconciliationTestCaseBase, TestCase
+):
+    def prepare_data(self):
+        self.csv_file_path = (
+            "./ipno/data/tests/services/test_data/data_news_article_classification.csv"
+        )
+        self.fields = [
+            field.name
+            for field in NewsArticleClassification._meta.fields
+            if field.name not in NewsArticleClassification.BASE_FIELDS
+            and field.name not in NewsArticleClassification.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = NewsArticleClassificationFactory
+
+    def create_db_instance(self, id):
+        return self.Factory.create(article_id=id)
