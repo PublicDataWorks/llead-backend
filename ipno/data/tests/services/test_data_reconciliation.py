@@ -17,6 +17,7 @@ from data.constants import (
     BRADY_MODEL_NAME,
     CITIZEN_MODEL_NAME,
     COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
     EVENT_MODEL_NAME,
     NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
@@ -27,6 +28,8 @@ from data.constants import (
 from data.services.data_reconciliation import DataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
+from documents.factories.document_factory import DocumentFactory
+from documents.models.document import Document
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
@@ -332,3 +335,104 @@ class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
 
     def create_db_instance(self, id):
         return self.Factory.create(person_id=id)
+
+
+class DocumentDataReconciliationTestCase(TestCase):
+    def setUp(self):
+        self.prepare_data()
+        self._prepare_csv_data()
+
+    def prepare_data(self):
+        self.csv_file_path = "./ipno/data/tests/services/test_data/data_document.csv"
+        self.fields = [
+            field.name
+            for field in Document._meta.fields
+            if field.name not in Document.BASE_FIELDS
+            and field.name not in Document.CUSTOM_FIELDS
+        ]
+        self.data_reconciliation = DataReconciliation(
+            DOCUMENT_MODEL_NAME, self.csv_file_path
+        )
+        self.Factory = DocumentFactory
+        self.index_column_names = ["docid", "hrg_no", "matched_uid", "agency"]
+
+    def _prepare_csv_data(self):
+        with open(self.csv_file_path) as csvfile:
+            reader = csv.reader(
+                csvfile,
+                strict=True,
+            )
+
+            reader_list = list(reader)
+            headers = reader_list[0]
+            # FIXME: Ideally, we don't need to store this
+            self.content = reader_list[1:]  # Skip the header row
+
+        included_idx = [i for i, j in enumerate(headers) if j in self.fields]
+        self.index_columns = [headers.index(i) for i in self.index_column_names]
+        self.csv_data = []
+
+        for c in self.content:
+            self.csv_data.append([str(c[i]) for i in included_idx])
+
+    def test_detect_added_rows_sucessfully(self):
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data,
+            "deleted_rows": [],
+            "updated_rows": [],
+        }
+
+    def test_detect_deleted_rows_sucessfully(self):
+        existed_instance = self.Factory()
+        existed_instance.refresh_from_db()
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data,
+            "deleted_rows": [
+                [str(getattr(existed_instance, field) or "") for field in self.fields]
+            ],
+            "updated_rows": [],
+        }
+
+    def test_detect_updated_rows_successfully(self):
+        self.Factory(
+            docid=self.content[0][self.index_columns[0]],
+            hrg_no=self.content[0][self.index_columns[1]],
+            matched_uid=self.content[0][self.index_columns[2]],
+            agency=self.content[0][self.index_columns[3]],
+        )
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [self.csv_data[0]],
+        }
+
+    def test_detect_delete_by_partial_key_correctly(self):
+        self.Factory(
+            docid=self.content[0][self.index_columns[0]],
+            hrg_no=self.content[0][self.index_columns[1]],
+            matched_uid=self.content[0][self.index_columns[2]],
+            agency=self.content[0][self.index_columns[3]],
+        )
+
+        to_deleted = self.Factory(
+            docid=self.content[1][self.index_columns[0]],
+            hrg_no=self.content[1][self.index_columns[1]],
+        )
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [
+                [str(getattr(to_deleted, field) or "") for field in self.fields]
+            ],
+            "updated_rows": [self.csv_data[0]],
+        }
