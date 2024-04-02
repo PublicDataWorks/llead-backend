@@ -25,7 +25,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch("data.services.person_importer.PersonImporter.process")
     @patch("data.services.appeal_importer.AppealImporter.process")
     @patch("data.services.agency_importer.AgencyImporter.process")
-    @patch("schemas.tasks.validate_schemas", return_value=True)
+    @patch(
+        "data.services.schema_validation.SchemaValidation.validate_schemas",
+        return_value=True,
+    )
     def test_call_command(
         self,
         _,
@@ -90,7 +93,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch("data.services.person_importer.PersonImporter.process")
     @patch("data.services.appeal_importer.AppealImporter.process")
     @patch("data.services.agency_importer.AgencyImporter.process")
-    @patch("schemas.tasks.validate_schemas", return_value=True)
+    @patch(
+        "data.services.schema_validation.SchemaValidation.validate_schemas",
+        return_value=True,
+    )
     def test_call_command_with_no_new_data(
         self,
         _,
@@ -155,7 +161,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
     @patch("data.services.person_importer.PersonImporter.process")
     @patch("data.services.appeal_importer.AppealImporter.process")
     @patch("data.services.agency_importer.AgencyImporter.process")
-    @patch("data.management.commands.import_data.validate_schemas", return_value=False)
+    @patch(
+        "data.services.schema_validation.SchemaValidation.validate_schemas",
+        return_value=False,
+    )
     def test_call_command_with_fail_validating(
         self,
         _,
