@@ -4,13 +4,14 @@ from unittest.mock import MagicMock
 from django.conf import settings
 from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import patch
 from structlog.testing import capture_logs
 
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.factories import WrglRepoFactory
 from data.models import ImportLog
 from data.services import AgencyImporter
+from data.util import MockDataReconciliation
 from departments.factories import DepartmentFactory
 from departments.models import Department
 
@@ -78,34 +79,7 @@ class AgencyImporterTestCase(TestCase):
 
         assert Department.objects.count() == 5
 
-        hash = "3950bd17edfd805972781ef9fe2c6449"
-
-        WrglRepoFactory(
-            data_model=AgencyImporter.data_model,
-            repo_name="agency_repo",
-            commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
-            latest_commit_hash=hash,
-        )
-
-        agency_importer = AgencyImporter()
-
-        agency_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = hash
-
-        agency_importer.repo = Mock()
-        agency_importer.new_commit = mock_commit
-
-        agency_importer.retrieve_wrgl_data = Mock()
-
-        agency_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
-        agency_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
+        agency_importer = AgencyImporter("csv_file_path")
 
         processed_data = {
             "added_rows": [
@@ -122,9 +96,12 @@ class AgencyImporterTestCase(TestCase):
                 self.agency3_data,
                 self.agency4_data,
             ],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        agency_importer.process_wrgl_data = Mock(return_value=processed_data)
+        agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob):
             return f"{settings.GC_PATH}{upload_location}"
@@ -141,7 +118,7 @@ class AgencyImporterTestCase(TestCase):
         import_log = ImportLog.objects.order_by("-created_at").last()
         assert import_log.data_model == AgencyImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+        assert not import_log.commit_hash
         assert import_log.created_rows == 2
         assert import_log.updated_rows == 4
         assert import_log.deleted_rows == 1
@@ -149,8 +126,6 @@ class AgencyImporterTestCase(TestCase):
         assert import_log.finished_at
 
         assert Department.objects.count() == 6
-
-        agency_importer.retrieve_wrgl_data.assert_called_with("agency_repo")
 
         check_columns = self.header + ["agency_slug", "agency_name"]
         check_columns_mappings = {
@@ -203,7 +178,7 @@ class AgencyImporterTestCase(TestCase):
                 else:
                     assert getattr(agency, attr) == raw_data
 
-    def test_process_successfully_with_columns_changed(self):
+    def test_process_column_change_successfully(self):
         DepartmentFactory(
             agency_name="New Orleans PD",
             location=(-91.9623327, 30.9842977),
@@ -235,25 +210,7 @@ class AgencyImporterTestCase(TestCase):
             latest_commit_hash=hash,
         )
 
-        agency_importer = AgencyImporter()
-
-        agency_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = hash
-
-        agency_importer.repo = Mock()
-        agency_importer.new_commit = mock_commit
-
-        agency_importer.retrieve_wrgl_data = Mock()
-
-        agency_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header[:2]
-        }
-        agency_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
+        agency_importer = AgencyImporter("csv_file_path")
 
         processed_data = {
             "added_rows": [
@@ -270,9 +227,12 @@ class AgencyImporterTestCase(TestCase):
                 self.agency3_data,
                 self.agency4_data,
             ],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        agency_importer.process_wrgl_data = Mock(return_value=processed_data)
+        agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob):
             return f"{settings.GC_PATH}{upload_location}"
@@ -287,7 +247,7 @@ class AgencyImporterTestCase(TestCase):
         import_log = ImportLog.objects.order_by("-created_at").last()
         assert import_log.data_model == AgencyImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+        assert not import_log.commit_hash
         assert import_log.created_rows == 2
         assert import_log.updated_rows == 4
         assert import_log.deleted_rows == 1
@@ -295,8 +255,6 @@ class AgencyImporterTestCase(TestCase):
         assert import_log.finished_at
 
         assert Department.objects.count() == 6
-
-        agency_importer.retrieve_wrgl_data.assert_called_with("agency_repo")
 
         check_columns = self.header + ["agency_slug", "agency_name"]
         check_columns_mappings = {
@@ -350,34 +308,7 @@ class AgencyImporterTestCase(TestCase):
                     assert getattr(agency, attr) == raw_data
 
     def test_delete_non_existed_agency(self):
-        hash = "3950bd17edfd805972781ef9fe2c6449"
-
-        WrglRepoFactory(
-            data_model=AgencyImporter.data_model,
-            repo_name="agency_repo",
-            commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
-            latest_commit_hash=hash,
-        )
-
-        agency_importer = AgencyImporter()
-
-        agency_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = hash
-
-        agency_importer.repo = Mock()
-        agency_importer.new_commit = mock_commit
-
-        agency_importer.retrieve_wrgl_data = Mock()
-
-        agency_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
-        agency_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
+        agency_importer = AgencyImporter("csv_file_path")
 
         processed_data = {
             "added_rows": [],
@@ -385,9 +316,12 @@ class AgencyImporterTestCase(TestCase):
                 self.agency3_data,
             ],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        agency_importer.process_wrgl_data = Mock(return_value=processed_data)
+        agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         result = agency_importer.process()
 
@@ -396,7 +330,7 @@ class AgencyImporterTestCase(TestCase):
         import_log = ImportLog.objects.order_by("-created_at").last()
         assert import_log.data_model == AgencyImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+        assert not import_log.commit_hash
         assert import_log.created_rows == 0
         assert import_log.updated_rows == 0
         assert import_log.deleted_rows == 0
@@ -408,7 +342,7 @@ class AgencyImporterTestCase(TestCase):
         file_blob = "file_blob"
 
         mock_upload_file_from_string = MagicMock()
-        agency_importer = AgencyImporter()
+        agency_importer = AgencyImporter("csv_file_path")
         agency_importer.gs = MagicMock(
             upload_file_from_string=mock_upload_file_from_string
         )
@@ -427,7 +361,7 @@ class AgencyImporterTestCase(TestCase):
 
         mock_upload_file_from_string = MagicMock()
         mock_upload_file_from_string.side_effect = Exception()
-        agency_importer = AgencyImporter()
+        agency_importer = AgencyImporter("csv_file_path")
         agency_importer.gs = MagicMock(
             upload_file_from_string=mock_upload_file_from_string
         )
@@ -441,34 +375,7 @@ class AgencyImporterTestCase(TestCase):
         assert department_image_url is None
 
     def test_raise_exception_when_updating_location(self):
-        hash = "3950bd17edfd805972781ef9fe2c6449"
-
-        WrglRepoFactory(
-            data_model=AgencyImporter.data_model,
-            repo_name="agency_repo",
-            commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
-            latest_commit_hash=hash,
-        )
-
-        agency_importer = AgencyImporter()
-
-        agency_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = hash
-
-        agency_importer.repo = Mock()
-        agency_importer.new_commit = mock_commit
-
-        agency_importer.retrieve_wrgl_data = Mock()
-
-        agency_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
-        agency_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
+        agency_importer = AgencyImporter("csv_file_path")
 
         processed_data = {
             "added_rows": [
@@ -476,9 +383,12 @@ class AgencyImporterTestCase(TestCase):
             ],
             "deleted_rows": [],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        agency_importer.process_wrgl_data = Mock(return_value=processed_data)
+        agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         mock_upload_file = MagicMock()
         mock_upload_file.side_effect = ValueError
