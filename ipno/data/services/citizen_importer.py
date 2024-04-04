@@ -3,6 +3,7 @@ from tqdm import tqdm
 from citizens.models import Citizen
 from data.constants import CITIZEN_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 
 
 class CitizenImporter(BaseImporter):
@@ -25,7 +26,7 @@ class CitizenImporter(BaseImporter):
         + ["use_of_force_id", "complaint_id", "department_id"]
     )
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_citizens_attrs = []
         self.update_citizens_attrs = []
         self.new_citizen_uids = []
@@ -34,6 +35,8 @@ class CitizenImporter(BaseImporter):
         self.complaint_mappings = {}
         self.department_mappings = {}
         self.citizen_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(CITIZEN_MODEL_NAME, csv_file_path)
 
     def handle_record_data(self, row):
         agency = row[self.column_mappings["agency"]]
