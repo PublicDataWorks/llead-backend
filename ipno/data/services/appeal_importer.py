@@ -5,6 +5,7 @@ from tqdm import tqdm
 from appeals.models import Appeal
 from data.constants import APPEAL_MODEL_NAME
 from data.services import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 
 
 class AppealImporter(BaseImporter):
@@ -17,7 +18,7 @@ class AppealImporter(BaseImporter):
     )
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["officer_id", "department_id"]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_appeals_attrs = []
         self.update_appeals_attrs = []
         self.new_appeal_uids = []
@@ -25,6 +26,7 @@ class AppealImporter(BaseImporter):
         self.officer_mappings = {}
         self.department_mappings = {}
         self.appeal_mappings = {}
+        self.data_reconciliation = DataReconciliation(APPEAL_MODEL_NAME, csv_file_path)
 
     def handle_record_data(self, row):
         agency = row[self.column_mappings["agency"]]
