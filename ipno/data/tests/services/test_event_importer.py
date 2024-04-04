@@ -1,14 +1,10 @@
 from decimal import Decimal
-from unittest.mock import MagicMock
 
 from django.test.testcases import TestCase
-
-from mock import Mock
 
 from appeals.factories import AppealFactory
 from complaints.factories import ComplaintFactory
 from data.constants import IMPORT_LOG_STATUS_FINISHED
-from data.factories import WrglRepoFactory
 from data.models import ImportLog
 from data.services import EventImporter
 from data.tests.services.util import MockDataReconciliation

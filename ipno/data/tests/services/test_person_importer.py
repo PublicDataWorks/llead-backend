@@ -1,11 +1,6 @@
-from unittest.mock import MagicMock
-
 from django.test.testcases import TestCase
 
-from mock import Mock
-
 from data.constants import IMPORT_LOG_STATUS_FINISHED
-from data.factories import WrglRepoFactory
 from data.models import ImportLog
 from data.services import PersonImporter
 from data.tests.services.util import MockDataReconciliation

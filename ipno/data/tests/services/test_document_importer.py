@@ -10,7 +10,6 @@ from dropbox.exceptions import ApiError
 from mock import MagicMock, Mock, patch
 
 from data.constants import IMPORT_LOG_STATUS_ERROR, IMPORT_LOG_STATUS_FINISHED
-from data.factories import WrglRepoFactory
 from data.models import ImportLog
 from data.services import DocumentImporter
 from data.tests.services.util import MockDataReconciliation
