@@ -23,6 +23,7 @@ class BradyFactory(factory.django.DjangoModelFactory):
         lambda: f"{random.randint(1000, 9999)}-{random.randint(100, 999)}"
     )
     charging_agency = factory.LazyFunction(lambda: fake.word())
+    source_agency = factory.LazyFunction(lambda: fake.word())
 
     department = factory.SubFactory(DepartmentFactory)
     officer = factory.SubFactory(OfficerFactory)
