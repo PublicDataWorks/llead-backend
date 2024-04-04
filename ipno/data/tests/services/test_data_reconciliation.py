@@ -321,10 +321,10 @@ class PostOfficerHistoryDataReconciliationTestCase(
             POST_OFFICE_HISTORY_MODEL_NAME, self.csv_file_path
         )
         self.Factory = PostOfficerHistoryFactory
-        self.index_column_name = "history_id"
+        self.index_column_name = "uid"
 
     def create_db_instance(self, id):
-        return self.Factory.create(history_id=id)
+        return self.Factory.create(uid=id)
 
 
 class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):

@@ -81,7 +81,7 @@ class DataReconciliation:
         if self.model_name == EVENT_MODEL_NAME:
             return ["event_uid"]
         if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
-            return ["history_id"]
+            return ["uid"]
         if self.model_name == PERSON_MODEL_NAME:
             return ["person_id"]
         if self.model_name == DOCUMENT_MODEL_NAME:
