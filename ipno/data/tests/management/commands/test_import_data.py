@@ -4,7 +4,7 @@ from django.test import TestCase
 from mock import patch
 
 
-class CreateInitialWRGLReposCommandTestCase(TestCase):
+class ImportDataCommandTestCase(TestCase):
     def setUp(self):
         patch("data.services.agency_importer.GoogleCloudService").start()
         patch("data.services.document_importer.GoogleCloudService").start()

@@ -59,7 +59,7 @@ class ScrapyRssSpider(scrapy.Spider):
     }
 
     def __init__(self):
-        self.gcloud = GoogleCloudService()
+        self.gcloud = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
         if self.name:
             self.source = NewsArticleSource.objects.get(source_name=self.name)
 
@@ -164,7 +164,7 @@ class ScrapyRssSpider(scrapy.Spider):
         try:
             self.gcloud.upload_file_from_string(file_location, buffer, file_type)
 
-            return f"{settings.GC_PATH}{file_location}"
+            return f"{settings.GC_DOCUMENT_BUCKET_PATH}{file_location}"
         except Exception as e:
             logger.error(e)
 

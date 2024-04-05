@@ -227,9 +227,9 @@ class DocumentImporterTestCase(TestCase):
         document_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
-            return f"{settings.GC_PATH}{upload_location}".replace(" ", "%20").replace(
-                "'", "%27"
-            )
+            return f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}".replace(
+                " ", "%20"
+            ).replace("'", "%27")
 
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         document_importer.upload_file = mock_upload_file
@@ -273,7 +273,7 @@ class DocumentImporterTestCase(TestCase):
             upload_location, file_blob, file_type
         )
 
-        assert download_url == f"{settings.GC_PATH}location"
+        assert download_url == f"{settings.GC_DOCUMENT_BUCKET_PATH}location"
 
     def test_upload_file_success_in_development(self):
         upload_location = "location"
@@ -294,7 +294,7 @@ class DocumentImporterTestCase(TestCase):
             f"{upload_location}", file_blob, file_type
         )
 
-        assert download_url == f"{settings.GC_PATH}location"
+        assert download_url == f"{settings.GC_DOCUMENT_BUCKET_PATH}location"
 
     def test_upload_file_fail_not_raise_exception(self):
         upload_location = "location"
@@ -357,10 +357,11 @@ class DocumentImporterTestCase(TestCase):
             pdf_db_content_hash=(
                 "a3847e1c769816a9988f90fa02b77c9c9a239f48684b9ff2b6cbe134cb59a14c"
             ),
-            url=(
-                f"{settings.GC_PATH}meeting-minutes-extraction/export/pdfs/0dd28391.pdf"
+            url=f"{settings.GC_DOCUMENT_BUCKET_PATH}meeting-minutes-extraction/export/pdfs/0dd28391.pdf",
+            preview_image_url=(
+                f"{settings.GC_DOCUMENT_BUCKET_PATH}"
+                "meeting-minutes-extraction/export/pdfs/0dd28391-preview.jpeg"
             ),
-            preview_image_url=f"{settings.GC_PATH}meeting-minutes-extraction/export/pdfs/0dd28391-preview.jpeg",
         )
 
         assert Document.objects.count() == 3
@@ -391,9 +392,9 @@ class DocumentImporterTestCase(TestCase):
         get_mock.return_value = get_mock_return
 
         def upload_file_side_effect(upload_location, _file_blob, _file_type):
-            return f"{settings.GC_PATH}{upload_location}".replace(" ", "%20").replace(
-                "'", "%27"
-            )
+            return f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}".replace(
+                " ", "%20"
+            ).replace("'", "%27")
 
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         document_importer.upload_file = mock_upload_file
@@ -510,9 +511,9 @@ class DocumentImporterTestCase(TestCase):
             base_url = document_data[check_columns_mappings["pdf_db_path"]].replace(
                 "/PPACT/", ""
             )
-            document_url = f"{settings.GC_PATH}{base_url}".replace(" ", "%20").replace(
-                "'", "%27"
-            )
+            document_url = f"{settings.GC_DOCUMENT_BUCKET_PATH}{base_url}".replace(
+                " ", "%20"
+            ).replace("'", "%27")
 
             upload_document_call = call(base_url, ANY, "application/pdf")
             preview_image_dest = base_url.replace(".pdf", "-preview.jpeg").replace(
@@ -570,7 +571,10 @@ class DocumentImporterTestCase(TestCase):
         mock_upload_file_from_string.assert_called_with(
             "path/to/file-preview.jpeg", "preview_image_blob", "image/jpeg"
         )
-        assert preview_image_url == f"{settings.GC_PATH}path/to/file-preview.jpeg"
+        assert (
+            preview_image_url
+            == f"{settings.GC_DOCUMENT_BUCKET_PATH}path/to/file-preview.jpeg"
+        )
 
     @patch("data.services.document_importer.generate_from_blob", return_value=None)
     def test_generate_preview_image_fail(self, _):
@@ -685,7 +689,7 @@ class DocumentImporterTestCase(TestCase):
         }
 
     @patch("data.services.document_importer.requests.get")
-    @override_settings(GC_PATH="")
+    @override_settings(GC_DOCUMENT_BUCKET_PATH="")
     def test_handle_file_process_fail(self, get_mock):
         get_mock_return = Mock(headers={"content-type": "application/pdf"})
         get_mock.return_value = get_mock_return

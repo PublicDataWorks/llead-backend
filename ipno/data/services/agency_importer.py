@@ -27,7 +27,7 @@ class AgencyImporter(BaseImporter):
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["location_map_url"]
 
     def __init__(self, csv_file_path):
-        self.gs = GoogleCloudService()
+        self.gs = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
         self.new_agency_attrs = []
         self.new_agency_slugs = []
         self.update_agency_attrs = []
@@ -45,7 +45,9 @@ class AgencyImporter(BaseImporter):
         try:
             self.gs.upload_file_from_string(upload_location, file_blob, "image/png")
 
-            department_image_url = f"{settings.GC_PATH}{upload_location}"
+            department_image_url = (
+                f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
+            )
 
             return department_image_url
         except Exception:
