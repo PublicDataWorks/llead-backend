@@ -9,7 +9,6 @@ from .data_troubleshooting import DataTroubleshooting
 from .document_importer import DocumentImporter
 from .event_importer import EventImporter
 from .migrate_officer_movement import MigrateOfficerMovement
-from .new_complaint_importer import NewComplaintImporter
 from .officer_importer import OfficerImporter
 from .person_importer import PersonImporter
 from .post_officer_history_importer import PostOfficerHistoryImporter
@@ -24,7 +23,6 @@ __all__ = [
     "CitizenImporter",
     "DocumentImporter",
     "PersonImporter",
-    "NewComplaintImporter",
     "AppealImporter",
     "DataTroubleshooting",
     "AgencyImporter",
