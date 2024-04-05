@@ -313,7 +313,7 @@ class ScrapyRssSpiderTestCase(TestCase):
         self.spider.gcloud.upload_file_from_string.assert_called_with(
             "file_location", "buffer", "pdf"
         )
-        assert result == f"{settings.GC_PATH}file_location"
+        assert result == f"{settings.GC_DOCUMENT_BUCKET_PATH}file_location"
 
     @patch("news_articles.spiders.base_scrapy_rss.logger.error")
     def test_upload_file_to_gcloud_raise_exception(self, mock_logger_error):

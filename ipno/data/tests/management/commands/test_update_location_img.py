@@ -46,7 +46,9 @@ class UpdateLocationImageCommandTestCase(TestCase):
         mock_gcs_object.upload_file_from_string.assert_called_with(
             upload_location, "generated-image", "image/png"
         )
-        expected_location_map_url = f"{settings.GC_PATH}{upload_location}"
+        expected_location_map_url = (
+            f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
+        )
 
         dep.refresh_from_db()
 

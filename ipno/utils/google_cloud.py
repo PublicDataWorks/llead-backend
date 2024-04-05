@@ -1,13 +1,15 @@
-from django.conf import settings
+from datetime import datetime
 
-from google.cloud.storage import Client
+from google.cloud.storage import Client, transfer_manager
 
 
 class GoogleCloudService:
-    def __init__(self):
+    def __init__(self, bucket_name, **kwargs):
         storage_client = Client()
-        bucket = storage_client.bucket(settings.DOCUMENTS_BUCKET_NAME)
-        self.bucket = bucket
+        self.bucket = storage_client.bucket(bucket_name)
+        self.data_mapping = kwargs.get("data_mapping", {})
+        self.csv_file_name_mapping = kwargs.get("csv_file_name_mapping", {})
+        self.csv_data_path = kwargs.get("csv_data_path", "")
 
     def upload_file_from_string(self, destination_location, file_blob, content_type):
         blob = self.bucket.blob(destination_location)
@@ -28,9 +30,19 @@ class GoogleCloudService:
         self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)
 
-    def download_schema(self, file_url):
-        bucket = Client().bucket(settings.SCHEMA_BUCKET_NAME)
-        self.bucket = bucket
+    def download_csv_data(self):
+        folder_name = datetime.now().strftime("%Y%m%d")
+        blob_names = [
+            f"{folder_name}/{self.csv_file_name_mapping[model]}"
+            for model in self.data_mapping
+        ]
 
-        blob = self.bucket.blob(file_url)
-        blob.download_to_filename("./schema.sql")
+        results = transfer_manager.download_many_to_path(
+            self.bucket, blob_names, destination_directory=self.csv_data_path
+        )
+
+        for name, result in zip(blob_names, results):
+            if isinstance(result, Exception):
+                print("Failed to download {} due to exception: {}".format(name, result))
+            else:
+                print("Successfully downloaded {}".format(name))

@@ -18,7 +18,9 @@ DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = "llead-static"
 DOCUMENTS_BUCKET_NAME = "llead-documents"
-GC_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+RAW_DATA_BUCKET_NAME = "llead-raw-data"
+GC_DOCUMENT_BUCKET_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+GC_RAW_DATA_BUCKET_PATH = f"https://storage.googleapis.com/{RAW_DATA_BUCKET_NAME}/"
 
 HOST = os.getenv("HOST", "https://llead.co")
 SERVER_URL = os.getenv("SERVER_URL", "https://api.llead.co")

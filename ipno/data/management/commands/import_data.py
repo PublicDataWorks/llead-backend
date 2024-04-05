@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.utils import timezone
@@ -41,32 +42,61 @@ from utils.count_data import (
     count_complaints,
 )
 from utils.data_utils import compute_department_data_period
+from utils.google_cloud import GoogleCloudService
 from utils.search_index import rebuild_search_index
 
 logger = structlog.get_logger("IPNO")
 
 
 # TODO: this should be returned from the downloand csv function
+csv_data_path = "./ipno/csv_data/"
+csv_file_name_mapping = {
+    AGENCY_MODEL_NAME: "data_agency.csv",
+    OFFICER_MODEL_NAME: "data_personnel.csv",
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: "data_news_article_classification.csv",
+    COMPLAINT_MODEL_NAME: "data_allegation.csv",
+    BRADY_MODEL_NAME: "data_brady.csv",
+    USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+    CITIZEN_MODEL_NAME: "data_citizens.csv",
+    APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+    EVENT_MODEL_NAME: "data_event.csv",
+    DOCUMENT_MODEL_NAME: "data_documents.csv",
+    POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+    PERSON_MODEL_NAME: "data_person.csv",
+}
+
 data_mapping = {
-    AGENCY_MODEL_NAME: "./ipno/csv_data/data_agency_old.csv",
-    OFFICER_MODEL_NAME: "./ipno/csv_data/data_personnel_old.csv",
-    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
-        "./ipno/csv_data/data_news_article_classification_old.csv"
+    AGENCY_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[AGENCY_MODEL_NAME]}",
+    OFFICER_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[OFFICER_MODEL_NAME]}",
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME]}",  # noqa
+    COMPLAINT_MODEL_NAME: (
+        f"{csv_data_path}{csv_file_name_mapping[COMPLAINT_MODEL_NAME]}"
     ),
-    COMPLAINT_MODEL_NAME: "./ipno/csv_data/data_allegation_old.csv",
-    BRADY_MODEL_NAME: "./ipno/csv_data/data_brady_old.csv",
-    USE_OF_FORCE_MODEL_NAME: "./ipno/csv_data/data_use-of-force_old.csv",
-    CITIZEN_MODEL_NAME: "./ipno/csv_data/data_citizens_old.csv",
-    APPEAL_MODEL_NAME: "./ipno/csv_data/data_appeal-hearing_old.csv",
-    EVENT_MODEL_NAME: "./ipno/csv_data/data_event_old.csv",
-    DOCUMENT_MODEL_NAME: "./ipno/csv_data/data_documents_old.csv",
-    POST_OFFICE_HISTORY_MODEL_NAME: "./ipno/csv_data/data_post-officer-history_old.csv",
-    PERSON_MODEL_NAME: "./ipno/csv_data/data_person_old.csv",
+    BRADY_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[BRADY_MODEL_NAME]}",
+    USE_OF_FORCE_MODEL_NAME: (
+        f"{csv_data_path}{csv_file_name_mapping[USE_OF_FORCE_MODEL_NAME]}"
+    ),
+    CITIZEN_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[CITIZEN_MODEL_NAME]}",
+    APPEAL_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[APPEAL_MODEL_NAME]}",
+    EVENT_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[EVENT_MODEL_NAME]}",
+    DOCUMENT_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[DOCUMENT_MODEL_NAME]}",
+    POST_OFFICE_HISTORY_MODEL_NAME: (
+        f"{csv_data_path}{csv_file_name_mapping[POST_OFFICE_HISTORY_MODEL_NAME]}"
+    ),
+    PERSON_MODEL_NAME: f"{csv_data_path}{csv_file_name_mapping[PERSON_MODEL_NAME]}",
 }
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        gs = GoogleCloudService(
+            settings.RAW_DATA_BUCKET_NAME,
+            data_mapping=data_mapping,
+            csv_file_name_mapping=csv_file_name_mapping,
+            csv_data_path=csv_data_path,
+        )
+        gs.download_csv_data()
+
         is_validating_success = SchemaValidation().validate_schemas(data_mapping)
 
         if not is_validating_success:

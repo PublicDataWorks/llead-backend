@@ -15,7 +15,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         file_blob = "file_blob"
         destination_url = "destination_url"
@@ -37,7 +37,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         destination_url = "destination_url"
         google_cloud_service.delete_file_from_url(destination_url)
@@ -55,7 +55,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         object_path = "object_path"
         google_cloud_service.is_object_exists(object_path)
@@ -79,7 +79,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         source_blob_name = "source_blob_name"
         destination_blob_name = "destination_blob_name"

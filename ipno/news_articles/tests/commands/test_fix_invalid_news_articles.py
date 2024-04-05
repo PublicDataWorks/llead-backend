@@ -24,7 +24,7 @@ class FixInvalidNewsArticlesTestCase(TestCase):
         mock_gcs_return = MagicMock()
         mock_google_cloud_service.return_value = mock_gcs_return
         source = NewsArticleSourceFactory(source_name="source")
-        url_1 = f"{settings.GC_PATH}news_articles/{source.source_name}/2020-04-05_http://guid-1.pdf"
+        url_1 = f"{settings.GC_DOCUMENT_BUCKET_PATH}news_articles/{source.source_name}/2020-04-05_http://guid-1.pdf"
         article_1 = NewsArticleFactory(
             guid="http://guid-1",
             url=url_1,
@@ -32,7 +32,10 @@ class FixInvalidNewsArticlesTestCase(TestCase):
             published_date=datetime(2020, 4, 5, tzinfo=pytz.utc),
             source=source,
         )
-        url_2 = f"{settings.GC_PATH}news_articles/{source.source_name}/2020-04-05_http://other.com?guid=2.pdf"
+        url_2 = (
+            f"{settings.GC_DOCUMENT_BUCKET_PATH}news_articles/"
+            f"{source.source_name}/2020-04-05_http://other.com?guid=2.pdf"
+        )
         article_2 = NewsArticleFactory(
             guid="http://other.com?guid=2",
             url=url_2,
@@ -68,8 +71,8 @@ class FixInvalidNewsArticlesTestCase(TestCase):
         article_1.refresh_from_db()
         article_2.refresh_from_db()
 
-        assert article_1.url == f"{settings.GC_PATH}{new_file_path_1}"
-        assert article_2.url == f"{settings.GC_PATH}{new_file_path_2}"
+        assert article_1.url == f"{settings.GC_DOCUMENT_BUCKET_PATH}{new_file_path_1}"
+        assert article_2.url == f"{settings.GC_DOCUMENT_BUCKET_PATH}{new_file_path_2}"
 
     @patch(
         "news_articles.management.commands.fix_invalid_news_articles.NEWS_ARTICLE_CLOUD_SPACES",
@@ -82,7 +85,7 @@ class FixInvalidNewsArticlesTestCase(TestCase):
         mock_gcs_return = MagicMock()
         mock_google_cloud_service.return_value = mock_gcs_return
         source = NewsArticleSourceFactory(source_name="source")
-        url_1 = f"{settings.GC_PATH}news_articles/{source.source_name}/2020-04-05_http://guid-1.pdf"
+        url_1 = f"{settings.GC_DOCUMENT_BUCKET_PATH}news_articles/{source.source_name}/2020-04-05_http://guid-1.pdf"
         article_1 = NewsArticleFactory(
             guid="http://guid-1",
             url=url_1,
@@ -90,7 +93,10 @@ class FixInvalidNewsArticlesTestCase(TestCase):
             published_date=datetime(2020, 4, 5, tzinfo=pytz.utc),
             source=source,
         )
-        url_2 = f"{settings.GC_PATH}news_articles/{source.source_name}/2020-04-05_http://other.com?guid=2.pdf"
+        url_2 = (
+            f"{settings.GC_DOCUMENT_BUCKET_PATH}news_articles/"
+            f"{source.source_name}/2020-04-05_http://other.com?guid=2.pdf"
+        )
         NewsArticleFactory(
             guid="http://other.com?guid=2",
             url=url_2,
