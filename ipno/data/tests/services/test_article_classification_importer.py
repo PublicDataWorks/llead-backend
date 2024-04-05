@@ -3,7 +3,7 @@ from django.test.testcases import TestCase
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.models import ImportLog
 from data.services import ArticleClassificationImporter
-from data.tests.services.util import MockDataReconciliation
+from data.util import MockDataReconciliation
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
