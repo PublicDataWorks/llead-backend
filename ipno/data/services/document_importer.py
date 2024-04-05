@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 from data.constants import DOCUMENT_MODEL_NAME
 from data.services.base_importer import BaseImporter
-from documents.models import Document
 from data.services.data_reconciliation import DataReconciliation
+from documents.models import Document
 from utils.dropbox_utils import DropboxService
 from utils.google_cloud import GoogleCloudService
 from utils.image_generator import generate_from_blob
@@ -60,7 +60,9 @@ class DocumentImporter(BaseImporter):
         self.delete_documents_ids = []
         self.document_mappings = {}
         self.uploaded_files = {}
-        self.data_reconciliation = DataReconciliation(DOCUMENT_MODEL_NAME, csv_file_path)
+        self.data_reconciliation = DataReconciliation(
+            DOCUMENT_MODEL_NAME, csv_file_path
+        )
 
     def get_document_mappings(self):
         documents_attrs = [

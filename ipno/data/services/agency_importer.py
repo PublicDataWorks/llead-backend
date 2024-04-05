@@ -8,8 +8,8 @@ from tqdm import tqdm
 
 from data.constants import AGENCY_MODEL_NAME, MAP_IMAGES_SUB_DIR
 from data.services import BaseImporter
-from departments.models import Department
 from data.services.data_reconciliation import DataReconciliation
+from departments.models import Department
 from utils.google_cloud import GoogleCloudService
 from utils.image_generator import generate_map_thumbnail
 
