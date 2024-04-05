@@ -6,7 +6,7 @@ from complaints.factories import ComplaintFactory
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.models import ImportLog
 from data.services import CitizenImporter
-from data.tests.services.util import MockDataReconciliation
+from data.util import MockDataReconciliation
 from departments.factories import DepartmentFactory
 from use_of_forces.factories import UseOfForceFactory
 

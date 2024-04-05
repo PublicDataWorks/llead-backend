@@ -3,7 +3,7 @@ from django.test import TestCase
 from data.constants import IMPORT_LOG_STATUS_FINISHED
 from data.models.import_log import ImportLog
 from data.services.post_officer_history_importer import PostOfficerHistoryImporter
-from data.tests.services.util import MockDataReconciliation
+from data.util import MockDataReconciliation
 from departments.factories.department_factory import DepartmentFactory
 from officers.factories.officer_factory import OfficerFactory
 from post_officer_history.factories.post_officer_history_factory import (
