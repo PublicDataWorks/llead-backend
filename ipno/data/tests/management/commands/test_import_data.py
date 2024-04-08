@@ -106,7 +106,7 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock.return_value = True
         post_officer_history_process_mock.return_value = True
         article_classification_process_mock.return_value = True
-        call_command("import_data")
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
@@ -209,7 +209,7 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock.return_value = False
         post_officer_history_process_mock.return_value = False
         article_classification_process_mock.return_value = False
-        call_command("import_data")
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
@@ -300,7 +300,7 @@ class ImportDataCommandTestCase(TestCase):
             BRADY_MODEL_NAME: "data_brady.csv",
             POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
         }
-        call_command("import_data")
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_not_called()
         appeal_process_mock.assert_not_called()
