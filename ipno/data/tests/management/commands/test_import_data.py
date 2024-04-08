@@ -3,12 +3,28 @@ from django.test import TestCase
 
 from mock import patch
 
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
+)
+
 
 class ImportDataCommandTestCase(TestCase):
     def setUp(self):
         patch("data.services.agency_importer.GoogleCloudService").start()
         patch("data.services.document_importer.GoogleCloudService").start()
 
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -58,7 +74,24 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
     ):
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
         agency_process_mock.return_value = True
         appeal_process_mock.return_value = True
         person_process_mock.return_value = True
@@ -90,6 +123,7 @@ class ImportDataCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -139,7 +173,24 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
     ):
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
         agency_process_mock.return_value = False
         appeal_process_mock.return_value = False
         person_process_mock.return_value = False
@@ -171,6 +222,7 @@ class ImportDataCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
 
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -220,7 +272,24 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
     ):
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
         call_command("import_data")
 
         agency_process_mock.assert_not_called()
