@@ -1,3 +1,5 @@
+from shutil import rmtree
+
 from django.conf import settings
 
 import structlog
@@ -75,6 +77,7 @@ class GoogleCloudService:
                 logger.error(
                     "Failed to download {} due to exception: {}".format(name, result)
                 )
+                rmtree(f"{settings.CSV_DATA_PATH}/{folder_name}")
                 raise Exception(
                     "Failed to download data from Google Cloud Storage, file name {}"
                     .format(name)
