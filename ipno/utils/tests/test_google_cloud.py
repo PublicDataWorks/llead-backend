@@ -128,9 +128,12 @@ class GoogleCloudTestCase(TestCase):
             for model_name in csv_file_name_mapping
         }
 
+    @patch("utils.google_cloud.rmtree")
     @patch("utils.google_cloud.transfer_manager")
     @patch("utils.google_cloud.Client")
-    def test_download_csv_data_raise_error(self, mock_client, mock_transfer_manager):
+    def test_download_csv_data_raise_error_and_delete_files(
+        self, mock_client, mock_transfer_manager, mock_rmtree
+    ):
         mock_transfer_manager.download_many_to_path = Mock(
             return_value=[None] * (len(csv_file_name_mapping) - 1)
             + [Exception("Failed to download")]
@@ -163,3 +166,5 @@ class GoogleCloudTestCase(TestCase):
             ],
             destination_directory=settings.CSV_DATA_PATH,
         )
+
+        mock_rmtree.assert_called_with(f"{settings.CSV_DATA_PATH}/{folder_name}")

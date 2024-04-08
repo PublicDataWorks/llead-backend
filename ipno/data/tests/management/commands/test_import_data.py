@@ -24,6 +24,7 @@ class ImportDataCommandTestCase(TestCase):
         patch("data.services.agency_importer.GoogleCloudService").start()
         patch("data.services.document_importer.GoogleCloudService").start()
 
+    @patch("data.management.commands.import_data.rmtree")
     @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
@@ -75,6 +76,7 @@ class ImportDataCommandTestCase(TestCase):
         post_officer_history_process_mock,
         article_classification_process_mock,
         mock_google_cloud_service,
+        rmtree_mock,
     ):
         mock_google_cloud_service.return_value.download_csv_data.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
@@ -123,6 +125,9 @@ class ImportDataCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
+        rmtree_mock.assert_called()
+
+    @patch("data.management.commands.import_data.rmtree")
     @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
@@ -174,6 +179,7 @@ class ImportDataCommandTestCase(TestCase):
         post_officer_history_process_mock,
         article_classification_process_mock,
         mock_google_cloud_service,
+        rmtree_mock,
     ):
         mock_google_cloud_service.return_value.download_csv_data.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
@@ -222,6 +228,9 @@ class ImportDataCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
 
+        rmtree_mock.assert_called()
+
+    @patch("data.management.commands.import_data.rmtree")
     @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
@@ -273,6 +282,7 @@ class ImportDataCommandTestCase(TestCase):
         post_officer_history_process_mock,
         article_classification_process_mock,
         mock_google_cloud_service,
+        rmtree_mock,
     ):
         mock_google_cloud_service.return_value.download_csv_data.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
@@ -311,3 +321,5 @@ class ImportDataCommandTestCase(TestCase):
         brady_process_mock.assert_not_called()
         post_officer_history_process_mock.assert_not_called()
         article_classification_process_mock.assert_not_called()
+
+        rmtree_mock.assert_called()
