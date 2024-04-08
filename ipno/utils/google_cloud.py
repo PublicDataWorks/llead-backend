@@ -1,15 +1,45 @@
-from datetime import datetime
+from django.conf import settings
 
+import structlog
 from google.cloud.storage import Client, transfer_manager
+
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
+)
+
+csv_file_name_mapping = {
+    AGENCY_MODEL_NAME: "data_agency.csv",
+    OFFICER_MODEL_NAME: "data_personnel.csv",
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: "data_news_article_classification.csv",
+    COMPLAINT_MODEL_NAME: "data_allegation.csv",
+    BRADY_MODEL_NAME: "data_brady.csv",
+    USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+    CITIZEN_MODEL_NAME: "data_citizens.csv",
+    APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+    EVENT_MODEL_NAME: "data_event.csv",
+    DOCUMENT_MODEL_NAME: "data_documents.csv",
+    POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+    PERSON_MODEL_NAME: "data_person.csv",
+}
+
+logger = structlog.get_logger("IPNO")
 
 
 class GoogleCloudService:
-    def __init__(self, bucket_name, **kwargs):
+    def __init__(self, bucket_name):
         storage_client = Client()
         self.bucket = storage_client.bucket(bucket_name)
-        self.data_mapping = kwargs.get("data_mapping", {})
-        self.csv_file_name_mapping = kwargs.get("csv_file_name_mapping", {})
-        self.csv_data_path = kwargs.get("csv_data_path", "")
 
     def upload_file_from_string(self, destination_location, file_blob, content_type):
         blob = self.bucket.blob(destination_location)
@@ -30,19 +60,31 @@ class GoogleCloudService:
         self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)
 
-    def download_csv_data(self):
-        folder_name = datetime.now().strftime("%Y%m%d")
+    def download_csv_data(self, folder_name):
         blob_names = [
-            f"{folder_name}/{self.csv_file_name_mapping[model]}"
-            for model in self.data_mapping
+            f"{folder_name}/{csv_file_name_mapping[model]}"
+            for model in csv_file_name_mapping
         ]
 
         results = transfer_manager.download_many_to_path(
-            self.bucket, blob_names, destination_directory=self.csv_data_path
+            self.bucket, blob_names, destination_directory=settings.CSV_DATA_PATH
         )
 
         for name, result in zip(blob_names, results):
             if isinstance(result, Exception):
-                print("Failed to download {} due to exception: {}".format(name, result))
+                logger.error(
+                    "Failed to download {} due to exception: {}".format(name, result)
+                )
+                raise Exception(
+                    "Failed to download data from Google Cloud Storage, file name {}"
+                    .format(name)
+                )
             else:
-                print("Successfully downloaded {}".format(name))
+                logger.info("Successfully downloaded {}".format(name))
+
+        downloaded_data = {
+            model_name: f"{settings.CSV_DATA_PATH}/{folder_name}/{csv_file_name_mapping[model_name]}"
+            for model_name in csv_file_name_mapping
+        }
+
+        return downloaded_data
