@@ -97,7 +97,7 @@ class DataReconciliation:
             if field.name not in self.model_class.BASE_FIELDS
             and field.name not in self.model_class.CUSTOM_FIELDS
         ]
-        
+
         if self.model_name == DOCUMENT_MODEL_NAME:
             columns += ["page_count"]
 
