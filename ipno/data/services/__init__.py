@@ -5,7 +5,6 @@ from .article_classification_importer import ArticleClassificationImporter
 from .brady_importer import BradyImporter
 from .citizen_importer import CitizenImporter
 from .complaint_importer import ComplaintImporter
-from .data_troubleshooting import DataTroubleshooting
 from .document_importer import DocumentImporter
 from .event_importer import EventImporter
 from .migrate_officer_movement import MigrateOfficerMovement
@@ -24,7 +23,6 @@ __all__ = [
     "DocumentImporter",
     "PersonImporter",
     "AppealImporter",
-    "DataTroubleshooting",
     "AgencyImporter",
     "MigrateOfficerMovement",
     "BradyImporter",
