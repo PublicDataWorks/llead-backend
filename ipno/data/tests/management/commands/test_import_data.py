@@ -3,12 +3,29 @@ from django.test import TestCase
 
 from mock import patch
 
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
+)
 
-class CreateInitialWRGLReposCommandTestCase(TestCase):
+
+class ImportDataCommandTestCase(TestCase):
     def setUp(self):
         patch("data.services.agency_importer.GoogleCloudService").start()
         patch("data.services.document_importer.GoogleCloudService").start()
 
+    @patch("data.management.commands.import_data.rmtree")
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -58,7 +75,25 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
+        rmtree_mock,
     ):
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
         agency_process_mock.return_value = True
         appeal_process_mock.return_value = True
         person_process_mock.return_value = True
@@ -71,7 +106,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock.return_value = True
         post_officer_history_process_mock.return_value = True
         article_classification_process_mock.return_value = True
-        call_command("import_data")
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
@@ -90,6 +125,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
+        rmtree_mock.assert_called()
+
+    @patch("data.management.commands.import_data.rmtree")
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -139,7 +178,25 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
+        rmtree_mock,
     ):
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
         agency_process_mock.return_value = False
         appeal_process_mock.return_value = False
         person_process_mock.return_value = False
@@ -152,7 +209,7 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock.return_value = False
         post_officer_history_process_mock.return_value = False
         article_classification_process_mock.return_value = False
-        call_command("import_data")
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_called()
         appeal_process_mock.assert_called()
@@ -171,6 +228,10 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
 
+        rmtree_mock.assert_called()
+
+    @patch("data.management.commands.import_data.rmtree")
+    @patch("data.management.commands.import_data.GoogleCloudService")
     @patch(
         "data.services.article_classification_importer.ArticleClassificationImporter.process"
     )
@@ -220,8 +281,26 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock,
         post_officer_history_process_mock,
         article_classification_process_mock,
+        mock_google_cloud_service,
+        rmtree_mock,
     ):
-        call_command("import_data")
+        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+            AGENCY_MODEL_NAME: "data_agency.csv",
+            APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
+            PERSON_MODEL_NAME: "data_person.csv",
+            DOCUMENT_MODEL_NAME: "data_documents.csv",
+            OFFICER_MODEL_NAME: "data_personnel.csv",
+            USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
+            CITIZEN_MODEL_NAME: "data_citizens.csv",
+            COMPLAINT_MODEL_NAME: "data_allegation.csv",
+            EVENT_MODEL_NAME: "data_event.csv",
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+                "data_news_article_classification.csv"
+            ),
+            BRADY_MODEL_NAME: "data_brady.csv",
+            POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
+        }
+        call_command("import_data", "folder_name")
 
         agency_process_mock.assert_not_called()
         appeal_process_mock.assert_not_called()
@@ -242,3 +321,5 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         brady_process_mock.assert_not_called()
         post_officer_history_process_mock.assert_not_called()
         article_classification_process_mock.assert_not_called()
+
+        rmtree_mock.assert_called()

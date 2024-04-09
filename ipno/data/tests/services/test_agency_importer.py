@@ -104,7 +104,7 @@ class AgencyImporterTestCase(TestCase):
         agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob):
-            return f"{settings.GC_PATH}{upload_location}"
+            return f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
 
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         agency_importer.upload_file = mock_upload_file
@@ -235,7 +235,7 @@ class AgencyImporterTestCase(TestCase):
         agency_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         def upload_file_side_effect(upload_location, _file_blob):
-            return f"{settings.GC_PATH}{upload_location}"
+            return f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
 
         mock_upload_file = MagicMock(side_effect=upload_file_side_effect)
         agency_importer.upload_file = mock_upload_file
@@ -353,7 +353,7 @@ class AgencyImporterTestCase(TestCase):
             upload_location, file_blob, "image/png"
         )
 
-        assert department_image_url == f"{settings.GC_PATH}location"
+        assert department_image_url == f"{settings.GC_DOCUMENT_BUCKET_PATH}location"
 
     def test_upload_file_fail_not_raise_exception(self):
         upload_location = "location"

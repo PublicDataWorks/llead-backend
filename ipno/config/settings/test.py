@@ -13,7 +13,9 @@ DROPBOX_APP_SECRET = "test-dropbox-app-service"
 DROPBOX_REFRESH_TOKEN = "test-dropbox-refresh-token"
 
 DOCUMENTS_BUCKET_NAME = "llead-documents-test"
-GC_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+RAW_DATA_BUCKET_NAME = "llead-raw-data-test"
+GC_DOCUMENT_BUCKET_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+GC_RAW_DATA_BUCKET_PATH = f"https://storage.googleapis.com/{RAW_DATA_BUCKET_NAME}/"
 
 HOST = "http://localhost:8080"
 
