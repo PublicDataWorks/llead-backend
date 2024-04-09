@@ -7,7 +7,6 @@ from tqdm import tqdm
 from news_articles.models import ExcludeOfficer, MatchedSentence
 from officers.models import Officer
 from utils.nlp import NLP
-from utils.wrgl_generator import WrglGenerator
 
 
 class ProcessRematchOfficers:
@@ -19,7 +18,6 @@ class ProcessRematchOfficers:
         self.officers = self.get_officers_data([*updated_officers, *created_officers])
 
         self.nlp = NLP()
-        self.wrgl = WrglGenerator()
 
         latest_exclude_officers = ExcludeOfficer.objects.order_by("-created_at").first()
         self.excluded_officers_ids = (
@@ -66,47 +64,4 @@ class ProcessRematchOfficers:
                 matched_sentence.excluded_officers.add(*exclude_matched_officers_obj)
                 matched_sentence.save()
 
-            # return self.commit_data_to_wrgl()
-
         return False
-
-    # TODO: Uncomment if WRGL is consistent
-    """
-    def commit_data_to_wrgl(self):
-        MatchedSentenceOfficer = MatchedSentence.officers.through
-        data = (
-            MatchedSentenceOfficer.objects.order_by(
-                "officer_id", "matchedsentence__article__id"
-            )
-            .annotate(
-                uid=F("officer__uid"),
-                created_at=F("matchedsentence__created_at"),
-                newsarticle_id=F("matchedsentence__article__id"),
-            )
-            .all()
-        )
-
-        count_updated_objects = data.filter(
-            matchedsentence__updated_at__gte=self.start_time
-        ).count()
-
-        if count_updated_objects:
-            columns = NEWS_ARTICLE_OFFICER_WRGL_COLUMNS
-            gzexcel = self.wrgl.generate_csv_file(data, columns)
-
-            result = self.wrgl.create_wrgl_commit(
-                f"+ {len(self.officers)} officer(s)",
-                ["uid", "newsarticle_id"],
-                gzexcel,
-                settings.NEWS_ARTICLE_OFFICER_WRGL_REPO,
-            )
-
-            commit_hash = result.sum if result else ""
-            wrgl_repo = WrglRepo.objects.get(data_model=NEWS_ARTICLE_OFFICER_MODEL_NAME)
-
-            if commit_hash and wrgl_repo.commit_hash != commit_hash:
-                wrgl_repo.commit_hash = commit_hash
-                wrgl_repo.save()
-
-        return count_updated_objects > 0
-    """
