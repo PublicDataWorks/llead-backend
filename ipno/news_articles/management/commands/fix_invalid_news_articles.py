@@ -15,10 +15,10 @@ logger = structlog.get_logger("IPNO")
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.gcloud = GoogleCloudService()
+        self.gcloud = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
     def _get_gcs_path_from_url(self, raw_url):
-        return raw_url.replace(settings.GC_PATH, "")
+        return raw_url.replace(settings.GC_DOCUMENT_BUCKET_PATH, "")
 
     def handle(self, *args, **options):
         inv_news = NewsArticle.objects.select_related("source").filter(
@@ -41,6 +41,6 @@ class Command(BaseCommand):
             )
 
             self.gcloud.move_blob_internally(file_path, new_file_path)
-            news.url = f"{settings.GC_PATH}{new_file_path}"
+            news.url = f"{settings.GC_DOCUMENT_BUCKET_PATH}{new_file_path}"
 
         NewsArticle.objects.bulk_update(inv_news, ["url"], 10000)

@@ -3,7 +3,7 @@ from django.test.testcases import TestCase
 
 from mock import Mock, patch
 
-from utils.google_cloud import GoogleCloudService
+from utils.google_cloud import GoogleCloudService, csv_file_name_mapping
 
 
 class GoogleCloudTestCase(TestCase):
@@ -15,7 +15,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         file_blob = "file_blob"
         destination_url = "destination_url"
@@ -37,7 +37,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         destination_url = "destination_url"
         google_cloud_service.delete_file_from_url(destination_url)
@@ -55,7 +55,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         object_path = "object_path"
         google_cloud_service.is_object_exists(object_path)
@@ -79,7 +79,7 @@ class GoogleCloudTestCase(TestCase):
         mock_storage_client = Mock(bucket=mock_bucket)
         mock_client.return_value = mock_storage_client
 
-        google_cloud_service = GoogleCloudService()
+        google_cloud_service = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
 
         source_blob_name = "source_blob_name"
         destination_blob_name = "destination_blob_name"
@@ -94,3 +94,77 @@ class GoogleCloudTestCase(TestCase):
             mock_blob_return, mock_bucket_return, destination_blob_name
         )
         mock_delete_blob.assert_called_with(source_blob_name)
+
+    @patch("utils.google_cloud.transfer_manager")
+    @patch("utils.google_cloud.Client")
+    def test_download_csv_data(self, mock_client, mock_transfer_manager):
+        mock_transfer_manager.download_many_to_path = Mock(
+            return_value=[None] * len(csv_file_name_mapping)
+        )
+
+        mock_bucket = Mock(return_value="mock_bucket")
+        mock_storage_client = Mock(bucket=mock_bucket)
+        mock_client.return_value = mock_storage_client
+
+        google_cloud_service = GoogleCloudService("bucket_name")
+
+        folder_name = "folder_name"
+
+        result = google_cloud_service.download_csv_data(folder_name)
+
+        mock_client.assert_called()
+        mock_bucket.assert_called_with("bucket_name")
+        mock_transfer_manager.download_many_to_path.assert_called_with(
+            "mock_bucket",
+            [
+                f"{folder_name}/{csv_file_name_mapping[model]}"
+                for model in csv_file_name_mapping
+            ],
+            destination_directory=settings.CSV_DATA_PATH,
+        )
+
+        assert result == {
+            model_name: f"{settings.CSV_DATA_PATH}/{folder_name}/{csv_file_name_mapping[model_name]}"
+            for model_name in csv_file_name_mapping
+        }
+
+    @patch("utils.google_cloud.rmtree")
+    @patch("utils.google_cloud.transfer_manager")
+    @patch("utils.google_cloud.Client")
+    def test_download_csv_data_raise_error_and_delete_files(
+        self, mock_client, mock_transfer_manager, mock_rmtree
+    ):
+        mock_transfer_manager.download_many_to_path = Mock(
+            return_value=[None] * (len(csv_file_name_mapping) - 1)
+            + [Exception("Failed to download")]
+        )
+
+        mock_bucket = Mock(return_value="mock_bucket")
+        mock_storage_client = Mock(bucket=mock_bucket)
+        mock_client.return_value = mock_storage_client
+
+        google_cloud_service = GoogleCloudService("bucket_name")
+
+        folder_name = "folder_name"
+
+        with self.assertRaises(Exception) as e:
+            google_cloud_service.download_csv_data(folder_name)
+
+        assert str(
+            e.exception
+        ) == "Failed to download data from Google Cloud Storage, file name {}".format(
+            "folder_name/data_person.csv"
+        )
+
+        mock_client.assert_called()
+        mock_bucket.assert_called_with("bucket_name")
+        mock_transfer_manager.download_many_to_path.assert_called_with(
+            "mock_bucket",
+            [
+                f"{folder_name}/{csv_file_name_mapping[model]}"
+                for model in csv_file_name_mapping
+            ],
+            destination_directory=settings.CSV_DATA_PATH,
+        )
+
+        mock_rmtree.assert_called_with(f"{settings.CSV_DATA_PATH}/{folder_name}")

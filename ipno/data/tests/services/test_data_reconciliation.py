@@ -359,6 +359,7 @@ class DocumentDataReconciliationTestCase(TestCase):
             if field.name not in Document.BASE_FIELDS
             and field.name not in Document.CUSTOM_FIELDS
         ]
+        self.fields += ["page_count"]
         self.data_reconciliation = DataReconciliation(
             DOCUMENT_MODEL_NAME, self.csv_file_path
         )
@@ -374,7 +375,6 @@ class DocumentDataReconciliationTestCase(TestCase):
 
             reader_list = list(reader)
             headers = reader_list[0]
-            # FIXME: Ideally, we don't need to store this
             self.content = reader_list[1:]  # Skip the header row
 
         included_idx = [headers.index(i) for i in self.fields]
@@ -404,8 +404,16 @@ class DocumentDataReconciliationTestCase(TestCase):
 
         assert output == {
             "added_rows": self.csv_data,
+            # page_count should be included in the result, as a empty string,
+            # this does not matter in the case of delete since we only care for the id,
+            # but we keep it all for the backward compatibility with WRGL.
             "deleted_rows": [
-                [str(getattr(existed_instance, field) or "") for field in self.fields]
+                [
+                    str(getattr(existed_instance, field) or "")
+                    for field in self.fields
+                    if field != "page_count"
+                ]
+                + [""]
             ],
             "updated_rows": [],
             "columns_mapping": {
@@ -449,8 +457,16 @@ class DocumentDataReconciliationTestCase(TestCase):
 
         assert output == {
             "added_rows": self.csv_data[1:],
+            # page_count should be included in the result, as a empty string,
+            # this does not matter in the case of delete since we only care for the id,
+            # but we keep it all for the backward compatibility with WRGL.
             "deleted_rows": [
-                [str(getattr(to_deleted, field) or "") for field in self.fields]
+                [
+                    str(getattr(to_deleted, field) or "")
+                    for field in self.fields
+                    if field != "page_count"
+                ]
+                + [""]
             ],
             "updated_rows": [self.csv_data[0]],
             "columns_mapping": {

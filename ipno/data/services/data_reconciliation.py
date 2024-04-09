@@ -91,12 +91,17 @@ class DataReconciliation:
         )
 
     def _get_columns(self):
-        return [
+        columns = [
             field.name
             for field in self.model_class._meta.fields
             if field.name not in self.model_class.BASE_FIELDS
             and field.name not in self.model_class.CUSTOM_FIELDS
         ]
+
+        if self.model_name == DOCUMENT_MODEL_NAME:
+            columns += ["page_count"]
+
+        return columns
 
     def _get_queryset(self):
         return self.model_class.objects.all().values()
