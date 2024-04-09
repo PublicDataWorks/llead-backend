@@ -20,6 +20,20 @@ from data.services import (
     UofImporter,
 )
 from data.services.schema_validation import SchemaValidation
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
+)
 from news_articles.services import ProcessRematchOfficers
 from utils.count_data import (
     calculate_complaint_fraction,
@@ -32,9 +46,28 @@ from utils.search_index import rebuild_search_index
 logger = structlog.get_logger("IPNO")
 
 
+# TODO: this should be returned from the downloand csv function
+data_mapping = {
+    AGENCY_MODEL_NAME: "./ipno/csv_data/data_agency_old.csv",
+    OFFICER_MODEL_NAME: "./ipno/csv_data/data_personnel_old.csv",
+    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
+        "./ipno/csv_data/data_news_article_classification_old.csv"
+    ),
+    COMPLAINT_MODEL_NAME: "./ipno/csv_data/data_allegation_old.csv",
+    BRADY_MODEL_NAME: "./ipno/csv_data/data_brady_old.csv",
+    USE_OF_FORCE_MODEL_NAME: "./ipno/csv_data/data_use-of-force_old.csv",
+    CITIZEN_MODEL_NAME: "./ipno/csv_data/data_citizens_old.csv",
+    APPEAL_MODEL_NAME: "./ipno/csv_data/data_appeal-hearing_old.csv",
+    EVENT_MODEL_NAME: "./ipno/csv_data/data_event_old.csv",
+    DOCUMENT_MODEL_NAME: "./ipno/csv_data/data_documents_old.csv",
+    POST_OFFICE_HISTORY_MODEL_NAME: "./ipno/csv_data/data_post-officer-history_old.csv",
+    PERSON_MODEL_NAME: "./ipno/csv_data/data_person_old.csv",
+}
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        is_validating_success = SchemaValidation().validate_schemas()
+        is_validating_success = SchemaValidation().validate_schemas(data_mapping)
 
         if not is_validating_success:
             logger.error("Schema validation failed")
@@ -42,19 +75,27 @@ class Command(BaseCommand):
 
         start_time = timezone.now()
 
-        agency_imported = AgencyImporter().process()
-        officer_imported = OfficerImporter().process()
-        ArticleClassificationImporter().process()
-        complaint_imported = ComplaintImporter().process()
-        brady_imported = BradyImporter().process()
-        uof_imported = UofImporter().process()
-        citizen_imported = CitizenImporter().process()
+        agency_imported = AgencyImporter(data_mapping[AGENCY_MODEL_NAME]).process()
+        officer_imported = OfficerImporter(data_mapping[OFFICER_MODEL_NAME]).process()
+        ArticleClassificationImporter(
+            data_mapping[NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME]
+        ).process()
+        complaint_imported = ComplaintImporter(
+            data_mapping[COMPLAINT_MODEL_NAME]
+        ).process()
+        brady_imported = BradyImporter(data_mapping[BRADY_MODEL_NAME]).process()
+        uof_imported = UofImporter(data_mapping[USE_OF_FORCE_MODEL_NAME]).process()
+        citizen_imported = CitizenImporter(data_mapping[CITIZEN_MODEL_NAME]).process()
 
-        appeal_imported = AppealImporter().process()
-        event_imported = EventImporter().process()
-        document_imported = DocumentImporter().process()
-        post_officer_history_imported = PostOfficerHistoryImporter().process()
-        person_imported = PersonImporter().process()
+        appeal_imported = AppealImporter(data_mapping[APPEAL_MODEL_NAME]).process()
+        event_imported = EventImporter(data_mapping[EVENT_MODEL_NAME]).process()
+        document_imported = DocumentImporter(
+            data_mapping[DOCUMENT_MODEL_NAME]
+        ).process()
+        post_officer_history_imported = PostOfficerHistoryImporter(
+            data_mapping[POST_OFFICE_HISTORY_MODEL_NAME]
+        ).process()
+        person_imported = PersonImporter(data_mapping[PERSON_MODEL_NAME]).process()
 
         ProcessRematchOfficers(start_time).process()
 

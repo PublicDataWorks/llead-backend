@@ -8,9 +8,6 @@ from post_officer_history.models.post_officer_history import PostOfficerHistory
 
 fake = Faker()
 
-RACES = ["white", "black"]
-GENDERS = ["male", "female"]
-
 
 class PostOfficerHistoryFactory(factory.django.DjangoModelFactory):
     class Meta:

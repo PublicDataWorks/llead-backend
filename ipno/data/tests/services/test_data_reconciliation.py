@@ -73,7 +73,7 @@ class DataReconciliationTestCaseBase(ABC):
             # FIXME: Ideally, we don't need to store this
             self.content = reader_list[1:]  # Skip the header row
 
-        included_idx = [i for i, j in enumerate(headers) if j in self.fields]
+        included_idx = [headers.index(i) for i in self.fields]
 
         self.csv_data = []
         self.index_column = headers.index(self.index_column_name) or 0
@@ -88,6 +88,9 @@ class DataReconciliationTestCaseBase(ABC):
             "added_rows": self.csv_data,
             "deleted_rows": [],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
     def test_detect_deleted_rows_sucessfully(self):
@@ -102,6 +105,9 @@ class DataReconciliationTestCaseBase(ABC):
                 [str(getattr(existed_instance, field) or "") for field in self.fields]
             ],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
     def test_detect_updated_rows_successfully(self):
@@ -113,6 +119,9 @@ class DataReconciliationTestCaseBase(ABC):
             "added_rows": self.csv_data[1:],
             "deleted_rows": [],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
 
@@ -312,10 +321,10 @@ class PostOfficerHistoryDataReconciliationTestCase(
             POST_OFFICE_HISTORY_MODEL_NAME, self.csv_file_path
         )
         self.Factory = PostOfficerHistoryFactory
-        self.index_column_name = "history_id"
+        self.index_column_name = "uid"
 
     def create_db_instance(self, id):
-        return self.Factory.create(history_id=id)
+        return self.Factory.create(uid=id)
 
 
 class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
@@ -368,7 +377,7 @@ class DocumentDataReconciliationTestCase(TestCase):
             # FIXME: Ideally, we don't need to store this
             self.content = reader_list[1:]  # Skip the header row
 
-        included_idx = [i for i, j in enumerate(headers) if j in self.fields]
+        included_idx = [headers.index(i) for i in self.fields]
         self.index_columns = [headers.index(i) for i in self.index_column_names]
         self.csv_data = []
 
@@ -382,6 +391,9 @@ class DocumentDataReconciliationTestCase(TestCase):
             "added_rows": self.csv_data,
             "deleted_rows": [],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
     def test_detect_deleted_rows_sucessfully(self):
@@ -396,6 +408,9 @@ class DocumentDataReconciliationTestCase(TestCase):
                 [str(getattr(existed_instance, field) or "") for field in self.fields]
             ],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
     def test_detect_updated_rows_successfully(self):
@@ -412,6 +427,9 @@ class DocumentDataReconciliationTestCase(TestCase):
             "added_rows": self.csv_data[1:],
             "deleted_rows": [],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }
 
     def test_detect_delete_by_partial_key_correctly(self):
@@ -435,4 +453,7 @@ class DocumentDataReconciliationTestCase(TestCase):
                 [str(getattr(to_deleted, field) or "") for field in self.fields]
             ],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
         }

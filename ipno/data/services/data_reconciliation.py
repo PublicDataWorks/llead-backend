@@ -81,7 +81,7 @@ class DataReconciliation:
         if self.model_name == EVENT_MODEL_NAME:
             return ["event_uid"]
         if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
-            return ["history_id"]
+            return ["uid"]
         if self.model_name == PERSON_MODEL_NAME:
             return ["person_id"]
         if self.model_name == DOCUMENT_MODEL_NAME:
@@ -117,10 +117,12 @@ class DataReconciliation:
 
         df_csv = pd.read_csv(
             self.csv_file_path, usecols=columns, dtype="string", keep_default_na=False
-        ).fillna("")
+        ).fillna("")[columns]
 
         queryset = self._get_queryset()
-        df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna("")
+        df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna(
+            ""
+        )[columns]
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
         df_all.iloc[:, :-1].fillna("", inplace=True)
@@ -168,4 +170,5 @@ class DataReconciliation:
             "added_rows": added_rows,
             "deleted_rows": deleted_rows,
             "updated_rows": updated_rows,
+            "columns_mapping": {column: columns.index(column) for column in columns},
         }

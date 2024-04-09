@@ -9,6 +9,7 @@ from complaints.models import Complaint
 from data.services.schema_validation import SchemaValidation
 from departments.models import Department
 from documents.models import Document
+from ipno.data.constants import AGENCY_MODEL_NAME
 from news_articles.models import NewsArticleClassification
 from officers.models import Event, Officer
 from people.models import Person
@@ -116,7 +117,8 @@ class SchemaTasksTestCase(TestCase):
     def test_validate_schemas_success(self, mock_check_fields, mock_notify_slack):
         mock_check_fields.return_value = set(), set()
         self.schema_validation.models = [Department]
-        self.schema_validation.validate_schemas()
+        data_mapping = {AGENCY_MODEL_NAME: "csv_file_path"}
+        self.schema_validation.validate_schemas(data_mapping)
 
         expected_message = (
             "====================\nResult after schema validation in *`TEST`*"
@@ -129,7 +131,8 @@ class SchemaTasksTestCase(TestCase):
     def test_validate_schemas_error(self, mock_check_fields, mock_notify_slack):
         mock_check_fields.return_value = {"missing_field"}, set()
         self.schema_validation.models = [Department]
-        self.schema_validation.validate_schemas()
+        data_mapping = {AGENCY_MODEL_NAME: "csv_file_path"}
+        self.schema_validation.validate_schemas(data_mapping)
 
         expected_message = (
             "====================\nResult after schema validation in *`TEST`*"
@@ -143,7 +146,8 @@ class SchemaTasksTestCase(TestCase):
     def test_validate_schemas_unused_fields(self, mock_check_fields, mock_notify_slack):
         mock_check_fields.return_value = set(), {"unused_field"}
         self.schema_validation.models = [Department]
-        self.schema_validation.validate_schemas()
+        data_mapping = {AGENCY_MODEL_NAME: "csv_file_path"}
+        self.schema_validation.validate_schemas(data_mapping)
 
         expected_message = (
             "====================\nResult after schema validation in *`TEST`*"
