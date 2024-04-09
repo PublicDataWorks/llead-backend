@@ -2,6 +2,7 @@ from tqdm import tqdm
 
 from data.constants import NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from news_articles.models import NewsArticle, NewsArticleClassification
 
 
@@ -21,13 +22,17 @@ class ArticleClassificationImporter(BaseImporter):  # pragma: no cover
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + INT_ATTRIBUTES + ["news_article_id"]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_classifications_attrs = []
         self.update_classifications_attrs = []
         self.new_article_classification_ids = []
         self.delete_classification_ids = []
         self.article_ids = NewsArticle.objects.all().values_list("id", flat=True)
         self.article_classification_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(
+            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME, csv_file_path
+        )
 
     def handle_record_data(self, row):
         article_classification_data = self.parse_row_data(row, self.column_mappings)

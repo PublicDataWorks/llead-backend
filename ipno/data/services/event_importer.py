@@ -5,6 +5,7 @@ from tqdm import tqdm
 from complaints.models import Complaint
 from data.constants import EVENT_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from officers.models import Event
 
 
@@ -29,7 +30,7 @@ class EventImporter(BaseImporter):
         + ["officer_id", "department_id", "use_of_force_id", "appeal_id", "brady_id"]
     )
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_events_attrs = []
         self.update_events_attrs = []
         self.new_event_uids = []
@@ -40,6 +41,7 @@ class EventImporter(BaseImporter):
         self.uof_mappings = {}
         self.appeal_mappings = {}
         self.brady_mappings = {}
+        self.data_reconciliation = DataReconciliation(EVENT_MODEL_NAME, csv_file_path)
 
     def get_event_mappings(self):
         return {

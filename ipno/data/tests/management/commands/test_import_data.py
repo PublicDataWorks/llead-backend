@@ -9,6 +9,13 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         patch("data.services.agency_importer.GoogleCloudService").start()
         patch("data.services.document_importer.GoogleCloudService").start()
 
+    @patch(
+        "data.services.article_classification_importer.ArticleClassificationImporter.process"
+    )
+    @patch(
+        "data.services.post_officer_history_importer.PostOfficerHistoryImporter.process"
+    )
+    @patch("data.services.brady_importer.BradyImporter.process")
     @patch("django.core.cache.cache.clear")
     @patch("utils.data_utils.compute_department_data_period")
     @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
@@ -48,6 +55,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         migrate_officer_movement_mock,
         compute_department_data_period_mock,
         cache_clear_mock,
+        brady_process_mock,
+        post_officer_history_process_mock,
+        article_classification_process_mock,
     ):
         agency_process_mock.return_value = True
         appeal_process_mock.return_value = True
@@ -58,6 +68,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         citizen_process_mock.return_value = False
         complaint_process_mock.return_value = True
         event_process_mock.return_value = False
+        brady_process_mock.return_value = True
+        post_officer_history_process_mock.return_value = True
+        article_classification_process_mock.return_value = True
         call_command("import_data")
 
         agency_process_mock.assert_called()
@@ -77,6 +90,13 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_called()
         cache_clear_mock.assert_called()
 
+    @patch(
+        "data.services.article_classification_importer.ArticleClassificationImporter.process"
+    )
+    @patch(
+        "data.services.post_officer_history_importer.PostOfficerHistoryImporter.process"
+    )
+    @patch("data.services.brady_importer.BradyImporter.process")
     @patch("django.core.cache.cache.clear")
     @patch("utils.data_utils.compute_department_data_period")
     @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
@@ -116,6 +136,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         migrate_officer_movement_mock,
         compute_department_data_period_mock,
         cache_clear_mock,
+        brady_process_mock,
+        post_officer_history_process_mock,
+        article_classification_process_mock,
     ):
         agency_process_mock.return_value = False
         appeal_process_mock.return_value = False
@@ -126,6 +149,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         citizen_process_mock.return_value = False
         complaint_process_mock.return_value = False
         event_process_mock.return_value = False
+        brady_process_mock.return_value = False
+        post_officer_history_process_mock.return_value = False
+        article_classification_process_mock.return_value = False
         call_command("import_data")
 
         agency_process_mock.assert_called()
@@ -145,6 +171,13 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
 
+    @patch(
+        "data.services.article_classification_importer.ArticleClassificationImporter.process"
+    )
+    @patch(
+        "data.services.post_officer_history_importer.PostOfficerHistoryImporter.process"
+    )
+    @patch("data.services.brady_importer.BradyImporter.process")
     @patch("django.core.cache.cache.clear")
     @patch("utils.data_utils.compute_department_data_period")
     @patch("data.services.migrate_officer_movement.MigrateOfficerMovement.process")
@@ -184,6 +217,9 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         migrate_officer_movement_mock,
         compute_department_data_period_mock,
         cache_clear_mock,
+        brady_process_mock,
+        post_officer_history_process_mock,
+        article_classification_process_mock,
     ):
         call_command("import_data")
 
@@ -203,3 +239,6 @@ class CreateInitialWRGLReposCommandTestCase(TestCase):
         migrate_officer_movement_mock.assert_not_called()
         compute_department_data_period_mock.assert_not_called()
         cache_clear_mock.assert_not_called()
+        brady_process_mock.assert_not_called()
+        post_officer_history_process_mock.assert_not_called()
+        article_classification_process_mock.assert_not_called()

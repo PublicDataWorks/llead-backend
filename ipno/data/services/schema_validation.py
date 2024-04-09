@@ -33,13 +33,13 @@ class SchemaValidation:
 
         return missing_fixed_fields, unused_fields
 
-    def validate_schemas(self):
+    def validate_schemas(self, data_location_mapping):
         err_msgs, unused_msgs = [], []
 
         for model in self.models:
             model_name = model._meta.model_name
             fixed_fields = self.model_schemas[model_name]
-            csv_file_path = f"../data/{model_name}.csv"
+            csv_file_path = data_location_mapping[model_name]
             missing_fixed_fields, unused_fields = self._check_fields(
                 csv_file_path, fixed_fields
             )

@@ -1,12 +1,9 @@
 import traceback
 from datetime import datetime
 
-from django.conf import settings
 from django.utils.text import slugify
 
 import pytz
-from tqdm import tqdm
-from wrgl import Repository
 
 from appeals.models import Appeal
 from brady.models import Brady
@@ -14,12 +11,10 @@ from complaints.models import Complaint
 from data.constants import (
     IMPORT_LOG_STATUS_ERROR,
     IMPORT_LOG_STATUS_FINISHED,
-    IMPORT_LOG_STATUS_NO_NEW_COMMIT,
     IMPORT_LOG_STATUS_NO_NEW_DATA,
-    IMPORT_LOG_STATUS_RUNNING,
     IMPORT_LOG_STATUS_STARTED,
 )
-from data.models import ImportLog, WrglRepo
+from data.models import ImportLog
 from departments.models import Department
 from officers.models import Officer
 from use_of_forces.models import UseOfForce
@@ -34,9 +29,6 @@ class BaseImporter(object):
     SLUG_ATTRIBUTES = []
     DATE_ATTRIBUTES = []
     BATCH_SIZE = 500
-    WRGL_OFFSET_BATCH_SIZE = 1000
-    branch = "main"
-    new_commit = None
     column_mappings = {}
     old_column_mappings = {}
 
@@ -107,78 +99,6 @@ class BaseImporter(object):
             brady.brady_uid: brady.id for brady in Brady.objects.only("id", "brady_uid")
         }
 
-    def process_wrgl_data(self, old_commit_hash):
-        diff_result = self.repo.diff(self.new_commit.sum, old_commit_hash)
-        if not diff_result.row_diff:
-            return
-
-        old_commit = self.repo.get_commit(old_commit_hash)
-
-        old_columns = old_commit.table.columns
-        self.old_column_mappings = {
-            column: old_columns.index(column) for column in old_columns
-        }
-
-        added_rows = []
-        deleted_rows = []
-        modified_rows_old = []
-
-        added_rows_offsets = [r.off1 for r in diff_result.row_diff if r.off2 is None]
-        removed_rows_offsets = [r.off2 for r in diff_result.row_diff if r.off1 is None]
-        modified_rows_offsets = [
-            r.off1
-            for r in diff_result.row_diff
-            if r.off1 is not None and r.off2 is not None
-        ]
-
-        with tqdm(
-            total=len(added_rows_offsets), desc="Downloading created data"
-        ) as pbar:
-            for i in range(0, len(added_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-                added_rows.extend(
-                    list(
-                        self.repo.get_table_rows(
-                            self.new_commit.table.sum,
-                            added_rows_offsets[i : i + self.WRGL_OFFSET_BATCH_SIZE],
-                        )
-                    )
-                )
-                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
-
-        with tqdm(
-            total=len(removed_rows_offsets), desc="Downloading deleted data"
-        ) as pbar:
-            for i in range(0, len(removed_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-                deleted_rows.extend(
-                    list(
-                        self.repo.get_table_rows(
-                            old_commit.table.sum,
-                            removed_rows_offsets[i : i + self.WRGL_OFFSET_BATCH_SIZE],
-                        )
-                    )
-                )
-                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
-
-        with tqdm(
-            total=len(modified_rows_offsets), desc="Downloading modified data"
-        ) as pbar:
-            for i in range(0, len(modified_rows_offsets), self.WRGL_OFFSET_BATCH_SIZE):
-                modified_rows_old.extend(
-                    list(
-                        self.repo.get_table_rows(
-                            self.new_commit.table.sum,
-                            modified_rows_offsets[i : i + self.WRGL_OFFSET_BATCH_SIZE],
-                        )
-                    )
-                )
-                pbar.update(self.WRGL_OFFSET_BATCH_SIZE)
-
-        return {
-            "added_rows": added_rows,
-            "deleted_rows": deleted_rows,
-            "updated_rows": modified_rows_old,
-        }
-
     def bulk_import(
         self,
         klass,
@@ -221,131 +141,59 @@ class BaseImporter(object):
             setattr(import_log, key, value)
         import_log.save()
 
-    def retrieve_wrgl_data(self, branch):
-        self.repo = Repository(
-            "https://wrgl.llead.co/",
-            settings.WRGL_CLIENT_ID,
-            settings.WRGL_CLIENT_SECRET,
-        )
-
-        self.new_commit = self.repo.get_branch(branch)
-
-        columns = self.new_commit.table.columns
-        self.column_mappings = {column: columns.index(column) for column in columns}
-
     def process(self):
         import_log = ImportLog.objects.create(
             data_model=self.data_model,
             status=IMPORT_LOG_STATUS_STARTED,
             started_at=datetime.now(pytz.utc),
         )
-        wrgl_repo = WrglRepo.objects.filter(data_model=self.data_model).first()
 
-        if wrgl_repo:
-            self.update_import_log(
-                import_log,
-                {
-                    "repo_name": wrgl_repo.repo_name,
-                },
-            )
+        try:
+            data = self.data_reconciliation.reconcile_data()
 
-            self.retrieve_wrgl_data(wrgl_repo.repo_name)
+            if (
+                data.get("added_rows")
+                or data.get("updated_rows")
+                or data.get("deleted_rows")
+            ):
+                self.column_mappings = data["columns_mapping"]
+                self.old_column_mappings = data[
+                    "columns_mapping"
+                ]  # Add this for backward compatibility only, TODO: remove
 
-            commit_hash = wrgl_repo.latest_commit_hash
+                import_results = self.import_data(data)
 
-            if commit_hash:
-                current_hash = wrgl_repo.commit_hash
-                if current_hash != commit_hash:
-                    self.update_import_log(
-                        import_log,
-                        {
-                            "commit_hash": commit_hash,
-                            "status": IMPORT_LOG_STATUS_RUNNING,
-                        },
-                    )
-                    try:
-                        if current_hash:
-                            data = self.process_wrgl_data(current_hash)
-                        else:
-                            all_rows = list(
-                                self.repo.get_blocks(
-                                    f"heads/{wrgl_repo.repo_name}",
-                                    with_column_names=False,
-                                )
-                            )
-                            data = {
-                                "added_rows": all_rows,
-                                "deleted_rows": [],
-                                "updated_rows": [],
-                            }
+                self.update_import_log(
+                    import_log,
+                    {
+                        "status": IMPORT_LOG_STATUS_FINISHED,
+                        "finished_at": datetime.now(pytz.utc),
+                        "created_rows": import_results.get("created_rows"),
+                        "updated_rows": import_results.get("updated_rows"),
+                        "deleted_rows": import_results.get("deleted_rows"),
+                    },
+                )
 
-                        if data:
-                            import_results = self.import_data(data)
-                            wrgl_repo.commit_hash = commit_hash
-                            wrgl_repo.save()
-                            self.update_import_log(
-                                import_log,
-                                {
-                                    "status": IMPORT_LOG_STATUS_FINISHED,
-                                    "finished_at": datetime.now(pytz.utc),
-                                    "created_rows": import_results.get("created_rows"),
-                                    "updated_rows": import_results.get("updated_rows"),
-                                    "deleted_rows": import_results.get("deleted_rows"),
-                                },
-                            )
-                            return True
-                        else:
-                            wrgl_repo.commit_hash = commit_hash
-                            wrgl_repo.save()
-                            self.update_import_log(
-                                import_log,
-                                {
-                                    "commit_hash": commit_hash,
-                                    "status": IMPORT_LOG_STATUS_NO_NEW_DATA,
-                                    "finished_at": datetime.now(pytz.utc),
-                                },
-                            )
-                    except Exception as e:
-                        self.update_import_log(
-                            import_log,
-                            {
-                                "status": IMPORT_LOG_STATUS_ERROR,
-                                "finished_at": datetime.now(pytz.utc),
-                                "error_message": (
-                                    "Error occurs while importing"
-                                    f" data!\n{traceback.format_exc()}"
-                                ),
-                            },
-                        )
-                        raise e
-                else:
-                    self.update_import_log(
-                        import_log,
-                        {
-                            "commit_hash": commit_hash,
-                            "status": IMPORT_LOG_STATUS_NO_NEW_COMMIT,
-                            "finished_at": datetime.now(pytz.utc),
-                        },
-                    )
+                return True
             else:
                 self.update_import_log(
                     import_log,
                     {
-                        "status": IMPORT_LOG_STATUS_ERROR,
+                        "status": IMPORT_LOG_STATUS_NO_NEW_DATA,
                         "finished_at": datetime.now(pytz.utc),
-                        "error_message": (
-                            "Cannot get latest commit hash from Wrgl for repo"
-                            f" {wrgl_repo.repo_name}!"
-                        ),
                     },
                 )
 
-        else:
+                return False
+        except Exception as e:
             self.update_import_log(
                 import_log,
                 {
                     "status": IMPORT_LOG_STATUS_ERROR,
                     "finished_at": datetime.now(pytz.utc),
-                    "error_message": "Cannot find Wrgl Repo!",
+                    "error_message": (
+                        f"Error occurs while importing data!\n{traceback.format_exc()}"
+                    ),
                 },
             )
+            raise e
