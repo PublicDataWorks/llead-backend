@@ -1,3 +1,4 @@
+import os
 from shutil import rmtree
 
 from django.conf import settings
@@ -61,6 +62,37 @@ class GoogleCloudService:
 
         self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)
+
+    def download_csv_data_sequentially(self, folder_name):
+        blob_names = [
+            f"{folder_name}/{csv_file_name_mapping[model]}"
+            for model in csv_file_name_mapping
+        ]
+
+        if not os.path.exists(f"{settings.CSV_DATA_PATH}/{folder_name}"):
+            os.makedirs(f"{settings.CSV_DATA_PATH}/{folder_name}")
+
+        try:
+            for name in blob_names:
+                blob = self.bucket.blob(name)
+                blob.download_to_filename(f"{settings.CSV_DATA_PATH}/{name}")
+                logger.info("Successfully downloaded {}".format(name))
+        except Exception as e:
+            logger.error(
+                "Failed to download raw data due to exception: {}".format(str(e))
+            )
+            rmtree(f"{settings.CSV_DATA_PATH}/{folder_name}")
+            raise Exception(
+                "Failed to download data from Google Cloud Storage, file name {}"
+                .format(name)
+            )
+
+        downloaded_data = {
+            model_name: f"{settings.CSV_DATA_PATH}/{folder_name}/{csv_file_name_mapping[model_name]}"
+            for model_name in csv_file_name_mapping
+        }
+
+        return downloaded_data
 
     def download_csv_data(self, folder_name):
         blob_names = [

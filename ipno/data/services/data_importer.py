@@ -55,7 +55,7 @@ class DataImporter:
             settings.RAW_DATA_BUCKET_NAME,
         )
 
-        data_mapping = gs.download_csv_data(folder_name)
+        data_mapping = gs.download_csv_data_sequentially(folder_name)
 
         try:
             is_validating_success = SchemaValidation().validate_schemas(data_mapping)

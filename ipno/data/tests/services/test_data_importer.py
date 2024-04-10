@@ -75,7 +75,7 @@ class DataImporterTestCase(TestCase):
         mock_google_cloud_service,
         rmtree_mock,
     ):
-        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+        mock_google_cloud_service.return_value.download_csv_data_sequentially.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
             APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
             PERSON_MODEL_NAME: "data_person.csv",
@@ -175,7 +175,7 @@ class DataImporterTestCase(TestCase):
         mock_google_cloud_service,
         rmtree_mock,
     ):
-        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+        mock_google_cloud_service.return_value.download_csv_data_sequentially.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
             APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
             PERSON_MODEL_NAME: "data_person.csv",
@@ -274,7 +274,7 @@ class DataImporterTestCase(TestCase):
         mock_google_cloud_service,
         rmtree_mock,
     ):
-        mock_google_cloud_service.return_value.download_csv_data.return_value = {
+        mock_google_cloud_service.return_value.download_csv_data_sequentially.return_value = {
             AGENCY_MODEL_NAME: "data_agency.csv",
             APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
             PERSON_MODEL_NAME: "data_person.csv",
