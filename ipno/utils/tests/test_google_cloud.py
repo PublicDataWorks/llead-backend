@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test.testcases import TestCase
 
-from mock import Mock, patch
+from mock import Mock, call, patch
 
 from utils.google_cloud import GoogleCloudService, csv_file_name_mapping
 
@@ -168,3 +168,85 @@ class GoogleCloudTestCase(TestCase):
         )
 
         mock_rmtree.assert_called_with(f"{settings.CSV_DATA_PATH}/{folder_name}")
+
+    @patch("utils.google_cloud.os")
+    @patch("utils.google_cloud.rmtree")
+    @patch("utils.google_cloud.Client")
+    def test_download_csv_data_sequentially(self, mock_client, mock_rmtree, mock_os):
+        mock_os.path.exists.return_value = False
+
+        mock_download_to_filename = Mock()
+        mock_blob = Mock(
+            return_value=Mock(download_to_filename=mock_download_to_filename)
+        )
+        mock_bucket = Mock(return_value=Mock(blob=mock_blob))
+        mock_storage_client = Mock(bucket=mock_bucket)
+        mock_client.return_value = mock_storage_client
+
+        google_cloud_service = GoogleCloudService("bucket_name")
+        google_cloud_service.download_csv_data_sequentially("test_folder")
+
+        mock_os.makedirs.assert_called_with(f"{settings.CSV_DATA_PATH}/test_folder")
+        mock_blob.assert_has_calls(
+            [
+                call("test_folder/data_agency.csv"),
+                call("test_folder/data_personnel.csv"),
+                call("test_folder/data_news_article_classification.csv"),
+                call("test_folder/data_allegation.csv"),
+                call("test_folder/data_brady.csv"),
+                call("test_folder/data_use-of-force.csv"),
+                call("test_folder/data_citizens.csv"),
+                call("test_folder/data_appeal-hearing.csv"),
+                call("test_folder/data_event.csv"),
+                call("test_folder/data_documents.csv"),
+                call("test_folder/data_post-officer-history.csv"),
+                call("test_folder/data_person.csv"),
+            ]
+        )
+        mock_download_to_filename.assert_has_calls(
+            [
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_agency.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_personnel.csv"),
+                call(
+                    f"{settings.CSV_DATA_PATH}/test_folder/data_news_article_classification.csv"
+                ),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_allegation.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_brady.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_use-of-force.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_citizens.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_appeal-hearing.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_event.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_documents.csv"),
+                call(
+                    f"{settings.CSV_DATA_PATH}/test_folder/data_post-officer-history.csv"
+                ),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/data_person.csv"),
+            ]
+        )
+        mock_rmtree.assert_not_called()
+
+    @patch("utils.google_cloud.os")
+    @patch("utils.google_cloud.rmtree")
+    @patch("utils.google_cloud.Client")
+    def test_download_csv_data_sequentially_fail(
+        self, mock_client, mock_rmtree, mock_os
+    ):
+        mock_os.path.exists.return_value = False
+
+        mock_download_to_filename = Mock()
+        mock_download_to_filename.side_effect = Exception()
+        mock_blob = Mock(
+            return_value=Mock(download_to_filename=mock_download_to_filename)
+        )
+        mock_bucket = Mock(return_value=Mock(blob=mock_blob))
+        mock_storage_client = Mock(bucket=mock_bucket)
+        mock_client.return_value = mock_storage_client
+
+        google_cloud_service = GoogleCloudService("bucket_name")
+
+        with self.assertRaises(Exception):
+            google_cloud_service.download_csv_data_sequentially("test_folder")
+
+        mock_os.makedirs.assert_called_with(f"{settings.CSV_DATA_PATH}/test_folder")
+        mock_blob.assert_called_once()
+        mock_rmtree.assert_called_with(f"{settings.CSV_DATA_PATH}/test_folder")
