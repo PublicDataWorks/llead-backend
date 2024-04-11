@@ -44,6 +44,7 @@ from historical_data.views import HistoricalDataViewSet
 from news_articles.views import NewsArticlesViewSet
 from officers.views import OfficersViewSet
 from q_and_a.views import QAndAViewSet
+from schemas.views import SchemaView
 from search.views import SearchViewSet
 from status.views import StatusView
 
@@ -80,6 +81,7 @@ urlpatterns = [
     path("api/user/", UserView.as_view(), name="user"),
     path("api/status/", StatusView.as_view(), name="status"),
     path("api/findings/", FindingView.as_view(), name="findings"),
+    path("api/schemas/validate/", SchemaView.as_view(), name="validate_schemas"),
     path("martor/", include("martor.urls")),
     path(
         "api/password-reset/",
