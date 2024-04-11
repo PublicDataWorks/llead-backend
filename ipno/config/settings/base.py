@@ -301,3 +301,5 @@ SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "")
 SCHEMA_BUCKET_NAME = "llead-schema"
 
 CSV_DATA_PATH = "./ipno/csv_data"
+
+IPNO_API_KEY = env.str("IPNO_API_KEY")
