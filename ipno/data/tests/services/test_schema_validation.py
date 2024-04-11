@@ -10,7 +10,6 @@ from data.services.schema_validation import SchemaValidation
 from departments.models import Department
 from documents.models import Document
 from ipno.data.constants import AGENCY_MODEL_NAME
-from news_articles.models import NewsArticleClassification
 from officers.models import Event, Officer
 from people.models import Person
 from post_officer_history.models import PostOfficerHistory
@@ -76,11 +75,6 @@ class SchemaTasksTestCase(TestCase):
             - base_fields
             - Brady.CUSTOM_FIELDS
         )
-        article_classification_fixed_fields = (
-            {field.name for field in NewsArticleClassification._meta.fields}
-            - base_fields
-            - NewsArticleClassification.CUSTOM_FIELDS
-        )
         post_officer_history_fixed_fields = (
             {field.name for field in PostOfficerHistory._meta.fields}
             - base_fields
@@ -98,7 +92,6 @@ class SchemaTasksTestCase(TestCase):
             "appeal": appeal_fixed_fields,
             "citizen": citizen_fixed_fields,
             "brady": brady_fixed_fields,
-            "newsarticleclassification": article_classification_fixed_fields,
             "postofficerhistory": post_officer_history_fixed_fields,
         }
 

@@ -11,7 +11,6 @@ from ipno.data.constants import (
     COMPLAINT_MODEL_NAME,
     DOCUMENT_MODEL_NAME,
     EVENT_MODEL_NAME,
-    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
     PERSON_MODEL_NAME,
     POST_OFFICE_HISTORY_MODEL_NAME,
@@ -27,7 +26,6 @@ class DataImporterTestCase(TestCase):
 
     @patch("data.services.data_importer.rmtree")
     @patch("data.services.data_importer.GoogleCloudService")
-    @patch("data.services.data_importer.ArticleClassificationImporter.process")
     @patch("data.services.data_importer.PostOfficerHistoryImporter.process")
     @patch("data.services.data_importer.BradyImporter.process")
     @patch("data.services.data_importer.cache.clear")
@@ -71,7 +69,6 @@ class DataImporterTestCase(TestCase):
         cache_clear_mock,
         brady_process_mock,
         post_officer_history_process_mock,
-        article_classification_process_mock,
         mock_google_cloud_service,
         rmtree_mock,
     ):
@@ -85,9 +82,6 @@ class DataImporterTestCase(TestCase):
             CITIZEN_MODEL_NAME: "data_citizens.csv",
             COMPLAINT_MODEL_NAME: "data_allegation.csv",
             EVENT_MODEL_NAME: "data_event.csv",
-            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
-                "data_news_article_classification.csv"
-            ),
             BRADY_MODEL_NAME: "data_brady.csv",
             POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
         }
@@ -102,7 +96,6 @@ class DataImporterTestCase(TestCase):
         event_process_mock.return_value = False
         brady_process_mock.return_value = True
         post_officer_history_process_mock.return_value = True
-        article_classification_process_mock.return_value = True
 
         self.data_importer.execute("folder_name")
 
@@ -127,7 +120,6 @@ class DataImporterTestCase(TestCase):
 
     @patch("data.services.data_importer.rmtree")
     @patch("data.services.data_importer.GoogleCloudService")
-    @patch("data.services.data_importer.ArticleClassificationImporter.process")
     @patch("data.services.data_importer.PostOfficerHistoryImporter.process")
     @patch("data.services.data_importer.BradyImporter.process")
     @patch("data.services.data_importer.cache.clear")
@@ -171,7 +163,6 @@ class DataImporterTestCase(TestCase):
         cache_clear_mock,
         brady_process_mock,
         post_officer_history_process_mock,
-        article_classification_process_mock,
         mock_google_cloud_service,
         rmtree_mock,
     ):
@@ -185,9 +176,6 @@ class DataImporterTestCase(TestCase):
             CITIZEN_MODEL_NAME: "data_citizens.csv",
             COMPLAINT_MODEL_NAME: "data_allegation.csv",
             EVENT_MODEL_NAME: "data_event.csv",
-            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
-                "data_news_article_classification.csv"
-            ),
             BRADY_MODEL_NAME: "data_brady.csv",
             POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
         }
@@ -202,7 +190,6 @@ class DataImporterTestCase(TestCase):
         event_process_mock.return_value = False
         brady_process_mock.return_value = False
         post_officer_history_process_mock.return_value = False
-        article_classification_process_mock.return_value = False
         self.data_importer.execute("folder_name")
 
         agency_process_mock.assert_called()
@@ -226,7 +213,6 @@ class DataImporterTestCase(TestCase):
 
     @patch("data.services.data_importer.rmtree")
     @patch("data.services.data_importer.GoogleCloudService")
-    @patch("data.services.data_importer.ArticleClassificationImporter.process")
     @patch("data.services.data_importer.PostOfficerHistoryImporter.process")
     @patch("data.services.data_importer.BradyImporter.process")
     @patch("data.services.data_importer.cache.clear")
@@ -270,7 +256,6 @@ class DataImporterTestCase(TestCase):
         cache_clear_mock,
         brady_process_mock,
         post_officer_history_process_mock,
-        article_classification_process_mock,
         mock_google_cloud_service,
         rmtree_mock,
     ):
@@ -284,9 +269,6 @@ class DataImporterTestCase(TestCase):
             CITIZEN_MODEL_NAME: "data_citizens.csv",
             COMPLAINT_MODEL_NAME: "data_allegation.csv",
             EVENT_MODEL_NAME: "data_event.csv",
-            NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: (
-                "data_news_article_classification.csv"
-            ),
             BRADY_MODEL_NAME: "data_brady.csv",
             POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
         }
@@ -310,6 +292,5 @@ class DataImporterTestCase(TestCase):
         cache_clear_mock.assert_not_called()
         brady_process_mock.assert_not_called()
         post_officer_history_process_mock.assert_not_called()
-        article_classification_process_mock.assert_not_called()
 
         rmtree_mock.assert_called()
