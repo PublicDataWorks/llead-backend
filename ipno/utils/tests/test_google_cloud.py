@@ -191,7 +191,6 @@ class GoogleCloudTestCase(TestCase):
             [
                 call("test_folder/data_agency.csv"),
                 call("test_folder/data_personnel.csv"),
-                call("test_folder/data_news_article_classification.csv"),
                 call("test_folder/data_allegation.csv"),
                 call("test_folder/data_brady.csv"),
                 call("test_folder/data_use-of-force.csv"),
@@ -207,9 +206,6 @@ class GoogleCloudTestCase(TestCase):
             [
                 call(f"{settings.CSV_DATA_PATH}/test_folder/data_agency.csv"),
                 call(f"{settings.CSV_DATA_PATH}/test_folder/data_personnel.csv"),
-                call(
-                    f"{settings.CSV_DATA_PATH}/test_folder/data_news_article_classification.csv"
-                ),
                 call(f"{settings.CSV_DATA_PATH}/test_folder/data_allegation.csv"),
                 call(f"{settings.CSV_DATA_PATH}/test_folder/data_brady.csv"),
                 call(f"{settings.CSV_DATA_PATH}/test_folder/data_use-of-force.csv"),

@@ -9,7 +9,6 @@ import structlog
 from data.services import (
     AgencyImporter,
     AppealImporter,
-    ArticleClassificationImporter,
     BradyImporter,
     CitizenImporter,
     ComplaintImporter,
@@ -30,7 +29,6 @@ from ipno.data.constants import (
     COMPLAINT_MODEL_NAME,
     DOCUMENT_MODEL_NAME,
     EVENT_MODEL_NAME,
-    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
     PERSON_MODEL_NAME,
     POST_OFFICE_HISTORY_MODEL_NAME,
@@ -69,9 +67,6 @@ class DataImporter:
             agency_imported = AgencyImporter(data_mapping[AGENCY_MODEL_NAME]).process()
             officer_imported = OfficerImporter(
                 data_mapping[OFFICER_MODEL_NAME]
-            ).process()
-            ArticleClassificationImporter(
-                data_mapping[NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME]
             ).process()
             complaint_imported = ComplaintImporter(
                 data_mapping[COMPLAINT_MODEL_NAME]
