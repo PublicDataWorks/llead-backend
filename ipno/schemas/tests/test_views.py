@@ -12,7 +12,9 @@ class SchemaViewTestCase(AuthAPITestCase):
     @patch("schemas.views.GoogleCloudService")
     @patch("schemas.views.open")
     def test_get_schema(self, mock_open, mock_google_cloud_service):
-        mock_google_cloud_service.return_value.download_schema.return_value = "schema.sql"
+        mock_google_cloud_service.return_value.download_schema.return_value = (
+            "schema.sql"
+        )
         mock_open.return_value = BytesIO(b"data")
 
         url = reverse("validate_schemas")
