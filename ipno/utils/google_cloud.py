@@ -21,17 +21,17 @@ from ipno.data.constants import (
 )
 
 csv_file_name_mapping = {
-    AGENCY_MODEL_NAME: "data_agency.csv",
-    OFFICER_MODEL_NAME: "data_personnel.csv",
-    COMPLAINT_MODEL_NAME: "data_allegation.csv",
-    BRADY_MODEL_NAME: "data_brady.csv",
-    USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
-    CITIZEN_MODEL_NAME: "data_citizens.csv",
-    APPEAL_MODEL_NAME: "data_appeal-hearing.csv",
-    EVENT_MODEL_NAME: "data_event.csv",
-    DOCUMENT_MODEL_NAME: "data_documents.csv",
-    POST_OFFICE_HISTORY_MODEL_NAME: "data_post-officer-history.csv",
-    PERSON_MODEL_NAME: "data_person.csv",
+    AGENCY_MODEL_NAME: "agency_reference_list.csv",
+    OFFICER_MODEL_NAME: "personnel.csv",
+    COMPLAINT_MODEL_NAME: "allegation.csv",
+    BRADY_MODEL_NAME: "brady.csv",
+    USE_OF_FORCE_MODEL_NAME: "use_of_force.csv",
+    CITIZEN_MODEL_NAME: "citizens.csv",
+    APPEAL_MODEL_NAME: "appeals.csv",
+    EVENT_MODEL_NAME: "event.csv",
+    DOCUMENT_MODEL_NAME: "documents.csv",
+    POST_OFFICE_HISTORY_MODEL_NAME: "post_officer_history.csv",
+    PERSON_MODEL_NAME: "person.csv",
 }
 
 logger = structlog.get_logger("IPNO")
