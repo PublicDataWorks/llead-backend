@@ -14,7 +14,6 @@ from ipno.data.constants import (
     COMPLAINT_MODEL_NAME,
     DOCUMENT_MODEL_NAME,
     EVENT_MODEL_NAME,
-    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME,
     OFFICER_MODEL_NAME,
     PERSON_MODEL_NAME,
     POST_OFFICE_HISTORY_MODEL_NAME,
@@ -24,7 +23,6 @@ from ipno.data.constants import (
 csv_file_name_mapping = {
     AGENCY_MODEL_NAME: "data_agency.csv",
     OFFICER_MODEL_NAME: "data_personnel.csv",
-    NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME: "data_news_article_classification.csv",
     COMPLAINT_MODEL_NAME: "data_allegation.csv",
     BRADY_MODEL_NAME: "data_brady.csv",
     USE_OF_FORCE_MODEL_NAME: "data_use-of-force.csv",
