@@ -153,7 +153,7 @@ class GoogleCloudTestCase(TestCase):
         assert str(
             e.exception
         ) == "Failed to download data from Google Cloud Storage, file name {}".format(
-            "folder_name/data_person.csv"
+            "folder_name/person.csv"
         )
 
         mock_client.assert_called()
@@ -189,34 +189,32 @@ class GoogleCloudTestCase(TestCase):
         mock_os.makedirs.assert_called_with(f"{settings.CSV_DATA_PATH}/test_folder")
         mock_blob.assert_has_calls(
             [
-                call("test_folder/data_agency.csv"),
-                call("test_folder/data_personnel.csv"),
-                call("test_folder/data_allegation.csv"),
-                call("test_folder/data_brady.csv"),
-                call("test_folder/data_use-of-force.csv"),
-                call("test_folder/data_citizens.csv"),
-                call("test_folder/data_appeal-hearing.csv"),
-                call("test_folder/data_event.csv"),
-                call("test_folder/data_documents.csv"),
-                call("test_folder/data_post-officer-history.csv"),
-                call("test_folder/data_person.csv"),
+                call("test_folder/agency_reference_list.csv"),
+                call("test_folder/personnel.csv"),
+                call("test_folder/allegation.csv"),
+                call("test_folder/brady.csv"),
+                call("test_folder/use_of_force.csv"),
+                call("test_folder/citizens.csv"),
+                call("test_folder/appeals.csv"),
+                call("test_folder/event.csv"),
+                call("test_folder/documents.csv"),
+                call("test_folder/post_officer_history.csv"),
+                call("test_folder/person.csv"),
             ]
         )
         mock_download_to_filename.assert_has_calls(
             [
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_agency.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_personnel.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_allegation.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_brady.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_use-of-force.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_citizens.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_appeal-hearing.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_event.csv"),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_documents.csv"),
-                call(
-                    f"{settings.CSV_DATA_PATH}/test_folder/data_post-officer-history.csv"
-                ),
-                call(f"{settings.CSV_DATA_PATH}/test_folder/data_person.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/agency_reference_list.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/personnel.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/allegation.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/brady.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/use_of_force.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/citizens.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/appeals.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/event.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/documents.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/post_officer_history.csv"),
+                call(f"{settings.CSV_DATA_PATH}/test_folder/person.csv"),
             ]
         )
         mock_rmtree.assert_not_called()
