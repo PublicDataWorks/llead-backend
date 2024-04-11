@@ -61,6 +61,10 @@ class GoogleCloudService:
         self.bucket.copy_blob(source_blob, self.bucket, destination_blob_name)
         self.bucket.delete_blob(source_blob_name)
 
+    def download_schema(self, file_url):
+        blob = self.bucket.blob(file_url)
+        blob.download_to_filename("./schema.sql")
+
     def download_csv_data_sequentially(self, folder_name):
         blob_names = [
             f"{folder_name}/{csv_file_name_mapping[model]}"
