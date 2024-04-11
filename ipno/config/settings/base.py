@@ -90,6 +90,7 @@ LOCAL_APPS = (
     "appeals",
     "feedbacks",
     "historical_data",
+    "schemas",
     "citizens",
     "brady",
     "findings",
