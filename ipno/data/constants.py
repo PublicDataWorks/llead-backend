@@ -31,3 +31,5 @@ IMPORT_LOG_STATUSES = (
 )
 
 MAP_IMAGES_SUB_DIR = "map_images"
+
+IMPORT_TASK_ID_CACHE_KEY = "import_task_id_cache_key"
