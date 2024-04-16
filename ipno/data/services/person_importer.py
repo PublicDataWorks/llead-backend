@@ -12,14 +12,13 @@ from people.models import Person
 class PersonImporter(BaseImporter):
     data_model = PERSON_MODEL_NAME
 
-    ATTRIBUTES = [
-        "canonical_officer_uid",
-        "person_id",
-    ]
+    ATTRIBUTES = ["canonical_officer_uid", "person_id", "canonical_uid", "uids"]
     UPDATE_ATTRIBUTES = [
         "canonical_officer_id",
         "person_id",
         "all_complaints_count",
+        "canonical_uid",
+        "uids",
     ]
 
     def __init__(self, csv_file_path):
