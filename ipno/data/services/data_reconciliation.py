@@ -175,6 +175,7 @@ class DataReconciliation:
         self.normalize_data(df_db, df_csv)
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
+        df_all = df_all.drop_duplicates(subset=idx_columns, keep="first")
         df_all.iloc[:, :-1] = df_all.iloc[:, :-1].fillna("")
 
         added = df_all[df_all["_merge"] == "right_only"]
