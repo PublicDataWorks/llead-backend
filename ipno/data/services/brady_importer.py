@@ -3,6 +3,7 @@ from tqdm import tqdm
 from brady.models import Brady
 from data.constants import BRADY_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 
 
 class BradyImporter(BaseImporter):  # pragma: no cover
@@ -16,7 +17,7 @@ class BradyImporter(BaseImporter):  # pragma: no cover
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["officer_id", "department_id"]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_brady_attrs = []
         self.update_brady_attrs = []
         self.new_brady_uids = []
@@ -24,6 +25,8 @@ class BradyImporter(BaseImporter):  # pragma: no cover
         self.officer_mappings = {}
         self.department_mappings = {}
         self.brady_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(BRADY_MODEL_NAME, csv_file_path)
 
     def handle_record_data(self, row):
         uid = row[self.column_mappings["uid"]]

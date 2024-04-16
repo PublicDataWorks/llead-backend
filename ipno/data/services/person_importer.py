@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from data.constants import PERSON_MODEL_NAME
 from data.services import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from officers.models import Officer
 from people.models import Person
 
@@ -11,23 +12,23 @@ from people.models import Person
 class PersonImporter(BaseImporter):
     data_model = PERSON_MODEL_NAME
 
-    ATTRIBUTES = [
-        "canonical_officer_uid",
-        "person_id",
-    ]
+    ATTRIBUTES = ["canonical_officer_uid", "person_id", "canonical_uid", "uids"]
     UPDATE_ATTRIBUTES = [
         "canonical_officer_id",
         "person_id",
         "all_complaints_count",
+        "canonical_uid",
+        "uids",
     ]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_people_attrs = []
         self.update_people_attrs = []
         self.new_person_ids = []
         self.delete_people_ids = []
         self.officer_mappings = {}
         self.person_mappings = {}
+        self.data_reconciliation = DataReconciliation(PERSON_MODEL_NAME, csv_file_path)
 
     def get_person_mappings(self):
         return {

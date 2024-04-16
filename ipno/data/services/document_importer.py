@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from data.constants import DOCUMENT_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from documents.models import Document
 from utils.dropbox_utils import DropboxService
 from utils.google_cloud import GoogleCloudService
@@ -49,8 +50,8 @@ class DocumentImporter(BaseImporter):
         ]
     )
 
-    def __init__(self):
-        self.gs = GoogleCloudService()
+    def __init__(self, csv_file_path):
+        self.gs = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
         self.ds = DropboxService()
 
         self.new_documents = []
@@ -59,6 +60,9 @@ class DocumentImporter(BaseImporter):
         self.delete_documents_ids = []
         self.document_mappings = {}
         self.uploaded_files = {}
+        self.data_reconciliation = DataReconciliation(
+            DOCUMENT_MODEL_NAME, csv_file_path
+        )
 
     def get_document_mappings(self):
         documents_attrs = [
@@ -199,9 +203,11 @@ class DocumentImporter(BaseImporter):
         try:
             self.gs.upload_file_from_string(upload_location, file_blob, file_type)
 
-            download_url = f"{settings.GC_PATH}{upload_location}".replace(
-                " ", "%20"
-            ).replace("'", "%27")
+            download_url = (
+                f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}".replace(
+                    " ", "%20"
+                ).replace("'", "%27")
+            )
 
             return download_url
         except Exception:

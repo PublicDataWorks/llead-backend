@@ -1,10 +1,11 @@
 from django.db import models
 
-from utils.models import APITemplateModel, TimeStampsModel
+from utils.models import TimeStampsModel
 
 
-class NewsArticleClassification(TimeStampsModel, APITemplateModel):
+class NewsArticleClassification(TimeStampsModel):
     CUSTOM_FIELDS = {"news_article"}
+    BASE_FIELDS = {"id", "created_at", "updated_at"}
 
     article_id = models.IntegerField(unique=True, db_index=True)
     text = models.TextField()

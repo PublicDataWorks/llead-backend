@@ -1,25 +1,6 @@
 from django.contrib import admin
 
-from data.models import ImportLog, WrglRepo
-
-
-class WrglRepoAdmin(admin.ModelAdmin):
-    list_display = (
-        "data_model",
-        "repo_name",
-        "commit_hash",
-        "latest_commit_hash",
-        "updated_at",
-    )
-
-    def has_add_permission(self, request, obj=None):
-        return False  # pragma: no cover
-
-    def has_change_permission(self, request, obj=None):
-        return False  # pragma: no cover
-
-    def has_delete_permission(self, request, obj=None):
-        return False  # pragma: no cover
+from data.models import ImportLog
 
 
 class ImportLogAdmin(admin.ModelAdmin):
@@ -45,5 +26,4 @@ class ImportLogAdmin(admin.ModelAdmin):
         return False  # pragma: no cover
 
 
-admin.site.register(WrglRepo, WrglRepoAdmin)
 admin.site.register(ImportLog, ImportLogAdmin)

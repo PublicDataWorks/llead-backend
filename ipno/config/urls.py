@@ -35,6 +35,7 @@ from authentication.views import (
     TokenRevokeView,
     UserView,
 )
+from data.views import ImportDataView
 from departments.views import DepartmentsViewSet
 from documents.views import DocumentsViewSet
 from feedbacks.views import FeedbackViewSet
@@ -76,6 +77,7 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh_token"),
     path("api/token/revoke/", TokenRevokeView.as_view(), name="revoke_token"),
+    path("api/data/import/", ImportDataView.as_view(), name="import_data"),
     path("api/user/", UserView.as_view(), name="user"),
     path("api/status/", StatusView.as_view(), name="status"),
     path("api/findings/", FindingView.as_view(), name="findings"),

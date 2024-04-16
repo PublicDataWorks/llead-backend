@@ -5,6 +5,7 @@ from tqdm import tqdm
 from complaints.models import Complaint
 from data.constants import COMPLAINT_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 
 
 class ComplaintImporter(BaseImporter):
@@ -17,12 +18,16 @@ class ComplaintImporter(BaseImporter):
     )
     UPDATE_ATTRIBUTES = ATTRIBUTES
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_complaints_attrs = []
         self.update_complaints_attrs = []
         self.new_allegation_uids = []
         self.delete_complaints_ids = []
         self.complaint_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(
+            COMPLAINT_MODEL_NAME, csv_file_path
+        )
 
     def update_relations(self, raw_data):
         saved_data = list(

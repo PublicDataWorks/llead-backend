@@ -1,0 +1,7 @@
+event_uid,kind,year,month,day,time,raw_date,uid,allegation_uid,appeal_uid,uof_uid,agency,badge_no,employee_id,department_code,department_desc,division_desc,unit_desc,unit_sub_desc,employee_class,rank_code,rank_desc,employment_status,sworn,officer_inactive,salary,overtime_annual_total,overtime_location,overtime_freq,salary_freq,award,award_comments,left_reason,left_reason_desc,years_of_service,source_agency,brady_uid
+0000001c094f71c87075ddf8f7a7ee59,officer_hire,2012,11.0,1.0,,,aee44913bc0095af09effd13d8a0ed5c,,,,ascension-so,,,,,,,,,,,,,,123.0,,,,,,,,,,,
+0005a63b3ea50ba4558e5e75c4461a85,officer_level_1_cert,2017,4.0,3.0,,2017-04-03,f33636e8c3f61d2ee2cf53aeb24590aa,,,,st-martin-so,,,,,,,,,,,,,,,,,,,,,,,,,
+7722f3e7ad63a7d92021a8443fd892b5,investigation_complete,2021,7.0,5.0,,7/5/2021,08509a05299c5429edf1e245024e520e,17917c13f4080d0d8d22852ec7d56c23,,,new-orleans-so,,105688,,,,,,,,deputy,,,,,,,,,,,,,,,
+7731a756571fa3edd91c6dfcb8f1dfe7,officer_pc_12_qualification,2018,12.0,10.0,,2018-12-10,bc178bb2c17659906f0c62f3720298b3,,,,port-fourchon-harbor-pd,,,,,,,,,,,,,,,,,,,,,,,,,
+7731a8214dbe0e40e0d71ddd46be4c16,complaint_receive,2019,9.0,23.0,,,1b08efbc9587b3d798e8ef08cad33ad3,3c312e97caf3d2e1a24e079e884ed733,,,new-orleans-pd,,,,field operations bureau,6th district,b platoon,,,,,,,,,,,,,,,,,13.0,,
+7731c73af54d81732954bff83701692b,officer_hire,2002,8.0,19.0,,,6cab0b89ba3f4bba1b7afdf95fbfe83e,,,,louisiana-state-pd,,,,,,,,,,,,,,,,,,,,,,,,,

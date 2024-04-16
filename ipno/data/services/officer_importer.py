@@ -2,6 +2,7 @@ from tqdm import tqdm
 
 from data.constants import OFFICER_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from officers.models import Officer
 
 
@@ -26,7 +27,7 @@ class OfficerImporter(BaseImporter):
         ATTRIBUTES + INT_ATTRIBUTES + UPDATE_ONLY_ATTRIBUTES + ["department_id"]
     )
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_officers_atrs = []
         self.update_officers_attrs = []
         self.new_officer_uids = []
@@ -35,6 +36,8 @@ class OfficerImporter(BaseImporter):
         self.officer_name_mappings = {}
         self.existed_officers_uids = []
         self.department_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(OFFICER_MODEL_NAME, csv_file_path)
 
     def get_officer_name_mappings(self):
         return {

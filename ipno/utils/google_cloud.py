@@ -1,13 +1,46 @@
+import os
+from shutil import rmtree
+
 from django.conf import settings
 
-from google.cloud.storage import Client
+import structlog
+from google.cloud.storage import Client, transfer_manager
+
+from ipno.data.constants import (
+    AGENCY_MODEL_NAME,
+    APPEAL_MODEL_NAME,
+    BRADY_MODEL_NAME,
+    CITIZEN_MODEL_NAME,
+    COMPLAINT_MODEL_NAME,
+    DOCUMENT_MODEL_NAME,
+    EVENT_MODEL_NAME,
+    OFFICER_MODEL_NAME,
+    PERSON_MODEL_NAME,
+    POST_OFFICE_HISTORY_MODEL_NAME,
+    USE_OF_FORCE_MODEL_NAME,
+)
+
+csv_file_name_mapping = {
+    AGENCY_MODEL_NAME: "agency_reference_list.csv",
+    OFFICER_MODEL_NAME: "personnel.csv",
+    COMPLAINT_MODEL_NAME: "allegation.csv",
+    BRADY_MODEL_NAME: "brady.csv",
+    USE_OF_FORCE_MODEL_NAME: "use_of_force.csv",
+    CITIZEN_MODEL_NAME: "citizens.csv",
+    APPEAL_MODEL_NAME: "appeals.csv",
+    EVENT_MODEL_NAME: "event.csv",
+    DOCUMENT_MODEL_NAME: "documents.csv",
+    POST_OFFICE_HISTORY_MODEL_NAME: "post_officer_history.csv",
+    PERSON_MODEL_NAME: "person.csv",
+}
+
+logger = structlog.get_logger("IPNO")
 
 
 class GoogleCloudService:
-    def __init__(self):
+    def __init__(self, bucket_name):
         storage_client = Client()
-        bucket = storage_client.bucket(settings.DOCUMENTS_BUCKET_NAME)
-        self.bucket = bucket
+        self.bucket = storage_client.bucket(bucket_name)
 
     def upload_file_from_string(self, destination_location, file_blob, content_type):
         blob = self.bucket.blob(destination_location)
@@ -29,8 +62,66 @@ class GoogleCloudService:
         self.bucket.delete_blob(source_blob_name)
 
     def download_schema(self, file_url):
-        bucket = Client().bucket(settings.SCHEMA_BUCKET_NAME)
-        self.bucket = bucket
-
         blob = self.bucket.blob(file_url)
         blob.download_to_filename("./schema.sql")
+
+    def download_csv_data_sequentially(self, folder_name):
+        blob_names = [
+            f"{folder_name}/{csv_file_name_mapping[model]}"
+            for model in csv_file_name_mapping
+        ]
+
+        if not os.path.exists(f"{settings.CSV_DATA_PATH}/{folder_name}"):
+            os.makedirs(f"{settings.CSV_DATA_PATH}/{folder_name}")
+
+        try:
+            for name in blob_names:
+                blob = self.bucket.blob(name)
+                blob.download_to_filename(f"{settings.CSV_DATA_PATH}/{name}")
+                logger.info("Successfully downloaded {}".format(name))
+        except Exception as e:
+            logger.error(
+                "Failed to download raw data due to exception: {}".format(str(e))
+            )
+            rmtree(f"{settings.CSV_DATA_PATH}/{folder_name}")
+            raise Exception(
+                "Failed to download data from Google Cloud Storage, file name {}"
+                .format(name)
+            )
+
+        downloaded_data = {
+            model_name: f"{settings.CSV_DATA_PATH}/{folder_name}/{csv_file_name_mapping[model_name]}"
+            for model_name in csv_file_name_mapping
+        }
+
+        return downloaded_data
+
+    def download_csv_data(self, folder_name):
+        blob_names = [
+            f"{folder_name}/{csv_file_name_mapping[model]}"
+            for model in csv_file_name_mapping
+        ]
+
+        results = transfer_manager.download_many_to_path(
+            self.bucket, blob_names, destination_directory=settings.CSV_DATA_PATH
+        )
+
+        for name, result in zip(blob_names, results):
+            if isinstance(result, Exception):
+                logger.error(
+                    "Failed to download {} due to exception: {}".format(name, result)
+                )
+                rmtree(f"{settings.CSV_DATA_PATH}/{folder_name}")
+                raise Exception(
+                    "Failed to download data from Google Cloud Storage, file name {}"
+                    .format(name)
+                )
+            else:
+                logger.info("Successfully downloaded {}".format(name))
+
+        downloaded_data = {
+            model_name: f"{settings.CSV_DATA_PATH}/{folder_name}/{csv_file_name_mapping[model_name]}"
+            for model_name in csv_file_name_mapping
+        }
+
+        return downloaded_data

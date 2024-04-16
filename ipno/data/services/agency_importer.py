@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from data.constants import AGENCY_MODEL_NAME, MAP_IMAGES_SUB_DIR
 from data.services import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from departments.models import Department
 from utils.google_cloud import GoogleCloudService
 from utils.image_generator import generate_map_thumbnail
@@ -25,8 +26,8 @@ class AgencyImporter(BaseImporter):
     )
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["location_map_url"]
 
-    def __init__(self):
-        self.gs = GoogleCloudService()
+    def __init__(self, csv_file_path):
+        self.gs = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
         self.new_agency_attrs = []
         self.new_agency_slugs = []
         self.update_agency_attrs = []
@@ -38,11 +39,15 @@ class AgencyImporter(BaseImporter):
             )
         }
 
+        self.data_reconciliation = DataReconciliation(AGENCY_MODEL_NAME, csv_file_path)
+
     def upload_file(self, upload_location, file_blob):
         try:
             self.gs.upload_file_from_string(upload_location, file_blob, "image/png")
 
-            department_image_url = f"{settings.GC_PATH}{upload_location}"
+            department_image_url = (
+                f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
+            )
 
             return department_image_url
         except Exception:
