@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 from appeals.models.appeal import Appeal
@@ -90,13 +92,28 @@ class DataReconciliation:
             f"Data reconciliation does not support model: {self.model_name}"
         )
 
-    def transform_db_data(self, df_db):
+    def normalize_data(self, df_db, df_csv):
         if self.model_name == AGENCY_MODEL_NAME:
             df_db["location"] = df_db["location"].apply(
                 lambda coord: coord.replace("(", "").replace(")", "")
             )
 
-        return df_db
+        if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            df_db["hire_date"] = df_db["hire_date"].apply(
+                lambda d: datetime.strptime(d, "%Y-%m-%d").strftime("%-m/%-d/%Y")
+                if d
+                else ""
+            )
+
+        if self.model_name == EVENT_MODEL_NAME:
+            df_db["month"] = df_db["month"].apply(lambda x: str(float(x)) if x else "")
+            df_db["day"] = df_db["day"].apply(lambda x: str(float(x)) if x else "")
+            df_db["salary"] = df_db["salary"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_csv["salary"] = df_csv["salary"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
 
     def _get_columns(self):
         columns = [
@@ -130,7 +147,7 @@ class DataReconciliation:
         df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna(
             ""
         )[columns]
-        self.transform_db_data(df_db)
+        self.normalize_data(df_db, df_csv)
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
         df_all.iloc[:, :-1] = df_all.iloc[:, :-1].fillna("")
