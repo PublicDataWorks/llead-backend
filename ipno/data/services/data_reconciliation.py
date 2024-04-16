@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 from appeals.models.appeal import Appeal
@@ -90,6 +92,46 @@ class DataReconciliation:
             f"Data reconciliation does not support model: {self.model_name}"
         )
 
+    def normalize_data(self, df_db, df_csv):
+        if self.model_name == AGENCY_MODEL_NAME:
+            df_db["location"] = df_db["location"].apply(
+                lambda coord: ", ".join(
+                    coord.replace("(", "").replace(")", "").split(", ")[::-1]
+                )
+            )
+
+        if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            df_db["hire_date"] = df_db["hire_date"].apply(
+                lambda d: datetime.strptime(d, "%Y-%m-%d").strftime("%-m/%-d/%Y")
+                if d
+                else ""
+            )
+
+        if self.model_name == EVENT_MODEL_NAME:
+            df_db["month"] = df_db["month"].apply(lambda x: str(float(x)) if x else "")
+            df_db["day"] = df_db["day"].apply(lambda x: str(float(x)) if x else "")
+            df_csv["month"] = df_csv["month"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_csv["day"] = df_csv["day"].apply(lambda x: str(float(x)) if x else "")
+
+            df_db["salary"] = df_db["salary"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_csv["salary"] = df_csv["salary"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+
+            df_csv["overtime_annual_total"] = df_csv["overtime_annual_total"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_db["overtime_annual_total"] = df_db["overtime_annual_total"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+
+        if self.model_name == DOCUMENT_MODEL_NAME:
+            df_db["page_count"] = df_db["pages_count"]
+
     def _get_columns(self):
         columns = [
             field.name
@@ -101,6 +143,7 @@ class DataReconciliation:
         if self.model_name == DOCUMENT_MODEL_NAME:
             columns += ["page_count"]
 
+        self.columns = columns
         return columns
 
     def _get_queryset(self):
@@ -108,23 +151,31 @@ class DataReconciliation:
 
     def _filter_by_idx_columns(self, df, source_df, idx_columns):
         indices = df.reset_index().merge(source_df, on=idx_columns)["index"].values
-        return df.loc[indices, :]
+        return df.loc[indices, self.columns]
 
     def reconcile_data(self):
         columns = self._get_columns()
+        # TODO: refactor this
+        db_columns = (
+            columns
+            if self.model_name != DOCUMENT_MODEL_NAME
+            else (columns + ["pages_count"])
+        )
         idx_columns = self._get_index_colums()
 
         df_csv = pd.read_csv(
-            self.csv_file_path, usecols=columns, dtype="string", keep_default_na=False
-        ).fillna("")[columns]
+            self.csv_file_path, dtype="string", keep_default_na=False
+        ).fillna("")
 
         queryset = self._get_queryset()
-        df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna(
+        df_db = pd.DataFrame(list(queryset), columns=db_columns, dtype="string").fillna(
             ""
-        )[columns]
+        )
+
+        self.normalize_data(df_db, df_csv)
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
-        df_all.iloc[:, :-1].fillna("", inplace=True)
+        df_all.iloc[:, :-1] = df_all.iloc[:, :-1].fillna("")
 
         added = df_all[df_all["_merge"] == "right_only"]
         added_rows = (

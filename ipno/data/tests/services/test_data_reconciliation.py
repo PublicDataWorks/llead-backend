@@ -1,5 +1,6 @@
 import csv
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from django.test import TestCase
 
@@ -30,6 +31,7 @@ from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
 from documents.factories.document_factory import DocumentFactory
 from documents.models.document import Document
+from ipno.utils.parse_utils import parse_int
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
@@ -73,13 +75,14 @@ class DataReconciliationTestCaseBase(ABC):
             # FIXME: Ideally, we don't need to store this
             self.content = reader_list[1:]  # Skip the header row
 
-        included_idx = [headers.index(i) for i in self.fields]
-
+        self.columns_mapping = {column: headers.index(column) for column in self.fields}
         self.csv_data = []
         self.index_column = headers.index(self.index_column_name) or 0
 
         for c in self.content:
-            self.csv_data.append([str(c[i]) for i in included_idx])
+            self.csv_data.append(
+                [str(c[self.columns_mapping[column]]) for column in self.fields]
+            )
 
     def test_detect_added_rows_sucessfully(self):
         output = self.data_reconciliation.reconcile_data()
@@ -99,15 +102,14 @@ class DataReconciliationTestCaseBase(ABC):
 
         output = self.data_reconciliation.reconcile_data()
 
-        assert output == {
-            "added_rows": self.csv_data,
-            "deleted_rows": [
-                [str(getattr(existed_instance, field) or "") for field in self.fields]
-            ],
-            "updated_rows": [],
-            "columns_mapping": {
-                column: self.fields.index(column) for column in self.fields
-            },
+        assert output["added_rows"] == self.csv_data
+        assert (
+            str(getattr(existed_instance, self.index_column_name))
+            in output["deleted_rows"][0]
+        )
+        assert output["updated_rows"] == []
+        assert output["columns_mapping"] == {
+            column: self.fields.index(column) for column in self.fields
         }
 
     def test_detect_updated_rows_successfully(self):
@@ -119,6 +121,36 @@ class DataReconciliationTestCaseBase(ABC):
             "added_rows": self.csv_data[1:],
             "deleted_rows": [],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
+        }
+
+    def test_detect_unchanged_rows_correctly(self):
+        data = {
+            attr: self.content[0][self.columns_mapping[attr]] or None
+            for attr in self.fields
+        }
+
+        if self.model_name == EVENT_MODEL_NAME:
+            data["year"] = parse_int(data["year"])
+            data["month"] = parse_int(data["month"])
+            data["day"] = parse_int(data["day"])
+
+        if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            data["hire_date"] = datetime.strptime(data["hire_date"], "%m/%d/%Y").date()
+
+        if self.model_name == AGENCY_MODEL_NAME:
+            data["location"] = ", ".join(data["location"].split(", ")[::-1])
+
+        self.Factory.create(**data)
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [],
             "columns_mapping": {
                 column: self.fields.index(column) for column in self.fields
             },
@@ -139,6 +171,7 @@ class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
         )
         self.Factory = BradyFactory
         self.index_column_name = "brady_uid"
+        self.model_name = BRADY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(
@@ -160,6 +193,7 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = DepartmentFactory
         self.index_column_name = "agency_slug"
+        self.model_name = AGENCY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
@@ -179,6 +213,7 @@ class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
         )
         self.Factory = OfficerFactory
         self.index_column_name = "uid"
+        self.model_name = OFFICER_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
@@ -202,6 +237,7 @@ class ArticleClassificationDataReconciliationTestCase(
         )
         self.Factory = NewsArticleClassificationFactory
         self.index_column_name = "article_id"
+        self.model_name = NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(article_id=id)
@@ -221,6 +257,7 @@ class AllegationDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
         )
         self.Factory = ComplaintFactory
         self.index_column_name = "allegation_uid"
+        self.model_name = COMPLAINT_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(allegation_uid=id)
@@ -242,6 +279,7 @@ class UseOfForceDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
         )
         self.Factory = UseOfForceFactory
         self.index_column_name = "uof_uid"
+        self.model_name = USE_OF_FORCE_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uof_uid=id)
@@ -261,6 +299,7 @@ class CitizenDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
         )
         self.Factory = CitizenFactory
         self.index_column_name = "citizen_uid"
+        self.model_name = CITIZEN_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(citizen_uid=id)
@@ -280,6 +319,7 @@ class AppealDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = AppealFactory
         self.index_column_name = "appeal_uid"
+        self.model_name = APPEAL_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(appeal_uid=id)
@@ -298,6 +338,7 @@ class EventDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
             EVENT_MODEL_NAME, self.csv_file_path
         )
         self.Factory = EventFactory
+        self.model_name = EVENT_MODEL_NAME
         self.index_column_name = "event_uid"
 
     def create_db_instance(self, id):
@@ -322,6 +363,7 @@ class PostOfficerHistoryDataReconciliationTestCase(
         )
         self.Factory = PostOfficerHistoryFactory
         self.index_column_name = "uid"
+        self.model_name = POST_OFFICE_HISTORY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
@@ -341,6 +383,7 @@ class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = PersonFactory
         self.index_column_name = "person_id"
+        self.model_name = PERSON_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(person_id=id)
@@ -380,6 +423,7 @@ class DocumentDataReconciliationTestCase(TestCase):
         included_idx = [headers.index(i) for i in self.fields]
         self.index_columns = [headers.index(i) for i in self.index_column_names]
         self.csv_data = []
+        self.columns_mapping = {column: headers.index(column) for column in self.fields}
 
         for c in self.content:
             self.csv_data.append([str(c[i]) for i in included_idx])
@@ -413,7 +457,7 @@ class DocumentDataReconciliationTestCase(TestCase):
                     for field in self.fields
                     if field != "page_count"
                 ]
-                + [""]
+                + [str(getattr(existed_instance, "pages_count") or "")]
             ],
             "updated_rows": [],
             "columns_mapping": {
@@ -466,9 +510,31 @@ class DocumentDataReconciliationTestCase(TestCase):
                     for field in self.fields
                     if field != "page_count"
                 ]
-                + [""]
+                + [str(getattr(to_deleted, "pages_count") or "")]
             ],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
+        }
+
+    def test_detect_unchanged_data_correctly(self):
+        data = {
+            attr: self.content[0][self.columns_mapping[attr]]
+            for attr in self.fields
+            if attr != "page_count"
+        }
+
+        data["pages_count"] = self.content[0][self.columns_mapping["page_count"]]
+
+        self.Factory(**data)
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [],
             "columns_mapping": {
                 column: self.fields.index(column) for column in self.fields
             },
