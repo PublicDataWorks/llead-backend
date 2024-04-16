@@ -115,6 +115,9 @@ class DataReconciliation:
                 lambda x: str(float(x)) if x else ""
             )
 
+        if self.model_name == DOCUMENT_MODEL_NAME:
+            df_db["page_count"] = df_db["pages_count"]
+
     def _get_columns(self):
         columns = [
             field.name
@@ -126,6 +129,7 @@ class DataReconciliation:
         if self.model_name == DOCUMENT_MODEL_NAME:
             columns += ["page_count"]
 
+        self.columns = columns
         return columns
 
     def _get_queryset(self):
@@ -133,20 +137,27 @@ class DataReconciliation:
 
     def _filter_by_idx_columns(self, df, source_df, idx_columns):
         indices = df.reset_index().merge(source_df, on=idx_columns)["index"].values
-        return df.loc[indices, :]
+        return df.loc[indices, self.columns]
 
     def reconcile_data(self):
         columns = self._get_columns()
+        # TODO: refactor this
+        db_columns = (
+            columns
+            if self.model_name != DOCUMENT_MODEL_NAME
+            else (columns + ["pages_count"])
+        )
         idx_columns = self._get_index_colums()
 
         df_csv = pd.read_csv(
-            self.csv_file_path, usecols=columns, dtype="string", keep_default_na=False
-        ).fillna("")[columns]
+            self.csv_file_path, dtype="string", keep_default_na=False
+        ).fillna("")
 
         queryset = self._get_queryset()
-        df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna(
+        df_db = pd.DataFrame(list(queryset), columns=db_columns, dtype="string").fillna(
             ""
-        )[columns]
+        )
+
         self.normalize_data(df_db, df_csv)
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
