@@ -108,10 +108,22 @@ class DataReconciliation:
         if self.model_name == EVENT_MODEL_NAME:
             df_db["month"] = df_db["month"].apply(lambda x: str(float(x)) if x else "")
             df_db["day"] = df_db["day"].apply(lambda x: str(float(x)) if x else "")
+            df_csv["month"] = df_csv["month"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_csv["day"] = df_csv["day"].apply(lambda x: str(float(x)) if x else "")
+
             df_db["salary"] = df_db["salary"].apply(
                 lambda x: str(float(x)) if x else ""
             )
             df_csv["salary"] = df_csv["salary"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+
+            df_csv["overtime_annual_total"] = df_csv["overtime_annual_total"].apply(
+                lambda x: str(float(x)) if x else ""
+            )
+            df_db["overtime_annual_total"] = df_db["overtime_annual_total"].apply(
                 lambda x: str(float(x)) if x else ""
             )
 
