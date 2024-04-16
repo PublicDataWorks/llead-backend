@@ -95,7 +95,9 @@ class DataReconciliation:
     def normalize_data(self, df_db, df_csv):
         if self.model_name == AGENCY_MODEL_NAME:
             df_db["location"] = df_db["location"].apply(
-                lambda coord: coord.replace("(", "").replace(")", "")
+                lambda coord: ", ".join(
+                    coord.replace("(", "").replace(")", "").split(", ")[::-1]
+                )
             )
 
         if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
