@@ -95,35 +95,35 @@ class PersonImporterTestCase(TestCase):
 
         assert Person.objects.count() == 2
 
-        results = Person.objects.all()
+        person1 = Person.objects.get(person_id="1")
+        person3 = Person.objects.get(person_id="3")
 
         check_columns = person_importer.column_mappings.copy()
 
         expected_person1_data = self.person1_data.copy()
+        assert person1.person_id == expected_person1_data[check_columns["person_id"]]
         assert (
-            results.first().person_id
-            == expected_person1_data[check_columns["person_id"]]
-        )
-        assert (
-            results.first().canonical_officer.uid
+            person1.canonical_officer.uid
             == expected_person1_data[check_columns["canonical_uid"]]
         )
-        assert not results.first().all_complaints_count
+        assert not person1.all_complaints_count
         assert expected_person1_data[
             check_columns["uids"]
-        ] in results.first().officers.values_list("uid", flat=True)
+        ] in person1.officers.values_list("uid", flat=True)
+        assert (
+            person1.canonical_uid
+            == expected_person1_data[check_columns["canonical_uid"]]
+        )
+        assert person1.uids == expected_person1_data[check_columns["uids"]]
 
         expected_person3_data = self.person3_data.copy()
+        assert person3.person_id == expected_person3_data[check_columns["person_id"]]
         assert (
-            results.last().person_id
-            == expected_person3_data[check_columns["person_id"]]
-        )
-        assert (
-            results.last().canonical_officer.uid
+            person3.canonical_officer.uid
             == expected_person3_data[check_columns["canonical_uid"]]
         )
-        assert not results.last().all_complaints_count
-        expected_uids_list = results.last().officers.values_list("uid", flat=True)
+        assert not person3.all_complaints_count
+        expected_uids_list = person3.officers.values_list("uid", flat=True)
         assert expected_uids_list.count() == 1
         assert (
             expected_person3_data[check_columns["uids"]].split(",")[0]
@@ -133,6 +133,11 @@ class PersonImporterTestCase(TestCase):
             expected_person3_data[check_columns["uids"]].split(",")[1]
             not in expected_uids_list
         )
+        assert (
+            person3.canonical_uid
+            == expected_person3_data[check_columns["canonical_uid"]]
+        )
+        assert person3.uids == expected_person3_data[check_columns["uids"]]
 
     def test_delete_non_existed_person(self):
         person_importer = PersonImporter("csv_file_path")
