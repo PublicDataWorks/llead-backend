@@ -107,14 +107,8 @@ class DataReconciliation:
         return self.model_class.objects.all().values()
 
     def _filter_by_idx_columns(self, df, source_df, idx_columns):
-        filters = []
-        for column in idx_columns:
-            filters.append(df[column].isin(source_df[column].tolist()))
-        combined_fileter = filters[0]
-        for filter in filters[1:]:
-            combined_fileter &= filter
-
-        return df[combined_fileter]
+        indices = df.reset_index().merge(source_df, on=idx_columns)["index"].values
+        return df.loc[indices, :]
 
     def reconcile_data(self):
         columns = self._get_columns()
