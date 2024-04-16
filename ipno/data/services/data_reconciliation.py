@@ -90,6 +90,14 @@ class DataReconciliation:
             f"Data reconciliation does not support model: {self.model_name}"
         )
 
+    def transform_db_data(self, df_db):
+        if self.model_name == AGENCY_MODEL_NAME:
+            df_db["location"] = df_db["location"].apply(
+                lambda coord: coord.replace("(", "").replace(")", "")
+            )
+
+        return df_db
+
     def _get_columns(self):
         columns = [
             field.name
@@ -122,9 +130,10 @@ class DataReconciliation:
         df_db = pd.DataFrame(list(queryset), columns=columns, dtype="string").fillna(
             ""
         )[columns]
+        self.transform_db_data(df_db)
 
         df_all = pd.merge(df_db, df_csv, how="outer", indicator=True, on=idx_columns)
-        df_all.iloc[:, :-1].fillna("", inplace=True)
+        df_all.iloc[:, :-1] = df_all.iloc[:, :-1].fillna("")
 
         added = df_all[df_all["_merge"] == "right_only"]
         added_rows = (
