@@ -1,5 +1,6 @@
 import csv
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from django.test import TestCase
 
@@ -30,6 +31,7 @@ from departments.factories.department_factory import DepartmentFactory
 from departments.models.department import Department
 from documents.factories.document_factory import DocumentFactory
 from documents.models.document import Document
+from ipno.utils.parse_utils import parse_int
 from news_articles.factories.news_article_classification_factory import (
     NewsArticleClassificationFactory,
 )
@@ -124,6 +126,33 @@ class DataReconciliationTestCaseBase(ABC):
             },
         }
 
+    def test_detect_unchanged_rows_correctly(self):
+        data = {
+            attr: self.content[0][self.columns_mapping[attr]] or None
+            for attr in self.fields
+        }
+
+        if self.model_name == EVENT_MODEL_NAME:
+            data["year"] = parse_int(data["year"])
+            data["month"] = parse_int(data["month"])
+            data["day"] = parse_int(data["day"])
+
+        if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
+            data["hire_date"] = datetime.strptime(data["hire_date"], "%m/%d/%Y").date()
+
+        self.Factory.create(**data)
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
+        }
+
 
 class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
     def prepare_data(self):
@@ -139,6 +168,7 @@ class BradyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
         )
         self.Factory = BradyFactory
         self.index_column_name = "brady_uid"
+        self.model_name = BRADY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(
@@ -160,6 +190,7 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = DepartmentFactory
         self.index_column_name = "agency_slug"
+        self.model_name = AGENCY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
@@ -197,6 +228,7 @@ class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
         )
         self.Factory = OfficerFactory
         self.index_column_name = "uid"
+        self.model_name = OFFICER_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
@@ -220,6 +252,7 @@ class ArticleClassificationDataReconciliationTestCase(
         )
         self.Factory = NewsArticleClassificationFactory
         self.index_column_name = "article_id"
+        self.model_name = NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(article_id=id)
@@ -239,6 +272,7 @@ class AllegationDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
         )
         self.Factory = ComplaintFactory
         self.index_column_name = "allegation_uid"
+        self.model_name = COMPLAINT_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(allegation_uid=id)
@@ -260,6 +294,7 @@ class UseOfForceDataReconciliationTestCase(DataReconciliationTestCaseBase, TestC
         )
         self.Factory = UseOfForceFactory
         self.index_column_name = "uof_uid"
+        self.model_name = USE_OF_FORCE_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uof_uid=id)
@@ -279,6 +314,7 @@ class CitizenDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase
         )
         self.Factory = CitizenFactory
         self.index_column_name = "citizen_uid"
+        self.model_name = CITIZEN_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(citizen_uid=id)
@@ -298,6 +334,7 @@ class AppealDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = AppealFactory
         self.index_column_name = "appeal_uid"
+        self.model_name = APPEAL_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(appeal_uid=id)
@@ -316,6 +353,7 @@ class EventDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
             EVENT_MODEL_NAME, self.csv_file_path
         )
         self.Factory = EventFactory
+        self.model_name = EVENT_MODEL_NAME
         self.index_column_name = "event_uid"
 
     def create_db_instance(self, id):
@@ -340,6 +378,7 @@ class PostOfficerHistoryDataReconciliationTestCase(
         )
         self.Factory = PostOfficerHistoryFactory
         self.index_column_name = "uid"
+        self.model_name = POST_OFFICE_HISTORY_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(uid=id)
@@ -359,6 +398,7 @@ class PersonDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
         )
         self.Factory = PersonFactory
         self.index_column_name = "person_id"
+        self.model_name = PERSON_MODEL_NAME
 
     def create_db_instance(self, id):
         return self.Factory.create(person_id=id)
