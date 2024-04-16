@@ -73,13 +73,14 @@ class DataReconciliationTestCaseBase(ABC):
             # FIXME: Ideally, we don't need to store this
             self.content = reader_list[1:]  # Skip the header row
 
-        included_idx = [headers.index(i) for i in self.fields]
-
+        self.columns_mapping = {column: headers.index(column) for column in self.fields}
         self.csv_data = []
         self.index_column = headers.index(self.index_column_name) or 0
 
         for c in self.content:
-            self.csv_data.append([str(c[i]) for i in included_idx])
+            self.csv_data.append(
+                [str(c[self.columns_mapping[column]]) for column in self.fields]
+            )
 
     def test_detect_added_rows_sucessfully(self):
         output = self.data_reconciliation.reconcile_data()
@@ -99,15 +100,14 @@ class DataReconciliationTestCaseBase(ABC):
 
         output = self.data_reconciliation.reconcile_data()
 
-        assert output == {
-            "added_rows": self.csv_data,
-            "deleted_rows": [
-                [str(getattr(existed_instance, field) or "") for field in self.fields]
-            ],
-            "updated_rows": [],
-            "columns_mapping": {
-                column: self.fields.index(column) for column in self.fields
-            },
+        assert output["added_rows"] == self.csv_data
+        assert (
+            str(getattr(existed_instance, self.index_column_name))
+            in output["deleted_rows"][0]
+        )
+        assert output["updated_rows"] == []
+        assert output["columns_mapping"] == {
+            column: self.fields.index(column) for column in self.fields
         }
 
     def test_detect_updated_rows_successfully(self):
@@ -163,6 +163,24 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
+
+    def test_detect_unchanged_data_correctly(self):
+        self.Factory.create(
+            agency_slug=self.content[0][self.columns_mapping["agency_slug"]],
+            location=self.content[0][self.columns_mapping["location"]],
+            agency_name=self.content[0][self.columns_mapping["agency_name"]],
+        )
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
+        }
 
 
 class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
