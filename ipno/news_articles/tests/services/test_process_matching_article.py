@@ -23,14 +23,12 @@ class ProcessMatchingKeywordsTestCase(TestCase):
         self.pmk.match_unprocessed_articles = Mock()
         self.pmk.match_processed_articles = Mock()
         self.pmk.update_status = Mock()
-        self.pmk.commit_data_to_wrgl = Mock()
 
         self.pmk.process()
 
         self.pmk.match_processed_articles.assert_called()
         self.pmk.match_unprocessed_articles.assert_called()
         self.pmk.update_status.assert_called()
-        self.pmk.commit_data_to_wrgl.assert_called()
 
     def test_process_out_of_date_latest_keywords(self):
         self.pmk.latest_keywords = {"a", "b"}
@@ -38,14 +36,12 @@ class ProcessMatchingKeywordsTestCase(TestCase):
         self.pmk.match_unprocessed_articles = Mock()
         self.pmk.match_processed_articles = Mock()
         self.pmk.update_status = Mock()
-        self.pmk.commit_data_to_wrgl = Mock()
 
         self.pmk.process()
 
         self.pmk.match_processed_articles.assert_not_called()
         self.pmk.match_unprocessed_articles.assert_called()
         self.pmk.update_status.assert_called()
-        self.pmk.commit_data_to_wrgl.assert_called()
 
     def test_match_processed_articles(self):
         self.pmk.latest_keywords = {"a", "b"}
