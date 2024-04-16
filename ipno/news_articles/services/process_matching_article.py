@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils import timezone
 
 from news_articles.models import (
@@ -52,7 +52,25 @@ class ProcessMatchingArticle:
         self.match_unprocessed_articles()
 
         self.update_status()
-        return self.commit_data_to_wrgl()
+
+        MatchedSentenceOfficer = MatchedSentence.officers.through
+        data = (
+            MatchedSentenceOfficer.objects.order_by(
+                "officer_id", "matchedsentence__article__id"
+            )
+            .annotate(
+                uid=F("officer__uid"),
+                created_at=F("matchedsentence__created_at"),
+                newsarticle_id=F("matchedsentence__article__id"),
+            )
+            .all()
+        )
+
+        count_updated_objects = data.filter(
+            matchedsentence__updated_at__gte=self.start_time
+        ).count()
+
+        return count_updated_objects > 0
 
     def match_processed_articles(self):
         new_keywords = self.latest_keywords - self.last_run_keywords
