@@ -140,6 +140,9 @@ class DataReconciliationTestCaseBase(ABC):
         if self.model_name == POST_OFFICE_HISTORY_MODEL_NAME:
             data["hire_date"] = datetime.strptime(data["hire_date"], "%m/%d/%Y").date()
 
+        if self.model_name == AGENCY_MODEL_NAME:
+            data["location"] = ", ".join(data["location"].split(", ")[::-1])
+
         self.Factory.create(**data)
 
         output = self.data_reconciliation.reconcile_data()
@@ -194,24 +197,6 @@ class AgencyDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase)
 
     def create_db_instance(self, id):
         return self.Factory.create(agency_slug=id)
-
-    def test_detect_unchanged_data_correctly(self):
-        self.Factory.create(
-            agency_slug=self.content[0][self.columns_mapping["agency_slug"]],
-            location=self.content[0][self.columns_mapping["location"]],
-            agency_name=self.content[0][self.columns_mapping["agency_name"]],
-        )
-
-        output = self.data_reconciliation.reconcile_data()
-
-        assert output == {
-            "added_rows": self.csv_data[1:],
-            "deleted_rows": [],
-            "updated_rows": [],
-            "columns_mapping": {
-                column: self.fields.index(column) for column in self.fields
-            },
-        }
 
 
 class OfficerDataReconciliationTestCase(DataReconciliationTestCaseBase, TestCase):
