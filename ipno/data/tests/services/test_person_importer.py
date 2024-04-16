@@ -1,13 +1,9 @@
-from unittest.mock import MagicMock
-
 from django.test.testcases import TestCase
 
-from mock import Mock
-
 from data.constants import IMPORT_LOG_STATUS_FINISHED
-from data.factories import WrglRepoFactory
 from data.models import ImportLog
 from data.services import PersonImporter
+from data.util import MockDataReconciliation
 from officers.factories import OfficerFactory
 from people.factories import PersonFactory
 from people.models import Person
@@ -62,34 +58,7 @@ class PersonImporterTestCase(TestCase):
         deleting_person.officers.add(self.officer2)
         deleting_person.save()
 
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
-
-        WrglRepoFactory(
-            data_model=PersonImporter.data_model,
-            repo_name="person_repo",
-            commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
-            latest_commit_hash=commit_hash,
-        )
-
-        person_importer = PersonImporter()
-
-        person_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
-
-        person_importer.repo = Mock()
-        person_importer.new_commit = mock_commit
-
-        person_importer.retrieve_wrgl_data = Mock()
-
-        person_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
-        person_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
+        person_importer = PersonImporter("csv_file_path")
 
         processed_data = {
             "added_rows": [
@@ -102,9 +71,12 @@ class PersonImporterTestCase(TestCase):
             "updated_rows": [
                 self.person1_data,
             ],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        person_importer.process_wrgl_data = Mock(return_value=processed_data)
+        person_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         result = person_importer.process()
 
@@ -114,7 +86,7 @@ class PersonImporterTestCase(TestCase):
 
         assert import_log.data_model == PersonImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+        assert not import_log.commit_hash
         assert import_log.created_rows == 1
         assert import_log.updated_rows == 1
         assert import_log.deleted_rows == 1
@@ -123,37 +95,35 @@ class PersonImporterTestCase(TestCase):
 
         assert Person.objects.count() == 2
 
-        results = Person.objects.all()
+        person1 = Person.objects.get(person_id="1")
+        person3 = Person.objects.get(person_id="3")
 
         check_columns = person_importer.column_mappings.copy()
 
-        person_importer.retrieve_wrgl_data.assert_called_with("person_repo")
-
         expected_person1_data = self.person1_data.copy()
+        assert person1.person_id == expected_person1_data[check_columns["person_id"]]
         assert (
-            results.first().person_id
-            == expected_person1_data[check_columns["person_id"]]
-        )
-        assert (
-            results.first().canonical_officer.uid
+            person1.canonical_officer.uid
             == expected_person1_data[check_columns["canonical_uid"]]
         )
-        assert not results.first().all_complaints_count
+        assert not person1.all_complaints_count
         assert expected_person1_data[
             check_columns["uids"]
-        ] in results.first().officers.values_list("uid", flat=True)
+        ] in person1.officers.values_list("uid", flat=True)
+        assert (
+            person1.canonical_uid
+            == expected_person1_data[check_columns["canonical_uid"]]
+        )
+        assert person1.uids == expected_person1_data[check_columns["uids"]]
 
         expected_person3_data = self.person3_data.copy()
+        assert person3.person_id == expected_person3_data[check_columns["person_id"]]
         assert (
-            results.last().person_id
-            == expected_person3_data[check_columns["person_id"]]
-        )
-        assert (
-            results.last().canonical_officer.uid
+            person3.canonical_officer.uid
             == expected_person3_data[check_columns["canonical_uid"]]
         )
-        assert not results.last().all_complaints_count
-        expected_uids_list = results.last().officers.values_list("uid", flat=True)
+        assert not person3.all_complaints_count
+        expected_uids_list = person3.officers.values_list("uid", flat=True)
         assert expected_uids_list.count() == 1
         assert (
             expected_person3_data[check_columns["uids"]].split(",")[0]
@@ -163,36 +133,16 @@ class PersonImporterTestCase(TestCase):
             expected_person3_data[check_columns["uids"]].split(",")[1]
             not in expected_uids_list
         )
+        assert (
+            person3.canonical_uid
+            == expected_person3_data[check_columns["canonical_uid"]]
+        )
+        assert person3.uids == expected_person3_data[check_columns["uids"]]
 
     def test_delete_non_existed_person(self):
-        commit_hash = "3950bd17edfd805972781ef9fe2c6449"
-
-        WrglRepoFactory(
-            data_model=PersonImporter.data_model,
-            repo_name="person_repo",
-            commit_hash="bf56dded0b1c4b57f425acb75d48e68c",
-            latest_commit_hash=commit_hash,
-        )
-
-        person_importer = PersonImporter()
+        person_importer = PersonImporter("csv_file_path")
 
         person_importer.branch = "main"
-
-        mock_commit = MagicMock()
-        mock_commit.table.columns = self.header
-        mock_commit.sum = commit_hash
-
-        person_importer.repo = Mock()
-        person_importer.new_commit = mock_commit
-
-        person_importer.retrieve_wrgl_data = Mock()
-
-        person_importer.old_column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
-        person_importer.column_mappings = {
-            column: self.header.index(column) for column in self.header
-        }
 
         processed_data = {
             "added_rows": [],
@@ -200,9 +150,12 @@ class PersonImporterTestCase(TestCase):
                 self.person2_data,
             ],
             "updated_rows": [],
+            "columns_mapping": {
+                column: self.header.index(column) for column in self.header
+            },
         }
 
-        person_importer.process_wrgl_data = Mock(return_value=processed_data)
+        person_importer.data_reconciliation = MockDataReconciliation(processed_data)
 
         result = person_importer.process()
 
@@ -212,7 +165,7 @@ class PersonImporterTestCase(TestCase):
 
         assert import_log.data_model == PersonImporter.data_model
         assert import_log.status == IMPORT_LOG_STATUS_FINISHED
-        assert import_log.commit_hash == "3950bd17edfd805972781ef9fe2c6449"
+        assert not import_log.commit_hash
         assert import_log.created_rows == 0
         assert import_log.updated_rows == 0
         assert import_log.deleted_rows == 0

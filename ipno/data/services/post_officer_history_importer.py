@@ -2,6 +2,7 @@ from tqdm import tqdm
 
 from data.constants import POST_OFFICE_HISTORY_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from post_officer_history.models import PostOfficerHistory
 
 
@@ -19,7 +20,7 @@ class PostOfficerHistoryImporter(BaseImporter):  # pragma: no cover
 
     UPDATE_ATTRIBUTES = ATTRIBUTES + DATE_ATTRIBUTES + ["officer_id", "department_id"]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_post_officer_history_attrs = []
         self.update_post_officer_history_attrs = []
         self.new_uids = []
@@ -27,6 +28,10 @@ class PostOfficerHistoryImporter(BaseImporter):  # pragma: no cover
         self.officer_mappings = {}
         self.department_mappings = {}
         self.post_officer_history_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(
+            POST_OFFICE_HISTORY_MODEL_NAME, csv_file_path
+        )
 
     def handle_record_data(self, row):
         uid = row[self.column_mappings["uid"]]

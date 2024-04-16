@@ -53,6 +53,11 @@ spec:
                 secretKeyRef:
                   name: django
                   key: setting-module
+            - name: IPNO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django
+                  key: ipno-api-key
             - name: ELASTICSEARCH_HOST
               valueFrom:
                 secretKeyRef:

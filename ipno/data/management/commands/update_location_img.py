@@ -16,7 +16,7 @@ logger = structlog.get_logger("IPNO")
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        gs = GoogleCloudService()
+        gs = GoogleCloudService(settings.DOCUMENTS_BUCKET_NAME)
         deps = Department.objects.filter(location_map_url__isnull=True)
         for dep in tqdm(deps):
             location = dep.location
@@ -28,7 +28,9 @@ class Command(BaseCommand):
                         f"{MAP_IMAGES_SUB_DIR}/{current_time}-{dep.agency_slug}.png"
                     )
                     gs.upload_file_from_string(upload_location, image, "image/png")
-                    dep.location_map_url = f"{settings.GC_PATH}{upload_location}"
+                    dep.location_map_url = (
+                        f"{settings.GC_DOCUMENT_BUCKET_PATH}{upload_location}"
+                    )
                 except ValueError as ex:
                     logger.error(
                         f"Error when update department map, at department {dep.id},"

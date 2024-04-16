@@ -2,6 +2,7 @@ from tqdm import tqdm
 
 from data.constants import USE_OF_FORCE_MODEL_NAME
 from data.services.base_importer import BaseImporter
+from data.services.data_reconciliation import DataReconciliation
 from use_of_forces.models import UseOfForce
 
 
@@ -15,7 +16,7 @@ class UofImporter(BaseImporter):
     )
     UPDATE_ATTRIBUTES = ATTRIBUTES + ["department_id", "officer_id"]
 
-    def __init__(self):
+    def __init__(self, csv_file_path):
         self.new_uofs_attrs = []
         self.update_uofs_attrs = []
         self.new_uof_uids = []
@@ -23,6 +24,10 @@ class UofImporter(BaseImporter):
         self.officer_mappings = {}
         self.department_mappings = {}
         self.uof_mappings = {}
+
+        self.data_reconciliation = DataReconciliation(
+            USE_OF_FORCE_MODEL_NAME, csv_file_path
+        )
 
     def handle_record_data(self, row):
         agency = row[self.column_mappings["agency"]]

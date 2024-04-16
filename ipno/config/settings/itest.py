@@ -42,7 +42,9 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
 )
 
 DOCUMENTS_BUCKET_NAME = "llead-documents-develop"
-GC_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+RAW_DATA_BUCKET_NAME = "llead-raw-data-develop"
+GC_DOCUMENT_BUCKET_PATH = f"https://storage.googleapis.com/{DOCUMENTS_BUCKET_NAME}/"
+GC_RAW_DATA_BUCKET_PATH = f"https://storage.googleapis.com/{RAW_DATA_BUCKET_NAME}/"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
