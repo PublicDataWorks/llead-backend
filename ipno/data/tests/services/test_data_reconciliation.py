@@ -438,6 +438,7 @@ class DocumentDataReconciliationTestCase(TestCase):
         included_idx = [headers.index(i) for i in self.fields]
         self.index_columns = [headers.index(i) for i in self.index_column_names]
         self.csv_data = []
+        self.columns_mapping = {column: headers.index(column) for column in self.fields}
 
         for c in self.content:
             self.csv_data.append([str(c[i]) for i in included_idx])
@@ -471,7 +472,7 @@ class DocumentDataReconciliationTestCase(TestCase):
                     for field in self.fields
                     if field != "page_count"
                 ]
-                + [""]
+                + [str(getattr(existed_instance, "pages_count") or "")]
             ],
             "updated_rows": [],
             "columns_mapping": {
@@ -524,9 +525,31 @@ class DocumentDataReconciliationTestCase(TestCase):
                     for field in self.fields
                     if field != "page_count"
                 ]
-                + [""]
+                + [str(getattr(to_deleted, "pages_count") or "")]
             ],
             "updated_rows": [self.csv_data[0]],
+            "columns_mapping": {
+                column: self.fields.index(column) for column in self.fields
+            },
+        }
+
+    def test_detect_unchanged_data_correctly(self):
+        data = {
+            attr: self.content[0][self.columns_mapping[attr]]
+            for attr in self.fields
+            if attr != "page_count"
+        }
+
+        data["pages_count"] = self.content[0][self.columns_mapping["page_count"]]
+
+        self.Factory(**data)
+
+        output = self.data_reconciliation.reconcile_data()
+
+        assert output == {
+            "added_rows": self.csv_data[1:],
+            "deleted_rows": [],
+            "updated_rows": [],
             "columns_mapping": {
                 column: self.fields.index(column) for column in self.fields
             },
