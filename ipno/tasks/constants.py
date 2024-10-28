@@ -14,6 +14,11 @@ APP_TASKS = [
         "task_type": DAILY_TASK,
     },
     {
+        "task_name": "Run LLM analysis on news articles",
+        "command": "run_llm_analysis",
+        "task_type": DAILY_TASK,
+    },
+    {
         "task_name": "Run news articles' officers matching",
         "command": "run_news_articles_officers_matching",
         "task_type": DAILY_TASK,

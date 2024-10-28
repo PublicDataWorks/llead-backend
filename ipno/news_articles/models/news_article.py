@@ -14,6 +14,8 @@ class NewsArticle(TimeStampsModel):
     is_hidden = models.BooleanField(default=False)
 
     is_processed = models.BooleanField(default=False)
+    is_llm_processed = models.BooleanField(default=False)
+    llm_analysis_result = models.JSONField(null=True, blank=True)
     source = models.ForeignKey(
         "news_articles.NewsArticleSource",
         null=True,
