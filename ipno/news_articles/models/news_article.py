@@ -11,9 +11,12 @@ class NewsArticle(TimeStampsModel):
     published_date = models.DateField()
     author = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=255, blank=True, null=True)
-    is_hidden = models.BooleanField(default=False)
+    is_hidden = models.BooleanField(default=True)  # Default to hidden until LLM processed
+    hide_reason = models.CharField(max_length=50, null=True, blank=True)
 
     is_processed = models.BooleanField(default=False)
+    is_llm_processed = models.BooleanField(default=False)
+    llm_analysis_result = models.JSONField(null=True, blank=True)
     source = models.ForeignKey(
         "news_articles.NewsArticleSource",
         null=True,
