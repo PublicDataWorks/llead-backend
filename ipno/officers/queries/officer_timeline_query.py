@@ -45,7 +45,13 @@ from utils.data_utils import format_data_period, sort_items
 
 class OfficerTimelineQuery(object):
     def __init__(self, officer):
-        self.all_officers = officer.person.officers.all()
+        # Handle officers without person association
+        if officer.person:
+            self.all_officers = officer.person.officers.all()
+        else:
+            # If no person, just use the single officer
+            self.all_officers = [officer]
+
         self.termination_left_reasons = set(
             Event.objects.filter(left_reason__icontains="terminat").values_list(
                 "left_reason", flat=True
