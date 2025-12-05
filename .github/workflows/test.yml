@@ -1,0 +1,107 @@
+name: Test
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - staging
+      - develop
+  pull_request:
+    branches:
+      - main
+      - staging
+      - develop
+
+env:
+  POSTGRES_USER: ipno
+  POSTGRES_DB: ipno
+  POSTGRES_PASSWORD: password
+  POSTGRES_HOST: localhost
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13.7
+        env:
+          POSTGRES_USER: ipno
+          POSTGRES_DB: ipno
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      elasticsearch:
+        image: elasticsearch:7.10.1
+        env:
+          discovery.type: single-node
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7.0.5
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8.5'
+          cache: 'pip'
+
+      - name: Install native packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install ghostscript python3-wand
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements/dev.txt
+
+      - name: Install spacy model
+        run: |
+          python -m spacy download en_core_web_sm
+
+      - name: Lint
+        run: bin/lint.sh
+
+      - name: Run tests
+        env:
+          IPNO_API_KEY: ${{ secrets.IPNO_API_KEY }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: |
+          mkdir -p test-results
+          python -m pytest --cov-report term --cov=ipno ipno --junitxml=test-results/junit.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: python -m coveralls
+        continue-on-error: true
