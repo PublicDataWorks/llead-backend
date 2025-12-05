@@ -87,7 +87,6 @@ jobs:
       image-tag: ${{ steps.set-tag.outputs.tag }}
       namespace: ${{ steps.set-env.outputs.NAMESPACE }}
       deploy-env: ${{ steps.set-env.outputs.DEPLOY_ENV }}
-      daily-time: ${{ steps.set-env.outputs.DAILY_TIME }}
       celery-workers: ${{ steps.set-env.outputs.CELERY_NUM_WORKER }}
       cloud-sql-db: ${{ steps.set-env.outputs.CLOUD_SQL_DB }}
 
@@ -101,14 +100,12 @@ jobs:
             echo "DEPLOY_ENV=--production" >> $GITHUB_OUTPUT
             echo "NAMESPACE=ipno-production" >> $GITHUB_OUTPUT
             echo "DOCKER_PRETAG=backend-production" >> $GITHUB_OUTPUT
-            echo "DAILY_TIME=${{ secrets.PROD_DAILY_TIME }}" >> $GITHUB_OUTPUT
             echo "CELERY_NUM_WORKER=4" >> $GITHUB_OUTPUT
             echo "CLOUD_SQL_DB=ipno-database-production" >> $GITHUB_OUTPUT
           else
             echo "DEPLOY_ENV=--staging" >> $GITHUB_OUTPUT
             echo "NAMESPACE=ipno-staging" >> $GITHUB_OUTPUT
             echo "DOCKER_PRETAG=backend-staging" >> $GITHUB_OUTPUT
-            echo "DAILY_TIME=${{ secrets.STAGING_DAILY_TIME }}" >> $GITHUB_OUTPUT
             echo "CELERY_NUM_WORKER=2" >> $GITHUB_OUTPUT
             echo "CLOUD_SQL_DB=ipno-database-staging" >> $GITHUB_OUTPUT
           fi
@@ -248,8 +245,9 @@ jobs:
       - name: Setup cronjobs
         env:
           CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+          DAILY_TIME: ${{ github.ref_name == 'main' && secrets.PROD_DAILY_TIME || secrets.STAGING_DAILY_TIME }}
         run: |
-          bin/run_cronjob.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} run_daily_tasks "${{ needs.build-and-push.outputs.daily-time }}"
+          bin/run_cronjob.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} run_daily_tasks "$DAILY_TIME"
 
       - name: Verify deployment
         run: |
