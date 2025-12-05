@@ -75,6 +75,7 @@ jobs:
           POSTGRES_USER: ipno
           POSTGRES_DB: ipno
           POSTGRES_PASSWORD: password
+          ELASTICSEARCH_HOST: localhost:9200
         run: |
           python -m pytest --cov-report term --cov=ipno ipno
 

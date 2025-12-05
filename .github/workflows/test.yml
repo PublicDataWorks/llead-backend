@@ -90,6 +90,7 @@ jobs:
         env:
           IPNO_API_KEY: ${{ secrets.IPNO_API_KEY }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          ELASTICSEARCH_HOST: localhost:9200
         run: |
           mkdir -p test-results
           python -m pytest --cov-report term --cov=ipno ipno --junitxml=test-results/junit.xml
