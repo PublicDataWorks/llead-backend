@@ -1,0 +1,256 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+env:
+  GOOGLE_PROJECT_ID: excellent-zoo-300106
+  GOOGLE_COMPUTE_ZONE: us-central1-a
+  GOOGLE_CLUSTER_NAME: ipno
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13.7
+        env:
+          POSTGRES_USER: ipno
+          POSTGRES_DB: ipno
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      elasticsearch:
+        image: elasticsearch:7.10.1
+        env:
+          discovery.type: single-node
+        ports:
+          - 9200:9200
+
+      redis:
+        image: redis:7.0.5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          cache: 'pip'
+
+      - name: Install native packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install ghostscript python3-wand
+
+      - name: Install dependencies
+        run: |
+          pip install "pip<24.1"
+          pip install -r requirements/dev.txt
+
+      - name: Install spacy model
+        run: python -m spacy download en_core_web_sm
+
+      - name: Lint
+        run: bin/lint.sh
+
+      - name: Run tests
+        env:
+          IPNO_API_KEY: ${{ secrets.IPNO_API_KEY }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: ipno
+          POSTGRES_DB: ipno
+          POSTGRES_PASSWORD: password
+          ELASTICSEARCH_HOST: localhost:9200
+          CELERY_BROKER_URL: redis://localhost:6379
+        run: |
+          python -m pytest --cov-report term --cov=ipno ipno
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.tag }}
+      namespace: ${{ steps.set-env.outputs.NAMESPACE }}
+      deploy-env: ${{ steps.set-env.outputs.DEPLOY_ENV }}
+      celery-workers: ${{ steps.set-env.outputs.CELERY_NUM_WORKER }}
+      cloud-sql-db: ${{ steps.set-env.outputs.CLOUD_SQL_DB }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set deployment environment
+        id: set-env
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "DEPLOY_ENV=--production" >> $GITHUB_OUTPUT
+            echo "NAMESPACE=ipno-production" >> $GITHUB_OUTPUT
+            echo "DOCKER_PRETAG=backend-production" >> $GITHUB_OUTPUT
+            echo "CELERY_NUM_WORKER=4" >> $GITHUB_OUTPUT
+            echo "CLOUD_SQL_DB=ipno-database-production" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY_ENV=--staging" >> $GITHUB_OUTPUT
+            echo "NAMESPACE=ipno-staging" >> $GITHUB_OUTPUT
+            echo "DOCKER_PRETAG=backend-staging" >> $GITHUB_OUTPUT
+            echo "CELERY_NUM_WORKER=2" >> $GITHUB_OUTPUT
+            echo "CLOUD_SQL_DB=ipno-database-staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set image tag
+        id: set-tag
+        run: |
+          echo "tag=${{ steps.set-env.outputs.DOCKER_PRETAG }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY_BASE64 }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+
+      - name: Build image
+        run: docker build -t ipno-backend .
+
+      - name: Tag and push image
+        run: |
+          BRANCH_SLUG="${{ github.ref_name }}"
+          BRANCH_SLUG="${BRANCH_SLUG//\//-}"
+
+          docker tag ipno-backend us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:${{ steps.set-tag.outputs.tag }}
+          docker tag ipno-backend us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:$BRANCH_SLUG
+          docker tag ipno-backend us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:${{ steps.set-env.outputs.DOCKER_PRETAG }}-latest
+
+          docker push us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:${{ steps.set-tag.outputs.tag }}
+          docker push us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:$BRANCH_SLUG
+          docker push us.gcr.io/${{ env.GOOGLE_PROJECT_ID }}/ipno-backend:${{ steps.set-env.outputs.DOCKER_PRETAG }}-latest
+
+  migrate:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY_BASE64 }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin,kubectl'
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.GOOGLE_CLUSTER_NAME }} \
+            --zone ${{ env.GOOGLE_COMPUTE_ZONE }} \
+            --project ${{ env.GOOGLE_PROJECT_ID }}
+
+      - name: Run migrations
+        env:
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+        run: |
+          bin/run_spot_job.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} migrate
+
+  collect-static:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY_BASE64 }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin,kubectl'
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.GOOGLE_CLUSTER_NAME }} \
+            --zone ${{ env.GOOGLE_COMPUTE_ZONE }} \
+            --project ${{ env.GOOGLE_PROJECT_ID }}
+
+      - name: Collect static
+        env:
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+        run: |
+          bin/run_spot_job.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} collectstatic --no-input
+
+  deploy:
+    needs: [build-and-push, migrate, collect-static]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY_BASE64 }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin,kubectl'
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.GOOGLE_CLUSTER_NAME }} \
+            --zone ${{ env.GOOGLE_COMPUTE_ZONE }} \
+            --project ${{ env.GOOGLE_PROJECT_ID }}
+
+      - name: Create initial project config
+        env:
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+        run: |
+          bin/run_spot_job.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} init_project_config
+
+      - name: Deploy celery
+        env:
+          BACKEND_IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          CELERY_NUM_WORKER: ${{ needs.build-and-push.outputs.celery-workers }}
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+        run: |
+          cat kubernetes/celery.yml | envsubst | kubectl apply -n ${{ needs.build-and-push.outputs.namespace }} -f -
+
+      - name: Deploy application
+        env:
+          BACKEND_IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+        run: |
+          cat kubernetes/ipno.yml | envsubst | kubectl apply -n ${{ needs.build-and-push.outputs.namespace }} -f -
+
+      - name: Setup cronjobs
+        env:
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
+          DAILY_TIME: ${{ github.ref_name == 'main' && secrets.PROD_DAILY_TIME || secrets.STAGING_DAILY_TIME }}
+        run: |
+          bin/run_cronjob.sh ${{ needs.build-and-push.outputs.deploy-env }} ${{ needs.build-and-push.outputs.image-tag }} run_daily_tasks "$DAILY_TIME"
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/ipno-backend -n ${{ needs.build-and-push.outputs.namespace }} --timeout=300s
