@@ -28,7 +28,11 @@ from use_of_forces.models import UseOfForce
 class OfficerDatafileQuery(object):
     def __init__(self, officer):
         self.officer = officer
-        self.all_officers = officer.person.officers.all()
+        # Handle officers without person association
+        if officer.person:
+            self.all_officers = officer.person.officers.all()
+        else:
+            self.all_officers = [officer]
 
     def _generate_officer_sheet(self):
         officer_profile_fields = OFFICER_PROFILE_FIELDS

@@ -11,4 +11,4 @@ class DepartmentNewsArticleSerializer(serializers.Serializer):
     source_display_name = serializers.SerializerMethodField()
 
     def get_source_display_name(self, obj):
-        return obj.source.source_display_name
+        return obj.source.source_display_name if obj.source else None

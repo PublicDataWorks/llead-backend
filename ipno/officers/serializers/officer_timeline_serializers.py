@@ -286,7 +286,7 @@ class DocumentTimelineSerializer(DocumentSerializer, BaseTimelineSerializer):
 
 class NewsArticleTimelineSerializer(BaseTimelineSerializer):
     id = serializers.IntegerField()
-    source_name = serializers.CharField(source="source.source_display_name")
+    source_name = serializers.SerializerMethodField()
     title = serializers.CharField()
     url = serializers.CharField()
     date = serializers.DateField(source="published_date")
@@ -294,6 +294,9 @@ class NewsArticleTimelineSerializer(BaseTimelineSerializer):
 
     def get_kind(self, obj):
         return NEWS_ARTICLE_TIMELINE_KIND
+
+    def get_source_name(self, obj):
+        return obj.source.source_display_name if obj.source else None
 
     def get_year(self, obj):
         return obj.published_date.year if obj.published_date else None

@@ -15,7 +15,7 @@ class FindingSerializer(serializers.Serializer):
 
         return (
             request.build_absolute_uri(obj.background_image.url)
-            if obj.background_image
+            if request and obj.background_image
             else None
         )
 
@@ -24,6 +24,6 @@ class FindingSerializer(serializers.Serializer):
 
         return (
             request.build_absolute_uri(obj.card_image.url)
-            if obj.background_image
+            if request and obj.card_image
             else None
         )

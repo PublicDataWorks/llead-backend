@@ -12,7 +12,11 @@ class OfficerSerializer(serializers.Serializer):
 
     def _get_all_events(self, obj):
         if not hasattr(obj, "all_events"):
-            all_officers = obj.person.officers.all()
+            # Handle officers without person association
+            if obj.person:
+                all_officers = obj.person.officers.all()
+            else:
+                all_officers = [obj]
 
             all_events = []
             for officer in all_officers:
@@ -40,7 +44,10 @@ class OfficerSerializer(serializers.Serializer):
         return events
 
     def get_departments(self, obj):
-        canonical_dep = obj.person.canonical_officer.department
+        # Handle officers without person association
+        canonical_dep = None
+        if obj.person and obj.person.canonical_officer:
+            canonical_dep = obj.person.canonical_officer.department
 
         all_events = self._get_all_events(obj)
 

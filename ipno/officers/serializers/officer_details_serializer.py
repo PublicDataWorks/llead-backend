@@ -40,7 +40,11 @@ class OfficerDetailsSerializer(serializers.Serializer):
 
     def _get_person_officers(self, obj):
         if not hasattr(obj, "person_officers"):
-            person_officers = obj.person.officers.all()
+            # Handle officers without person association
+            if obj.person:
+                person_officers = obj.person.officers.all()
+            else:
+                person_officers = [obj]
             setattr(obj, "person_officers", person_officers)
 
         return obj.person_officers
@@ -88,7 +92,10 @@ class OfficerDetailsSerializer(serializers.Serializer):
         return events
 
     def get_departments(self, obj):
-        canonical_dep = obj.person.canonical_officer.department
+        # Handle officers without person association
+        canonical_dep = None
+        if obj.person and obj.person.canonical_officer:
+            canonical_dep = obj.person.canonical_officer.department
 
         all_events = self._get_all_events(obj)
 
@@ -133,7 +140,8 @@ class OfficerDetailsSerializer(serializers.Serializer):
         )
 
     def get_complaints_count(self, obj):
-        return obj.person.all_complaints_count
+        # Handle officers without person association
+        return obj.person.all_complaints_count if obj.person else 0
 
     def get_sustained_complaints_count(self, obj):
         officers = self._get_person_officers(obj)

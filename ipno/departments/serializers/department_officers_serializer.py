@@ -16,7 +16,11 @@ class DepartmentOfficerSerializer(serializers.Serializer):
 
     def _get_person_officers(self, obj):
         if not hasattr(obj, "person_officers"):
-            person_officers = obj.person.officers.all()
+            # Handle officers without person association
+            if obj.person:
+                person_officers = obj.person.officers.all()
+            else:
+                person_officers = [obj]
             setattr(obj, "person_officers", person_officers)
 
         return obj.person_officers
@@ -51,7 +55,8 @@ class DepartmentOfficerSerializer(serializers.Serializer):
         return events
 
     def get_complaints_count(self, obj):
-        return obj.person.all_complaints_count
+        # Handle officers without person association
+        return obj.person.all_complaints_count if obj.person else 0
 
     def get_department(self, obj):
         return (
