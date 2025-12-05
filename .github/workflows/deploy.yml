@@ -57,7 +57,9 @@ jobs:
           sudo apt-get -y install ghostscript python3-wand
 
       - name: Install dependencies
-        run: pip install -r requirements/dev.txt
+        run: |
+          pip install "pip<24.1"
+          pip install -r requirements/dev.txt
 
       - name: Install spacy model
         run: python -m spacy download en_core_web_sm

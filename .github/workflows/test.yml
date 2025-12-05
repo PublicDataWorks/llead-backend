@@ -76,6 +76,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install "pip<24.1"
           pip install -r requirements/dev.txt
 
       - name: Install spacy model
