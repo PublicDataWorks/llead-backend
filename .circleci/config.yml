@@ -148,7 +148,7 @@ jobs:
   django_migrate:
     description: Migrate database
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2204:current
     environment: *gcloud-env
     steps:
       - run: *set-gcloud-service-key
@@ -169,7 +169,7 @@ jobs:
   django_collect_static:
     description: Collect static
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2204:current
     environment: *gcloud-env
     steps:
       - run: *set-gcloud-service-key
@@ -190,7 +190,7 @@ jobs:
   deploy:
     description: Deploy application to Google Kubernetes Engine
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2204:current
     environment: *gcloud-env
     steps:
       - checkout
