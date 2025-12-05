@@ -233,12 +233,14 @@ jobs:
         env:
           BACKEND_IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
           CELERY_NUM_WORKER: ${{ needs.build-and-push.outputs.celery-workers }}
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
         run: |
           cat kubernetes/celery.yml | envsubst | kubectl apply -n ${{ needs.build-and-push.outputs.namespace }} -f -
 
       - name: Deploy application
         env:
           BACKEND_IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          CLOUD_SQL_DATABASE: ${{ needs.build-and-push.outputs.cloud-sql-db }}
         run: |
           cat kubernetes/ipno.yml | envsubst | kubectl apply -n ${{ needs.build-and-push.outputs.namespace }} -f -
 
