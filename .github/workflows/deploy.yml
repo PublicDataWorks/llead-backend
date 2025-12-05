@@ -126,6 +126,9 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker
 
+      - name: Write GCS credentials file
+        run: echo "${{ secrets.GCLOUD_SERVICE_KEY_BASE64 }}" | base64 -d > gcloud-credentials.json
+
       - name: Build image
         run: docker build -t ipno-backend .
 
