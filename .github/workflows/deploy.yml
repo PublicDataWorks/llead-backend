@@ -76,6 +76,7 @@ jobs:
           POSTGRES_DB: ipno
           POSTGRES_PASSWORD: password
           ELASTICSEARCH_HOST: localhost:9200
+          CELERY_BROKER_URL: redis://localhost:6379
         run: |
           python -m pytest --cov-report term --cov=ipno ipno
 
