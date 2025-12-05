@@ -9,6 +9,7 @@ defaults:
     GOOGLE_PROJECT_ID: "excellent-zoo-300106"
     GOOGLE_COMPUTE_ZONE: "us-central1-a"
     GOOGLE_CLUSTER_NAME: "ipno"
+    CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
   - &set-push-env
     USER_NAME: "East Agile"
     USER_EMAIL: "open-source@eastagile.com"
