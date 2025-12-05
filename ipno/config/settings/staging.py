@@ -10,8 +10,11 @@ CORS_ORIGIN_WHITELIST = [
     "https://staging.llead.co",
 ]
 
+# Use GOOGLE_APPLICATION_CREDENTIALS env var set by Kubernetes (mounted from backend-gsa secret)
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    f"{BASE_DIR}/gcloud-credentials.json"  # NOQA
+    os.getenv(
+        "GOOGLE_APPLICATION_CREDENTIALS", f"{BASE_DIR}/gcloud-credentials.json"
+    )  # NOQA
 )
 
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
