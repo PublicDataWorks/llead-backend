@@ -220,12 +220,17 @@ class UseOfForceTimelineSerializer(BaseTimelineSerializer):
         return receive_event.year if receive_event else None
 
     def get_citizen_information(self, obj):
-        return [
-            str(o.citizen_age) + "-year-old " + o.citizen_race + " " + o.citizen_sex
-            if o.citizen_age
-            else o.citizen_race + " " + o.citizen_sex
-            for o in obj.citizens.all()
-        ]
+        result = []
+        for o in obj.citizens.all():
+            parts = []
+            if o.citizen_age:
+                parts.append(f"{o.citizen_age}-year-old")
+            if o.citizen_race:
+                parts.append(o.citizen_race)
+            if o.citizen_sex:
+                parts.append(o.citizen_sex)
+            result.append(" ".join(parts) if parts else None)
+        return result
 
     def get_citizen_arrested(self, obj):
         arrests = [o.citizen_arrested for o in obj.citizens.all()]
