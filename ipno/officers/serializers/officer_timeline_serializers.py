@@ -50,7 +50,11 @@ class JoinedTimelineSerializer(BaseTimelineSerializer):
 
     def _get_person_officers(self, obj):
         if not hasattr(obj, "person_officers"):
-            person_officers = obj.officer.person.officers.all()
+            # Handle officers without person association
+            if obj.officer.person:
+                person_officers = obj.officer.person.officers.all()
+            else:
+                person_officers = [obj.officer]
             setattr(obj, "person_officers", person_officers)
 
         return obj.person_officers

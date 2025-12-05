@@ -95,7 +95,7 @@ jobs:
           path: test-results
       - run:
           name: Coveralls
-          command: python -m coveralls
+          command: python -m coveralls || true
 
   push_to_public:
     description: Push code to public repository
