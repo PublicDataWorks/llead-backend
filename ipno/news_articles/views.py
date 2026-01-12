@@ -12,6 +12,7 @@ from news_articles.documents import NewsArticleESDoc
 from news_articles.models import NewsArticle
 from shared.serializers import NewsArticleSerializer
 from utils.cache_utils import flush_news_article_related_caches
+from news_articles.services.openai_llm_service import OpenAILLMService
 
 
 class NewsArticlesViewSet(viewsets.ViewSet):

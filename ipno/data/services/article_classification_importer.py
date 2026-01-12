@@ -4,6 +4,7 @@ from data.constants import NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME
 from data.services.base_importer import BaseImporter
 from data.services.data_reconciliation import DataReconciliation
 from news_articles.models import NewsArticle, NewsArticleClassification
+from news_articles.services.openai_llm_service import OpenAILLMService
 
 
 class ArticleClassificationImporter(BaseImporter):  # pragma: no cover
@@ -34,6 +35,8 @@ class ArticleClassificationImporter(BaseImporter):  # pragma: no cover
             NEWS_ARTICLE_CLASSIFICATION_MODEL_NAME, csv_file_path
         )
 
+        self.openai_service = OpenAILLMService(api_key="your_openai_api_key")
+
     def handle_record_data(self, row):
         article_classification_data = self.parse_row_data(row, self.column_mappings)
 
@@ -42,6 +45,11 @@ class ArticleClassificationImporter(BaseImporter):  # pragma: no cover
 
         article_classification_id = self.article_classification_mappings.get(article_id)
         article_classification_data["news_article_id"] = relation_article_id
+
+        # Call OpenAI LLM service to get confidence score
+        article_text = article_classification_data.get("text", "")
+        confidence_score = self.openai_service.get_confidence_score(article_text)
+        article_classification_data["confidence_score"] = confidence_score
 
         if article_classification_id:
             article_classification_data["id"] = article_classification_id
